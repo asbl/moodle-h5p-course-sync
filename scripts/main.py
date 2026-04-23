@@ -14,11 +14,9 @@ import textwrap
 import threading
 import time
 import unicodedata
-from http import HTTPStatus
 from http.server import ThreadingHTTPServer
 from pathlib import Path
 from typing import Iterable
-from urllib.error import HTTPError
 from urllib.parse import parse_qs, quote, urlencode
 from urllib.request import Request, urlopen
 from urllib.parse import unquote, urljoin, urlparse, urlunparse
@@ -29,6 +27,7 @@ from scripts.classes import (
     CourseOrchestrator,
     ContentStore,
     H5PImportMapper,
+    H5PLibraryManager,
     H5PPackageBuilder,
     MarkdownRenderer,
     MdxCourseParser,
@@ -951,38 +950,15 @@ def download_file(url: str, destination: Path) -> None:
         shutil.copyfileobj(response, target)
 
 
-def find_downloaded_asset(asset_prefix: str) -> Path | None:
-    matches = sorted(H5P_RUNTIME_DOWNLOADS_DIR.glob(f"{asset_prefix}*.h5p"))
-    if not matches:
-        return None
-    return matches[-1]
-
-
 def release_metadata_cache_path() -> Path:
-    return H5P_RUNTIME_DOWNLOADS_DIR / f"release-{H5P_LIBRARY_RELEASE_TAG}.json"
-
-
-def load_release_assets() -> dict[str, str]:
-    cache_path = release_metadata_cache_path()
-    cached_release = read_json_or_default(cache_path, {})
-    if cached_release:
-        return {asset["name"]: asset["browser_download_url"] for asset in cached_release.get("assets", [])}
-
-    try:
-        release = fetch_json(f"https://api.github.com/repos/{H5P_LIBRARY_RELEASE_REPO}/releases/tags/{H5P_LIBRARY_RELEASE_TAG}")
-    except HTTPError as error:
-        if error.code == HTTPStatus.FORBIDDEN:
-            raise RuntimeError(
-                "GitHub API Rate-Limit erreicht und keine lokale Release-Metadatenkopie gefunden. "
-                "Falls die Libraries schon einmal geladen wurden, reicht ein vorhandener Inhalt in .h5p-runtime/downloads/."
-            ) from error
-        raise
-
-    write_json(cache_path, release)
-    return {asset["name"]: asset["browser_download_url"] for asset in release.get("assets", [])}
+    return h5p_library_manager().release_metadata_cache_path()
 
 
 def get_h5p_cli_command() -> list[str]:
+    return h5p_library_manager().get_h5p_cli_command()
+
+
+def resolve_h5p_cli_command() -> list[str]:
     h5p_binary = shutil.which("h5p")
     if h5p_binary:
         return [h5p_binary]
@@ -997,8 +973,12 @@ def get_h5p_cli_command() -> list[str]:
 
 
 def run_h5p_cli(args: list[str], cwd: Path) -> subprocess.CompletedProcess[str]:
+    return h5p_library_manager().run_h5p_cli(args, cwd)
+
+
+def run_h5p_cli_command(args: list[str], cwd: Path) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
-        [*get_h5p_cli_command(), *args],
+        [*resolve_h5p_cli_command(), *args],
         cwd=cwd,
         check=True,
         capture_output=True,
@@ -1007,210 +987,31 @@ def run_h5p_cli(args: list[str], cwd: Path) -> subprocess.CompletedProcess[str]:
 
 
 def find_library_dir(machine_name: str, major_version: int | None = None, minor_version: int | None = None) -> Path:
-    if major_version is not None and minor_version is not None:
-        candidate = H5P_RUNTIME_LIBRARIES_DIR / f"{machine_name}-{major_version}.{minor_version}"
-        if candidate.exists():
-            return candidate
-
-    matches = sorted(H5P_RUNTIME_LIBRARIES_DIR.glob(f"{machine_name}-*"))
-    if not matches:
-        raise FileNotFoundError(f"H5P-Library '{machine_name}' wurde in {H5P_RUNTIME_LIBRARIES_DIR} nicht gefunden.")
-
-    if major_version is None or minor_version is None:
-        return matches[-1]
-
-    for candidate in matches:
-        metadata = read_json(candidate / "library.json")
-        if metadata.get("majorVersion") == major_version and metadata.get("minorVersion") == minor_version:
-            return candidate
-
-    # Imported packages may reference older patch/minor versions that are not present locally.
-    # Fallback to the newest available version of the same machine name.
-    return matches[-1]
+    return h5p_library_manager().find_library_dir(machine_name, major_version, minor_version)
 
 
 def extract_library_asset(archive_path: Path, machine_name: str) -> Path:
-    with ZipFile(archive_path) as archive:
-        library_root = None
-        for member in archive.namelist():
-            normalized = member.strip("/")
-            if normalized.endswith("/library.json"):
-                library_root = normalized.rsplit("/", 1)[0]
-                break
-
-        if library_root is None:
-            raise RuntimeError(f"Kein library.json in {archive_path.name} gefunden.")
-
-        destination = H5P_RUNTIME_LIBRARIES_DIR / Path(library_root).name
-        if destination.exists():
-            shutil.rmtree(destination)
-
-        extracted_root = None
-        for member in archive.namelist():
-            normalized = member.strip("/")
-            if not normalized or not normalized.startswith(f"{library_root}/"):
-                continue
-
-            relative_path = Path(normalized).relative_to(library_root)
-            if not relative_path.parts or relative_path.parts[0] == "content":
-                continue
-
-            target_path = destination / relative_path
-            if normalized.endswith("/"):
-                ensure_directory(target_path)
-                continue
-
-            ensure_directory(target_path.parent)
-            with archive.open(member) as source, target_path.open("wb") as target:
-                shutil.copyfileobj(source, target)
-            extracted_root = destination
-
-    if extracted_root is None:
-        raise RuntimeError(f"Die Library '{machine_name}' konnte aus {archive_path.name} nicht extrahiert werden.")
-
-    return extracted_root
+    return h5p_library_manager().extract_library_asset(archive_path, machine_name)
 
 
 def register_local_library(library_dir: Path) -> None:
-    with WORKSPACE_LOCK:
-        library_json = read_json(library_dir / "library.json")
-        registry_path = H5P_RUNTIME_DIR / "libraryRegistry.json"
-        registry = read_json_or_default(registry_path, {})
-        machine_name = library_json["machineName"]
-        existing_entry = registry.get(machine_name, {})
-        short_name = CUSTOM_H5P_LIBRARY_SHORT_NAMES.get(machine_name) or existing_entry.get("shortName") or machine_name.lower().replace(".", "-")
-        registry[machine_name] = {
-            **existing_entry,
-            "id": machine_name,
-            "title": library_json.get("title", machine_name),
-            "author": library_json.get("author", ""),
-            "runnable": library_json.get("runnable", 0),
-            "shortName": short_name,
-        }
-        write_json(registry_path, registry)
+    h5p_library_manager().register_local_library(library_dir)
 
 
 def ensure_custom_h5p_libraries() -> None:
-    ensure_directory(H5P_RUNTIME_DOWNLOADS_DIR)
-    ensure_directory(H5P_RUNTIME_LIBRARIES_DIR)
-
-    missing_machine_names = [
-        machine_name
-        for machine_name in H5P_LIBRARY_ASSET_PREFIXES
-        if not list(H5P_RUNTIME_LIBRARIES_DIR.glob(f"{machine_name}-*"))
-    ]
-    if not missing_machine_names:
-        return
-
-    assets: dict[str, str] | None = None
-
-    for machine_name, asset_prefix in H5P_LIBRARY_ASSET_PREFIXES.items():
-        if machine_name not in missing_machine_names:
-            continue
-
-        archive_path = find_downloaded_asset(asset_prefix)
-        if archive_path is None:
-            if assets is None:
-                assets = load_release_assets()
-
-            asset_name = next((name for name in assets if name.startswith(asset_prefix) and name.endswith(".h5p")), None)
-            if asset_name is None:
-                raise RuntimeError(f"Release-Asset für {machine_name} mit Präfix '{asset_prefix}' wurde nicht gefunden.")
-
-            archive_path = H5P_RUNTIME_DOWNLOADS_DIR / asset_name
-            if not archive_path.exists():
-                download_file(assets[asset_name], archive_path)
-
-        library_dir = extract_library_asset(archive_path, machine_name)
-        register_local_library(library_dir)
-
-
-def ensure_registered_local_libraries() -> None:
-    for library_dir in sorted(H5P_RUNTIME_LIBRARIES_DIR.glob("*")):
-        library_json = library_dir / "library.json"
-        if library_json.exists():
-            register_local_library(library_dir)
-
-
-def ensure_h5p_editor_dependencies() -> None:
-    if not list(H5P_RUNTIME_LIBRARIES_DIR.glob("H5PEditor.ShowWhen-*")):
-        run_h5p_cli(["setup", "h5p-editor-show-when"], cwd=H5P_RUNTIME_DIR)
-    if not list(H5P_RUNTIME_LIBRARIES_DIR.glob("H5PEditor.DateTime-*")):
-        run_h5p_cli(["setup", "h5p-editor-datetime"], cwd=H5P_RUNTIME_DIR)
-
-
-def ensure_h5p_math_display_registered() -> None:
-    math_display_dirs = sorted(H5P_RUNTIME_LIBRARIES_DIR.glob("H5P.MathDisplay-*"))
-    if not math_display_dirs:
-        return
-    register_local_library(math_display_dirs[-1])
+    h5p_library_manager().ensure_custom_h5p_libraries()
 
 
 def ensure_h5p_runtime_libraries() -> None:
-    with WORKSPACE_LOCK:
-        ensure_directory(H5P_RUNTIME_DIR)
-        ensure_directory(H5P_RUNTIME_CONTENT_DIR)
-        ensure_directory(H5P_RUNTIME_LIBRARIES_DIR)
-
-        core_marker = H5P_RUNTIME_DIR / ".core-ready"
-        if not core_marker.exists():
-            run_h5p_cli(["core"], cwd=H5P_RUNTIME_DIR)
-            core_marker.write_text("ok\n", encoding="utf-8")
-
-        ensure_custom_h5p_libraries()
-        ensure_registered_local_libraries()
-        ensure_h5p_math_display_registered()
-
-        if not list(H5P_RUNTIME_LIBRARIES_DIR.glob("H5P.Question-*")):
-            run_h5p_cli(["setup", "h5p-question"], cwd=H5P_RUNTIME_DIR)
-
-        ensure_h5p_editor_dependencies()
+    h5p_library_manager().ensure_h5p_runtime_libraries()
 
 
 def collect_required_library_dirs(machine_name: str, major_version: int | None = None, minor_version: int | None = None, seen: set[str] | None = None) -> list[Path]:
-    seen = seen or set()
-    library_dir = find_library_dir(machine_name, major_version, minor_version)
-    library_name = library_dir.name
-    if library_name in seen:
-        return []
-
-    seen.add(library_name)
-    metadata = read_json(library_dir / "library.json")
-    required = [library_dir]
-    for dependency in metadata.get("preloadedDependencies", []):
-        required.extend(
-            collect_required_library_dirs(
-                dependency["machineName"],
-                dependency.get("majorVersion"),
-                dependency.get("minorVersion"),
-                seen,
-            )
-        )
-    return required
+    return h5p_library_manager().collect_required_library_dirs(machine_name, major_version, minor_version, seen)
 
 
 def collect_required_library_dirs_from_metadata(metadata_payload: dict[str, object]) -> list[Path]:
-    dependencies = metadata_payload.get("preloadedDependencies", [])
-    if not isinstance(dependencies, list):
-        return []
-
-    required: list[Path] = []
-    seen: set[str] = set()
-    for dependency in dependencies:
-        if not isinstance(dependency, dict):
-            continue
-        machine_name = str(dependency.get("machineName") or "").strip()
-        if not machine_name:
-            continue
-        required.extend(
-            collect_required_library_dirs(
-                machine_name,
-                int(dependency["majorVersion"]) if dependency.get("majorVersion") is not None else None,
-                int(dependency["minorVersion"]) if dependency.get("minorVersion") is not None else None,
-                seen,
-            )
-        )
-    return required
+    return h5p_library_manager().collect_required_library_dirs_from_metadata(metadata_payload)
 
 
 def is_port_open(host: str, port: int) -> bool:
@@ -1332,6 +1133,29 @@ def component_syncer() -> ComponentSyncer:
             build_default_imported_h5p_content=build_default_imported_h5p_content,
         )
     return COMPONENT_SYNCER
+
+
+def h5p_library_manager() -> H5PLibraryManager:
+    # Intentionally not cached so tests can monkeypatch module-level dependencies safely.
+    return H5PLibraryManager(
+        workspace_lock=WORKSPACE_LOCK,
+        runtime_dir=H5P_RUNTIME_DIR,
+        runtime_content_dir=H5P_RUNTIME_CONTENT_DIR,
+        runtime_libraries_dir=H5P_RUNTIME_LIBRARIES_DIR,
+        runtime_downloads_dir=H5P_RUNTIME_DOWNLOADS_DIR,
+        release_repo=H5P_LIBRARY_RELEASE_REPO,
+        release_tag=H5P_LIBRARY_RELEASE_TAG,
+        asset_prefixes=H5P_LIBRARY_ASSET_PREFIXES,
+        custom_short_names=CUSTOM_H5P_LIBRARY_SHORT_NAMES,
+        ensure_directory=ensure_directory,
+        read_json=read_json,
+        read_json_or_default=read_json_or_default,
+        write_json=write_json,
+        fetch_json=fetch_json,
+        download_file=download_file,
+        run_cli_command=run_h5p_cli_command,
+        resolve_cli_command=resolve_h5p_cli_command,
+    )
 
 
 def h5p_runtime_manager() -> H5PRuntimeManager:

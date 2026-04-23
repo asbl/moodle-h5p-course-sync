@@ -1341,13 +1341,14 @@ print("quadrat")
 
     def test_ensure_custom_h5p_libraries_uses_cached_release_metadata(self) -> None:
         from scripts import main as module
+        from scripts.classes import H5PLibraryManager
 
         original_libraries_dir = module.H5P_RUNTIME_LIBRARIES_DIR
         original_downloads_dir = module.H5P_RUNTIME_DOWNLOADS_DIR
         original_fetch_json = module.fetch_json
         original_download_file = module.download_file
-        original_extract_library_asset = module.extract_library_asset
-        original_register_local_library = module.register_local_library
+        original_extract_library_asset = H5PLibraryManager.extract_library_asset
+        original_register_local_library = H5PLibraryManager.register_local_library
         try:
             module.H5P_RUNTIME_LIBRARIES_DIR = self.root / ".h5p-runtime" / "libraries"
             module.H5P_RUNTIME_DOWNLOADS_DIR = self.root / ".h5p-runtime" / "downloads"
@@ -1391,7 +1392,7 @@ print("quadrat")
                 downloaded.append((url, destination))
                 destination.write_bytes(b"fake")
 
-            def fake_extract(archive_path: Path, machine_name: str) -> Path:
+            def fake_extract(self: H5PLibraryManager, archive_path: Path, machine_name: str) -> Path:
                 extracted.append((archive_path, machine_name))
                 library_dir = module.H5P_RUNTIME_LIBRARIES_DIR / f"{machine_name}-6.73"
                 library_dir.mkdir(parents=True, exist_ok=True)
@@ -1401,13 +1402,13 @@ print("quadrat")
                 )
                 return library_dir
 
-            def fake_register(library_dir: Path) -> None:
+            def fake_register(self: H5PLibraryManager, library_dir: Path) -> None:
                 registered.append(library_dir)
 
             module.fetch_json = fail_fetch
             module.download_file = fake_download
-            module.extract_library_asset = fake_extract
-            module.register_local_library = fake_register
+            H5PLibraryManager.extract_library_asset = fake_extract
+            H5PLibraryManager.register_local_library = fake_register
 
             ensure_custom_h5p_libraries()
         finally:
@@ -1415,8 +1416,8 @@ print("quadrat")
             module.H5P_RUNTIME_DOWNLOADS_DIR = original_downloads_dir
             module.fetch_json = original_fetch_json
             module.download_file = original_download_file
-            module.extract_library_asset = original_extract_library_asset
-            module.register_local_library = original_register_local_library
+            H5PLibraryManager.extract_library_asset = original_extract_library_asset
+            H5PLibraryManager.register_local_library = original_register_local_library
 
         self.assertEqual(len(downloaded), 4)
         self.assertEqual(downloaded[0][0], "https://example.invalid/python-question.h5p")
