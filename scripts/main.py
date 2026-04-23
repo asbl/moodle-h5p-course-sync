@@ -4,14 +4,9 @@ import argparse
 import html
 import json
 import os
-import re
 import shutil
 import subprocess
-import tarfile
-import tempfile
-import textwrap
 import threading
-import unicodedata
 from http.server import ThreadingHTTPServer
 from pathlib import Path
 from typing import Iterable
@@ -80,18 +75,6 @@ WORKSPACE_LOCK = threading.RLock()
 PREVIEW_CACHE: dict[str, tuple[int, list[PythonQuestionBlock], str]] = {}
 CONTENT_STORE = ContentStore()
 RUNTIME_PREPARATION = RuntimePreparationService(H5P_RUNTIME_CONTENT_DIR)
-PREVIEW_VIEW_BUILDER: PreviewViewBuilder | None = None
-PREVIEW_CONTROLLER: PreviewController | None = None
-MARKDOWN_RENDERER: MarkdownRenderer | None = None
-TEMPLATE_RENDERER: TemplateRenderer | None = None
-COMPONENT_SYNCER: ComponentSyncer | None = None
-H5P_RUNTIME_MANAGER: H5PRuntimeManager | None = None
-MOODLE_SYNCER: MoodleSyncer | None = None
-H5P_PACKAGE_BUILDER: H5PPackageBuilder | None = None
-COURSE_ORCHESTRATOR: CourseOrchestrator | None = None
-RUNTIME_HTML_REWRITER: RuntimeHtmlRewriter | None = None
-MDX_COURSE_PARSER: MdxCourseParser | None = None
-H5P_IMPORT_MAPPER: H5PImportMapper | None = None
 
 TAG_RE = APP_CONFIG.tag_re
 FENCE_RE = APP_CONFIG.fence_re
@@ -99,6 +82,149 @@ HTML_TAG_RE = APP_CONFIG.html_tag_re
 WHITESPACE_RE = APP_CONFIG.whitespace_re
 H5P_EMBED_IFRAME_RE = APP_CONFIG.h5p_embed_iframe_re
 MBZ_LINK_RE = APP_CONFIG.mbz_link_re
+
+
+class _ServiceRegistry:
+    """Centralized singleton service container. Lazily initializes cached services."""
+
+    def __init__(self) -> None:
+        self._preview_view_builder: PreviewViewBuilder | None = None
+        self._preview_controller: PreviewController | None = None
+        self._markdown_renderer: MarkdownRenderer | None = None
+        self._template_renderer: TemplateRenderer | None = None
+        self._component_syncer: ComponentSyncer | None = None
+        self._h5p_runtime_manager: H5PRuntimeManager | None = None
+        self._moodle_syncer: MoodleSyncer | None = None
+        self._course_orchestrator: CourseOrchestrator | None = None
+        self._runtime_html_rewriter: RuntimeHtmlRewriter | None = None
+        self._mdx_course_parser: MdxCourseParser | None = None
+        self._h5p_import_mapper: H5PImportMapper | None = None
+
+    def get_preview_view_builder(self) -> PreviewViewBuilder:
+        if self._preview_view_builder is None:
+            self._preview_view_builder = PreviewViewBuilder(
+                runtime_proxy_prefix=RUNTIME_PROXY_PREFIX,
+                quote_path_segment=quote_path_segment,
+                escape_inline=escape_inline,
+                build_runtime_proxy_path=build_runtime_proxy_path,
+            )
+        return self._preview_view_builder
+
+    def get_preview_controller(self) -> PreviewController:
+        if self._preview_controller is None:
+            self._preview_controller = PreviewController(
+                courses_dir=COURSES_DIR,
+                load_course_preview_state=load_course_preview_state,
+                get_runtime_preparation_state=get_runtime_preparation_state,
+                start_runtime_question_preparation=start_runtime_question_preparation,
+                is_runtime_question_ready=is_runtime_question_ready,
+                build_runtime_proxy_path=build_runtime_proxy_path,
+                render_preview_waiting_page=render_preview_waiting_page,
+            )
+        return self._preview_controller
+
+    def get_markdown_renderer(self) -> MarkdownRenderer:
+        if self._markdown_renderer is None:
+            self._markdown_renderer = MarkdownRenderer(escape_inline=escape_inline)
+        return self._markdown_renderer
+
+    def get_template_renderer(self) -> TemplateRenderer:
+        if self._template_renderer is None:
+            self._template_renderer = TemplateRenderer(escape_inline=escape_inline)
+        return self._template_renderer
+
+    def get_component_syncer(self) -> ComponentSyncer:
+        if self._component_syncer is None:
+            self._component_syncer = ComponentSyncer(
+                python_question_machine_name=PYTHON_QUESTION_MACHINE_NAME,
+                load_python_question_semantics=load_python_question_semantics,
+                load_h5p_payload_from_source_package=load_h5p_payload_from_source_package,
+                build_h5p_metadata=build_h5p_metadata,
+            )
+        return self._component_syncer
+
+    def get_h5p_runtime_manager(self) -> H5PRuntimeManager:
+        if self._h5p_runtime_manager is None:
+            self._h5p_runtime_manager = H5PRuntimeManager(
+                runtime_dir=H5P_RUNTIME_DIR,
+                runtime_port=H5P_RUNTIME_PORT,
+                runtime_proxy_prefix=RUNTIME_PROXY_PREFIX,
+                custom_h5p_library_short_names=CUSTOM_H5P_LIBRARY_SHORT_NAMES,
+                runtime_preparation=RUNTIME_PREPARATION,
+                get_preview_view_builder=preview_view_builder,
+                compute_question_hash=compute_question_hash,
+                write_h5p_package=write_h5p_package,
+                import_question_into_runtime=import_question_into_runtime,
+                read_json_or_default=read_json_or_default,
+            )
+        return self._h5p_runtime_manager
+
+    def get_moodle_syncer(self) -> MoodleSyncer:
+        if self._moodle_syncer is None:
+            self._moodle_syncer = MoodleSyncer(
+                courses_dir=COURSES_DIR,
+                ensure_directory=ensure_directory,
+                render_imported_question_mdx=render_imported_question_mdx,
+                build_scaffold_question=build_scaffold_question,
+                parse_course=parse_course,
+                compute_question_hash=compute_question_hash,
+                save_sync_metadata=save_sync_metadata,
+                escape_mdx_attribute=escape_mdx_attribute,
+            )
+        return self._moodle_syncer
+
+    def get_course_orchestrator(self) -> CourseOrchestrator:
+        if self._course_orchestrator is None:
+            self._course_orchestrator = CourseOrchestrator(
+                workspace_lock=WORKSPACE_LOCK,
+                courses_dir=COURSES_DIR,
+                preview_cache=PREVIEW_CACHE,
+                parse_course=parse_course,
+                write_h5p_package=write_h5p_package,
+                render_course_page=render_course_page,
+                load_sync_metadata=load_sync_metadata,
+                compute_question_hash=compute_question_hash,
+            )
+        return self._course_orchestrator
+
+    def get_runtime_html_rewriter(self) -> RuntimeHtmlRewriter:
+        if self._runtime_html_rewriter is None:
+            self._runtime_html_rewriter = RuntimeHtmlRewriter(
+                runtime_port=H5P_RUNTIME_PORT,
+                runtime_proxy_prefix=RUNTIME_PROXY_PREFIX,
+            )
+        return self._runtime_html_rewriter
+
+    def get_mdx_course_parser(self) -> MdxCourseParser:
+        if self._mdx_course_parser is None:
+            self._mdx_course_parser = MdxCourseParser(
+                tag_re=TAG_RE,
+                fence_re=FENCE_RE,
+                placeholder_template=PLACEHOLDER_TEMPLATE,
+                python_question_machine_name=PYTHON_QUESTION_MACHINE_NAME,
+                parse_jsx_expression=parse_jsx_expression,
+                normalize_whitespace=normalize_whitespace,
+                infer_source_package_sidecar_path=infer_source_package_sidecar_path,
+                build_imported_question_from_sidecar=build_imported_question_from_sidecar,
+                load_h5p_sidecar_file=lambda course_dir, relative_path: load_h5p_sidecar_file(
+                    course_dir,
+                    relative_path,
+                    description="H5P-Sidecar",
+                ),
+                apply_editable_h5p_payload=apply_editable_h5p_payload,
+            )
+        return self._mdx_course_parser
+
+    def get_h5p_import_mapper(self) -> H5PImportMapper:
+        if self._h5p_import_mapper is None:
+            self._h5p_import_mapper = H5PImportMapper(
+                compact_text=compact_text,
+                normalize_whitespace=normalize_whitespace,
+            )
+        return self._h5p_import_mapper
+
+
+_SERVICE_REGISTRY = _ServiceRegistry()
 
 
 def moodle_backup_extractor() -> MoodleBackupExtractor:
@@ -447,56 +573,23 @@ def write_h5p_package(question: PythonQuestionBlock) -> Path:
 
 
 def preview_view_builder() -> PreviewViewBuilder:
-    global PREVIEW_VIEW_BUILDER
-    if PREVIEW_VIEW_BUILDER is None:
-        PREVIEW_VIEW_BUILDER = PreviewViewBuilder(
-            runtime_proxy_prefix=RUNTIME_PROXY_PREFIX,
-            quote_path_segment=quote_path_segment,
-            escape_inline=escape_inline,
-            build_runtime_proxy_path=build_runtime_proxy_path,
-        )
-    return PREVIEW_VIEW_BUILDER
+    return _SERVICE_REGISTRY.get_preview_view_builder()
 
 
 def preview_controller() -> PreviewController:
-    global PREVIEW_CONTROLLER
-    if PREVIEW_CONTROLLER is None:
-        PREVIEW_CONTROLLER = PreviewController(
-            courses_dir=COURSES_DIR,
-            load_course_preview_state=load_course_preview_state,
-            get_runtime_preparation_state=get_runtime_preparation_state,
-            start_runtime_question_preparation=start_runtime_question_preparation,
-            is_runtime_question_ready=is_runtime_question_ready,
-            build_runtime_proxy_path=build_runtime_proxy_path,
-            render_preview_waiting_page=render_preview_waiting_page,
-        )
-    return PREVIEW_CONTROLLER
+    return _SERVICE_REGISTRY.get_preview_controller()
 
 
 def markdown_renderer() -> MarkdownRenderer:
-    global MARKDOWN_RENDERER
-    if MARKDOWN_RENDERER is None:
-        MARKDOWN_RENDERER = MarkdownRenderer(escape_inline=escape_inline)
-    return MARKDOWN_RENDERER
+    return _SERVICE_REGISTRY.get_markdown_renderer()
 
 
 def template_renderer() -> TemplateRenderer:
-    global TEMPLATE_RENDERER
-    if TEMPLATE_RENDERER is None:
-        TEMPLATE_RENDERER = TemplateRenderer(escape_inline=escape_inline)
-    return TEMPLATE_RENDERER
+    return _SERVICE_REGISTRY.get_template_renderer()
 
 
 def component_syncer() -> ComponentSyncer:
-    global COMPONENT_SYNCER
-    if COMPONENT_SYNCER is None:
-        COMPONENT_SYNCER = ComponentSyncer(
-            python_question_machine_name=PYTHON_QUESTION_MACHINE_NAME,
-            load_python_question_semantics=load_python_question_semantics,
-            load_h5p_payload_from_source_package=load_h5p_payload_from_source_package,
-            build_h5p_metadata=build_h5p_metadata,
-        )
-    return COMPONENT_SYNCER
+    return _SERVICE_REGISTRY.get_component_syncer()
 
 
 def h5p_library_manager() -> H5PLibraryManager:
@@ -571,37 +664,11 @@ def text_operations() -> TextOperations:
 
 
 def h5p_runtime_manager() -> H5PRuntimeManager:
-    global H5P_RUNTIME_MANAGER
-    if H5P_RUNTIME_MANAGER is None:
-        H5P_RUNTIME_MANAGER = H5PRuntimeManager(
-            runtime_dir=H5P_RUNTIME_DIR,
-            runtime_port=H5P_RUNTIME_PORT,
-            runtime_proxy_prefix=RUNTIME_PROXY_PREFIX,
-            custom_h5p_library_short_names=CUSTOM_H5P_LIBRARY_SHORT_NAMES,
-            runtime_preparation=RUNTIME_PREPARATION,
-            get_preview_view_builder=preview_view_builder,
-            compute_question_hash=compute_question_hash,
-            write_h5p_package=write_h5p_package,
-            import_question_into_runtime=import_question_into_runtime,
-            read_json_or_default=read_json_or_default,
-        )
-    return H5P_RUNTIME_MANAGER
+    return _SERVICE_REGISTRY.get_h5p_runtime_manager()
 
 
 def moodle_syncer() -> MoodleSyncer:
-    global MOODLE_SYNCER
-    if MOODLE_SYNCER is None:
-        MOODLE_SYNCER = MoodleSyncer(
-            courses_dir=COURSES_DIR,
-            ensure_directory=ensure_directory,
-            render_imported_question_mdx=render_imported_question_mdx,
-            build_scaffold_question=build_scaffold_question,
-            parse_course=parse_course,
-            compute_question_hash=compute_question_hash,
-            save_sync_metadata=save_sync_metadata,
-            escape_mdx_attribute=escape_mdx_attribute,
-        )
-    return MOODLE_SYNCER
+    return _SERVICE_REGISTRY.get_moodle_syncer()
 
 
 def h5p_package_builder() -> H5PPackageBuilder:
@@ -624,61 +691,19 @@ def h5p_package_builder() -> H5PPackageBuilder:
 
 
 def course_orchestrator() -> CourseOrchestrator:
-    global COURSE_ORCHESTRATOR
-    if COURSE_ORCHESTRATOR is None:
-        COURSE_ORCHESTRATOR = CourseOrchestrator(
-            workspace_lock=WORKSPACE_LOCK,
-            courses_dir=COURSES_DIR,
-            preview_cache=PREVIEW_CACHE,
-            parse_course=parse_course,
-            write_h5p_package=write_h5p_package,
-            render_course_page=render_course_page,
-            load_sync_metadata=load_sync_metadata,
-            compute_question_hash=compute_question_hash,
-        )
-    return COURSE_ORCHESTRATOR
+    return _SERVICE_REGISTRY.get_course_orchestrator()
 
 
 def runtime_html_rewriter() -> RuntimeHtmlRewriter:
-    global RUNTIME_HTML_REWRITER
-    if RUNTIME_HTML_REWRITER is None:
-        RUNTIME_HTML_REWRITER = RuntimeHtmlRewriter(
-            runtime_port=H5P_RUNTIME_PORT,
-            runtime_proxy_prefix=RUNTIME_PROXY_PREFIX,
-        )
-    return RUNTIME_HTML_REWRITER
+    return _SERVICE_REGISTRY.get_runtime_html_rewriter()
 
 
 def mdx_course_parser() -> MdxCourseParser:
-    global MDX_COURSE_PARSER
-    if MDX_COURSE_PARSER is None:
-        MDX_COURSE_PARSER = MdxCourseParser(
-            tag_re=TAG_RE,
-            fence_re=FENCE_RE,
-            placeholder_template=PLACEHOLDER_TEMPLATE,
-            python_question_machine_name=PYTHON_QUESTION_MACHINE_NAME,
-            parse_jsx_expression=parse_jsx_expression,
-            normalize_whitespace=normalize_whitespace,
-            infer_source_package_sidecar_path=infer_source_package_sidecar_path,
-            build_imported_question_from_sidecar=build_imported_question_from_sidecar,
-            load_h5p_sidecar_file=lambda course_dir, relative_path: load_h5p_sidecar_file(
-                course_dir,
-                relative_path,
-                description="H5P-Sidecar",
-            ),
-            apply_editable_h5p_payload=apply_editable_h5p_payload,
-        )
-    return MDX_COURSE_PARSER
+    return _SERVICE_REGISTRY.get_mdx_course_parser()
 
 
 def h5p_import_mapper() -> H5PImportMapper:
-    global H5P_IMPORT_MAPPER
-    if H5P_IMPORT_MAPPER is None:
-        H5P_IMPORT_MAPPER = H5PImportMapper(
-            compact_text=compact_text,
-            normalize_whitespace=normalize_whitespace,
-        )
-    return H5P_IMPORT_MAPPER
+    return _SERVICE_REGISTRY.get_h5p_import_mapper()
 
 
 def imported_question_factory() -> ImportedQuestionFactory:
