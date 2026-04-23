@@ -924,9 +924,7 @@ def runtime_cli_service() -> RuntimeCliService:
         workspace_lock=WORKSPACE_LOCK,
         runtime_dir=H5P_RUNTIME_DIR,
         runtime_content_dir=H5P_RUNTIME_CONTENT_DIR,
-        ensure_h5p_runtime_libraries=ensure_h5p_runtime_libraries,
-        get_h5p_cli_command=library_manager.get_h5p_cli_command,
-        run_h5p_cli=library_manager.run_h5p_cli,
+        backend=library_manager,
     )
 
 
