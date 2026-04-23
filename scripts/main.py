@@ -404,49 +404,39 @@ def write_h5p_package(question: PythonQuestionBlock) -> Path:
 
 def preview_view_builder() -> PreviewViewBuilder:
     return _SERVICE_REGISTRY.get_preview_view_builder(
-        lambda: PreviewViewBuilder(
-            runtime_proxy_prefix=RUNTIME_PROXY_PREFIX,
-            quote_path_segment=quote_path_segment,
-            escape_inline=escape_inline,
-            build_runtime_proxy_path=build_runtime_proxy_path,
-        )
+        runtime_proxy_prefix=RUNTIME_PROXY_PREFIX,
+        quote_path_segment=quote_path_segment,
+        escape_inline=escape_inline,
+        build_runtime_proxy_path=build_runtime_proxy_path,
     )
 
 
 def preview_controller() -> PreviewController:
     return _SERVICE_REGISTRY.get_preview_controller(
-        lambda: PreviewController(
-            courses_dir=COURSES_DIR,
-            load_course_preview_state=load_course_preview_state,
-            get_runtime_preparation_state=get_runtime_preparation_state,
-            start_runtime_question_preparation=start_runtime_question_preparation,
-            is_runtime_question_ready=is_runtime_question_ready,
-            build_runtime_proxy_path=build_runtime_proxy_path,
-            render_preview_waiting_page=render_preview_waiting_page,
-        )
+        courses_dir=COURSES_DIR,
+        load_course_preview_state=load_course_preview_state,
+        get_runtime_preparation_state=get_runtime_preparation_state,
+        start_runtime_question_preparation=start_runtime_question_preparation,
+        is_runtime_question_ready=is_runtime_question_ready,
+        build_runtime_proxy_path=build_runtime_proxy_path,
+        render_preview_waiting_page=render_preview_waiting_page,
     )
 
 
 def markdown_renderer() -> MarkdownRenderer:
-    return _SERVICE_REGISTRY.get_markdown_renderer(
-        lambda: MarkdownRenderer(escape_inline=escape_inline)
-    )
+    return _SERVICE_REGISTRY.get_markdown_renderer(escape_inline=escape_inline)
 
 
 def template_renderer() -> TemplateRenderer:
-    return _SERVICE_REGISTRY.get_template_renderer(
-        lambda: TemplateRenderer(escape_inline=escape_inline)
-    )
+    return _SERVICE_REGISTRY.get_template_renderer(escape_inline=escape_inline)
 
 
 def component_syncer() -> ComponentSyncer:
     return _SERVICE_REGISTRY.get_component_syncer(
-        lambda: ComponentSyncer(
-            python_question_machine_name=PYTHON_QUESTION_MACHINE_NAME,
-            load_python_question_semantics=load_python_question_semantics,
-            load_h5p_payload_from_source_package=load_h5p_payload_from_source_package,
-            build_h5p_metadata=build_h5p_metadata,
-        )
+        python_question_machine_name=PYTHON_QUESTION_MACHINE_NAME,
+        load_python_question_semantics=load_python_question_semantics,
+        load_h5p_payload_from_source_package=load_h5p_payload_from_source_package,
+        build_h5p_metadata=build_h5p_metadata,
     )
 
 
@@ -523,33 +513,29 @@ def text_operations() -> TextOperations:
 
 def h5p_runtime_manager() -> H5PRuntimeManager:
     return _SERVICE_REGISTRY.get_h5p_runtime_manager(
-        lambda: H5PRuntimeManager(
-            runtime_dir=H5P_RUNTIME_DIR,
-            runtime_port=H5P_RUNTIME_PORT,
-            runtime_proxy_prefix=RUNTIME_PROXY_PREFIX,
-            custom_h5p_library_short_names=CUSTOM_H5P_LIBRARY_SHORT_NAMES,
-            runtime_preparation=RUNTIME_PREPARATION,
-            get_preview_view_builder=preview_view_builder,
-            compute_question_hash=compute_question_hash,
-            write_h5p_package=write_h5p_package,
-            import_question_into_runtime=import_question_into_runtime,
-            read_json_or_default=read_json_or_default,
-        )
+        runtime_dir=H5P_RUNTIME_DIR,
+        runtime_port=H5P_RUNTIME_PORT,
+        runtime_proxy_prefix=RUNTIME_PROXY_PREFIX,
+        custom_h5p_library_short_names=CUSTOM_H5P_LIBRARY_SHORT_NAMES,
+        runtime_preparation=RUNTIME_PREPARATION,
+        get_preview_view_builder=preview_view_builder,
+        compute_question_hash=compute_question_hash,
+        write_h5p_package=write_h5p_package,
+        import_question_into_runtime=import_question_into_runtime,
+        read_json_or_default=read_json_or_default,
     )
 
 
 def moodle_syncer() -> MoodleSyncer:
     return _SERVICE_REGISTRY.get_moodle_syncer(
-        lambda: MoodleSyncer(
-            courses_dir=COURSES_DIR,
-            ensure_directory=ensure_directory,
-            render_imported_question_mdx=render_imported_question_mdx,
-            build_scaffold_question=build_scaffold_question,
-            parse_course=parse_course,
-            compute_question_hash=compute_question_hash,
-            save_sync_metadata=save_sync_metadata,
-            escape_mdx_attribute=escape_mdx_attribute,
-        )
+        courses_dir=COURSES_DIR,
+        ensure_directory=ensure_directory,
+        render_imported_question_mdx=render_imported_question_mdx,
+        build_scaffold_question=build_scaffold_question,
+        parse_course=parse_course,
+        compute_question_hash=compute_question_hash,
+        save_sync_metadata=save_sync_metadata,
+        escape_mdx_attribute=escape_mdx_attribute,
     )
 
 
@@ -574,55 +560,47 @@ def h5p_package_builder() -> H5PPackageBuilder:
 
 def course_orchestrator() -> CourseOrchestrator:
     return _SERVICE_REGISTRY.get_course_orchestrator(
-        lambda: CourseOrchestrator(
-            workspace_lock=WORKSPACE_LOCK,
-            courses_dir=COURSES_DIR,
-            preview_cache=PREVIEW_CACHE,
-            parse_course=parse_course,
-            write_h5p_package=write_h5p_package,
-            render_course_page=render_course_page,
-            load_sync_metadata=load_sync_metadata,
-            compute_question_hash=compute_question_hash,
-        )
+        workspace_lock=WORKSPACE_LOCK,
+        courses_dir=COURSES_DIR,
+        preview_cache=PREVIEW_CACHE,
+        parse_course=parse_course,
+        write_h5p_package=write_h5p_package,
+        render_course_page=render_course_page,
+        load_sync_metadata=load_sync_metadata,
+        compute_question_hash=compute_question_hash,
     )
 
 
 def runtime_html_rewriter() -> RuntimeHtmlRewriter:
     return _SERVICE_REGISTRY.get_runtime_html_rewriter(
-        lambda: RuntimeHtmlRewriter(
-            runtime_port=H5P_RUNTIME_PORT,
-            runtime_proxy_prefix=RUNTIME_PROXY_PREFIX,
-        )
+        runtime_port=H5P_RUNTIME_PORT,
+        runtime_proxy_prefix=RUNTIME_PROXY_PREFIX,
     )
 
 
 def mdx_course_parser() -> MdxCourseParser:
     return _SERVICE_REGISTRY.get_mdx_course_parser(
-        lambda: MdxCourseParser(
-            tag_re=TAG_RE,
-            fence_re=FENCE_RE,
-            placeholder_template=PLACEHOLDER_TEMPLATE,
-            python_question_machine_name=PYTHON_QUESTION_MACHINE_NAME,
-            parse_jsx_expression=parse_jsx_expression,
-            normalize_whitespace=normalize_whitespace,
-            infer_source_package_sidecar_path=infer_source_package_sidecar_path,
-            build_imported_question_from_sidecar=build_imported_question_from_sidecar,
-            load_h5p_sidecar_file=lambda course_dir, relative_path: load_h5p_sidecar_file(
-                course_dir,
-                relative_path,
-                description="H5P-Sidecar",
-            ),
-            apply_editable_h5p_payload=apply_editable_h5p_payload,
-        )
+        tag_re=TAG_RE,
+        fence_re=FENCE_RE,
+        placeholder_template=PLACEHOLDER_TEMPLATE,
+        python_question_machine_name=PYTHON_QUESTION_MACHINE_NAME,
+        parse_jsx_expression=parse_jsx_expression,
+        normalize_whitespace=normalize_whitespace,
+        infer_source_package_sidecar_path=infer_source_package_sidecar_path,
+        build_imported_question_from_sidecar=build_imported_question_from_sidecar,
+        load_h5p_sidecar_file_wrapper=lambda course_dir, relative_path: load_h5p_sidecar_file(
+            course_dir,
+            relative_path,
+            description="H5P-Sidecar",
+        ),
+        apply_editable_h5p_payload=apply_editable_h5p_payload,
     )
 
 
 def h5p_import_mapper() -> H5PImportMapper:
     return _SERVICE_REGISTRY.get_h5p_import_mapper(
-        lambda: H5PImportMapper(
-            compact_text=compact_text,
-            normalize_whitespace=normalize_whitespace,
-        )
+        compact_text=compact_text,
+        normalize_whitespace=normalize_whitespace,
     )
 
 
