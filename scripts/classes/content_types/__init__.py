@@ -1,10 +1,12 @@
 from .base import H5PContentType
+from .imported_question_factory import ImportedQuestionFactory
 from .python_question import PythonQuestion
 from .question_set import QuestionSet
 from .raw_content import RawH5PContent
 
 __all__ = [
     "H5PContentType",
+    "ImportedQuestionFactory",
     "PythonQuestion",
     "QuestionSet",
     "RawH5PContent",

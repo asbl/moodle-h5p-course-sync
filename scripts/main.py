@@ -47,6 +47,7 @@ from scripts.classes import (
     build_course_preview_handler,
 )
 from scripts.classes.component_sync import ComponentSyncer
+from scripts.classes.content_types import ImportedQuestionFactory
 from scripts.config import AppConfig, settings
 from scripts.classes.h5p_runtime_manager import build_runtime_content_id as build_runtime_content_id_helper
 from scripts.classes.h5p_runtime_manager import quote_path_segment as quote_path_segment_helper
@@ -679,107 +680,11 @@ def build_imported_question_from_h5p_package(
     metadata_payload: dict[str, object],
     content_payload: dict[str, object],
 ) -> PythonQuestionBlock | None:
-    main_library = str(metadata_payload.get("mainLibrary") or "").strip()
-    content_type = str(content_payload.get("contentType") or "").strip()
-    if not main_library:
-        return None
-
-    metadata_copy = json.loads(json.dumps(metadata_payload, ensure_ascii=False))
-    content_copy = json.loads(json.dumps(content_payload, ensure_ascii=False))
-
-    if main_library == "H5P.QuestionSet":
-        return PythonQuestionBlock(
-            identifier=activity.identifier,
-            title=str(metadata_payload.get("title") or activity.title),
-            instructions=summarize_questionset(content_payload),
-            preview_url=activity.url,
-            main_library=main_library,
-            package_url=getattr(activity, "package_url", ""),
-            h5p_metadata=metadata_copy,
-            h5p_content=content_copy,
-            runner="pyodide",
-            course_slug=course_slug,
-            course_dir=COURSES_DIR / course_slug,
-        )
-
-    if main_library != PYTHON_QUESTION_MACHINE_NAME:
-        return PythonQuestionBlock(
-            identifier=activity.identifier,
-            title=str(metadata_payload.get("title") or activity.title),
-            instructions=activity.intro or f"Importiert aus Moodle: {activity.title}",
-            preview_url=activity.url,
-            main_library=main_library,
-            package_url=getattr(activity, "package_url", ""),
-            raw_package=True,
-            h5p_metadata=metadata_copy,
-            h5p_content=content_copy,
-            runner="pyodide",
-            course_slug=course_slug,
-            course_dir=COURSES_DIR / course_slug,
-        )
-
-    if content_type and content_type != "ide_only":
-        return PythonQuestionBlock(
-            identifier=activity.identifier,
-            title=str(metadata_payload.get("title") or activity.title),
-            instructions=h5p_import_mapper().summarize_instructions(activity, content_payload),
-            preview_url=activity.url,
-            main_library=main_library,
-            package_url=getattr(activity, "package_url", ""),
-            h5p_metadata=metadata_copy,
-            h5p_content=content_copy,
-            runner=str(content_payload.get("pythonRunner") or "pyodide").strip() or "pyodide",
-            course_slug=course_slug,
-            course_dir=COURSES_DIR / course_slug,
-        )
-
-    editor_settings = content_payload.get("editorSettings", {})
-    grading_settings = content_payload.get("gradingSettings", {})
-    advanced_options = content_payload.get("advancedOptions", {})
-    if not isinstance(editor_settings, dict) or not isinstance(grading_settings, dict):
-        return None
-    if not isinstance(advanced_options, dict):
-        advanced_options = {}
-
-    editor_options = editor_settings.get("options", {})
-    if not isinstance(editor_options, dict):
-        editor_options = {}
-
-    test_cases: list[TestCase] = []
-    for raw_test_case in grading_settings.get("testCases", []) or []:
-        if not isinstance(raw_test_case, dict):
-            continue
-        test_cases.append(
-            TestCase(
-                hidden=bool(raw_test_case.get("hidden", False)),
-                inputs=h5p_import_mapper().extract_test_case_values(raw_test_case.get("inputs", []), field_name="input"),
-                outputs=h5p_import_mapper().extract_test_case_values(raw_test_case.get("outputs", []), field_name="output"),
-            )
-        )
-
-    return PythonQuestionBlock(
-        identifier=activity.identifier,
-        title=str(metadata_payload.get("title") or activity.title),
-        instructions=h5p_import_mapper().extract_editor_instructions(content_payload)
-        or h5p_import_mapper().summarize_instructions(activity, content_payload),
-        preview_url=activity.url,
-        main_library=main_library,
-        package_url=getattr(activity, "package_url", ""),
-        h5p_metadata=metadata_copy,
-        h5p_content=content_copy,
-        runner=str(content_payload.get("pythonRunner") or "pyodide").strip() or "pyodide",
-        packages=h5p_import_mapper().extract_packages(content_payload),
-        starter_code=normalize_whitespace(html.unescape(str(editor_settings.get("startingCode") or ""))),
-        solution_code=normalize_whitespace(html.unescape(str(grading_settings.get("targetCode") or ""))),
-        pre_code=normalize_whitespace(html.unescape(str(editor_settings.get("preCode") or ""))),
-        post_code=normalize_whitespace(html.unescape(str(editor_settings.get("postCode") or ""))),
-        grading_method=str(grading_settings.get("gradingMethod") or "please_choose"),
-        show_console=bool(advanced_options.get("showConsole", True)),
-        allow_adding_files=bool(editor_options.get("allowAddingFiles", False)),
-        source_files=h5p_import_mapper().extract_source_files(editor_options),
-        test_cases=test_cases,
+    return imported_question_factory().create_from_h5p_package(
         course_slug=course_slug,
-        course_dir=COURSES_DIR / course_slug,
+        activity=activity,
+        metadata_payload=metadata_payload,
+        content_payload=content_payload,
     )
 
 
@@ -1588,6 +1493,17 @@ def h5p_import_mapper() -> H5PImportMapper:
             normalize_whitespace=normalize_whitespace,
         )
     return H5P_IMPORT_MAPPER
+
+
+def imported_question_factory() -> ImportedQuestionFactory:
+    # Intentionally not cached so tests can monkeypatch module-level dependencies safely.
+    return ImportedQuestionFactory(
+        courses_dir=COURSES_DIR,
+        python_question_machine_name=PYTHON_QUESTION_MACHINE_NAME,
+        normalize_whitespace=normalize_whitespace,
+        summarize_questionset=summarize_questionset,
+        import_mapper=h5p_import_mapper(),
+    )
 
 
 def rewrite_runtime_html(document: str, runtime_path: str, query: str = "") -> str:
