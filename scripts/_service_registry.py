@@ -138,7 +138,6 @@ class ServiceRegistry:
         courses_dir: object,
         ensure_directory: callable,  # type: ignore[type-arg]
         render_imported_question_mdx: callable,  # type: ignore[type-arg]
-        build_scaffold_question: callable,  # type: ignore[type-arg]
         parse_course: callable,  # type: ignore[type-arg]
         compute_question_hash: callable,  # type: ignore[type-arg]
         save_sync_metadata: callable,  # type: ignore[type-arg]
@@ -149,7 +148,6 @@ class ServiceRegistry:
                 courses_dir=courses_dir,
                 ensure_directory=ensure_directory,
                 render_imported_question_mdx=render_imported_question_mdx,
-                build_scaffold_question=build_scaffold_question,
                 parse_course=parse_course,
                 compute_question_hash=compute_question_hash,
                 save_sync_metadata=save_sync_metadata,

@@ -29,14 +29,35 @@ class ImportedQuestionFactory:
         courses_dir: Path,
         python_question_machine_name: str,
         normalize_whitespace: Callable[[str], str],
-        summarize_questionset: Callable[[dict[str, object]], str],
+        strip_html: Callable[[str], str],
         import_mapper: H5PImportMapperProtocol,
     ) -> None:
         self._courses_dir = courses_dir
         self._python_question_machine_name = python_question_machine_name
         self._normalize_whitespace = normalize_whitespace
-        self._summarize_questionset = summarize_questionset
+        self._strip_html = strip_html
         self._import_mapper = import_mapper
+
+    def _summarize_questionset(self, content_payload: dict[str, object]) -> str:
+        questions = content_payload.get("questions", [])
+        if not isinstance(questions, list) or not questions:
+            return "Importiertes Quiz aus Moodle."
+
+        prompts: list[str] = []
+        for entry in questions[:5]:
+            if not isinstance(entry, dict):
+                continue
+            params = entry.get("params", {})
+            if not isinstance(params, dict):
+                continue
+            prompt = self._normalize_whitespace(self._strip_html(str(params.get("question") or ""))).strip()
+            if prompt:
+                prompts.append(prompt)
+
+        if not prompts:
+            return f"Importiertes Quiz aus Moodle mit {len(questions)} Teilfragen."
+        prompt_summary = " | ".join(prompts)
+        return f"Importiertes Quiz aus Moodle mit {len(questions)} Teilfragen: {prompt_summary}"
 
     def create_from_h5p_package(
         self,

@@ -4,21 +4,18 @@ import argparse
 import html
 import json
 import os
-import shutil
 import subprocess
 import threading
 from http.server import ThreadingHTTPServer
 from pathlib import Path
 from typing import Iterable
-from xml.etree import ElementTree
-from zipfile import BadZipFile, ZIP_DEFLATED, ZipFile
+from zipfile import ZipFile
 
 from scripts._http_client import (
     download_file,
     extract_h5p_package_url_from_activity_html,
     fetch_json,
     fetch_text,
-    normalize_http_url,
 )
 
 from scripts.classes import (
@@ -86,7 +83,6 @@ TAG_RE = APP_CONFIG.tag_re
 FENCE_RE = APP_CONFIG.fence_re
 HTML_TAG_RE = APP_CONFIG.html_tag_re
 WHITESPACE_RE = APP_CONFIG.whitespace_re
-H5P_EMBED_IFRAME_RE = APP_CONFIG.h5p_embed_iframe_re
 MBZ_LINK_RE = APP_CONFIG.mbz_link_re
 
 
@@ -201,41 +197,6 @@ def load_h5p_payload_from_source_package(question: PythonQuestionBlock) -> tuple
     if not archive_path.exists():
         return None
     return load_h5p_payload_from_path(archive_path)
-
-
-def summarize_questionset(content_payload: dict[str, object]) -> str:
-    questions = content_payload.get("questions", [])
-    if not isinstance(questions, list) or not questions:
-        return "Importiertes Quiz aus Moodle."
-
-    prompts: list[str] = []
-    for entry in questions[:5]:
-        if not isinstance(entry, dict):
-            continue
-        params = entry.get("params", {})
-        if not isinstance(params, dict):
-            continue
-        prompt = compact_text(strip_html(str(params.get("question") or "")))
-        if prompt:
-            prompts.append(prompt)
-
-    if not prompts:
-        return f"Importiertes Quiz aus Moodle mit {len(questions)} Teilfragen."
-    prompt_summary = " | ".join(prompts)
-    return f"Importiertes Quiz aus Moodle mit {len(questions)} Teilfragen: {prompt_summary}"
-
-
-def build_scaffold_question(course_slug: str, activity: MoodleH5PActivity) -> PythonQuestionBlock:
-    return PythonQuestionBlock(
-        identifier=activity.identifier,
-        title=activity.title,
-        instructions=activity.intro or f"Importiert aus Moodle: {activity.title}",
-        preview_url=activity.url,
-        package_url=getattr(activity, "package_url", ""),
-        runner="pyodide",
-        course_slug=course_slug,
-        course_dir=COURSES_DIR / course_slug,
-    )
 
 
 def build_imported_question_from_h5p_package(
@@ -531,7 +492,6 @@ def moodle_syncer() -> MoodleSyncer:
         courses_dir=COURSES_DIR,
         ensure_directory=ensure_directory,
         render_imported_question_mdx=render_imported_question_mdx,
-        build_scaffold_question=build_scaffold_question,
         parse_course=parse_course,
         compute_question_hash=compute_question_hash,
         save_sync_metadata=save_sync_metadata,
@@ -610,7 +570,7 @@ def imported_question_factory() -> ImportedQuestionFactory:
         courses_dir=COURSES_DIR,
         python_question_machine_name=PYTHON_QUESTION_MACHINE_NAME,
         normalize_whitespace=normalize_whitespace,
-        summarize_questionset=summarize_questionset,
+        strip_html=strip_html,
         import_mapper=h5p_import_mapper(),
     )
 

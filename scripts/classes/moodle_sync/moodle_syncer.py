@@ -29,7 +29,6 @@ class MoodleSyncer:
         courses_dir: Path,
         ensure_directory: Callable[[Path], None],
         render_imported_question_mdx: Callable[[PythonQuestionBlock], list[str]],
-        build_scaffold_question: Callable[[str, MoodleH5PActivity], PythonQuestionBlock],
         parse_course: Callable[[Path], tuple[str, list[PythonQuestionBlock], str]],
         compute_question_hash: Callable[[PythonQuestionBlock], str],
         save_sync_metadata: Callable[[Path, SyncMetadata], Path],
@@ -38,11 +37,22 @@ class MoodleSyncer:
         self._courses_dir = courses_dir
         self._ensure_directory = ensure_directory
         self._render_imported_question_mdx = render_imported_question_mdx
-        self._build_scaffold_question = build_scaffold_question
         self._parse_course = parse_course
         self._compute_question_hash = compute_question_hash
         self._save_sync_metadata = save_sync_metadata
         self._escape_mdx_attribute = escape_mdx_attribute
+
+    def _build_scaffold_question(self, course_slug: str, activity: MoodleH5PActivity) -> PythonQuestionBlock:
+        return PythonQuestionBlock(
+            identifier=activity.identifier,
+            title=activity.title,
+            instructions=activity.intro or f"Importiert aus Moodle: {activity.title}",
+            preview_url=activity.url,
+            package_url=getattr(activity, "package_url", ""),
+            runner="pyodide",
+            course_slug=course_slug,
+            course_dir=self._courses_dir / course_slug,
+        )
 
     def render_imported_course_mdx(self, course_slug: str, activities: list[MoodleH5PActivity]) -> str:
         lines = [f"# {course_slug}", ""]
