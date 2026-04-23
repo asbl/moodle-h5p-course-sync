@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>${TITLE} Vorschau</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f4efe8;
+        --surface: rgba(255, 250, 244, 0.9);
+        --surface-strong: #fffdf9;
+        --ink: #1c140d;
+        --muted: #725b47;
+        --accent: #b6532f;
+        --accent-soft: #f1d7c5;
+        --border: rgba(92, 58, 32, 0.18);
+        --shadow: 0 20px 45px rgba(73, 43, 22, 0.12);
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: Georgia, "Iowan Old Style", "Palatino Linotype", serif;
+        color: var(--ink);
+        background:
+          radial-gradient(circle at top left, rgba(182, 83, 47, 0.12), transparent 26%),
+          linear-gradient(180deg, #fbf6ef 0%, var(--bg) 100%);
+      }
+      main {
+        width: min(1100px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 48px 0 96px;
+      }
+      h1, h2, h3 {
+        line-height: 1.1;
+        letter-spacing: -0.03em;
+      }
+      p, li {
+        font-size: 1.05rem;
+        line-height: 1.65;
+      }
+      pre {
+        overflow-x: auto;
+        padding: 16px;
+        border-radius: 16px;
+        background: #22180f;
+        color: #f7f0e8;
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+      }
+      code { font-family: "Fira Code", "SFMono-Regular", Consolas, monospace; }
+      .python-question-card {
+        padding: 18px;
+        margin: 28px 0;
+        border: 1px solid var(--border);
+        border-radius: 28px;
+        background: var(--surface);
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(10px);
+      }
+      .question-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 14px;
+        padding: 10px 12px 14px;
+        border-bottom: 1px solid var(--border);
+      }
+      .question-toolbar-title {
+        min-width: 0;
+        font-size: 1rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .question-toolbar-actions {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 10px;
+      }
+      .question-action-link,
+      .question-action-button {
+        display: inline-flex;
+        align-items: center;
+        padding: 8px 12px;
+        border-radius: 999px;
+        text-decoration: none;
+        color: var(--ink);
+        background: var(--accent-soft);
+        border: 1px solid rgba(182, 83, 47, 0.18);
+        font: inherit;
+        cursor: pointer;
+      }
+      .question-action-button {
+        appearance: none;
+      }
+      .question-action-button.primary {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: #fff7f0;
+      }
+      .question-action-button.danger {
+        background: rgba(126, 33, 23, 0.08);
+        border-color: rgba(126, 33, 23, 0.18);
+        color: #7e2117;
+      }
+      .preview-modal {
+        position: fixed;
+        inset: 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        background: rgba(28, 20, 13, 0.42);
+        backdrop-filter: blur(8px);
+        z-index: 1000;
+      }
+      .preview-modal.is-open {
+        display: flex;
+      }
+      .preview-modal-dialog {
+        width: min(1200px, 100%);
+        height: min(90vh, 920px);
+        display: flex;
+        flex-direction: column;
+        border-radius: 28px;
+        border: 1px solid var(--border);
+        background: var(--surface-strong);
+        box-shadow: 0 24px 60px rgba(34, 24, 15, 0.28);
+        overflow: hidden;
+      }
+      .preview-modal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 16px 18px;
+        border-bottom: 1px solid var(--border);
+        background: rgba(255, 248, 241, 0.94);
+      }
+      .preview-modal-title {
+        font-size: 1.05rem;
+        font-weight: 700;
+      }
+      .preview-modal-body {
+        flex: 1;
+        min-height: 0;
+        background: #fff;
+      }
+      .preview-modal-frame {
+        width: 100%;
+        height: 100%;
+        border: 0;
+        display: block;
+      }
+      @media (max-width: 900px) {
+        .question-toolbar {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+        .question-toolbar-actions {
+          justify-content: flex-start;
+        }
+        .preview-modal {
+          padding: 12px;
+        }
+        .preview-modal-dialog {
+          height: min(94vh, 920px);
+        }
+        .preview-modal-header {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      ${CONTENT_HTML}
+    </main>
+    <div class="preview-modal" id="preview-modal" aria-hidden="true">
+      <div class="preview-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="preview-modal-title">
+        <div class="preview-modal-header">
+          <div class="preview-modal-title" id="preview-modal-title">H5P Vorschau</div>
+          <div class="question-toolbar-actions">
+            <button class="question-action-button" type="button" data-modal-action="close">Schließen</button>
+          </div>
+        </div>
+        <div class="preview-modal-body">
+          <iframe class="preview-modal-frame" id="preview-modal-frame" loading="lazy" title="H5P Vorschau"></iframe>
+        </div>
+      </div>
+    </div>
+    <script>
+      const modal = document.getElementById("preview-modal");
+      const modalFrame = document.getElementById("preview-modal-frame");
+      const modalTitle = document.getElementById("preview-modal-title");
+
+      const closeModal = () => {
+        if (!(modal instanceof HTMLElement) || !(modalFrame instanceof HTMLIFrameElement)) {
+          return;
+        }
+        modal.classList.remove("is-open");
+        modal.setAttribute("aria-hidden", "true");
+        modalFrame.src = "about:blank";
+      };
+
+      const openModal = (frameSrc, frameTitle) => {
+        if (!(modal instanceof HTMLElement) || !(modalFrame instanceof HTMLIFrameElement) || !(modalTitle instanceof HTMLElement)) {
+          return;
+        }
+        modal.classList.add("is-open");
+        modal.setAttribute("aria-hidden", "false");
+        modalTitle.textContent = frameTitle || "H5P Vorschau";
+        modalFrame.src = frameSrc;
+      };
+
+      document.addEventListener("click", (event) => {
+        const target = event.target;
+        if (!(target instanceof HTMLElement)) {
+          return;
+        }
+
+        if (target.dataset.openModal === "true" && target.dataset.frameSrc) {
+          openModal(target.dataset.frameSrc, target.dataset.frameTitle || target.textContent || "H5P Vorschau");
+          return;
+        }
+
+        if (target.dataset.modalAction === "close" || target === modal) {
+          closeModal();
+          return;
+        }
+
+        if (target.dataset.action === "delete-runtime") {
+          const card = target.closest(".python-question-card");
+          const deleteUrl = target.dataset.deleteUrl;
+          if (!deleteUrl) {
+            return;
+          }
+
+          if (!window.confirm("Are you sure you want to delete this H5P content?")) {
+            return;
+          }
+
+          fetch(deleteUrl, { method: "POST" })
+            .then((response) => {
+              if (!response.ok) {
+                throw new Error(`Delete failed: ${response.status}`);
+              }
+              closeModal();
+              if (card instanceof HTMLElement) {
+                card.remove();
+              }
+            })
+            .catch((error) => {
+              console.error(error);
+              window.alert("Löschen fehlgeschlagen.");
+            });
+        }
+      });
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          closeModal();
+        }
+      });
+    </script>
+  </body>
+</html>

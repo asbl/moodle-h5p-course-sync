@@ -1,0 +1,13 @@
+.venv/
+.env
+.h5p-runtime/
+__pycache__/
+*.py[cod]
+**/.git
+
+content/
+temp/
+uploads/
+audit/
+
+courses/*/h5p/

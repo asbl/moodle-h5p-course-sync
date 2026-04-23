@@ -1,0 +1,1000 @@
+[
+    {
+        "name": "contentType",
+        "type": "select",
+        "label": "Type",
+        "required": true,
+        "description": "Type of H5P Content ",
+        "options": [
+            {
+                "value": "please_choose",
+                "label": "Please choose"
+            },
+            {
+                "value": "ide_only",
+                "label": "Assignment only"
+            },
+            {
+                "value": "text_only",
+                "label": "Contents (Text, Editor, [...] only"
+            },
+            {
+                "value": "text_and_ide",
+                "label": "Contents (Text, Editor, [...] + Coding assignment"
+            }
+        ],
+        "default":  "please_choose"
+    },
+    {
+    "name": "pythonRunner",
+    "type": "select",
+    "label": "Python Runner",
+    "description": "Choose the Python interpreter used for code execution",
+    "default": "skulpt",
+    "options": [
+        {
+            "value": "skulpt",
+            "label": "Skulpt (browser-based, fast)"
+        },
+        {
+            "value": "pyodide",
+            "label": "Pyodide (full Python 3 support, loaded via CDN)"
+        }
+    ]
+    },
+    {
+        "name": "advancedOptions",
+        "type": "group",
+        "label": "Advanced Runtime Options",
+        "fields": [
+            {
+                "name": "showConsole",
+                "type": "boolean",
+                "label": "Show console",
+                "description": "If enabled, the integrated console will be shown below the editor.",
+                "default": true
+            },
+            {
+                "name": "disableOutputPopups",
+                "type": "boolean",
+                "label": "Disable output popups",
+                "description": "If enabled, program output will only be written to the console and not shown in popup dialogs.",
+                "default": false
+            },
+            {
+                "name": "enableSaveLoadButtons",
+                "type": "boolean",
+                "label": "Show save and load buttons",
+                "description": "If enabled, learners can download their code and load it again later using the shared save/load buttons.",
+                "default": true
+            },
+            {
+                "name": "execLimit",
+                "type": "number",
+                "label": "Execution Limit",
+                "description": "Maximum execution time in milliseconds. Use to prevent programs from running indefinitely. [0: No limit]",
+                "default": 0,
+                "min": 0
+            },
+            {
+                "name": "blocklyCdnUrl",
+                "type": "text",
+                "label": "Blockly Script URL",
+                "description": "Base URL or direct URL to blockly.min.js. Self-hosted files are supported. Standard blocks and the Python generator are loaded from the same directory.",
+                "default": ""
+            },
+            {
+                "name": "codeMirrorCdnUrl",
+                "type": "text",
+                "label": "CodeMirror Module URL",
+                "description": "Base URL to an ESM CDN or direct URL to a custom CodeMirror runtime module. Self-hosted module mirrors are supported.",
+                "default": ""
+            },
+            {
+                "name": "markdownCdnUrl",
+                "type": "text",
+                "label": "Markdown Module URL",
+                "description": "Base URL to an ESM CDN or direct URL to a custom markdown runtime module. Self-hosted module mirrors are supported.",
+                "default": ""
+            },
+            {
+                "name": "fontAwesomeCdnUrl",
+                "type": "text",
+                "label": "Font Awesome Stylesheet URL",
+                "description": "Direct URL or base URL to a self-hosted Font Awesome stylesheet. Leave empty to use the default hosted stylesheet.",
+                "default": ""
+            },
+            {
+                "name": "sweetAlertCdnUrl",
+                "type": "text",
+                "label": "SweetAlert Script URL",
+                "description": "Base URL or direct URL to sweetalert2.all.min.js. Self-hosted files are supported.",
+                "default": ""
+            },
+            {
+                "name": "jsZipCdnUrl",
+                "type": "text",
+                "label": "JSZip Script URL",
+                "description": "Base URL or direct URL to jszip.min.js. Self-hosted files are supported.",
+                "default": ""
+            },
+            {
+                "name": "p5CdnUrl",
+                "type": "text",
+                "label": "p5 Script URL",
+                "description": "Direct URL to a hosted p5.min.js file. Leave empty to use the default hosted file.",
+                "default": ""
+            },
+            {
+                "name": "skulptCdnUrl",
+                "type": "text",
+                "label": "Skulpt Script URL",
+                "description": "Base URL or direct URL to skulpt.min.js. Self-hosted files are supported. If left empty, p5 tasks use the bundled local Skulpt build and other Skulpt tasks use the default hosted build.",
+                "default": ""
+            },
+            {
+                "name": "sqlJsUrl",
+                "type": "text",
+                "label": "sql.js Script URL",
+                "description": "Base URL or direct URL to sql-wasm.js. Self-hosted files are supported. The matching sql-wasm.wasm is loaded from the same directory.",
+                "default": ""
+            }
+        ]
+    },
+    {
+        "name": "pyodideOptions",
+        "type": "group",
+        "label": "Pyodide Advanced Options",
+        "widget": "showWhen",
+        "showWhen": {
+            "rules": [
+                {
+                    "field": "pythonRunner",
+                    "equals": [
+                        "pyodide"
+                    ]
+                }
+            ]
+        },
+        "fields": [
+            {
+                "name": "pyodideCdnUrl",
+                "type": "text",
+                "label": "Pyodide Script URL",
+                "description": "Base URL or direct URL to pyodide.js. Self-hosted files are supported. Matching Pyodide assets are loaded from the same directory.",
+                "default": ""
+            },
+            {
+                "name": "packages",
+                "type": "list",
+                "label": "Pyodide-Packages",
+                "entity": "package",
+                "description": "Additional Pyodide packages that should be loaded before execution.",
+                "field": {
+                    "name": "package",
+                    "type": "select",
+                    "label": "Paket",
+                    "options": [
+                        {
+                            "value": "numpy",
+                            "label": "numpy"
+                        },
+                        {
+                            "value": "pandas",
+                            "label": "pandas"
+                        },
+                        {
+                            "value": "matplotlib",
+                            "label": "matplotlib"
+                        },
+                        {
+                            "value": "scipy",
+                            "label": "scipy"
+                        },
+                        {
+                            "value": "sympy",
+                            "label": "sympy"
+                        },
+                        {
+                            "value": "networkx",
+                            "label": "networkx"
+                        },
+                        {
+                            "value": "micropip",
+                            "label": "micropip"
+                        },
+                        {
+                            "value": "pygame-ce",
+                            "label": "pygame-ce"
+                        },
+                        {
+                            "value": "sqlite3",
+                            "label": "sqlite3"
+                        },
+                        {
+                            "value": "miniworlds",
+                            "label": "miniworlds"
+                        },
+                        {
+                            "value": "pillow",
+                            "label": "Pillow"
+                        },
+                        {
+                            "value": "beautifulsoup4",
+                            "label": "beautifulsoup4"
+                        },
+                        {
+                            "value": "lxml",
+                            "label": "lxml"
+                        },
+                        {
+                            "value": "regex",
+                            "label": "regex"
+                        },
+                        {
+                            "value": "packaging",
+                            "label": "packaging"
+                        }
+                    ]
+                }
+            }
+        ]
+    },
+    {
+        "name": "contents",
+        "type": "list",
+        "label": "Content",
+        "widget": "showWhen",
+        "showWhen": {
+            "rules": [
+                {
+                    "field": "contentType",
+                    "equals": [
+                        "text_only",
+                        "text_and_ide"
+                    ]
+                }
+            ]
+        },
+        "description": "Text can contain text, images, videos and code",
+        "expanded": true,
+        "field": {
+            "name": "field",
+            "type": "group",
+            "label": "Field",
+            "fields": [
+                {
+                    "name": "type",
+                    "type": "select",
+                    "label": "Type",
+                    "description": "Type of H5P Content ",
+                    "options": [
+                        {
+                            "value": "text",
+                            "label": "Text"
+                        },
+                        {
+                            "value": "image",
+                            "label": "Image"
+                        },
+                        {
+                            "value": "code",
+                            "label": "Code"
+                        },
+                        {
+                            "value": "solution-code",
+                            "label": "Solution Code (hidden)"
+                        }
+                    ],
+                    "default": "text"
+                },
+                {
+                    "type": "text",
+                    "name": "text",
+                    "optional": true,
+                    "label": "Text",
+                    "description": "Write general description as markdown code",
+                    "widget": "showWhen",
+                    "showWhen": {
+                        "rules": [
+                            {
+                                "field": "type",
+                                "equals": [
+                                    "text"
+                                ]
+                            }
+                        ],
+                        "widget": "codeWidget"
+                    },
+                    "options": [
+                        {
+                            "language": "markdown",
+                            "showAlways": true
+                        }
+                    ]
+                },
+                {
+                    "name": "solution",
+                    "type": "code",
+                    "label": "Solution Code in Spoiler-Tags",
+                    "optional": true,
+                    "description": "Solution Code in Spoiler-Tags",
+                    "widget": "showWhen",
+                    "showWhen": {
+                        "rules": [
+                            {
+                                "field": "type",
+                                "equals": [
+                                    "solution-code"
+                                ]
+                            }
+                        ],
+                        "widget": "codeWidget"
+                    },
+                    "options": [
+                        {
+                            "language": "python",
+                            "showAlways": true
+                        }
+                    ]
+                },
+                {
+                    "name": "image",
+                    "type": "image",
+                    "label": "Image",
+                    "optional": true,
+                    "description": "An image",
+                    "widget": "showWhen",
+                    "showWhen": {
+                        "rules": [
+                            {
+                                "field": "type",
+                                "equals": [
+                                    "image"
+                                ]
+                            }
+                        ]
+                    }
+                },
+                {
+                    "type": "text",
+                    "name": "code",
+                    "optional": true,
+                    "label": "Code",
+                    "description": "Write general description as markdown code",
+                    "widget": "showWhen",
+                    "showWhen": {
+                        "rules": [
+                            {
+                                "field": "type",
+                                "equals": [
+                                    "code"
+                                ]
+                            }
+                        ],
+                        "widget": "codeWidget"
+                    },
+                    "options": [
+                        {
+                            "language": "python",
+                            "showAlways": true
+                        }
+                    ]
+                },
+                {
+                    "name": "options",
+                    "type": "group",
+                    "label": "Options",
+                    "expanded": false,
+                    "widget": "showWhen",
+                    "showWhen": {
+                        "rules": [
+                            {
+                                "field": "type",
+                                "equals": [
+                                    "code"
+                                ]
+                            }
+                        ]
+                    },
+                    "fields": [
+                        {
+                            "type": "boolean",
+                            "name": "showEditor",
+                            "label": "Show Editor?",
+                            "description": "Should an editor displayed to the user",
+                            "default": true
+                        },
+                        {
+                            "name": "enableImageUploads",
+                            "type": "boolean",
+                            "label": "Enable image uploads",
+                            "description": "If enabled for this content item, learners can upload images during runtime and access them in their code.",
+                            "default": false
+                        },
+                        {
+                            "name": "defaultImages",
+                            "type": "list",
+                            "label": "Default Images",
+                            "entity": "image",
+                            "optional": true,
+                            "description": "Images that are preloaded into the Images tab for this content item.",
+                            "field": {
+                                "name": "defaultImage",
+                                "type": "group",
+                                "label": "Default Image",
+                                "fields": [
+                                    {
+                                        "name": "image",
+                                        "type": "image",
+                                        "label": "Image"
+                                    },
+                                    {
+                                        "name": "fileName",
+                                        "type": "text",
+                                        "label": "File Name",
+                                        "optional": true,
+                                        "description": "Optional file name shown in the Images tab (for example background.png)."
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "name": "enableSoundUploads",
+                            "type": "boolean",
+                            "label": "Enable sound uploads",
+                            "description": "If enabled for this content item, learners can upload sounds during runtime and access them in their code.",
+                            "default": false
+                        },
+                        {
+                            "name": "sourceFiles",
+                            "type": "list",
+                            "label": "Additional Python Files",
+                            "entity": "file",
+                            "optional": true,
+                            "description": "Additional Python modules available for import in this editor when using Pyodide. Use module file names like helper.py.",
+                            "field": {
+                                "name": "sourceFile",
+                                "type": "group",
+                                "label": "Python File",
+                                "fields": [
+                                    {
+                                        "name": "fileName",
+                                        "type": "text",
+                                        "label": "File Name",
+                                        "description": "Python module file name, for example helper.py"
+                                    },
+                                    {
+                                        "name": "code",
+                                        "type": "text",
+                                        "label": "Code",
+                                        "widget": "codeWidget",
+                                        "options": [
+                                            {
+                                                "language": "python"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "name": "visibleToLearner",
+                                        "type": "boolean",
+                                        "label": "Show file in editor",
+                                        "description": "If enabled, learners can switch to this file in the editor.",
+                                        "default": true
+                                    },
+                                    {
+                                        "name": "learnerEditable",
+                                        "type": "boolean",
+                                        "label": "Learner can edit file",
+                                        "description": "If enabled, learners can modify this file in the editor.",
+                                        "default": true
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "name": "allowAddingFiles",
+                            "type": "boolean",
+                            "label": "Allow learners to add files",
+                            "description": "If enabled, learners can add, rename and delete their own Python files in this editor. Only applies when using Pyodide.",
+                            "default": false
+                        },
+                        {
+                            "name": "editorMode",
+                            "type": "select",
+                            "label": "Editor mode",
+                            "description": "Choose whether learners see a code editor, a block-based editor, or both panels with a toggle.",
+                            "default": "code",
+                            "options": [
+                                {
+                                    "value": "code",
+                                    "label": "Code editor (CodeMirror)"
+                                },
+                                {
+                                    "value": "blocks",
+                                    "label": "Block editor (Blockly)"
+                                },
+                                {
+                                    "value": "both",
+                                    "label": "Both – blocks are source of truth, code preview is read-only"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "blocklyCategories",
+                    "type": "group",
+                    "label": "Blockly categories",
+                    "description": "Select which block categories are available in the Blockly editor. All categories are included by default.",
+                    "widget": "pythonQuestionShowWhen",
+                    "showWhen": {
+                        "rules": [
+                            {
+                                "field": "options/editorMode",
+                                "equals": [
+                                    "blocks",
+                                    "both"
+                                ]
+                            }
+                        ]
+                    },
+                    "fields": [
+                        {
+                            "name": "variables",
+                            "type": "boolean",
+                            "label": "Variables",
+                            "default": true
+                        },
+                        {
+                            "name": "logic",
+                            "type": "boolean",
+                            "label": "Logic",
+                            "default": true
+                        },
+                        {
+                            "name": "loops",
+                            "type": "boolean",
+                            "label": "Loops",
+                            "default": true
+                        },
+                        {
+                            "name": "math",
+                            "type": "boolean",
+                            "label": "Maths",
+                            "default": true
+                        },
+                        {
+                            "name": "text",
+                            "type": "boolean",
+                            "label": "Text",
+                            "default": true
+                        },
+                        {
+                            "name": "lists",
+                            "type": "boolean",
+                            "label": "Lists",
+                            "default": true
+                        },
+                        {
+                            "name": "functions",
+                            "type": "boolean",
+                            "label": "Functions",
+                            "default": true
+                        }
+                    ]
+                }
+            ]
+        }
+    },
+    {
+        "name": "editorSettings",
+        "type": "group",
+        "label": "Editor Settings",
+        "widget": "pythonQuestionShowWhen",
+        "showWhen": {
+            "rules": [
+                {
+                    "field": "contentType",
+                    "equals": [
+                        "ide_only",
+                        "text_and_ide"
+                    ]
+                }
+            ]
+        },
+        "description": "This defines how the actual editor is pre-populated and whether code should be executed before or after user input.",
+        "expanded": true,
+        "fields": [
+            {
+                "type": "text",
+                "name": "instructions",
+                "widget": "codeWidget",
+                "optional": true,
+                "label": "Instructions",
+                "description": "Write instructions as markdown code",
+                "options": [
+                    {
+                        "language": "markdown",
+                        "showAlways": true
+                    }
+                ]
+            },
+            {
+                "name": "instructionsImage",
+                "type": "image",
+                "label": "Instructions Image",
+                "optional": true,
+                "description": "An optional image appended to instructions"
+            },
+            {
+                "label": "Pre code",
+                "name": "preCode",
+                "type": "text",
+                "optional": true,
+                "widget": "codeWidget",
+                "default": "",
+                "description": "Code prepended before main program",
+                "options": [
+                    {
+                        "language": "python"
+                    }
+                ]
+            },
+            {
+                "label": "Default Code",
+                "name": "startingCode",
+                "type": "text",
+                "widget": "codeWidget",
+                "default": "print(\"Hello World\")",
+                "description": "Add default code here, so that users can modify this code.",
+                "options": [
+                    {
+                        "language": "python"
+                    }
+                ]
+            },
+            {
+                "label": "Post code",
+                "name": "postCode",
+                "type": "text",
+                "optional": true,
+                "widget": "codeWidget",
+                "default": "",
+                "description": "Code appended after main program",
+                "options": [
+                    {
+                        "language": "python"
+                    }
+                ]
+            },
+            {
+                "name": "options",
+                "type": "group",
+                "label": "Options",
+                "expanded": false,
+                "fields": [
+                    {
+                        "name": "enableImageUploads",
+                        "type": "boolean",
+                        "label": "Enable image uploads",
+                        "description": "If enabled for this editor, learners can upload images during runtime and access them in their code.",
+                        "default": false
+                    },
+                    {
+                        "name": "defaultImages",
+                        "type": "list",
+                        "label": "Default Images",
+                        "entity": "image",
+                        "optional": true,
+                        "description": "Images that are preloaded into the Images tab for this editor.",
+                        "field": {
+                            "name": "defaultImage",
+                            "type": "group",
+                            "label": "Default Image",
+                            "fields": [
+                                {
+                                    "name": "image",
+                                    "type": "image",
+                                    "label": "Image"
+                                },
+                                {
+                                    "name": "fileName",
+                                    "type": "text",
+                                    "label": "File Name",
+                                    "optional": true,
+                                    "description": "Optional file name shown in the Images tab (for example background.png)."
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "enableSoundUploads",
+                        "type": "boolean",
+                        "label": "Enable sound uploads",
+                        "description": "If enabled for this editor, learners can upload sounds during runtime and access them in their code.",
+                        "default": false
+                    },
+                    {
+                        "name": "sourceFiles",
+                        "type": "list",
+                        "label": "Additional Python Files",
+                        "entity": "file",
+                        "optional": true,
+                        "description": "Additional Python modules available for import when using Pyodide. Use module file names like helper.py.",
+                        "field": {
+                            "name": "sourceFile",
+                            "type": "group",
+                            "label": "Python File",
+                            "fields": [
+                                {
+                                    "name": "fileName",
+                                    "type": "text",
+                                    "label": "File Name",
+                                    "description": "Python module file name, for example helper.py"
+                                },
+                                {
+                                    "name": "code",
+                                    "type": "text",
+                                    "label": "Code",
+                                    "widget": "codeWidget",
+                                    "default": "",
+                                    "options": [
+                                        {
+                                            "language": "python"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "name": "visibleToLearner",
+                                    "type": "boolean",
+                                    "label": "Show file in editor",
+                                    "description": "If enabled, learners can switch to this file in the editor.",
+                                    "default": true
+                                },
+                                {
+                                    "name": "learnerEditable",
+                                    "type": "boolean",
+                                    "label": "Learner can edit file",
+                                    "description": "If enabled, learners can modify this file in the editor.",
+                                    "default": true
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "allowAddingFiles",
+                        "type": "boolean",
+                        "label": "Allow learners to add files",
+                        "description": "If enabled, learners can add, rename and delete their own Python files in the editor. Only applies when using Pyodide.",
+                        "default": false
+                    },
+                    {
+                        "name": "editorMode",
+                        "type": "select",
+                        "label": "Editor mode",
+                        "description": "Choose whether learners see a code editor, a block-based editor, or both panels with a toggle.",
+                        "default": "code",
+                        "options": [
+                            {
+                                "value": "code",
+                                "label": "Code editor (CodeMirror)"
+                            },
+                            {
+                                "value": "blocks",
+                                "label": "Block editor (Blockly)"
+                            },
+                            {
+                                "value": "both",
+                                "label": "Both – blocks are source of truth, code preview is read-only"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "blocklyCategories",
+                "type": "group",
+                "label": "Blockly categories",
+                "description": "Select which block categories are available in the Blockly editor. All categories are included by default.",
+                "widget": "pythonQuestionShowWhen",
+                "showWhen": {
+                    "rules": [
+                        {
+                            "field": "options/editorMode",
+                            "equals": [
+                                "blocks",
+                                "both"
+                            ]
+                        }
+                    ]
+                },
+                "fields": [
+                    {
+                        "name": "variables",
+                        "type": "boolean",
+                        "label": "Variables",
+                        "default": true
+                    },
+                    {
+                        "name": "logic",
+                        "type": "boolean",
+                        "label": "Logic",
+                        "default": true
+                    },
+                    {
+                        "name": "loops",
+                        "type": "boolean",
+                        "label": "Loops",
+                        "default": true
+                    },
+                    {
+                        "name": "math",
+                        "type": "boolean",
+                        "label": "Maths",
+                        "default": true
+                    },
+                    {
+                        "name": "text",
+                        "type": "boolean",
+                        "label": "Text",
+                        "default": true
+                    },
+                    {
+                        "name": "lists",
+                        "type": "boolean",
+                        "label": "Lists",
+                        "default": true
+                    },
+                    {
+                        "name": "functions",
+                        "type": "boolean",
+                        "label": "Functions",
+                        "default": true
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "name": "gradingSettings",
+        "type": "group",
+        "label": "Grading Settings",
+        "widget": "pythonQuestionShowWhen",
+        "showWhen": {
+            "rules": [
+                {
+                    "field": "contentType",
+                    "equals": [
+                        "ide_only",
+                        "text_and_ide"
+                    ]
+                }
+            ]
+        },
+        "description": "Information how the content should be graded",
+        "expanded": true,
+        "fields": [
+            {
+                "name": "gradingMethod",
+                "type": "select",
+                "label": "Grading method",
+                "description": "Grading methods",
+                "default": "please_choose",
+                "options": [
+                    {
+                        "value": "please_choose",
+                        "label": "Please choose"
+                    },
+                    {
+                        "value": "ioTestCases",
+                        "label": "Input/Output TestCases"
+                    },
+                    {
+                        "value": "targetImage",
+                        "label": "Target Image"
+                    }
+                    
+                ]
+            },
+            {
+                "name": "dueDateGroup",
+                "type": "group",
+                "label": "Due Date Settings",
+                "fields": [
+                    {
+                        "name": "enableDueDate",
+                        "type": "boolean",
+                        "label": "Enable Due Date",
+                        "default": false
+                    },
+                    {
+                        "name": "duedate",
+                        "type": "text",
+                        "label": "Due Date",
+                        "widget": "datetime",
+                        "default": "01.01.1970"
+                    }
+                ]
+            },
+            {
+                "name": "testCases",
+                "type": "list",
+                "label": "Test Cases",
+                "entity": "testcase",
+                "widget": "showWhen",
+                "showWhen": {
+                    "rules": [
+                        {
+                            "field": "gradingMethod",
+                            "equals": [
+                                "ioTestCases",
+                                "targetImage"
+                            ]
+                        }
+                    ]
+                },
+                "min": 0,
+                "max": 20,
+                "field": {
+                    "name": "testCase",
+                    "type": "group",
+                    "label": "Test Case",
+                    "fields": [
+                        {
+                            "name": "hidden",
+                            "type": "boolean",
+                            "label": "Hidden Testcase",
+                            "description": "Input- and Output values are not shown to user.",
+                            "default": false
+                        },
+                        {
+                            "name": "inputs",
+                            "type": "list",
+                            "label": "Inputs",
+                            "entity": "input",
+                            "min": 1,
+                            "field": {
+                                "name": "input",
+                                "type": "text",
+                                "label": "Text",
+                                "description": "Input",
+                                "optional": true
+                            }
+                        },
+                        {
+                            "name": "outputs",
+                            "type": "list",
+                            "label": "Outputs",
+                            "entity": "output",
+                            "min": 1,
+                            "field": {
+                                "name": "output",
+                                "type": "text",
+                                "label": "Answer",
+                                "description": "Output",
+                                "optional": true
+                            },
+                            "widget": "showWhen",
+                            "showWhen": {
+                                "rules": [
+                                    {
+                                        "field": "../../gradingMethod",
+                                        "equals": "ioTestCases"
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "name": "targetCode",
+                "type": "text",
+                "label": "Solution Code",
+                "entity": "testcase",
+                "widget": "codeWidget"
+            }
+        ]
+    }
+]

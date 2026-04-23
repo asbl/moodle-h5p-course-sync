@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>H5P wird geladen</title>
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        font-family: Georgia, serif;
+        background: #f4efe8;
+        color: #1c140d;
+      }
+      main { width: min(640px, calc(100% - 32px)); }
+      .card {
+        border: 1px solid rgba(92, 58, 32, 0.18);
+        border-radius: 20px;
+        background: rgba(255, 250, 244, 0.95);
+        padding: 24px;
+      }
+      p { line-height: 1.6; }
+      .muted { color: #6e5442; }
+      .error { color: #7e2117; white-space: pre-wrap; }
+    </style>
+  </head>
+  <body>
+    <main class="card">
+      <h1>H5P wird vorbereitet…</h1>
+      <p>Die Runtime wird aufgebaut und der Inhalt importiert. Die Seite leitet automatisch weiter, sobald alles bereit ist.</p>
+      <p class="muted" id="status">Status: starte Vorbereitung</p>
+      <p class="error" id="error"></p>
+    </main>
+    <script>
+      const statusEl = document.getElementById("status");
+      const errorEl = document.getElementById("error");
+      const statusUrl = ${STATUS_URL_JSON};
+      const targetUrl = ${TARGET_URL_JSON};
+
+      const poll = () => {
+        fetch(statusUrl, { cache: "no-store" })
+          .then((response) => response.json())
+          .then((payload) => {
+            if (payload.status === "ready") {
+              window.location.replace(targetUrl);
+              return;
+            }
+            if (payload.status === "error") {
+              statusEl.textContent = "Status: Fehler";
+              errorEl.textContent = payload.error || "Unbekannter Fehler";
+              return;
+            }
+            statusEl.textContent = "Status: " + payload.status;
+            window.setTimeout(poll, 900);
+          })
+          .catch(() => {
+            statusEl.textContent = "Status: warte auf Serverantwort";
+            window.setTimeout(poll, 1200);
+          });
+      };
+
+      poll();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,426 @@
+{
+  "semantics": [
+    {
+      "label": "Type",
+      "description": "Type of H5P Content ",
+      "options": [
+        {
+          "label": "Bitte wählen"
+        },
+        {
+          "label": "Nur Aufgabe"
+        },
+        {
+          "label": "Nur Text"
+        },
+        {
+          "label": "Text und Programmieraufgabe"
+        }
+      ]
+    },
+    {
+      "label": "Python-Laufzeit",
+      "description": "Wähle den Python-Interpreter für die Code-Ausführung",
+      "options": [
+        {
+          "label": "Skulpt (browserbasiert, schnell)"
+        },
+        {
+          "label": "Pyodide (volles Python 3, wird per CDN geladen)"
+        }
+      ]
+    },
+    {
+      "label": "Erweiterte Laufzeit-Optionen",
+      "fields": [
+        {
+          "label": "Konsole anzeigen",
+          "description": "Wenn aktiviert, wird die integrierte Konsole unterhalb des Editors angezeigt."
+        },
+        {
+          "label": "Ausgabe-Popups deaktivieren",
+          "description": "Wenn aktiviert, werden Programmausgaben nur in der Konsole angezeigt und nicht in Popup-Dialogen."
+        },
+        {
+          "label": "Speichern-/Laden-Buttons anzeigen",
+          "description": "Wenn aktiviert, können Lernende ihren Code herunterladen und später mit den gemeinsamen Speichern/Laden-Buttons wieder laden."
+        },
+        {
+          "label": "Ausführungs-Limit",
+          "description": "Maximale Anzahl von Ausführungsschritten für Python. Verhindert Endlosschleifen. [0: kein Limit]"
+        },
+        {
+          "label": "Blockly-Skript-URL",
+          "description": "Basis-URL oder direkte URL zu blockly.min.js. Selbst gehostete Dateien werden unterstützt. Standardblöcke und der Python-Generator werden aus demselben Verzeichnis geladen."
+        },
+        {
+          "label": "CodeMirror-Modul-URL",
+          "description": "Basis-URL zu einem ESM-CDN oder direkte URL zu einem eigenen CodeMirror-Runtime-Modul. Selbst gehostete Modul-Spiegel werden unterstützt."
+        },
+        {
+          "label": "Markdown-Modul-URL",
+          "description": "Basis-URL zu einem ESM-CDN oder direkte URL zu einem eigenen Markdown-Runtime-Modul. Selbst gehostete Modul-Spiegel werden unterstützt."
+        },
+        {
+          "label": "Font-Awesome-Stylesheet-URL",
+          "description": "Direkte URL oder Basis-URL zu einem selbst gehosteten Font-Awesome-Stylesheet. Leer lassen, um das standardmäßig gehostete Stylesheet zu verwenden."
+        },
+        {
+          "label": "SweetAlert-Skript-URL",
+          "description": "Basis-URL oder direkte URL zu sweetalert2.all.min.js. Selbst gehostete Dateien werden unterstützt."
+        },
+        {
+          "label": "JSZip-Skript-URL",
+          "description": "Basis-URL oder direkte URL zu jszip.min.js. Selbst gehostete Dateien werden unterstützt."
+        },
+        {
+          "label": "p5-Skript-URL",
+          "description": "Direkte URL zu einer gehosteten p5.min.js-Datei. Leer lassen, um die standardmäßig gehostete Datei zu verwenden."
+        },
+        {
+          "label": "Skulpt-Skript-URL",
+          "description": "Basis-URL oder direkte URL zu skulpt.min.js. Selbst gehostete Dateien werden unterstützt. Wenn leer, verwenden p5-Aufgaben den lokal gebündelten Skulpt-Build und andere Skulpt-Aufgaben den standardmäßig gehosteten Build."
+        },
+        {
+          "label": "sql.js-Skript-URL",
+          "description": "Basis-URL oder direkte URL zu sql-wasm.js. Selbst gehostete Dateien werden unterstützt. Die passende sql-wasm.wasm wird aus demselben Verzeichnis geladen."
+        }
+      ]
+    },
+    {
+      "label": "Erweiterte Pyodide-Optionen",
+      "fields": [
+        {
+          "label": "Pyodide-Skript-URL",
+          "description": "Basis-URL oder direkte URL zu pyodide.js. Selbst gehostete Dateien werden unterstützt. Zugehörige Pyodide-Assets werden aus demselben Verzeichnis geladen."
+        },
+        {
+          "label": "Pyodide-Pakete",
+          "entity": "package",
+          "description": "Zusätzliche Pyodide-Pakete, die vor der Ausführung geladen werden sollen.",
+          "field": {
+            "label": "Paket",
+            "options": [
+              { "label": "numpy" },
+              { "label": "pandas" },
+              { "label": "matplotlib" },
+              { "label": "scipy" },
+              { "label": "sympy" },
+              { "label": "networkx" },
+              { "label": "micropip" },
+              { "label": "pygame-ce" },
+              { "label": "sqlite3" },
+              { "label": "miniworlds" },
+              { "label": "Pillow" },
+              { "label": "beautifulsoup4" },
+              { "label": "lxml" },
+              { "label": "regex" },
+              { "label": "packaging" }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "label": "Inhalt",
+      "description": "Text kann Text, Bilder, Videos und Code enthalten",
+      "field": {
+        "label": "Feld",
+        "fields": [
+          {
+            "label": "Typ",
+            "description": "Art des H5P-Inhalts",
+            "options": [
+              {
+                "label": "Text"
+              },
+              {
+                "label": "Image"
+              },
+              {
+                "label": "Code"
+              },
+              {
+                "label": "Lösungscode (versteckt)"
+              }
+            ]
+          },
+          {
+            "label": "Text",
+            "description": "Allgemeine Beschreibung als Markdown schreiben"
+          },
+          {
+            "label": "Lösungs-Code in Spoiler-Tags",
+            "description": "Lösungs-Code in Spoiler-Tags"
+          },
+          {
+            "label": "Bild",
+            "description": "Ein Bild"
+          },
+          {
+            "label": "Code",
+            "description": "Allgemeine Beschreibung als Markdown schreiben"
+          },
+          {
+            "label": "Optionen",
+            "fields": [
+              {
+                "label": "Editor anzeigen?",
+                "description": "Soll dem Lernenden ein Editor angezeigt werden?"
+              },
+              {
+                "label": "Bild-Uploads aktivieren",
+                "description": "Wenn aktiviert, können Lernende für dieses Inhaltselement während der Laufzeit Bilder hochladen und im Code verwenden."
+              },
+              {
+                "label": "Standard-Bilder",
+                "entity": "image",
+                "description": "Bilder, die für dieses Inhaltselement im Bilder-Tab vorgeladen werden.",
+                "field": {
+                  "label": "Standard-Bild",
+                  "fields": [
+                    { "label": "Bild" },
+                    { "label": "Dateiname", "description": "Optionaler Dateiname im Bilder-Tab (z. B. hintergrund.png)." }
+                  ]
+                }
+              },
+              {
+                "label": "Sound-Uploads aktivieren",
+                "description": "Wenn aktiviert, können Lernende für dieses Inhaltselement während der Laufzeit Sounds hochladen und im Code verwenden."
+              },
+              {
+                "label": "Zusätzliche Python-Dateien",
+                "entity": "file",
+                "description": "Zusätzliche Python-Module für diesen Editor (nur Pyodide).",
+                "field": {
+                  "label": "Python-Datei",
+                  "fields": [
+                    {
+                      "label": "Dateiname",
+                      "description": "Python-Modulname, z. B. helper.py"
+                    },
+                    {
+                      "label": "Code"
+                    },
+                    {
+                      "label": "Datei im Editor anzeigen",
+                      "description": "Wenn aktiviert, können Lernende in diese Datei wechseln."
+                    },
+                    {
+                      "label": "Lernende können die Datei bearbeiten",
+                      "description": "Wenn aktiviert, können Lernende diese Datei verändern."
+                    }
+                  ]
+                }
+              },
+              {
+                "label": "Lernenden das Hinzufügen von Dateien erlauben",
+                "description": "Wenn aktiviert, können Lernende eigene Python-Dateien anlegen, umbenennen und löschen. Gilt nur bei Pyodide."
+              },
+              {
+                "label": "Editor-Modus",
+                "description": "Wähle, ob Lernende einen Code-Editor, einen blockbasierten Editor oder beide Ansichten mit Umschalter sehen.",
+                "options": [
+                  {
+                    "label": "Code-Editor (CodeMirror)"
+                  },
+                  {
+                    "label": "Block-Editor (Blockly)"
+                  },
+                  {
+                    "label": "Beides – Blöcke sind maßgeblich, Code-Vorschau ist schreibgeschützt"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "label": "Blockly-Kategorien",
+            "description": "Wähle, welche Block-Kategorien im Blockly-Editor angezeigt werden sollen. Standardmäßig sind alle Kategorien aktiv.",
+            "fields": [
+              {
+                "label": "Variablen"
+              },
+              {
+                "label": "Logik"
+              },
+              {
+                "label": "Schleifen"
+              },
+              {
+                "label": "Mathematik"
+              },
+              {
+                "label": "Text"
+              },
+              {
+                "label": "Listen"
+              },
+              {
+                "label": "Funktionen"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "label": "Editor-Einstellungen",
+      "description": "Definiert, wie der Editor vorausgefüllt ist und ob Code vor/nach Benutzereingaben ausgeführt wird.",
+      "fields": [
+        {
+          "label": "Anweisungen",
+          "description": "Schreibe Anweisungen als Markdown"
+        },
+        {
+          "label": "Anleitungs-Bild",
+          "description": "Optionales Bild, das den Anweisungen angehängt wird"
+        },
+        {
+          "label": "Vor-Code",
+          "description": "Code, der vor dem Hauptprogramm eingefügt wird"
+        },
+        {
+          "label": "Standard-Code",
+          "default": "print(\"Hello World\")",
+          "description": "Standard-Code, den Lernende anpassen können."
+        },
+        {
+          "label": "Nach-Code",
+          "description": "Code, der nach dem Hauptprogramm angehängt wird"
+        },
+        {
+          "label": "Optionen",
+          "fields": [
+            {
+              "label": "Bild-Uploads aktivieren",
+              "description": "Wenn aktiviert, können Lernende in diesem Editor während der Laufzeit Bilder hochladen und im Code verwenden."
+            },
+            {
+              "label": "Standard-Bilder",
+              "entity": "image",
+              "description": "Bilder, die für diesen Editor im Bilder-Tab vorgeladen werden.",
+              "field": {
+                "label": "Standard-Bild",
+                "fields": [
+                  { "label": "Bild" },
+                  { "label": "Dateiname", "description": "Optionaler Dateiname im Bilder-Tab (z. B. hintergrund.png)." }
+                ]
+              }
+            },
+            {
+              "label": "Sound-Uploads aktivieren",
+              "description": "Wenn aktiviert, können Lernende in diesem Editor während der Laufzeit Sounds hochladen und im Code verwenden."
+            },
+            {
+              "label": "Zusätzliche Python-Dateien",
+              "entity": "file",
+              "description": "Zusätzliche Python-Module, die bei der Verwendung von Pyodide per Import verfügbar sind. Modulnamen wie helper.py verwenden.",
+              "field": {
+                "label": "Python-Datei",
+                "fields": [
+                  {
+                    "label": "Dateiname",
+                    "description": "Python-ModulDateiname, z. B. helper.py"
+                  },
+                  {
+                    "label": "Code"
+                  },
+                  {
+                    "label": "Datei im Editor anzeigen",
+                    "description": "Wenn aktiviert, können Lernende in diese Datei im Editor wechseln."
+                  },
+                  {
+                    "label": "Lernende können die Datei bearbeiten",
+                    "description": "Wenn aktiviert, können Lernende diese Datei im Editor verändern."
+                  }
+                ]
+              }
+            },
+            {
+              "label": "Lernenden das Hinzufügen von Dateien erlauben",
+              "description": "Wenn aktiviert, können Lernende eigene Python-Dateien anlegen, umbenennen und löschen. Im Tab-Streifen erscheint ein '+'-Button sowie ein Dateimanager. Gilt nur bei Pyodide."
+            },
+            {
+              "label": "Editor-Modus",
+              "description": "Wähle, ob Lernende einen Code-Editor, einen blockbasierten Editor oder beide Ansichten mit Umschalter sehen.",
+              "options": [
+                {
+                  "label": "Code-Editor (CodeMirror)"
+                },
+                {
+                  "label": "Block-Editor (Blockly)"
+                },
+                {
+                  "label": "Beides – Blöcke sind maßgeblich, Code-Vorschau ist schreibgeschützt"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "label": "Blockly-Kategorien",
+          "description": "Wähle, welche Block-Kategorien im Blockly-Editor angezeigt werden sollen. Standardmäßig sind alle Kategorien aktiv.",
+          "fields": [
+            {
+              "label": "Variablen"
+            },
+            {
+              "label": "Logik"
+            },
+            {
+              "label": "Schleifen"
+            },
+            {
+              "label": "Mathematik"
+            },
+            {
+              "label": "Text"
+            },
+            {
+              "label": "Listen"
+            },
+            {
+              "label": "Funktionen"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "Bewertungseinstellungen",
+      "description": "Informationen zur Bewertung des Inhalts",
+      "fields": [
+        {
+          "label": "Bewertungsmethode",
+          "description": "Methoden zur Bewertung",
+          "options": [
+            { "label": "Bitte wählen" },
+            { "label": "Eingabe/Ausgabe Testfälle" },
+            { "label": "Zielbild" }
+          ]
+        },
+        {
+          "label": "Fälligkeitseinstellungen",
+          "fields": [
+            { "label": "Fälligkeitsdatum aktivieren" },
+            { "label": "Fälligkeitsdatum", "default": "01.01.1970" }
+          ]
+        },
+        {
+          "label": "Testfälle",
+          "entity": "testcase",
+          "field": {
+            "label": "Testfall",
+            "fields": [
+              { "label": "Versteckter Testfall", "description": "Eingabe- und Ausgabe-Werte werden dem Lernenden nicht angezeigt." },
+              { "label": "Eingaben", "entity": "input", "field": { "label": "Text", "description": "Eingabe" } },
+              { "label": "Ausgaben", "entity": "output", "field": { "label": "Antwort", "description": "Ausgabe" } }
+            ]
+          }
+        },
+        { "label": "Lösungscode", "entity": "testcase" }
+      ]
+    }
+  ]
+}
