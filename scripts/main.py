@@ -43,6 +43,11 @@ from scripts.classes import (
     TextOperations,
     build_course_preview_handler,
 )
+from scripts.classes.cli import (
+    build_arg_parser as build_cli_arg_parser,
+    print_course_status as print_cli_course_status,
+    print_moodle_ping_report as print_cli_moodle_ping_report,
+)
 from scripts.classes.component_sync import ComponentSyncer
 from scripts.classes.content_types import ImportedQuestionFactory
 from scripts.classes.sync_metadata_store import SyncMetadataStore
@@ -679,54 +684,15 @@ def resolve_course_dir(course: str) -> Path:
 
 
 def print_course_status(status: dict[str, object]) -> None:
-    counts = status["counts"]
-    print(f"Kurs: {status['course']} (remote course id: {status['remoteCourseId']})")
-    print(f"Moodle: {status['moodleBaseUrl']}")
-    print(
-        "Status: "
-        f"tracked={counts['tracked']}, "
-        f"modified-local={counts['modified-local']}, "
-        f"local-only={counts['local-only']}, "
-        f"remote-only={counts['remote-only']}"
-    )
-    for item in status["items"]:
-        print(f"- {item['identifier']}: {item['status']} (remote activity id: {item['remoteActivityId']})")
+    print_cli_course_status(status)
 
 
 def print_moodle_ping_report(report: dict[str, object]) -> None:
-    print(f"Moodle erreichbar: {report['baseUrl']}")
-    print(f"Site: {report['siteName']} ({report['siteUrl']})")
-    print(f"Benutzer: {report['fullName']} ({report['userName']}, id={report['userId']})")
-    print(
-        "Import-API: "
-        + ("verfügbar" if report["supportsCourseImport"] else "fehlt: core_course_get_contents nicht freigegeben")
-    )
+    print_cli_moodle_ping_report(report)
 
 
 def build_arg_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Synchronisiert PythonQuestion-Blöcke aus MDX nach H5P und stellt eine Browser-Vorschau bereit.")
-    subparsers = parser.add_subparsers(dest="command", required=True)
-
-    sync_parser = subparsers.add_parser("sync", help="Erzeugt H5P-Dateien aus einer Kurs-MDX.")
-    sync_parser.add_argument("course", help="Kursordner unter courses/, zum Beispiel python-2026")
-
-    serve_parser = subparsers.add_parser("serve", help="Startet die lokale Browser-Vorschau.")
-    serve_parser.add_argument("--port", type=int, default=DEFAULT_PORT, help=f"Port für den Preview-Server. Standard: {DEFAULT_PORT}")
-
-    import_parser = subparsers.add_parser("import-moodle", help="Importiert einen vorhandenen Moodle-Kurs als lokale MDX-Struktur.")
-    import_parser.add_argument("course", help="Lokaler Kursordner unter courses/, zum Beispiel python-2026")
-    import_parser.add_argument("remote_course_id", type=int, help="Remote Moodle Course ID")
-    import_parser.add_argument("--base-url", help="Moodle-Basis-URL. Fällt sonst auf MOODLE_BASE_URL zurück.")
-    import_parser.add_argument("--token", help="Moodle-Token. Fällt sonst auf MOODLE_TOKEN zurück.")
-
-    ping_parser = subparsers.add_parser("moodle-ping", help="Prüft, ob die konfigurierte Moodle-Webservice-Verbindung funktioniert.")
-    ping_parser.add_argument("--base-url", help="Moodle-Basis-URL. Fällt sonst auf MOODLE_BASE_URL zurück.")
-    ping_parser.add_argument("--token", help="Moodle-Token. Fällt sonst auf MOODLE_TOKEN zurück.")
-
-    status_parser = subparsers.add_parser("status", help="Zeigt den lokalen Sync-Status eines importierten Moodle-Kurses.")
-    status_parser.add_argument("course", help="Lokaler Kursordner unter courses/, zum Beispiel python-2026")
-
-    return parser
+    return build_cli_arg_parser(DEFAULT_PORT)
 
 
 def main() -> None:
