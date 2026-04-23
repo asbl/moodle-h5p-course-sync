@@ -82,3 +82,27 @@ class MoodleSyncer:
 
         self._save_sync_metadata(course_dir, metadata)
         return course_dir
+
+    @staticmethod
+    def build_moodle_ping_report(client: object) -> dict[str, object]:
+        get_site_info = getattr(client, "get_site_info")
+        site_info = get_site_info()
+        functions = site_info.get("functions", [])
+        function_names: list[str] = []
+        if isinstance(functions, list):
+            for item in functions:
+                if not isinstance(item, dict):
+                    continue
+                name = str(item.get("name") or "").strip()
+                if name:
+                    function_names.append(name)
+        return {
+            "baseUrl": getattr(client, "base_url"),
+            "siteName": str(site_info.get("sitename") or ""),
+            "siteUrl": str(site_info.get("siteurl") or getattr(client, "base_url")),
+            "userId": site_info.get("userid"),
+            "userName": str(site_info.get("username") or ""),
+            "fullName": str(site_info.get("fullname") or ""),
+            "functions": sorted(function_names),
+            "supportsCourseImport": "core_course_get_contents" in function_names,
+        }

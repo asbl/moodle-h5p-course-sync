@@ -169,6 +169,17 @@ def unescape_display_value(value: object) -> object:
     return value
 
 
+def escape_h5p_value(value: object) -> object:
+    """Recursively HTML-escape strings inside a JSON-like structure."""
+    if isinstance(value, dict):
+        return {key: escape_h5p_value(item) for key, item in value.items()}
+    if isinstance(value, list):
+        return [escape_h5p_value(item) for item in value]
+    if isinstance(value, str):
+        return html.escape(value, quote=True)
+    return value
+
+
 def render_template_literal(value: str, *, indent: int = 0) -> str:
     """Render *value* as a JS template literal (backtick string)."""
     escaped = value.replace("\\", "\\\\").replace("`", "\\`").replace("${", "\\${")

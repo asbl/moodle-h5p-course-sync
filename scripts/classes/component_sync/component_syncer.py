@@ -7,6 +7,12 @@ from typing import Callable
 from scripts.classes.models import PythonQuestionBlock
 from scripts.classes.content_types import PythonQuestion as PythonQuestionContentType
 from scripts.classes.content_types import block_to_content_type
+from scripts.classes.content_types._helpers import (
+    clone_json_value,
+    default_object_from_semantics,
+    escape_h5p_value,
+    merge_json_values,
+)
 
 
 class ComponentSyncer:
@@ -18,24 +24,47 @@ class ComponentSyncer:
         python_question_machine_name: str,
         load_python_question_semantics: Callable[[], list[dict[str, object]]],
         load_h5p_payload_from_source_package: Callable[[PythonQuestionBlock], tuple[dict[str, object], dict[str, object]] | None],
-        clone_json_value: Callable[[object], object],
-        escape_h5p_value: Callable[[object], object],
-        merge_json_values: Callable[[object, object], object],
         build_h5p_metadata: Callable[[PythonQuestionBlock], dict],
-        build_default_python_question_content: Callable[[PythonQuestionBlock], dict[str, object]],
-        build_default_imported_h5p_metadata: Callable[[PythonQuestionBlock], dict[str, object]],
-        build_default_imported_h5p_content: Callable[[PythonQuestionBlock], dict[str, object]],
     ) -> None:
         self._python_question_machine_name = python_question_machine_name
         self._load_python_question_semantics = load_python_question_semantics
         self._load_h5p_payload_from_source_package = load_h5p_payload_from_source_package
-        self._clone_json_value = clone_json_value
-        self._escape_h5p_value = escape_h5p_value
-        self._merge_json_values = merge_json_values
         self._build_h5p_metadata = build_h5p_metadata
-        self._build_default_python_question_content = build_default_python_question_content
-        self._build_default_imported_h5p_metadata = build_default_imported_h5p_metadata
-        self._build_default_imported_h5p_content = build_default_imported_h5p_content
+
+    def _build_default_python_question_content(self, question: PythonQuestionBlock) -> dict[str, object]:
+        defaults = default_object_from_semantics(self._load_python_question_semantics())
+        defaults["pythonRunner"] = question.runner
+        defaults.setdefault("advancedOptions", {})
+        if isinstance(defaults["advancedOptions"], dict):
+            defaults["advancedOptions"]["showConsole"] = question.show_console
+        defaults.setdefault("pyodideOptions", {})
+        if isinstance(defaults["pyodideOptions"], dict):
+            defaults["pyodideOptions"]["packages"] = [{"package": p} for p in question.packages]
+        defaults.setdefault("editorSettings", {})
+        if isinstance(defaults["editorSettings"], dict):
+            defaults["editorSettings"]["instructions"] = question.instructions
+            defaults.setdefault("editorSettings", {}).setdefault("options", {})
+            options = defaults["editorSettings"].get("options")
+            if isinstance(options, dict):
+                options["allowAddingFiles"] = question.allow_adding_files
+        defaults.setdefault("gradingSettings", {})
+        if isinstance(defaults["gradingSettings"], dict):
+            defaults["gradingSettings"]["gradingMethod"] = question.grading_method
+        return defaults
+
+    def _build_default_imported_h5p_metadata(self, question: PythonQuestionBlock) -> dict[str, object]:
+        try:
+            metadata = self._build_h5p_metadata(question)
+        except (ValueError, FileNotFoundError):
+            return {}
+        metadata.pop("title", None)
+        metadata.pop("mainLibrary", None)
+        return metadata
+
+    def _build_default_imported_h5p_content(self, question: PythonQuestionBlock) -> dict[str, object]:
+        if question.main_library != self._python_question_machine_name:
+            return {}
+        return self._build_default_python_question_content(question)
 
     def compute_question_hash(self, question: PythonQuestionBlock) -> str:
         return block_to_content_type(question).compute_hash()
@@ -62,7 +91,7 @@ class ComponentSyncer:
         return rendered.split("\n")
 
     def apply_editable_h5p_payload(self, question: PythonQuestionBlock, payload: dict[str, object]) -> None:
-        escaped_payload = self._escape_h5p_value(payload)
+        escaped_payload = escape_h5p_value(payload)
         if (
             question.main_library == self._python_question_machine_name
             and "metadata" not in escaped_payload
@@ -71,7 +100,7 @@ class ComponentSyncer:
             metadata = self._build_h5p_metadata(question)
             metadata["title"] = question.title
             metadata["mainLibrary"] = question.main_library
-            content = self._merge_json_values(self._build_default_python_question_content(question), escaped_payload)
+            content = merge_json_values(self._build_default_python_question_content(question), escaped_payload)
             if not isinstance(content, dict):
                 raise ValueError("Der H5P-Block konnte nicht in ein gueltiges H5P-Objekt umgewandelt werden.")
             question.h5p_metadata = metadata
@@ -92,15 +121,15 @@ class ComponentSyncer:
             if not isinstance(content_override, dict):
                 raise ValueError("Der H5P-Block erwartet fuer 'content' ein JSON-Objekt.")
 
-            metadata_base = self._clone_json_value(source_metadata)
-            content_base = self._clone_json_value(source_content)
+            metadata_base = clone_json_value(source_metadata)
+            content_base = clone_json_value(source_content)
             if not isinstance(metadata_base, dict) or not isinstance(content_base, dict):
                 raise ValueError("Das source.h5p enthaelt keine gueltigen H5P-Daten.")
 
             metadata_base.pop("title", None)
             metadata_base.pop("mainLibrary", None)
-            metadata = self._merge_json_values(metadata_base, metadata_override)
-            content = self._merge_json_values(content_base, content_override)
+            metadata = merge_json_values(metadata_base, metadata_override)
+            content = merge_json_values(content_base, content_override)
             if not isinstance(metadata, dict) or not isinstance(content, dict):
                 raise ValueError("Der H5P-Block konnte nicht in ein gueltiges H5P-Objekt umgewandelt werden.")
 
@@ -121,8 +150,8 @@ class ComponentSyncer:
         if not isinstance(content_override, dict):
             raise ValueError("Der H5P-Block erwartet fuer 'content' ein JSON-Objekt.")
 
-        metadata = self._merge_json_values(self._build_default_imported_h5p_metadata(question), metadata_override)
-        content = self._merge_json_values(self._build_default_imported_h5p_content(question), content_override)
+        metadata = merge_json_values(self._build_default_imported_h5p_metadata(question), metadata_override)
+        content = merge_json_values(self._build_default_imported_h5p_content(question), content_override)
         if not isinstance(metadata, dict) or not isinstance(content, dict):
             raise ValueError("Der H5P-Block konnte nicht in ein gueltiges H5P-Objekt umgewandelt werden.")
 

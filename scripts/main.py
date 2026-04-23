@@ -164,10 +164,6 @@ def load_h5p_sidecar_file(course_dir: Path, relative_path: str, *, description: 
     return h5p_file_service().load_h5p_sidecar_file(course_dir, relative_path, description=description)
 
 
-def clone_json_value(value: object) -> object:
-    return json.loads(json.dumps(value, ensure_ascii=False))
-
-
 def load_h5p_payload_from_path(source_path: Path) -> tuple[dict[str, object], dict[str, object]] | None:
     return h5p_file_service().load_h5p_payload_from_path(source_path)
 
@@ -205,43 +201,8 @@ def build_imported_question_from_sidecar(course_dir: Path, identifier: str, sour
     return question
 
 
-def escape_h5p_value(value: object) -> object:
-    if isinstance(value, dict):
-        return {key: escape_h5p_value(item) for key, item in value.items()}
-    if isinstance(value, list):
-        return [escape_h5p_value(item) for item in value]
-    if isinstance(value, str):
-        return html.escape(value, quote=True)
-    return value
-
-
 def parse_jsx_expression(expression: str) -> object:
     return component_syncer().parse_jsx_expression(expression)
-
-
-def merge_json_values(default: object, override: object) -> object:
-    if isinstance(default, dict) and isinstance(override, dict):
-        merged = {key: clone_json_value(value) for key, value in default.items()}
-        for key, value in override.items():
-            if key in merged:
-                merged[key] = merge_json_values(merged[key], value)
-            else:
-                merged[key] = clone_json_value(value)
-        return merged
-
-    if isinstance(override, (dict, list)):
-        return clone_json_value(override)
-    return override
-
-
-def build_default_imported_h5p_metadata(question: PythonQuestionBlock) -> dict[str, object]:
-    try:
-        metadata = build_h5p_metadata(question)
-    except (ValueError, FileNotFoundError):
-        return {}
-    metadata.pop("title", None)
-    metadata.pop("mainLibrary", None)
-    return metadata
 
 
 def load_python_question_semantics() -> list[dict[str, object]]:
@@ -249,76 +210,6 @@ def load_python_question_semantics() -> list[dict[str, object]]:
     if not isinstance(payload, list):
         raise ValueError("semantics.json fuer H5P.PythonQuestion muss ein JSON-Array sein.")
     return [field for field in payload if isinstance(field, dict)]
-
-
-def default_from_semantics_field(field: dict[str, object]) -> object:
-    field_type = str(field.get("type") or "")
-    if field_type == "group":
-        defaults: dict[str, object] = {}
-        for child in field.get("fields", []) or []:
-            if not isinstance(child, dict):
-                continue
-            child_name = str(child.get("name") or "").strip()
-            if not child_name:
-                continue
-            defaults[child_name] = default_from_semantics_field(child)
-        return defaults
-    if field_type == "list":
-        if "default" in field:
-            return clone_json_value(field["default"])
-        return []
-    if "default" in field:
-        return clone_json_value(field["default"])
-    if field_type in {"text", "code", "select"}:
-        return ""
-    if field_type == "boolean":
-        return False
-    if field_type == "number":
-        return 0
-    return None
-
-
-def default_object_from_semantics(fields: list[dict[str, object]]) -> dict[str, object]:
-    defaults: dict[str, object] = {}
-    for field in fields:
-        name = str(field.get("name") or "").strip()
-        if not name:
-            continue
-        defaults[name] = default_from_semantics_field(field)
-    return defaults
-
-
-def build_default_python_question_content(question: PythonQuestionBlock) -> dict[str, object]:
-    defaults = default_object_from_semantics(load_python_question_semantics())
-
-    defaults["pythonRunner"] = question.runner
-    defaults.setdefault("advancedOptions", {})
-    if isinstance(defaults["advancedOptions"], dict):
-        defaults["advancedOptions"]["showConsole"] = question.show_console
-
-    defaults.setdefault("pyodideOptions", {})
-    if isinstance(defaults["pyodideOptions"], dict):
-        defaults["pyodideOptions"]["packages"] = [{"package": package_name} for package_name in question.packages]
-
-    defaults.setdefault("editorSettings", {})
-    if isinstance(defaults["editorSettings"], dict):
-        defaults["editorSettings"]["instructions"] = question.instructions
-        defaults.setdefault("editorSettings", {}).setdefault("options", {})
-        options = defaults["editorSettings"].get("options")
-        if isinstance(options, dict):
-            options["allowAddingFiles"] = question.allow_adding_files
-
-    defaults.setdefault("gradingSettings", {})
-    if isinstance(defaults["gradingSettings"], dict):
-        defaults["gradingSettings"]["gradingMethod"] = question.grading_method
-
-    return defaults
-
-
-def build_default_imported_h5p_content(question: PythonQuestionBlock) -> dict[str, object]:
-    if question.main_library != PYTHON_QUESTION_MACHINE_NAME:
-        return {}
-    return build_default_python_question_content(question)
 
 
 def apply_editable_h5p_payload(question: PythonQuestionBlock, payload: dict[str, object]) -> None:
@@ -439,77 +330,11 @@ def import_moodle_course(course: str, remote_course_id: int, client: MoodleApiCl
 
 
 def build_course_status(course_dir: Path) -> dict[str, object]:
-    metadata = load_sync_metadata(course_dir)
-    if metadata is None:
-        raise FileNotFoundError(f"Keine Sync-Metadaten in {sync_metadata_path(course_dir)} gefunden.")
-
-    _, questions, _ = parse_course(course_dir)
-    local_questions = {question.identifier: question for question in questions}
-    items: list[dict[str, object]] = []
-    counts = {"tracked": 0, "modified-local": 0, "local-only": 0, "remote-only": 0}
-
-    for identifier, question in sorted(local_questions.items()):
-        entry = metadata.entries.get(identifier)
-        if entry is None:
-            status = "local-only"
-        elif compute_question_hash(question) != entry.local_hash:
-            status = "modified-local"
-        else:
-            status = "tracked"
-        counts[status] += 1
-        items.append(
-            {
-                "identifier": identifier,
-                "title": question.title,
-                "status": status,
-                "remoteActivityId": entry.remote_activity_id if entry else None,
-            }
-        )
-
-    for identifier, entry in sorted(metadata.entries.items()):
-        if identifier in local_questions:
-            continue
-        counts["remote-only"] += 1
-        items.append(
-            {
-                "identifier": identifier,
-                "title": entry.remote_title,
-                "status": "remote-only",
-                "remoteActivityId": entry.remote_activity_id,
-            }
-        )
-
-    return {
-        "course": course_dir.name,
-        "remoteCourseId": metadata.remote_course_id,
-        "moodleBaseUrl": metadata.moodle_base_url,
-        "counts": counts,
-        "items": items,
-    }
+    return course_orchestrator().build_course_status(course_dir)
 
 
 def build_moodle_ping_report(client: MoodleApiClient) -> dict[str, object]:
-    site_info = client.get_site_info()
-    functions = site_info.get("functions", [])
-    function_names: list[str] = []
-    if isinstance(functions, list):
-        for item in functions:
-            if not isinstance(item, dict):
-                continue
-            name = str(item.get("name") or "").strip()
-            if name:
-                function_names.append(name)
-
-    return {
-        "baseUrl": client.base_url,
-        "siteName": str(site_info.get("sitename") or ""),
-        "siteUrl": str(site_info.get("siteurl") or client.base_url),
-        "userId": site_info.get("userid"),
-        "userName": str(site_info.get("username") or ""),
-        "fullName": str(site_info.get("fullname") or ""),
-        "functions": sorted(function_names),
-        "supportsCourseImport": "core_course_get_contents" in function_names,
-    }
+    return MoodleSyncer.build_moodle_ping_report(client)
 
 
 def resolve_moodle_client(base_url: str | None = None, token: str | None = None) -> MoodleApiClient:
@@ -669,13 +494,7 @@ def component_syncer() -> ComponentSyncer:
             python_question_machine_name=PYTHON_QUESTION_MACHINE_NAME,
             load_python_question_semantics=load_python_question_semantics,
             load_h5p_payload_from_source_package=load_h5p_payload_from_source_package,
-            clone_json_value=clone_json_value,
-            escape_h5p_value=escape_h5p_value,
-            merge_json_values=merge_json_values,
             build_h5p_metadata=build_h5p_metadata,
-            build_default_python_question_content=build_default_python_question_content,
-            build_default_imported_h5p_metadata=build_default_imported_h5p_metadata,
-            build_default_imported_h5p_content=build_default_imported_h5p_content,
         )
     return COMPONENT_SYNCER
 
@@ -814,6 +633,8 @@ def course_orchestrator() -> CourseOrchestrator:
             parse_course=parse_course,
             write_h5p_package=write_h5p_package,
             render_course_page=render_course_page,
+            load_sync_metadata=load_sync_metadata,
+            compute_question_hash=compute_question_hash,
         )
     return COURSE_ORCHESTRATOR
 
