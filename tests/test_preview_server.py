@@ -51,6 +51,7 @@ class PreviewServerTests(unittest.TestCase):
         build_handler.return_value = object()
 
         runtime_process = Mock()
+        runtime_process.poll.return_value = None
 
         serve_preview(
             8877,
@@ -71,3 +72,33 @@ class PreviewServerTests(unittest.TestCase):
         server.server_close.assert_called_once_with()
         runtime_process.terminate.assert_called_once_with()
         runtime_process.wait.assert_called_once_with(timeout=5)
+
+    @patch("scripts.classes.cli.preview_server.build_course_preview_handler")
+    @patch("scripts.classes.cli.preview_server.ThreadingHTTPServer")
+    def test_serve_preview_raises_when_runtime_process_already_exited(
+        self,
+        server_cls: Mock,
+        build_handler: Mock,
+    ) -> None:
+        runtime_process = Mock()
+        runtime_process.poll.return_value = 1
+
+        with self.assertRaisesRegex(RuntimeError, "H5P-Runtime ist unerwartet beendet"):
+            serve_preview(
+                8877,
+                courses_dir=Path("courses"),
+                runtime_proxy_prefix="/runtime",
+                h5p_runtime_port=8820,
+                ensure_h5p_runtime_server=lambda: runtime_process,
+                load_course_preview_state=lambda _course_dir: ([], ""),
+                preview_controller=lambda *args, **kwargs: None,
+                resolve_runtime_question_from_path=lambda _path: None,
+                ensure_runtime_question_ready=lambda _question: None,
+                rewrite_runtime_html=lambda document, _runtime_path, _query="": document,
+                escape_inline=lambda value: value,
+                start_runtime_question_preparation=lambda _question: None,
+                template_renderer=lambda: None,
+            )
+
+        server_cls.assert_not_called()
+        build_handler.assert_not_called()

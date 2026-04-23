@@ -2,7 +2,11 @@ from __future__ import annotations
 
 import argparse
 from pathlib import Path
-from typing import Callable
+from typing import Callable, Protocol
+
+
+class SyncQuestionLike(Protocol):
+    package_path: Path
 
 
 def resolve_course_dir(course: str, courses_dir: Path) -> Path:
@@ -18,7 +22,7 @@ def run_cli_command(
     parser: argparse.ArgumentParser,
     root_dir: Path,
     courses_dir: Path,
-    sync_course: Callable[[Path], list[object]],
+    sync_course: Callable[[Path], list[SyncQuestionLike]],
     serve_preview: Callable[[int], None],
     resolve_moodle_client: Callable[[str | None, str | None], object],
     import_moodle_course: Callable[[str, int, object], Path],

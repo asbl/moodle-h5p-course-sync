@@ -3,7 +3,17 @@ from __future__ import annotations
 import subprocess
 from http.server import ThreadingHTTPServer
 from pathlib import Path
-from typing import Callable
+from typing import Callable, Protocol
+
+from scripts.classes.preview_controller import PreviewController
+
+
+class QuestionLike(Protocol):
+    identifier: str
+
+
+class TemplateRendererLike(Protocol):
+    def render_index(self, course_dirs: list[Path]) -> str: ...
 
 from scripts.classes.preview_http_handler import (
     PreviewHandlerContext,
@@ -18,16 +28,21 @@ def serve_preview(
     runtime_proxy_prefix: str,
     h5p_runtime_port: int,
     ensure_h5p_runtime_server: Callable[[], subprocess.Popen[str] | None],
-    load_course_preview_state: Callable,
-    preview_controller: Callable,
-    resolve_runtime_question_from_path: Callable,
-    ensure_runtime_question_ready: Callable,
-    rewrite_runtime_html: Callable,
-    escape_inline: Callable,
-    start_runtime_question_preparation: Callable,
-    template_renderer: Callable,
+    load_course_preview_state: Callable[[Path], tuple[list[QuestionLike], str]],
+    preview_controller: Callable[[], PreviewController],
+    resolve_runtime_question_from_path: Callable[[str], QuestionLike | None],
+    ensure_runtime_question_ready: Callable[[QuestionLike], None],
+    rewrite_runtime_html: Callable[[str, str, str], str],
+    escape_inline: Callable[[str], str],
+    start_runtime_question_preparation: Callable[[QuestionLike], None],
+    template_renderer: Callable[[], TemplateRendererLike],
 ) -> None:
     runtime_process = ensure_h5p_runtime_server()
+    if runtime_process is not None:
+        exit_code = runtime_process.poll()
+        if exit_code is not None:
+            raise RuntimeError(f"H5P-Runtime ist unerwartet beendet (Exit-Code {exit_code}).")
+
     handler = build_course_preview_handler(
         PreviewHandlerContext(
             courses_dir=courses_dir,
@@ -53,5 +68,11 @@ def serve_preview(
     finally:
         server.server_close()
         if runtime_process is not None:
-            runtime_process.terminate()
-            runtime_process.wait(timeout=5)
+            try:
+                runtime_process.terminate()
+                runtime_process.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                runtime_process.kill()
+                runtime_process.wait(timeout=5)
+            except ProcessLookupError:
+                pass
