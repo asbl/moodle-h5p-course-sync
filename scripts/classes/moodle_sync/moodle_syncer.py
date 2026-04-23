@@ -1,9 +1,23 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Callable
+from typing import Callable, Protocol
 
 from scripts.classes.models import MoodleH5PActivity, PythonQuestionBlock, SyncMetadata, SyncMetadataEntry
+
+
+class MoodleImportClient(Protocol):
+    base_url: str
+
+    def list_course_h5p_activities(self, course_id: int) -> list[MoodleH5PActivity]: ...
+
+    def download_activity_question(self, course_slug: str, activity: MoodleH5PActivity) -> PythonQuestionBlock | None: ...
+
+
+class MoodlePingClient(Protocol):
+    base_url: str
+
+    def get_site_info(self) -> dict[str, object]: ...
 
 
 class MoodleSyncer:
@@ -34,28 +48,25 @@ class MoodleSyncer:
         lines = [f"# {course_slug}", ""]
         current_section: str | None = None
         for activity in activities:
-            question = getattr(activity, "imported_question", None) or self._build_scaffold_question(course_slug, activity)
+            question = activity.imported_question or self._build_scaffold_question(course_slug, activity)
             if activity.section_title and activity.section_title != current_section:
                 lines.extend([f"## {self._escape_mdx_attribute(activity.section_title)}", ""])
                 current_section = activity.section_title
             lines.extend(self._render_imported_question_mdx(question))
         return "\n".join(line for line in lines if line != "") + "\n"
 
-    def import_moodle_course(self, *, course: str, remote_course_id: int, client: object) -> Path:
+    def import_moodle_course(self, *, course: str, remote_course_id: int, client: MoodleImportClient) -> Path:
         course_dir = self._courses_dir / course
         self._ensure_directory(course_dir)
         self._ensure_directory(course_dir / "assets")
 
-        list_course_h5p_activities = getattr(client, "list_course_h5p_activities")
-        activities = list_course_h5p_activities(remote_course_id)
+        activities = client.list_course_h5p_activities(remote_course_id)
 
-        download_activity_question = getattr(client, "download_activity_question", None)
-        if callable(download_activity_question):
-            for activity in activities:
-                try:
-                    activity.imported_question = download_activity_question(course, activity)
-                except RuntimeError:
-                    activity.imported_question = None
+        for activity in activities:
+            try:
+                activity.imported_question = client.download_activity_question(course, activity)
+            except RuntimeError:
+                activity.imported_question = None
 
         mdx = self.render_imported_course_mdx(course, activities)
         (course_dir / "index.mdx").write_text(mdx, encoding="utf-8")
@@ -65,7 +76,7 @@ class MoodleSyncer:
         metadata = SyncMetadata(
             course_slug=course,
             remote_course_id=remote_course_id,
-            moodle_base_url=str(getattr(client, "base_url")),
+            moodle_base_url=str(client.base_url),
         )
         for activity in activities:
             question = question_by_identifier[activity.identifier]
@@ -84,9 +95,8 @@ class MoodleSyncer:
         return course_dir
 
     @staticmethod
-    def build_moodle_ping_report(client: object) -> dict[str, object]:
-        get_site_info = getattr(client, "get_site_info")
-        site_info = get_site_info()
+    def build_moodle_ping_report(client: MoodlePingClient) -> dict[str, object]:
+        site_info = client.get_site_info()
         functions = site_info.get("functions", [])
         function_names: list[str] = []
         if isinstance(functions, list):
@@ -97,9 +107,9 @@ class MoodleSyncer:
                 if name:
                     function_names.append(name)
         return {
-            "baseUrl": getattr(client, "base_url"),
+            "baseUrl": client.base_url,
             "siteName": str(site_info.get("sitename") or ""),
-            "siteUrl": str(site_info.get("siteurl") or getattr(client, "base_url")),
+            "siteUrl": str(site_info.get("siteurl") or client.base_url),
             "userId": site_info.get("userid"),
             "userName": str(site_info.get("username") or ""),
             "fullName": str(site_info.get("fullname") or ""),

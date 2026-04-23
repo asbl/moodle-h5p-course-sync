@@ -1124,6 +1124,9 @@ print("quadrat")
                     )(),
                 ]
 
+            def download_activity_question(self, course_slug: str, activity: object):
+                return None
+
         from scripts import main as module
 
         original_courses_dir = module.COURSES_DIR
