@@ -47,6 +47,8 @@ from scripts.classes.cli import (
     build_arg_parser as build_cli_arg_parser,
     print_course_status as print_cli_course_status,
     print_moodle_ping_report as print_cli_moodle_ping_report,
+    resolve_course_dir as resolve_cli_course_dir,
+    run_cli_command,
 )
 from scripts.classes.component_sync import ComponentSyncer
 from scripts.classes.content_types import ImportedQuestionFactory
@@ -677,10 +679,7 @@ def serve_preview(port: int) -> None:
 
 
 def resolve_course_dir(course: str) -> Path:
-    course_dir = COURSES_DIR / course
-    if not course_dir.exists():
-        raise FileNotFoundError(f"Kurs '{course}' wurde nicht gefunden.")
-    return course_dir
+    return resolve_cli_course_dir(course, COURSES_DIR)
 
 
 def print_course_status(status: dict[str, object]) -> None:
@@ -698,39 +697,21 @@ def build_arg_parser() -> argparse.ArgumentParser:
 def main() -> None:
     parser = build_arg_parser()
     args = parser.parse_args()
-
-    try:
-        if args.command == "sync":
-            course_dir = resolve_course_dir(args.course)
-            questions = sync_course(course_dir)
-            for question in questions:
-                print(question.package_path.relative_to(ROOT_DIR))
-            return
-
-        if args.command == "serve":
-            serve_preview(args.port)
-            return
-
-        if args.command == "import-moodle":
-            client = resolve_moodle_client(base_url=args.base_url, token=args.token)
-            course_dir = import_moodle_course(args.course, args.remote_course_id, client)
-            print(course_dir.relative_to(ROOT_DIR))
-            print(sync_metadata_path(course_dir).relative_to(ROOT_DIR))
-            return
-
-        if args.command == "moodle-ping":
-            client = resolve_moodle_client(base_url=args.base_url, token=args.token)
-            print_moodle_ping_report(build_moodle_ping_report(client))
-            return
-
-        if args.command == "status":
-            course_dir = resolve_course_dir(args.course)
-            print_course_status(build_course_status(course_dir))
-            return
-    except (FileNotFoundError, RuntimeError, ValueError) as error:
-        parser.exit(1, f"Fehler: {error}\n")
-
-    parser.error("Unbekanntes Kommando.")
+    run_cli_command(
+        args,
+        parser=parser,
+        root_dir=ROOT_DIR,
+        courses_dir=COURSES_DIR,
+        sync_course=sync_course,
+        serve_preview=serve_preview,
+        resolve_moodle_client=resolve_moodle_client,
+        import_moodle_course=import_moodle_course,
+        sync_metadata_path=sync_metadata_path,
+        build_moodle_ping_report=build_moodle_ping_report,
+        print_moodle_ping_report=print_moodle_ping_report,
+        build_course_status=build_course_status,
+        print_course_status=print_course_status,
+    )
 
 
 if __name__ == "__main__":
