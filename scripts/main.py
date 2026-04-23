@@ -696,36 +696,8 @@ def escape_mdx_attribute(value: str) -> str:
     return html.escape(value, quote=True)
 
 
-def parse_bool(value: str, default: bool = False) -> bool:
-    return mdx_course_parser().parse_bool(value, default)
-
-
-def split_csv(value: str) -> list[str]:
-    return mdx_course_parser().split_csv(value)
-
-
-def parse_braced_attribute(raw: str, start_index: int) -> tuple[str, int]:
-    return mdx_course_parser().parse_braced_attribute(raw, start_index)
-
-
 def parse_tag_attributes(raw_attrs: str) -> dict[str, object]:
     return mdx_course_parser().parse_tag_attributes(raw_attrs)
-
-
-def build_question_from_attrs(course_dir: Path, attrs: dict[str, object]) -> PythonQuestionBlock:
-    return mdx_course_parser().build_question_from_attrs(course_dir, attrs)
-
-
-def parse_test_case(raw: str) -> TestCase:
-    return mdx_course_parser().parse_test_case(raw)
-
-
-def parse_json_object(raw: str, *, description: str) -> dict[str, object]:
-    return mdx_course_parser().parse_json_object(raw, description=description)
-
-
-def parse_source_file(spec_parts: list[str], body: str) -> SourceFile:
-    return mdx_course_parser().parse_source_file(spec_parts, body)
 
 
 def parse_course(course_dir: Path) -> tuple[str, list[PythonQuestionBlock], str]:
@@ -1287,18 +1259,6 @@ def import_question_into_runtime(question: PythonQuestionBlock) -> None:
         run_h5p_cli(["import", question.runtime_content_id, str(question.package_path)], cwd=H5P_RUNTIME_DIR)
 
 
-def build_runtime_preview_url(question: PythonQuestionBlock) -> str:
-    return h5p_runtime_manager().build_runtime_preview_url(question)
-
-
-def resolve_runtime_short_name(machine_name: str = PYTHON_QUESTION_MACHINE_NAME) -> str:
-    return h5p_runtime_manager().resolve_runtime_short_name(machine_name)
-
-
-def build_runtime_route_path(question: PythonQuestionBlock, mode: str, *, simple: bool = False) -> str:
-    return h5p_runtime_manager().build_runtime_route_path(question, mode, simple=simple)
-
-
 def build_runtime_proxy_path(question: PythonQuestionBlock, mode: str, *, simple: bool = False) -> str:
     return h5p_runtime_manager().build_runtime_proxy_path(question, mode, simple=simple)
 
@@ -1311,20 +1271,8 @@ def build_h5p_content(question: PythonQuestionBlock) -> dict:
     return h5p_package_builder().build_h5p_content(question)
 
 
-def sync_shared_h5p_libraries(question: PythonQuestionBlock, required_libraries: Iterable[Path]) -> list[Path]:
-    return h5p_package_builder().sync_shared_h5p_libraries(question, required_libraries)
-
-
 def write_h5p_package(question: PythonQuestionBlock) -> Path:
     return h5p_package_builder().write_h5p_package(question)
-
-
-def build_local_preview_path(question: PythonQuestionBlock) -> str:
-    return preview_view_builder().build_local_preview_path(question)
-
-
-def build_local_preview_path_with_options(question: PythonQuestionBlock, *, mode: str = "view", simple: bool = False) -> str:
-    return preview_view_builder().build_local_preview_path_with_options(question, mode=mode, simple=simple)
 
 
 def preview_view_builder() -> PreviewViewBuilder:
@@ -1561,14 +1509,6 @@ def build_runtime_content_id(course_slug: str, identifier: str) -> str:
     return build_runtime_content_id_helper(course_slug, identifier)
 
 
-def render_markdown(markdown_text: str, question_html: dict[str, str]) -> str:
-    return markdown_renderer().render(markdown_text, question_html)
-
-
-def build_question_component(question: PythonQuestionBlock) -> str:
-    return preview_view_builder().build_question_component(question)
-
-
 def render_course_page(
     course_dir: Path,
     *,
@@ -1578,8 +1518,9 @@ def render_course_page(
     if questions is None or rendered_source is None:
         _, questions, rendered_source = parse_course(course_dir)
 
-    question_html = {question.identifier: build_question_component(question) for question in questions}
-    content_html = render_markdown(rendered_source, question_html)
+    view_builder = preview_view_builder()
+    question_html = {question.identifier: view_builder.build_question_component(question) for question in questions}
+    content_html = markdown_renderer().render(rendered_source, question_html)
 
     return template_renderer().render_course_page(title=course_dir.name, content_html=content_html)
 
