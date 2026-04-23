@@ -28,6 +28,14 @@ def build_arg_parser(default_port: int) -> argparse.ArgumentParser:
     import_parser.add_argument("--base-url", help="Moodle-Basis-URL. Faellt sonst auf MOODLE_BASE_URL zurueck.")
     import_parser.add_argument("--token", help="Moodle-Token. Faellt sonst auf MOODLE_TOKEN zurueck.")
 
+    push_parser = subparsers.add_parser(
+        "push-moodle", help="Versucht, einen lokalen Kurs als H5P-Aktivitaeten in einen Moodle-Kurs zu pushen."
+    )
+    push_parser.add_argument("course", help="Lokaler Kursordner unter courses/, zum Beispiel python-2026")
+    push_parser.add_argument("remote_course_id", type=int, help="Remote Moodle Course ID")
+    push_parser.add_argument("--base-url", help="Moodle-Basis-URL. Faellt sonst auf MOODLE_BASE_URL zurueck.")
+    push_parser.add_argument("--token", help="Moodle-Token. Faellt sonst auf MOODLE_TOKEN zurueck.")
+
     ping_parser = subparsers.add_parser(
         "moodle-ping", help="Prueft, ob die konfigurierte Moodle-Webservice-Verbindung funktioniert."
     )
@@ -64,4 +72,12 @@ def print_moodle_ping_report(report: dict[str, object]) -> None:
     print(
         "Import-API: "
         + ("verfugbar" if report["supportsCourseImport"] else "fehlt: core_course_get_contents nicht freigegeben")
+    )
+    print(
+        "Push-API: "
+        + (
+            "verfugbar"
+            if report["supportsCoursePush"]
+            else "nicht verfuegbar: " + "; ".join(str(item) for item in report.get("pushBlockers", []))
+        )
     )

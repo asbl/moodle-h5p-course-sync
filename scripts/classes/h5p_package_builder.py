@@ -108,6 +108,7 @@ class H5PPackageBuilder:
                 if question.package_path.exists() and question.package_path.stat().st_mtime_ns >= freshness_reference:
                     return question.package_path
 
+                self._ensure_h5p_runtime_libraries()
                 metadata_payload = json.loads(json.dumps(question.h5p_metadata, ensure_ascii=False))
                 content_payload = json.loads(json.dumps(question.h5p_content, ensure_ascii=False))
                 metadata_payload["title"] = question.title

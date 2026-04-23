@@ -26,6 +26,7 @@ def run_cli_command(
     serve_preview: Callable[[int], None],
     resolve_moodle_client: Callable[[str | None, str | None], object],
     import_moodle_course: Callable[[str, int, object], Path],
+    push_moodle_course: Callable[[Path, int, object], None],
     sync_metadata_path: Callable[[Path], Path],
     build_moodle_ping_report: Callable[[object], dict[str, object]],
     print_moodle_ping_report: Callable[[dict[str, object]], None],
@@ -49,6 +50,12 @@ def run_cli_command(
             course_dir = import_moodle_course(args.course, args.remote_course_id, client)
             print(course_dir.relative_to(root_dir))
             print(sync_metadata_path(course_dir).relative_to(root_dir))
+            return
+
+        if args.command == "push-moodle":
+            course_dir = resolve_course_dir(args.course, courses_dir)
+            client = resolve_moodle_client(args.base_url, args.token)
+            push_moodle_course(course_dir, args.remote_course_id, client)
             return
 
         if args.command == "moodle-ping":

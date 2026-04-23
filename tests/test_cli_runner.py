@@ -64,6 +64,7 @@ class CliRunnerTests(unittest.TestCase):
                 serve_preview=lambda _port: None,
                 resolve_moodle_client=lambda _base_url, _token: object(),
                 import_moodle_course=lambda _course, _remote_id, _client: self.course_dir,
+                push_moodle_course=lambda _course_dir, _remote_id, _client: None,
                 sync_metadata_path=lambda _course_dir: self.course_dir / "sync-metadata.json",
                 build_moodle_ping_report=lambda _client: {},
                 print_moodle_ping_report=lambda _report: None,
@@ -87,6 +88,7 @@ class CliRunnerTests(unittest.TestCase):
             serve_preview=lambda port: called.append(port),
             resolve_moodle_client=lambda _base_url, _token: object(),
             import_moodle_course=lambda _course, _remote_id, _client: self.course_dir,
+            push_moodle_course=lambda _course_dir, _remote_id, _client: None,
             sync_metadata_path=lambda _course_dir: self.course_dir / "sync-metadata.json",
             build_moodle_ping_report=lambda _client: {},
             print_moodle_ping_report=lambda _report: None,
@@ -118,6 +120,7 @@ class CliRunnerTests(unittest.TestCase):
                 serve_preview=lambda _port: None,
                 resolve_moodle_client=lambda _base_url, _token: object(),
                 import_moodle_course=lambda _course, _remote_id, _client: imported_course_dir,
+                push_moodle_course=lambda _course_dir, _remote_id, _client: None,
                 sync_metadata_path=lambda _course_dir: metadata_path,
                 build_moodle_ping_report=lambda _client: {},
                 print_moodle_ping_report=lambda _report: None,
@@ -148,6 +151,7 @@ class CliRunnerTests(unittest.TestCase):
             serve_preview=lambda _port: None,
             resolve_moodle_client=lambda _base_url, _token: client,
             import_moodle_course=lambda _course, _remote_id, _client: self.course_dir,
+            push_moodle_course=lambda _course_dir, _remote_id, _client: None,
             sync_metadata_path=lambda _course_dir: self.course_dir / "sync-metadata.json",
             build_moodle_ping_report=lambda _client: report,
             print_moodle_ping_report=lambda _report: calls.append("printed"),
@@ -156,6 +160,39 @@ class CliRunnerTests(unittest.TestCase):
         )
 
         self.assertEqual(calls, ["printed"])
+
+    def test_run_cli_command_push_moodle_calls_push_callback(self) -> None:
+        args = SimpleNamespace(
+            command="push-moodle",
+            course="python-2026",
+            remote_course_id=7,
+            base_url="https://moodle.example",
+            token="abc",
+        )
+        parser = DummyParser()
+        client = object()
+        calls: list[tuple[Path, int, object]] = []
+
+        run_cli_command(
+            args,
+            parser=parser,
+            root_dir=self.root_dir,
+            courses_dir=self.courses_dir,
+            sync_course=lambda _course_dir: [],
+            serve_preview=lambda _port: None,
+            resolve_moodle_client=lambda _base_url, _token: client,
+            import_moodle_course=lambda _course, _remote_id, _client: self.course_dir,
+            push_moodle_course=lambda course_dir, remote_id, resolved_client: calls.append(
+                (course_dir, remote_id, resolved_client)
+            ),
+            sync_metadata_path=lambda _course_dir: self.course_dir / "sync-metadata.json",
+            build_moodle_ping_report=lambda _client: {},
+            print_moodle_ping_report=lambda _report: None,
+            build_course_status=lambda _course_dir: {},
+            print_course_status=lambda _status: None,
+        )
+
+        self.assertEqual(calls, [(self.course_dir, 7, client)])
 
     def test_run_cli_command_status_prints_status_for_course(self) -> None:
         args = SimpleNamespace(command="status", course="python-2026")
@@ -172,6 +209,7 @@ class CliRunnerTests(unittest.TestCase):
             serve_preview=lambda _port: None,
             resolve_moodle_client=lambda _base_url, _token: object(),
             import_moodle_course=lambda _course, _remote_id, _client: self.course_dir,
+            push_moodle_course=lambda _course_dir, _remote_id, _client: None,
             sync_metadata_path=lambda _course_dir: self.course_dir / "sync-metadata.json",
             build_moodle_ping_report=lambda _client: {},
             print_moodle_ping_report=lambda _report: None,
@@ -195,6 +233,7 @@ class CliRunnerTests(unittest.TestCase):
                 serve_preview=lambda _port: None,
                 resolve_moodle_client=lambda _base_url, _token: object(),
                 import_moodle_course=lambda _course, _remote_id, _client: self.course_dir,
+                push_moodle_course=lambda _course_dir, _remote_id, _client: None,
                 sync_metadata_path=lambda _course_dir: self.course_dir / "sync-metadata.json",
                 build_moodle_ping_report=lambda _client: {},
                 print_moodle_ping_report=lambda _report: None,
@@ -221,6 +260,7 @@ class CliRunnerTests(unittest.TestCase):
                 serve_preview=lambda _port: None,
                 resolve_moodle_client=lambda _base_url, _token: object(),
                 import_moodle_course=lambda _course, _remote_id, _client: self.course_dir,
+                push_moodle_course=lambda _course_dir, _remote_id, _client: None,
                 sync_metadata_path=lambda _course_dir: self.course_dir / "sync-metadata.json",
                 build_moodle_ping_report=lambda _client: {},
                 print_moodle_ping_report=lambda _report: None,

@@ -2,6 +2,7 @@ import json
 import os
 import tarfile
 import tempfile
+import threading
 import unittest
 from hashlib import sha1
 from io import BytesIO
@@ -1085,7 +1086,83 @@ print("quadrat")
         self.assertEqual(report["siteName"], "OpenCode")
         self.assertEqual(report["userName"], "service-user")
         self.assertTrue(report["supportsCourseImport"])
+        self.assertFalse(report["supportsCoursePush"])
         self.assertIn("core_course_get_contents", report["functions"])
+        self.assertTrue(report["pushBlockers"])
+
+    def test_moodle_api_client_push_support_report_marks_missing_write_apis(self) -> None:
+        class StubMoodleApiClient(MoodleApiClient):
+            def get_available_function_names(self) -> list[str]:
+                return ["core_course_get_contents", "core_webservice_get_site_info"]
+
+        client = StubMoodleApiClient(
+            "https://example.invalid",
+            "token",
+            make_stable_identifier=lambda title, used: make_stable_identifier(title, used),
+            strip_html=lambda text: text,
+            fetch_text=lambda url: "",
+            extract_h5p_package_url_from_activity_html=lambda page_html: "",
+            download_file=lambda url, destination: None,
+            extract_h5p_package_from_course_backup=lambda base, activity, archive_path: False,
+            build_imported_question_from_h5p_package=lambda course_slug, activity, metadata, content: None,
+            write_source_package_sidecar=lambda question, archive_path: "",
+        )
+
+        report = client.build_course_push_support_report()
+
+        self.assertFalse(report["supportsCoursePush"])
+        self.assertFalse(report["supportsDraftUpload"])
+        self.assertFalse(report["supportsModuleCreation"])
+        self.assertTrue(report["blockers"])
+
+    def test_find_library_dir_seeds_runtime_from_local_archive(self) -> None:
+        from scripts.classes import H5PLibraryManager
+
+        runtime_dir = self.root / ".h5p-runtime"
+        runtime_libraries_dir = runtime_dir / "libraries"
+        runtime_downloads_dir = runtime_dir / "downloads"
+        shared_libraries_dir = self.root / "libraries"
+        shared_libraries_dir.mkdir(parents=True, exist_ok=True)
+
+        archive_path = self.course_dir / "h5p" / "quiz-division.h5p"
+        archive_path.write_bytes(
+            self._build_h5p_archive_bytes(
+                {"title": "Quiz", "mainLibrary": "H5P.MultiChoice"},
+                {"question": "2+2?"},
+                libraries={
+                    "H5P.MultiChoice-1.16": {
+                        "machineName": "H5P.MultiChoice",
+                        "majorVersion": 1,
+                        "minorVersion": 16,
+                    }
+                },
+            )
+        )
+
+        manager = H5PLibraryManager(
+            workspace_lock=threading.RLock(),
+            runtime_dir=runtime_dir,
+            runtime_content_dir=runtime_dir / "content",
+            runtime_libraries_dir=runtime_libraries_dir,
+            runtime_downloads_dir=runtime_downloads_dir,
+            shared_libraries_dir=shared_libraries_dir,
+            courses_dir=self.root / "courses",
+            release_repo="repo",
+            release_tag="tag",
+            asset_prefixes={},
+            custom_short_names={},
+            ensure_directory=lambda path: path.mkdir(parents=True, exist_ok=True),
+            read_json=lambda path: json.loads(path.read_text(encoding="utf-8")),
+            read_json_or_default=lambda path, default: default if not path.exists() else json.loads(path.read_text(encoding="utf-8")),
+            write_json=lambda path, payload: path.write_text(json.dumps(payload), encoding="utf-8"),
+            fetch_json=lambda url: {},
+            download_file=lambda url, destination: None,
+        )
+
+        library_dir = manager.find_library_dir("H5P.MultiChoice", 1, 16)
+
+        self.assertEqual(library_dir.name, "H5P.MultiChoice-1.16")
+        self.assertTrue((runtime_libraries_dir / "H5P.MultiChoice-1.16" / "library.json").exists())
 
     def test_moodle_api_client_list_course_h5p_activities_filters_and_maps_fields(self) -> None:
         class StubMoodleApiClient(MoodleApiClient):
@@ -1534,11 +1611,15 @@ print("quadrat")
         metadata: dict[str, object],
         content: dict[str, object],
         extra_files: dict[str, bytes | str] | None = None,
+        libraries: dict[str, dict[str, object]] | None = None,
     ) -> bytes:
         buffer = BytesIO()
         with ZipFile(buffer, "w") as archive:
             archive.writestr("h5p.json", json.dumps(metadata))
             archive.writestr("content/content.json", json.dumps(content))
+            for library_root, library_metadata in (libraries or {}).items():
+                archive.writestr(f"{library_root}/library.json", json.dumps(library_metadata))
+                archive.writestr(f"{library_root}/scripts/example.js", "console.log('ok');")
             for path, payload in (extra_files or {}).items():
                 archive.writestr(path, payload)
         return buffer.getvalue()

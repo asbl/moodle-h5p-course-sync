@@ -103,6 +103,57 @@ class MoodleApiClient:
             raise RuntimeError("Unerwartete Moodle-Antwort für core_webservice_get_site_info.")
         return payload
 
+    def get_available_function_names(self) -> list[str]:
+        site_info = self.get_site_info()
+        functions = site_info.get("functions", [])
+        if not isinstance(functions, list):
+            return []
+
+        function_names: list[str] = []
+        for item in functions:
+            if not isinstance(item, dict):
+                continue
+            name = str(item.get("name") or "").strip()
+            if name:
+                function_names.append(name)
+        return sorted(function_names)
+
+    def build_course_push_support_report(self) -> dict[str, object]:
+        function_names = set(self.get_available_function_names())
+        blockers: list[str] = []
+
+        if "core_files_get_unused_draft_itemid" not in function_names:
+            blockers.append("core_files_get_unused_draft_itemid fehlt")
+        if "core_files_upload" not in function_names:
+            blockers.append("core_files_upload fehlt")
+        if not ({"core_courseformat_new_module", "core_courseformat_create_module"} & function_names):
+            blockers.append("core_courseformat_new_module oder core_courseformat_create_module fehlt")
+
+        blockers.append(
+            "Moodle stellt ohne zusaetzlichen Site-spezifischen Webservice keinen stabilen REST-Weg bereit, "
+            "ein .h5p-Paket als mod_h5pactivity inklusive packagefile zu speichern"
+        )
+
+        return {
+            "functions": sorted(function_names),
+            "supportsDraftUpload": {
+                "core_files_get_unused_draft_itemid",
+                "core_files_upload",
+            }.issubset(function_names),
+            "supportsModuleCreation": bool(
+                {"core_courseformat_new_module", "core_courseformat_create_module"} & function_names
+            ),
+            "supportsCoursePush": False,
+            "blockers": blockers,
+        }
+
+    def ensure_course_push_supported(self) -> None:
+        report = self.build_course_push_support_report()
+        blockers = report.get("blockers", [])
+        if isinstance(blockers, list) and blockers:
+            raise RuntimeError("Moodle-Push ist nicht verfuegbar: " + "; ".join(str(blocker) for blocker in blockers))
+        raise RuntimeError("Moodle-Push ist nicht verfuegbar.")
+
     def download_activity_question(self, course_slug: str, activity: MoodleH5PActivity) -> PythonQuestionBlock | None:
         try:
             with tempfile.TemporaryDirectory() as temp_dir:

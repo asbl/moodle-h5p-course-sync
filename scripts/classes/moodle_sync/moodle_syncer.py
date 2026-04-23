@@ -20,6 +20,12 @@ class MoodlePingClient(Protocol):
     def get_site_info(self) -> dict[str, object]: ...
 
 
+class MoodlePushClient(Protocol):
+    base_url: str
+
+    def ensure_course_push_supported(self) -> None: ...
+
+
 class MoodleSyncer:
     """Coordinates syncing imported Moodle activities into local MDX courses."""
 
@@ -104,6 +110,24 @@ class MoodleSyncer:
         self._save_sync_metadata(course_dir, metadata)
         return course_dir
 
+    def push_moodle_course(
+        self,
+        *,
+        course_dir: Path,
+        remote_course_id: int,
+        client: MoodlePushClient,
+        sync_course: Callable[[Path], list[PythonQuestionBlock]],
+    ) -> list[PythonQuestionBlock]:
+        questions = sync_course(course_dir)
+        if not questions:
+            raise RuntimeError(f"Kurs '{course_dir.name}' enthaelt keine synchronisierbaren H5P-Aufgaben.")
+
+        client.ensure_course_push_supported()
+        raise RuntimeError(
+            "Moodle-Push ist fuer diese Installation noch nicht ausfuehrbar. "
+            f"Lokale Pakete fuer '{course_dir.name}' wurden erstellt, aber Moodle erlaubt keinen REST-Upload von mod_h5pactivity in Kurs {remote_course_id}."
+        )
+
     @staticmethod
     def build_moodle_ping_report(client: MoodlePingClient) -> dict[str, object]:
         site_info = client.get_site_info()
@@ -125,4 +149,10 @@ class MoodleSyncer:
             "fullName": str(site_info.get("fullname") or ""),
             "functions": sorted(function_names),
             "supportsCourseImport": "core_course_get_contents" in function_names,
+            "supportsCoursePush": False,
+            "pushBlockers": [
+                "core_files_get_unused_draft_itemid und core_files_upload muessen freigegeben sein",
+                "core_courseformat_new_module oder core_courseformat_create_module muessen freigegeben sein",
+                "mod_h5pactivity bietet ohne zusaetzlichen Site-Webservice keinen REST-Create/Update-Pfad fuer packagefile",
+            ],
         }

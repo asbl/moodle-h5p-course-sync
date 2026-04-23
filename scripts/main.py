@@ -231,6 +231,15 @@ def import_moodle_course(course: str, remote_course_id: int, client: MoodleApiCl
     )
 
 
+def push_moodle_course(course_dir: Path, remote_course_id: int, client: MoodleApiClient) -> list[PythonQuestionBlock]:
+    return moodle_syncer().push_moodle_course(
+        course_dir=course_dir,
+        remote_course_id=remote_course_id,
+        client=client,
+        sync_course=sync_course,
+    )
+
+
 def build_course_status(course_dir: Path) -> dict[str, object]:
     return course_orchestrator().build_course_status(course_dir)
 
@@ -384,6 +393,8 @@ def h5p_library_manager() -> H5PLibraryManager:
         runtime_content_dir=H5P_RUNTIME_CONTENT_DIR,
         runtime_libraries_dir=H5P_RUNTIME_LIBRARIES_DIR,
         runtime_downloads_dir=H5P_RUNTIME_DOWNLOADS_DIR,
+        shared_libraries_dir=ROOT_DIR / "libraries",
+        courses_dir=COURSES_DIR,
         release_repo=H5P_LIBRARY_RELEASE_REPO,
         release_tag=H5P_LIBRARY_RELEASE_TAG,
         asset_prefixes=H5P_LIBRARY_ASSET_PREFIXES,
@@ -643,6 +654,7 @@ def main() -> None:
         ),
         resolve_moodle_client=resolve_moodle_client,
         import_moodle_course=import_moodle_course,
+        push_moodle_course=push_moodle_course,
         sync_metadata_path=_SYNC_METADATA_STORE.path,
         build_moodle_ping_report=build_moodle_ping_report,
         print_moodle_ping_report=print_cli_moodle_ping_report,

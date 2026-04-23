@@ -8,7 +8,7 @@ from http import HTTPStatus
 from pathlib import Path
 from typing import Callable
 from urllib.error import HTTPError
-from zipfile import ZipFile
+from zipfile import BadZipFile, ZipFile
 
 
 class H5PLibraryManager:
@@ -22,6 +22,8 @@ class H5PLibraryManager:
         runtime_content_dir: Path,
         runtime_libraries_dir: Path,
         runtime_downloads_dir: Path,
+        shared_libraries_dir: Path,
+        courses_dir: Path,
         release_repo: str,
         release_tag: str,
         asset_prefixes: dict[str, str],
@@ -40,6 +42,8 @@ class H5PLibraryManager:
         self._runtime_content_dir = runtime_content_dir
         self._runtime_libraries_dir = runtime_libraries_dir
         self._runtime_downloads_dir = runtime_downloads_dir
+        self._shared_libraries_dir = shared_libraries_dir
+        self._courses_dir = courses_dir
         self._release_repo = release_repo
         self._release_tag = release_tag
         self._asset_prefixes = asset_prefixes
@@ -110,7 +114,7 @@ class H5PLibraryManager:
             text=True,
         )
 
-    def find_library_dir(
+    def _find_installed_library_dir(
         self,
         machine_name: str,
         major_version: int | None = None,
@@ -137,6 +141,152 @@ class H5PLibraryManager:
 
         return matches[-1]
 
+    def _library_matches_requested_version(
+        self,
+        library_dir: Path,
+        major_version: int | None = None,
+        minor_version: int | None = None,
+    ) -> bool:
+        if major_version is None or minor_version is None:
+            return True
+
+        library_json = library_dir / "library.json"
+        if not library_json.exists():
+            return False
+
+        metadata = self._read_json(library_json)
+        return metadata.get("majorVersion") == major_version and metadata.get("minorVersion") == minor_version
+
+    def _copy_library_dir_to_runtime(self, library_dir: Path) -> Path:
+        destination = self._runtime_libraries_dir / library_dir.name
+        if destination.exists():
+            shutil.rmtree(destination)
+        shutil.copytree(library_dir, destination)
+        return destination
+
+    def _extract_library_root_from_archive(self, archive: ZipFile, library_root: str) -> Path:
+        destination = self._runtime_libraries_dir / Path(library_root).name
+        if destination.exists():
+            shutil.rmtree(destination)
+
+        extracted_root = False
+        for member in archive.namelist():
+            normalized = member.strip("/")
+            if not normalized or not normalized.startswith(f"{library_root}/"):
+                continue
+
+            relative_path = Path(normalized).relative_to(library_root)
+            if not relative_path.parts or relative_path.parts[0] == "content":
+                continue
+
+            target_path = destination / relative_path
+            if normalized.endswith("/"):
+                self._ensure_directory(target_path)
+                continue
+
+            self._ensure_directory(target_path.parent)
+            with archive.open(member) as source, target_path.open("wb") as target:
+                shutil.copyfileobj(source, target)
+            extracted_root = True
+
+        if not extracted_root:
+            raise RuntimeError(f"Die Library '{Path(library_root).name}' konnte nicht aus dem Archiv extrahiert werden.")
+
+        return destination
+
+    def _seed_library_from_shared_libraries(
+        self,
+        machine_name: str,
+        major_version: int | None = None,
+        minor_version: int | None = None,
+    ) -> Path | None:
+        if not self._shared_libraries_dir.exists():
+            return None
+
+        if major_version is not None and minor_version is not None:
+            exact_match = self._shared_libraries_dir / f"{machine_name}-{major_version}.{minor_version}"
+            if exact_match.exists() and self._library_matches_requested_version(exact_match, major_version, minor_version):
+                return self._copy_library_dir_to_runtime(exact_match)
+
+        matches = sorted(self._shared_libraries_dir.glob(f"{machine_name}-*"))
+        for candidate in matches:
+            if self._library_matches_requested_version(candidate, major_version, minor_version):
+                return self._copy_library_dir_to_runtime(candidate)
+
+        if matches and (major_version is None or minor_version is None):
+            return self._copy_library_dir_to_runtime(matches[-1])
+
+        return None
+
+    def _seed_library_from_local_archives(
+        self,
+        machine_name: str,
+        major_version: int | None = None,
+        minor_version: int | None = None,
+    ) -> Path | None:
+        if not self._courses_dir.exists():
+            return None
+
+        archive_paths = sorted(self._courses_dir.glob("*/h5p/*.h5p"))
+        fallback_root: str | None = None
+        fallback_archive: Path | None = None
+
+        for archive_path in archive_paths:
+            try:
+                with ZipFile(archive_path) as archive:
+                    for member in archive.namelist():
+                        normalized = member.strip("/")
+                        if not normalized.endswith("/library.json"):
+                            continue
+
+                        library_root = normalized.rsplit("/", 1)[0]
+                        metadata = json.loads(archive.read(member).decode("utf-8"))
+                        if metadata.get("machineName") != machine_name:
+                            continue
+
+                        if major_version is not None and minor_version is not None:
+                            if (
+                                metadata.get("majorVersion") == major_version
+                                and metadata.get("minorVersion") == minor_version
+                            ):
+                                return self._extract_library_root_from_archive(archive, library_root)
+                        elif fallback_root is None:
+                            fallback_root = library_root
+                            fallback_archive = archive_path
+            except (BadZipFile, OSError, KeyError, json.JSONDecodeError):
+                continue
+
+        if fallback_root is None or fallback_archive is None:
+            return None
+
+        with ZipFile(fallback_archive) as archive:
+            return self._extract_library_root_from_archive(archive, fallback_root)
+
+    def _seed_runtime_library(
+        self,
+        machine_name: str,
+        major_version: int | None = None,
+        minor_version: int | None = None,
+    ) -> None:
+        seeded_library = self._seed_library_from_shared_libraries(machine_name, major_version, minor_version)
+        if seeded_library is None:
+            seeded_library = self._seed_library_from_local_archives(machine_name, major_version, minor_version)
+
+        if seeded_library is not None:
+            self.register_local_library(seeded_library)
+
+    def find_library_dir(
+        self,
+        machine_name: str,
+        major_version: int | None = None,
+        minor_version: int | None = None,
+    ) -> Path:
+        try:
+            return self._find_installed_library_dir(machine_name, major_version, minor_version)
+        except FileNotFoundError:
+            self._seed_runtime_library(machine_name, major_version, minor_version)
+            return self._find_installed_library_dir(machine_name, major_version, minor_version)
+
     def extract_library_asset(self, archive_path: Path, machine_name: str) -> Path:
         with ZipFile(archive_path) as archive:
             library_root = None
@@ -148,35 +298,7 @@ class H5PLibraryManager:
 
             if library_root is None:
                 raise RuntimeError(f"Kein library.json in {archive_path.name} gefunden.")
-
-            destination = self._runtime_libraries_dir / Path(library_root).name
-            if destination.exists():
-                shutil.rmtree(destination)
-
-            extracted_root = None
-            for member in archive.namelist():
-                normalized = member.strip("/")
-                if not normalized or not normalized.startswith(f"{library_root}/"):
-                    continue
-
-                relative_path = Path(normalized).relative_to(library_root)
-                if not relative_path.parts or relative_path.parts[0] == "content":
-                    continue
-
-                target_path = destination / relative_path
-                if normalized.endswith("/"):
-                    self._ensure_directory(target_path)
-                    continue
-
-                self._ensure_directory(target_path.parent)
-                with archive.open(member) as source, target_path.open("wb") as target:
-                    shutil.copyfileobj(source, target)
-                extracted_root = destination
-
-        if extracted_root is None:
-            raise RuntimeError(f"Die Library '{machine_name}' konnte aus {archive_path.name} nicht extrahiert werden.")
-
-        return extracted_root
+            return self._extract_library_root_from_archive(archive, library_root)
 
     def register_local_library(self, library_dir: Path) -> None:
         with self._workspace_lock:
