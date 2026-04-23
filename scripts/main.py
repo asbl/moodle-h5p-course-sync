@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import argparse
 import html
-import json
 import os
 import subprocess
 import threading
@@ -53,6 +52,7 @@ from scripts.classes.cli import (
 from scripts.classes.component_sync import ComponentSyncer
 from scripts.classes.content_types import ImportedQuestionFactory
 from scripts.classes.sync_metadata_store import SyncMetadataStore
+from scripts.classes.workspace_io import WorkspaceIO
 from scripts.config import AppConfig, settings
 from scripts.classes.h5p_runtime_manager import quote_path_segment as quote_path_segment_helper
 from scripts.classes.h5p_runtime_manager.runtime_manager import H5PRuntimeManager
@@ -85,6 +85,7 @@ H5P_SIDECAR_DIRNAME = APP_CONFIG.h5p_sidecar_dirname
 WORKSPACE_LOCK = threading.RLock()
 PREVIEW_CACHE: dict[str, tuple[int, list[PythonQuestionBlock], str]] = {}
 CONTENT_STORE = ContentStore()
+WORKSPACE_IO = WorkspaceIO(content_store=CONTENT_STORE)
 RUNTIME_PREPARATION = RuntimePreparationService(H5P_RUNTIME_CONTENT_DIR)
 
 TAG_RE = APP_CONFIG.tag_re
@@ -270,7 +271,7 @@ def resolve_moodle_client(base_url: str | None = None, token: str | None = None)
 
 
 def ensure_directory(path: Path) -> None:
-    path.mkdir(parents=True, exist_ok=True)
+    WORKSPACE_IO.ensure_directory(path)
 
 
 _SYNC_METADATA_STORE = SyncMetadataStore(
@@ -280,37 +281,27 @@ _SYNC_METADATA_STORE = SyncMetadataStore(
 
 
 def read_json(path: Path) -> dict:
-    return json.loads(path.read_text(encoding="utf-8"))
+    return WORKSPACE_IO.read_json(path)
 
 
 def read_yaml(path: Path) -> object:
-    return CONTENT_STORE.read_yaml(path)
+    return WORKSPACE_IO.read_yaml(path)
 
 
 def read_json_or_default(path: Path, default: dict) -> dict:
-    if not path.exists():
-        return default
-
-    content = path.read_text(encoding="utf-8")
-    if not content.strip():
-        return default
-
-    return json.loads(content)
+    return WORKSPACE_IO.read_json_or_default(path, default)
 
 
 def write_json(path: Path, payload: dict) -> None:
-    ensure_directory(path.parent)
-    temp_path = path.with_name(f".{path.name}.tmp")
-    temp_path.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-    os.replace(temp_path, path)
+    WORKSPACE_IO.write_json(path, payload)
 
 
 def read_h5p_content_payload(source_dir: Path) -> dict[str, object]:
-    return CONTENT_STORE.read_h5p_content_payload(source_dir)
+    return WORKSPACE_IO.read_h5p_content_payload(source_dir)
 
 
 def write_h5p_content_files(target_dir: Path, payload: dict[str, object]) -> None:
-    CONTENT_STORE.write_h5p_content_files(target_dir, payload)
+    WORKSPACE_IO.write_h5p_content_files(target_dir, payload)
 
 
 def write_h5p_archive_from_directory(
