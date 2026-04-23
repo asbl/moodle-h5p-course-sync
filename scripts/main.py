@@ -4,7 +4,6 @@ import html
 import os
 import subprocess
 import threading
-from http.server import ThreadingHTTPServer
 from pathlib import Path
 from typing import Iterable
 from zipfile import ZipFile
@@ -27,7 +26,6 @@ from scripts.classes import (
     MdxCourseParser,
     MoodleH5PActivity,
     PreviewController,
-    PreviewHandlerContext,
     PreviewViewBuilder,
     PythonQuestionBlock,
     RuntimeCliService,
@@ -39,13 +37,13 @@ from scripts.classes import (
     TemplateRenderer,
     TestCase,
     TextOperations,
-    build_course_preview_handler,
 )
 from scripts.classes.cli import (
     build_arg_parser as build_cli_arg_parser,
     print_course_status as print_cli_course_status,
     print_moodle_ping_report as print_cli_moodle_ping_report,
     run_cli_command,
+    serve_preview as serve_preview_impl,
 )
 from scripts.classes.component_sync import ComponentSyncer
 from scripts.classes.content_types import ImportedQuestionFactory
@@ -632,37 +630,6 @@ def render_course_page(
     return template_renderer().render_course_page(title=course_dir.name, content_html=content_html)
 
 
-def serve_preview(port: int) -> None:
-    runtime_process = ensure_h5p_runtime_server()
-    handler = build_course_preview_handler(
-        PreviewHandlerContext(
-            courses_dir=COURSES_DIR,
-            runtime_proxy_prefix=RUNTIME_PROXY_PREFIX,
-            h5p_runtime_port=H5P_RUNTIME_PORT,
-            load_course_preview_state=load_course_preview_state,
-            preview_controller=preview_controller,
-            resolve_runtime_question_from_path=resolve_runtime_question_from_path,
-            ensure_runtime_question_ready=ensure_runtime_question_ready,
-            ensure_h5p_runtime_server=ensure_h5p_runtime_server,
-            rewrite_runtime_html=rewrite_runtime_html,
-            escape_inline=escape_inline,
-            start_runtime_question_preparation=start_runtime_question_preparation,
-            template_renderer=template_renderer,
-        )
-    )
-    server = ThreadingHTTPServer(("127.0.0.1", port), handler)
-    print(f"Preview läuft auf http://127.0.0.1:{port}")
-    try:
-        server.serve_forever()
-    except KeyboardInterrupt:
-        pass
-    finally:
-        server.server_close()
-        if runtime_process is not None:
-            runtime_process.terminate()
-            runtime_process.wait(timeout=5)
-
-
 def main() -> None:
     parser = build_cli_arg_parser(DEFAULT_PORT)
     args = parser.parse_args()
@@ -672,7 +639,21 @@ def main() -> None:
         root_dir=ROOT_DIR,
         courses_dir=COURSES_DIR,
         sync_course=sync_course,
-        serve_preview=serve_preview,
+        serve_preview=lambda port: serve_preview_impl(
+            port,
+            courses_dir=COURSES_DIR,
+            runtime_proxy_prefix=RUNTIME_PROXY_PREFIX,
+            h5p_runtime_port=H5P_RUNTIME_PORT,
+            ensure_h5p_runtime_server=ensure_h5p_runtime_server,
+            load_course_preview_state=load_course_preview_state,
+            preview_controller=preview_controller,
+            resolve_runtime_question_from_path=resolve_runtime_question_from_path,
+            ensure_runtime_question_ready=ensure_runtime_question_ready,
+            rewrite_runtime_html=rewrite_runtime_html,
+            escape_inline=escape_inline,
+            start_runtime_question_preparation=start_runtime_question_preparation,
+            template_renderer=template_renderer,
+        ),
         resolve_moodle_client=resolve_moodle_client,
         import_moodle_course=import_moodle_course,
         sync_metadata_path=_SYNC_METADATA_STORE.path,
