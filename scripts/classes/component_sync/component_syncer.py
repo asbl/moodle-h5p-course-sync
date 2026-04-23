@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import json
+import textwrap
 from typing import Callable
 
 from scripts.classes.models import PythonQuestionBlock
@@ -131,3 +133,64 @@ class ComponentSyncer:
 
         question.h5p_metadata = metadata
         question.h5p_content = content
+
+    def normalize_template_literal(self, content: str) -> str:
+        if content.startswith("\n"):
+            content = content[1:]
+        content = textwrap.dedent(content)
+        content = content.replace("\\`", "`").replace("\\${", "${")
+        content = content.replace("\\n", "\n").replace("\\r", "\r").replace("\\t", "\t")
+        content = content.replace("\\\\", "\\")
+        return content
+
+    def jsx_expression_to_json(self, expression: str) -> str:
+        result: list[str] = []
+        index = 0
+        in_string = False
+        in_template = False
+        escaped = False
+        template_buffer: list[str] = []
+        while index < len(expression):
+            char = expression[index]
+            if in_template:
+                if escaped:
+                    template_buffer.append("\\" + char)
+                    escaped = False
+                elif char == "\\":
+                    escaped = True
+                elif char == "`":
+                    result.append(json.dumps(self.normalize_template_literal("".join(template_buffer)), ensure_ascii=False))
+                    template_buffer = []
+                    in_template = False
+                else:
+                    template_buffer.append(char)
+                index += 1
+                continue
+            if in_string:
+                result.append(char)
+                if escaped:
+                    escaped = False
+                elif char == "\\":
+                    escaped = True
+                elif char == '"':
+                    in_string = False
+                index += 1
+                continue
+            if char == '"':
+                in_string = True
+                result.append(char)
+                index += 1
+                continue
+            if char == "`":
+                in_template = True
+                template_buffer = []
+                index += 1
+                continue
+            result.append(char)
+            index += 1
+        if in_template:
+            raise ValueError("Unvollstaendiger Template-String im PythonQuestion-Tag.")
+        return "".join(result)
+
+    def parse_jsx_expression(self, expression: str) -> object:
+        return json.loads(self.jsx_expression_to_json(expression))

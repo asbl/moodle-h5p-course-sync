@@ -438,67 +438,15 @@ def render_tag_attribute(name: str, value: str) -> str:
 
 
 def normalize_template_literal(content: str) -> str:
-    if content.startswith("\n"):
-        content = content[1:]
-    content = textwrap.dedent(content)
-    content = content.replace("\\`", "`").replace("\\${", "${")
-    content = content.replace("\\n", "\n").replace("\\r", "\r").replace("\\t", "\t")
-    content = content.replace("\\\\", "\\")
-    return content
+    return component_syncer().normalize_template_literal(content)
 
 
 def jsx_expression_to_json(expression: str) -> str:
-    result: list[str] = []
-    index = 0
-    in_string = False
-    in_template = False
-    escaped = False
-    template_buffer: list[str] = []
-    while index < len(expression):
-        char = expression[index]
-        if in_template:
-            if escaped:
-                template_buffer.append("\\" + char)
-                escaped = False
-            elif char == "\\":
-                escaped = True
-            elif char == "`":
-                result.append(json.dumps(normalize_template_literal("".join(template_buffer)), ensure_ascii=False))
-                template_buffer = []
-                in_template = False
-            else:
-                template_buffer.append(char)
-            index += 1
-            continue
-        if in_string:
-            result.append(char)
-            if escaped:
-                escaped = False
-            elif char == "\\":
-                escaped = True
-            elif char == '"':
-                in_string = False
-            index += 1
-            continue
-        if char == '"':
-            in_string = True
-            result.append(char)
-            index += 1
-            continue
-        if char == "`":
-            in_template = True
-            template_buffer = []
-            index += 1
-            continue
-        result.append(char)
-        index += 1
-    if in_template:
-        raise ValueError("Unvollstaendiger Template-String im PythonQuestion-Tag.")
-    return "".join(result)
+    return component_syncer().jsx_expression_to_json(expression)
 
 
 def parse_jsx_expression(expression: str) -> object:
-    return json.loads(jsx_expression_to_json(expression))
+    return component_syncer().parse_jsx_expression(expression)
 
 
 def diff_json_values(actual: object, default: object) -> object | None:
