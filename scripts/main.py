@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import argparse
 import html
 import os
 import subprocess
@@ -231,10 +230,6 @@ def escape_mdx_attribute(value: str) -> str:
 
 def parse_course(course_dir: Path) -> tuple[str, list[PythonQuestionBlock], str]:
     return mdx_course_parser().parse_course(course_dir)
-
-
-def sync_metadata_path(course_dir: Path) -> Path:
-    return _SYNC_METADATA_STORE.path(course_dir)
 
 
 def load_sync_metadata(course_dir: Path) -> SyncMetadata | None:
@@ -668,20 +663,8 @@ def serve_preview(port: int) -> None:
             runtime_process.wait(timeout=5)
 
 
-def print_course_status(status: dict[str, object]) -> None:
-    print_cli_course_status(status)
-
-
-def print_moodle_ping_report(report: dict[str, object]) -> None:
-    print_cli_moodle_ping_report(report)
-
-
-def build_arg_parser() -> argparse.ArgumentParser:
-    return build_cli_arg_parser(DEFAULT_PORT)
-
-
 def main() -> None:
-    parser = build_arg_parser()
+    parser = build_cli_arg_parser(DEFAULT_PORT)
     args = parser.parse_args()
     run_cli_command(
         args,
@@ -692,11 +675,11 @@ def main() -> None:
         serve_preview=serve_preview,
         resolve_moodle_client=resolve_moodle_client,
         import_moodle_course=import_moodle_course,
-        sync_metadata_path=sync_metadata_path,
+        sync_metadata_path=_SYNC_METADATA_STORE.path,
         build_moodle_ping_report=build_moodle_ping_report,
-        print_moodle_ping_report=print_moodle_ping_report,
+        print_moodle_ping_report=print_cli_moodle_ping_report,
         build_course_status=build_course_status,
-        print_course_status=print_course_status,
+        print_course_status=print_cli_course_status,
     )
 
 
