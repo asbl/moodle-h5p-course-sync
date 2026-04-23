@@ -953,38 +953,6 @@ def release_metadata_cache_path() -> Path:
     return h5p_library_manager().release_metadata_cache_path()
 
 
-def get_h5p_cli_command() -> list[str]:
-    return h5p_library_manager().get_h5p_cli_command()
-
-
-def resolve_h5p_cli_command() -> list[str]:
-    h5p_binary = shutil.which("h5p")
-    if h5p_binary:
-        return [h5p_binary]
-
-    npx_binary = shutil.which("npx")
-    if npx_binary:
-        return [npx_binary, "--yes", "h5p-cli"]
-
-    raise RuntimeError(
-        "Für vollständige H5P-Pakete benötigt course_sync entweder 'h5p' oder 'npx' im PATH."
-    )
-
-
-def run_h5p_cli(args: list[str], cwd: Path) -> subprocess.CompletedProcess[str]:
-    return h5p_library_manager().run_h5p_cli(args, cwd)
-
-
-def run_h5p_cli_command(args: list[str], cwd: Path) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(
-        [*resolve_h5p_cli_command(), *args],
-        cwd=cwd,
-        check=True,
-        capture_output=True,
-        text=True,
-    )
-
-
 def find_library_dir(machine_name: str, major_version: int | None = None, minor_version: int | None = None) -> Path:
     return h5p_library_manager().find_library_dir(machine_name, major_version, minor_version)
 
@@ -1122,20 +1090,19 @@ def h5p_library_manager() -> H5PLibraryManager:
         write_json=write_json,
         fetch_json=fetch_json,
         download_file=download_file,
-        run_cli_command=run_h5p_cli_command,
-        resolve_cli_command=resolve_h5p_cli_command,
     )
 
 
 def runtime_cli_service() -> RuntimeCliService:
     # Intentionally not cached so tests can monkeypatch module-level dependencies safely.
+    library_manager = h5p_library_manager()
     return RuntimeCliService(
         workspace_lock=WORKSPACE_LOCK,
         runtime_dir=H5P_RUNTIME_DIR,
         runtime_content_dir=H5P_RUNTIME_CONTENT_DIR,
         ensure_h5p_runtime_libraries=ensure_h5p_runtime_libraries,
-        get_h5p_cli_command=get_h5p_cli_command,
-        run_h5p_cli=run_h5p_cli,
+        get_h5p_cli_command=library_manager.get_h5p_cli_command,
+        run_h5p_cli=library_manager.run_h5p_cli,
     )
 
 

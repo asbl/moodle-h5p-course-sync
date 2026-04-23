@@ -32,8 +32,8 @@ class H5PLibraryManager:
         write_json: Callable[[Path, dict], None],
         fetch_json: Callable[[str], dict],
         download_file: Callable[[str, Path], None],
-        run_cli_command: Callable[[list[str], Path], subprocess.CompletedProcess[str]],
-        resolve_cli_command: Callable[[], list[str]],
+        run_cli_command: Callable[[list[str], Path], subprocess.CompletedProcess[str]] | None = None,
+        resolve_cli_command: Callable[[], list[str]] | None = None,
     ) -> None:
         self._workspace_lock = workspace_lock
         self._runtime_dir = runtime_dir
@@ -84,10 +84,31 @@ class H5PLibraryManager:
         return {asset["name"]: asset["browser_download_url"] for asset in release.get("assets", [])}
 
     def get_h5p_cli_command(self) -> list[str]:
-        return self._resolve_cli_command()
+        if self._resolve_cli_command is not None:
+            return self._resolve_cli_command()
+
+        h5p_binary = shutil.which("h5p")
+        if h5p_binary:
+            return [h5p_binary]
+
+        npx_binary = shutil.which("npx")
+        if npx_binary:
+            return [npx_binary, "--yes", "h5p-cli"]
+
+        raise RuntimeError(
+            "Für vollständige H5P-Pakete benötigt course_sync entweder 'h5p' oder 'npx' im PATH."
+        )
 
     def run_h5p_cli(self, args: list[str], cwd: Path) -> subprocess.CompletedProcess[str]:
-        return self._run_cli_command(args, cwd)
+        if self._run_cli_command is not None:
+            return self._run_cli_command(args, cwd)
+        return subprocess.run(
+            [*self.get_h5p_cli_command(), *args],
+            cwd=cwd,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
 
     def find_library_dir(
         self,
