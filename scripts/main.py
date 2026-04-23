@@ -6,13 +6,11 @@ import json
 import os
 import re
 import shutil
-import socket
 import subprocess
 import tarfile
 import tempfile
 import textwrap
 import threading
-import time
 import unicodedata
 from http.server import ThreadingHTTPServer
 from pathlib import Path
@@ -36,6 +34,7 @@ from scripts.classes import (
     PreviewHandlerContext,
     PreviewViewBuilder,
     PythonQuestionBlock,
+    RuntimeCliService,
     RuntimePreparationService,
     RuntimeHtmlRewriter,
     SourceFile,
@@ -1015,49 +1014,19 @@ def collect_required_library_dirs_from_metadata(metadata_payload: dict[str, obje
 
 
 def is_port_open(host: str, port: int) -> bool:
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-        sock.settimeout(0.2)
-        return sock.connect_ex((host, port)) == 0
+    return runtime_cli_service().is_port_open(host, port)
 
 
 def wait_for_port(host: str, port: int, timeout_seconds: float = 30.0) -> None:
-    deadline = time.time() + timeout_seconds
-    while time.time() < deadline:
-        if is_port_open(host, port):
-            return
-        time.sleep(0.2)
-    raise TimeoutError(f"Der H5P-Preview-Server auf Port {port} wurde nicht rechtzeitig erreichbar.")
+    runtime_cli_service().wait_for_port(host, port, timeout_seconds=timeout_seconds)
 
 
 def ensure_h5p_runtime_server(port: int = H5P_RUNTIME_PORT) -> subprocess.Popen[str] | None:
-    ensure_h5p_runtime_libraries()
-    if is_port_open("127.0.0.1", port):
-        return None
-
-    process = subprocess.Popen(
-        [*get_h5p_cli_command(), "server", str(port)],
-        cwd=H5P_RUNTIME_DIR,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
-        text=True,
-    )
-
-    try:
-        wait_for_port("127.0.0.1", port)
-    except Exception:
-        process.terminate()
-        process.wait(timeout=5)
-        raise
-
-    return process
+    return runtime_cli_service().ensure_h5p_runtime_server(port)
 
 
 def import_question_into_runtime(question: PythonQuestionBlock) -> None:
-    with WORKSPACE_LOCK:
-        content_dir = H5P_RUNTIME_CONTENT_DIR / question.runtime_content_id
-        if content_dir.exists():
-            shutil.rmtree(content_dir)
-        run_h5p_cli(["import", question.runtime_content_id, str(question.package_path)], cwd=H5P_RUNTIME_DIR)
+    runtime_cli_service().import_question_into_runtime(question)
 
 
 def build_runtime_proxy_path(question: PythonQuestionBlock, mode: str, *, simple: bool = False) -> str:
@@ -1155,6 +1124,18 @@ def h5p_library_manager() -> H5PLibraryManager:
         download_file=download_file,
         run_cli_command=run_h5p_cli_command,
         resolve_cli_command=resolve_h5p_cli_command,
+    )
+
+
+def runtime_cli_service() -> RuntimeCliService:
+    # Intentionally not cached so tests can monkeypatch module-level dependencies safely.
+    return RuntimeCliService(
+        workspace_lock=WORKSPACE_LOCK,
+        runtime_dir=H5P_RUNTIME_DIR,
+        runtime_content_dir=H5P_RUNTIME_CONTENT_DIR,
+        ensure_h5p_runtime_libraries=ensure_h5p_runtime_libraries,
+        get_h5p_cli_command=get_h5p_cli_command,
+        run_h5p_cli=run_h5p_cli,
     )
 
 

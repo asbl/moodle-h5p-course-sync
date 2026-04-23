@@ -1,4 +1,5 @@
 from .content_store import ContentStore
+from .cli import RuntimeCliService
 from .component_sync import ComponentSyncer
 from .course_orchestrator import CourseOrchestrator
 from .content_types import H5PContentType, PythonQuestion, QuestionSet, RawH5PContent
@@ -25,6 +26,7 @@ from .template_renderer import TemplateRenderer
 
 __all__ = [
     "ContentStore",
+    "RuntimeCliService",
     "ComponentSyncer",
     "CourseOrchestrator",
     "H5PContentType",
