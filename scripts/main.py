@@ -10,11 +10,16 @@ import threading
 from http.server import ThreadingHTTPServer
 from pathlib import Path
 from typing import Iterable
-from urllib.parse import parse_qs, quote, urlencode
-from urllib.request import Request, urlopen
-from urllib.parse import unquote, urljoin, urlparse, urlunparse
 from xml.etree import ElementTree
 from zipfile import BadZipFile, ZIP_DEFLATED, ZipFile
+
+from scripts._http_client import (
+    download_file,
+    extract_h5p_package_url_from_activity_html,
+    fetch_json,
+    fetch_text,
+    normalize_http_url,
+)
 
 from scripts.classes import (
     CourseOrchestrator,
@@ -113,31 +118,6 @@ def compact_text(value: str) -> str:
 
 def make_stable_identifier(title: str, existing_identifiers: set[str]) -> str:
     return text_operations().make_stable_identifier(title, existing_identifiers)
-
-
-def fetch_text(url: str) -> str:
-    request = Request(url, headers={"User-Agent": "course-sync"})
-    with urlopen(request, timeout=30) as response:
-        return response.read().decode("utf-8")
-
-
-def normalize_http_url(url: str) -> str:
-    parsed = urlparse(url)
-    normalized_path = quote(parsed.path, safe="/%")
-    normalized_query = quote(parsed.query, safe="=&%/:+,-_.~")
-    return urlunparse((parsed.scheme, parsed.netloc, normalized_path, parsed.params, normalized_query, parsed.fragment))
-
-
-def extract_h5p_package_url_from_activity_html(page_html: str, *, base_url: str = "") -> str:
-    unescaped_html = html.unescape(page_html)
-    iframe_match = H5P_EMBED_IFRAME_RE.search(unescaped_html)
-    if not iframe_match:
-        return ""
-
-    iframe_src = urljoin(base_url, iframe_match.group("src"))
-    iframe_query = parse_qs(urlparse(iframe_src).query)
-    package_url = iframe_query.get("url", [""])[0]
-    return unquote(package_url).strip()
 
 
 def build_source_package_sidecar_path(question: PythonQuestionBlock) -> str:
@@ -380,18 +360,6 @@ def write_h5p_archive_from_directory(
         shared_libraries=shared_libraries,
         shared_libraries_root=shared_libraries_root,
     )
-
-
-def fetch_json(url: str) -> dict:
-    request = Request(url, headers={"Accept": "application/json", "User-Agent": "course-sync"})
-    with urlopen(request, timeout=30) as response:
-        return json.load(response)
-
-
-def download_file(url: str, destination: Path) -> None:
-    request = Request(normalize_http_url(url), headers={"User-Agent": "course-sync"})
-    with urlopen(request, timeout=60) as response, destination.open("wb") as target:
-        shutil.copyfileobj(response, target)
 
 
 def find_library_dir(machine_name: str, major_version: int | None = None, minor_version: int | None = None) -> Path:
