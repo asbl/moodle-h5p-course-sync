@@ -46,7 +46,6 @@ from scripts.classes.cli import (
     build_arg_parser as build_cli_arg_parser,
     print_course_status as print_cli_course_status,
     print_moodle_ping_report as print_cli_moodle_ping_report,
-    resolve_course_dir as resolve_cli_course_dir,
     run_cli_command,
 )
 from scripts.classes.component_sync import ComponentSyncer
@@ -667,10 +666,6 @@ def serve_preview(port: int) -> None:
         if runtime_process is not None:
             runtime_process.terminate()
             runtime_process.wait(timeout=5)
-
-
-def resolve_course_dir(course: str) -> Path:
-    return resolve_cli_course_dir(course, COURSES_DIR)
 
 
 def print_course_status(status: dict[str, object]) -> None:
