@@ -5,6 +5,7 @@ from .course_orchestrator import CourseOrchestrator
 from .content_types import H5PContentType, PythonQuestion, QuestionSet, RawH5PContent
 from .h5p_package_builder import H5PPackageBuilder
 from .h5p_import_mapper import H5PImportMapper
+from .h5p_file_service import H5PFileService
 from .h5p_library_manager import H5PLibraryManager
 from .markdown_renderer import MarkdownRenderer
 from .mdx_course_parser import MdxCourseParser
@@ -32,6 +33,7 @@ __all__ = [
     "H5PContentType",
     "H5PPackageBuilder",
     "H5PImportMapper",
+    "H5PFileService",
     "H5PLibraryManager",
     "PythonQuestion",
     "QuestionSet",
