@@ -28,6 +28,7 @@ from zipfile import BadZipFile, ZIP_DEFLATED, ZipFile
 from scripts.classes import (
     CourseOrchestrator,
     ContentStore,
+    H5PImportMapper,
     H5PPackageBuilder,
     MarkdownRenderer,
     MdxCourseParser,
@@ -51,7 +52,7 @@ from scripts.classes.h5p_runtime_manager import build_runtime_content_id as buil
 from scripts.classes.h5p_runtime_manager import quote_path_segment as quote_path_segment_helper
 from scripts.classes.h5p_runtime_manager.runtime_manager import H5PRuntimeManager
 from scripts.classes.moodle_sync import MoodleSyncer
-from scripts.classes.moodle_sync import MoodleApiClient as ExtractedMoodleApiClient
+from scripts.classes.moodle_sync import MoodleApiClient
 from scripts.classes.moodle_sync import MoodleBackupExtractor
 
 
@@ -89,6 +90,7 @@ H5P_PACKAGE_BUILDER: H5PPackageBuilder | None = None
 COURSE_ORCHESTRATOR: CourseOrchestrator | None = None
 RUNTIME_HTML_REWRITER: RuntimeHtmlRewriter | None = None
 MDX_COURSE_PARSER: MdxCourseParser | None = None
+H5P_IMPORT_MAPPER: H5PImportMapper | None = None
 
 TAG_RE = APP_CONFIG.tag_re
 FENCE_RE = APP_CONFIG.fence_re
@@ -96,27 +98,6 @@ HTML_TAG_RE = APP_CONFIG.html_tag_re
 WHITESPACE_RE = APP_CONFIG.whitespace_re
 H5P_EMBED_IFRAME_RE = APP_CONFIG.h5p_embed_iframe_re
 MBZ_LINK_RE = APP_CONFIG.mbz_link_re
-
-
-class MoodleApiClient(ExtractedMoodleApiClient):
-    """Compatibility facade keeping the historical public API in main."""
-
-    def __init__(self, base_url: str, token: str):
-        super().__init__(
-            base_url,
-            token,
-            make_stable_identifier=make_stable_identifier,
-            strip_html=strip_html,
-            fetch_text=fetch_text,
-            extract_h5p_package_url_from_activity_html=lambda page_html: extract_h5p_package_url_from_activity_html(
-                page_html,
-                base_url=base_url,
-            ),
-            download_file=download_file,
-            extract_h5p_package_from_course_backup=extract_h5p_package_from_course_backup,
-            build_imported_question_from_h5p_package=build_imported_question_from_h5p_package,
-            write_source_package_sidecar=write_source_package_sidecar,
-        )
 
 
 def moodle_backup_extractor() -> MoodleBackupExtractor:
@@ -212,117 +193,6 @@ def extract_h5p_package_url_from_activity_html(page_html: str, *, base_url: str 
     return unquote(package_url).strip()
 
 
-def discover_course_backup_url(base_url: str, course_id: int, activity_url: str = "") -> str:
-    return moodle_backup_extractor().discover_course_backup_url(base_url, course_id, activity_url)
-
-
-def parse_backup_activity_directory(backup_path: Path, activity: MoodleH5PActivity) -> str:
-    return moodle_backup_extractor().parse_backup_activity_directory(backup_path, activity)
-
-
-def extract_backup_file_records(backup_path: Path, file_ids: set[str]) -> dict[str, dict[str, str]]:
-    return moodle_backup_extractor().extract_backup_file_records(backup_path, file_ids)
-
-
-def extract_h5p_package_from_backup_activity(backup_path: Path, activity_dir: str, destination: Path) -> bool:
-    return moodle_backup_extractor().extract_h5p_package_from_backup_activity(backup_path, activity_dir, destination)
-
-
-def extract_h5p_package_from_course_backup(base_url: str, activity: MoodleH5PActivity, destination: Path) -> bool:
-    return moodle_backup_extractor().extract_h5p_package_from_course_backup(base_url, activity, destination)
-
-
-def extract_h5p_packages(content_payload: dict[str, object]) -> list[str]:
-    packages: list[str] = []
-    pyodide_options = content_payload.get("pyodideOptions", {})
-    if not isinstance(pyodide_options, dict):
-        return packages
-
-    for entry in pyodide_options.get("packages", []) or []:
-        if isinstance(entry, dict):
-            package_name = str(entry.get("package") or entry.get("name") or "").strip()
-        else:
-            package_name = str(entry).strip()
-        if package_name and package_name not in packages:
-            packages.append(package_name)
-    return packages
-
-
-def summarize_h5p_instructions(activity: MoodleH5PActivity, content_payload: dict[str, object]) -> str:
-    editor_settings = content_payload.get("editorSettings", {})
-    if isinstance(editor_settings, dict):
-        editor_instructions = compact_text(str(editor_settings.get("instructions") or ""))
-        if editor_instructions:
-            return editor_instructions
-
-    content_fragments: list[str] = []
-    for entry in content_payload.get("contents", []) or []:
-        if not isinstance(entry, dict):
-            continue
-        text = compact_text(str(entry.get("text") or ""))
-        if text:
-            content_fragments.append(text)
-
-    if content_fragments:
-        return " ".join(content_fragments)
-    if activity.intro:
-        return compact_text(activity.intro)
-    return f"Importiert aus Moodle: {activity.title}"
-
-
-def extract_h5p_editor_instructions(content_payload: dict[str, object]) -> str:
-    editor_settings = content_payload.get("editorSettings", {})
-    if not isinstance(editor_settings, dict):
-        return ""
-    raw_instructions = html.unescape(str(editor_settings.get("instructions") or ""))
-    return normalize_whitespace(raw_instructions)
-
-
-def extract_test_case_values(raw_values: object, *, field_name: str) -> list[str]:
-    if not isinstance(raw_values, list):
-        return []
-
-    values: list[str] = []
-    for entry in raw_values:
-        if isinstance(entry, dict):
-            raw_value = entry.get(field_name)
-            if raw_value is None:
-                continue
-            values.append(str(raw_value))
-            continue
-        values.append(str(entry))
-    return values
-
-
-def extract_source_files(editor_options: dict[str, object]) -> list[SourceFile]:
-    source_files: list[SourceFile] = []
-    raw_files = editor_options.get("sourceFiles", [])
-    if not isinstance(raw_files, list):
-        return source_files
-
-    for index, entry in enumerate(raw_files, start=1):
-        if not isinstance(entry, dict):
-            continue
-
-        code = normalize_whitespace(html.unescape(str(entry.get("code") or "")))
-        file_name = str(entry.get("fileName") or "").strip()
-        if not file_name:
-            if not code:
-                continue
-            file_name = f"source-{index}.py"
-
-        source_files.append(
-            SourceFile(
-                file_name=file_name,
-                code=code,
-                visible_to_learner=bool(entry.get("visibleToLearner", True)),
-                learner_editable=bool(entry.get("learnerEditable", True)),
-            )
-        )
-
-    return source_files
-
-
 def build_h5p_sidecar_paths(question: PythonQuestionBlock) -> tuple[str, str]:
     base_dir = Path("h5p") / question.identifier
     return (base_dir / "h5p.json").as_posix(), (base_dir / "content.yml").as_posix()
@@ -330,10 +200,6 @@ def build_h5p_sidecar_paths(question: PythonQuestionBlock) -> tuple[str, str]:
 
 def build_source_package_sidecar_path(question: PythonQuestionBlock) -> str:
     return (Path("h5p") / question.identifier).as_posix()
-
-
-def build_legacy_source_archive_sidecar_path(question: PythonQuestionBlock) -> str:
-    return (Path(H5P_SIDECAR_DIRNAME) / question.identifier / "source.h5p").as_posix()
 
 
 def write_h5p_sidecar_files(question: PythonQuestionBlock) -> tuple[str, str]:
@@ -354,8 +220,6 @@ def write_source_package_sidecar(question: PythonQuestionBlock, source_archive: 
 
     relative_path = build_source_package_sidecar_path(question)
     target_path = question.course_dir / relative_path
-    legacy_sidecar_path = question.course_dir / Path(H5P_SIDECAR_DIRNAME) / question.identifier
-    legacy_archive_path = question.course_dir / build_legacy_source_archive_sidecar_path(question)
 
     if target_path.exists():
         if target_path.is_dir():
@@ -368,27 +232,7 @@ def write_source_package_sidecar(question: PythonQuestionBlock, source_archive: 
         content_payload = json.loads(archive.read("content/content.json").decode("utf-8"))
 
     populate_imported_h5p_directory(source_archive, target_path, metadata_payload, content_payload)
-
-    if legacy_sidecar_path.exists() and legacy_sidecar_path.is_dir():
-        shutil.rmtree(legacy_sidecar_path)
-    if legacy_archive_path.exists() and legacy_archive_path.is_file():
-        legacy_archive_path.unlink()
     return relative_path
-
-
-def remove_legacy_h5p_json_sidecars(course_dir: Path) -> None:
-    sidecar_root = course_dir / H5P_SIDECAR_DIRNAME
-    if not sidecar_root.exists():
-        return
-
-    for archive_path in sidecar_root.glob("**/source.h5p"):
-        sidecar_dir = archive_path.parent
-        if (sidecar_dir / "h5p.json").exists() and (
-            (sidecar_dir / "content" / "content.json").exists()
-            or (sidecar_dir / "content.yml").exists()
-            or (sidecar_dir / "content.json").exists()
-        ):
-            archive_path.unlink()
 
 
 def load_h5p_sidecar_file(course_dir: Path, relative_path: str, *, description: str) -> dict[str, object]:
@@ -833,9 +677,6 @@ def infer_source_package_sidecar_path(question: PythonQuestionBlock) -> str:
     relative_path = build_source_package_sidecar_path(question)
     if (question.course_dir / relative_path).exists():
         return relative_path
-    legacy_relative_path = build_legacy_source_archive_sidecar_path(question)
-    if (question.course_dir / legacy_relative_path).exists():
-        return legacy_relative_path
     return ""
 
 
@@ -933,7 +774,7 @@ def build_imported_question_from_h5p_package(
         return PythonQuestionBlock(
             identifier=activity.identifier,
             title=str(metadata_payload.get("title") or activity.title),
-            instructions=summarize_h5p_instructions(activity, content_payload),
+            instructions=h5p_import_mapper().summarize_instructions(activity, content_payload),
             preview_url=activity.url,
             main_library=main_library,
             package_url=getattr(activity, "package_url", ""),
@@ -963,22 +804,23 @@ def build_imported_question_from_h5p_package(
         test_cases.append(
             TestCase(
                 hidden=bool(raw_test_case.get("hidden", False)),
-                inputs=extract_test_case_values(raw_test_case.get("inputs", []), field_name="input"),
-                outputs=extract_test_case_values(raw_test_case.get("outputs", []), field_name="output"),
+                inputs=h5p_import_mapper().extract_test_case_values(raw_test_case.get("inputs", []), field_name="input"),
+                outputs=h5p_import_mapper().extract_test_case_values(raw_test_case.get("outputs", []), field_name="output"),
             )
         )
 
     return PythonQuestionBlock(
         identifier=activity.identifier,
         title=str(metadata_payload.get("title") or activity.title),
-        instructions=extract_h5p_editor_instructions(content_payload) or summarize_h5p_instructions(activity, content_payload),
+        instructions=h5p_import_mapper().extract_editor_instructions(content_payload)
+        or h5p_import_mapper().summarize_instructions(activity, content_payload),
         preview_url=activity.url,
         main_library=main_library,
         package_url=getattr(activity, "package_url", ""),
         h5p_metadata=metadata_copy,
         h5p_content=content_copy,
         runner=str(content_payload.get("pythonRunner") or "pyodide").strip() or "pyodide",
-        packages=extract_h5p_packages(content_payload),
+        packages=h5p_import_mapper().extract_packages(content_payload),
         starter_code=normalize_whitespace(html.unescape(str(editor_settings.get("startingCode") or ""))),
         solution_code=normalize_whitespace(html.unescape(str(grading_settings.get("targetCode") or ""))),
         pre_code=normalize_whitespace(html.unescape(str(editor_settings.get("preCode") or ""))),
@@ -986,7 +828,7 @@ def build_imported_question_from_h5p_package(
         grading_method=str(grading_settings.get("gradingMethod") or "please_choose"),
         show_console=bool(advanced_options.get("showConsole", True)),
         allow_adding_files=bool(editor_options.get("allowAddingFiles", False)),
-        source_files=extract_source_files(editor_options),
+        source_files=h5p_import_mapper().extract_source_files(editor_options),
         test_cases=test_cases,
         course_slug=course_slug,
         course_dir=COURSES_DIR / course_slug,
@@ -1156,7 +998,26 @@ def resolve_moodle_client(base_url: str | None = None, token: str | None = None)
         raise RuntimeError("MOODLE_BASE_URL ist nicht gesetzt.")
     if not resolved_token:
         raise RuntimeError("MOODLE_TOKEN ist nicht gesetzt.")
-    return MoodleApiClient(resolved_base_url, resolved_token)
+    backup_extractor = moodle_backup_extractor()
+    return MoodleApiClient(
+        resolved_base_url,
+        resolved_token,
+        make_stable_identifier=make_stable_identifier,
+        strip_html=strip_html,
+        fetch_text=fetch_text,
+        extract_h5p_package_url_from_activity_html=lambda page_html: extract_h5p_package_url_from_activity_html(
+            page_html,
+            base_url=resolved_base_url,
+        ),
+        download_file=download_file,
+        extract_h5p_package_from_course_backup=lambda base_url, activity, destination: backup_extractor.extract_h5p_package_from_course_backup(
+            base_url,
+            activity,
+            destination,
+        ),
+        build_imported_question_from_h5p_package=build_imported_question_from_h5p_package,
+        write_source_package_sidecar=write_source_package_sidecar,
+    )
 
 
 def ensure_directory(path: Path) -> None:
@@ -1696,7 +1557,6 @@ def moodle_syncer() -> MoodleSyncer:
         MOODLE_SYNCER = MoodleSyncer(
             courses_dir=COURSES_DIR,
             ensure_directory=ensure_directory,
-            remove_legacy_h5p_json_sidecars=remove_legacy_h5p_json_sidecars,
             render_imported_question_mdx=render_imported_question_mdx,
             build_scaffold_question=build_scaffold_question,
             parse_course=parse_course,
@@ -1770,6 +1630,16 @@ def mdx_course_parser() -> MdxCourseParser:
             apply_editable_h5p_payload=apply_editable_h5p_payload,
         )
     return MDX_COURSE_PARSER
+
+
+def h5p_import_mapper() -> H5PImportMapper:
+    global H5P_IMPORT_MAPPER
+    if H5P_IMPORT_MAPPER is None:
+        H5P_IMPORT_MAPPER = H5PImportMapper(
+            compact_text=compact_text,
+            normalize_whitespace=normalize_whitespace,
+        )
+    return H5P_IMPORT_MAPPER
 
 
 def rewrite_runtime_html(document: str, runtime_path: str, query: str = "") -> str:

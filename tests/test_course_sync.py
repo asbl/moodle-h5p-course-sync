@@ -23,8 +23,6 @@ from scripts.main import (
     build_imported_question_from_h5p_package,
     compute_question_hash,
     ensure_custom_h5p_libraries,
-    extract_h5p_package_from_backup_activity,
-    extract_h5p_package_from_course_backup,
     extract_h5p_package_url_from_activity_html,
     import_moodle_course,
     load_dotenv_file,
@@ -842,7 +840,13 @@ print("quadrat")
             url="https://example.invalid/mod/h5pactivity/view.php?id=171",
         )
 
-        extracted = extract_h5p_package_from_backup_activity(backup_path, "activities/h5pactivity_110020", destination)
+        from scripts import main as module
+
+        extracted = module.moodle_backup_extractor().extract_h5p_package_from_backup_activity(
+            backup_path,
+            "activities/h5pactivity_110020",
+            destination,
+        )
 
         self.assertTrue(extracted)
         with ZipFile(destination) as archive:
@@ -906,7 +910,22 @@ print("quadrat")
 
             module.fetch_text = fake_fetch_text
             module.download_file = fake_download_file
-            client = MoodleApiClient("https://example.invalid", "token")
+            backup_extractor = module.moodle_backup_extractor()
+            client = MoodleApiClient(
+                "https://example.invalid",
+                "token",
+                make_stable_identifier=module.make_stable_identifier,
+                strip_html=module.strip_html,
+                fetch_text=module.fetch_text,
+                extract_h5p_package_url_from_activity_html=lambda page_html: module.extract_h5p_package_url_from_activity_html(
+                    page_html,
+                    base_url="https://example.invalid",
+                ),
+                download_file=module.download_file,
+                extract_h5p_package_from_course_backup=backup_extractor.extract_h5p_package_from_course_backup,
+                build_imported_question_from_h5p_package=module.build_imported_question_from_h5p_package,
+                write_source_package_sidecar=module.write_source_package_sidecar,
+            )
             question = client.download_activity_question(
                 "python-2026",
                 MoodleH5PActivity(
@@ -1156,7 +1175,22 @@ print("quadrat")
 
             module.fetch_text = fake_fetch_text
             module.download_file = fake_download_file
-            client = MoodleApiClient("https://example.invalid", "token")
+            backup_extractor = module.moodle_backup_extractor()
+            client = MoodleApiClient(
+                "https://example.invalid",
+                "token",
+                make_stable_identifier=module.make_stable_identifier,
+                strip_html=module.strip_html,
+                fetch_text=module.fetch_text,
+                extract_h5p_package_url_from_activity_html=lambda page_html: module.extract_h5p_package_url_from_activity_html(
+                    page_html,
+                    base_url="https://example.invalid",
+                ),
+                download_file=module.download_file,
+                extract_h5p_package_from_course_backup=backup_extractor.extract_h5p_package_from_course_backup,
+                build_imported_question_from_h5p_package=module.build_imported_question_from_h5p_package,
+                write_source_package_sidecar=module.write_source_package_sidecar,
+            )
             question = client.download_activity_question(
                 "python-2026",
                 MoodleH5PActivity(

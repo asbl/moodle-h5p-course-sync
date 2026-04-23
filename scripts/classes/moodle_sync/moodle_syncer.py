@@ -14,7 +14,6 @@ class MoodleSyncer:
         *,
         courses_dir: Path,
         ensure_directory: Callable[[Path], None],
-        remove_legacy_h5p_json_sidecars: Callable[[Path], None],
         render_imported_question_mdx: Callable[[PythonQuestionBlock], list[str]],
         build_scaffold_question: Callable[[str, MoodleH5PActivity], PythonQuestionBlock],
         parse_course: Callable[[Path], tuple[str, list[PythonQuestionBlock], str]],
@@ -24,7 +23,6 @@ class MoodleSyncer:
     ) -> None:
         self._courses_dir = courses_dir
         self._ensure_directory = ensure_directory
-        self._remove_legacy_h5p_json_sidecars = remove_legacy_h5p_json_sidecars
         self._render_imported_question_mdx = render_imported_question_mdx
         self._build_scaffold_question = build_scaffold_question
         self._parse_course = parse_course
@@ -59,7 +57,6 @@ class MoodleSyncer:
                 except RuntimeError:
                     activity.imported_question = None
 
-        self._remove_legacy_h5p_json_sidecars(course_dir)
         mdx = self.render_imported_course_mdx(course, activities)
         (course_dir / "index.mdx").write_text(mdx, encoding="utf-8")
 
