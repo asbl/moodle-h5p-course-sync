@@ -1087,6 +1087,76 @@ print("quadrat")
         self.assertTrue(report["supportsCourseImport"])
         self.assertIn("core_course_get_contents", report["functions"])
 
+    def test_moodle_api_client_list_course_h5p_activities_filters_and_maps_fields(self) -> None:
+        class StubMoodleApiClient(MoodleApiClient):
+            def call(self, function_name: str, **params: object) -> object:
+                self.last_call = (function_name, params)
+                return [
+                    {
+                        "name": "Kapitel 1",
+                        "modules": [
+                            {
+                                "modname": "h5pactivity",
+                                "id": 10,
+                                "instance": 20,
+                                "name": "Einfuehrung Farben",
+                                "description": "<p>Intro</p>",
+                                "url": "https://example.invalid/mod/h5pactivity/view.php?id=10",
+                                "visible": 1,
+                            },
+                            {
+                                "modname": "assign",
+                                "id": 11,
+                                "name": "Abgabe",
+                            },
+                        ],
+                    }
+                ]
+
+        client = StubMoodleApiClient(
+            "https://example.invalid",
+            "token",
+            make_stable_identifier=lambda title, used: make_stable_identifier(title, used),
+            strip_html=lambda text: "Intro" if "Intro" in text else text,
+            fetch_text=lambda url: "",
+            extract_h5p_package_url_from_activity_html=lambda page_html: "",
+            download_file=lambda url, destination: None,
+            extract_h5p_package_from_course_backup=lambda base, activity, archive_path: False,
+            build_imported_question_from_h5p_package=lambda course_slug, activity, metadata, content: None,
+            write_source_package_sidecar=lambda question, archive_path: "",
+        )
+
+        activities = client.list_course_h5p_activities(5)
+
+        self.assertEqual(client.last_call[0], "core_course_get_contents")
+        self.assertEqual(client.last_call[1]["courseid"], 5)
+        self.assertEqual(len(activities), 1)
+        self.assertEqual(activities[0].identifier, "einfuehrung-farben")
+        self.assertEqual(activities[0].activity_id, 10)
+        self.assertEqual(activities[0].instance_id, 20)
+        self.assertEqual(activities[0].intro, "Intro")
+
+    def test_moodle_api_client_get_site_info_rejects_non_object_payload(self) -> None:
+        class StubMoodleApiClient(MoodleApiClient):
+            def call(self, function_name: str, **params: object) -> object:
+                return ["not-a-dict"]
+
+        client = StubMoodleApiClient(
+            "https://example.invalid",
+            "token",
+            make_stable_identifier=lambda title, used: make_stable_identifier(title, used),
+            strip_html=lambda text: text,
+            fetch_text=lambda url: "",
+            extract_h5p_package_url_from_activity_html=lambda page_html: "",
+            download_file=lambda url, destination: None,
+            extract_h5p_package_from_course_backup=lambda base, activity, archive_path: False,
+            build_imported_question_from_h5p_package=lambda course_slug, activity, metadata, content: None,
+            write_source_package_sidecar=lambda question, archive_path: "",
+        )
+
+        with self.assertRaises(RuntimeError):
+            client.get_site_info()
+
     def test_import_moodle_course_creates_local_scaffold_and_metadata(self) -> None:
         class FakeMoodleClient:
             base_url = "https://example.invalid"
