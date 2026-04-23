@@ -123,10 +123,6 @@ def compact_text(value: str) -> str:
     return text_operations().compact_text(value)
 
 
-def slugify_identifier(value: str) -> str:
-    return text_operations().slugify_identifier(value)
-
-
 def make_stable_identifier(title: str, existing_identifiers: set[str]) -> str:
     return text_operations().make_stable_identifier(title, existing_identifiers)
 
@@ -156,16 +152,8 @@ def extract_h5p_package_url_from_activity_html(page_html: str, *, base_url: str 
     return unquote(package_url).strip()
 
 
-def build_h5p_sidecar_paths(question: PythonQuestionBlock) -> tuple[str, str]:
-    return h5p_file_service().build_h5p_sidecar_paths(question)
-
-
 def build_source_package_sidecar_path(question: PythonQuestionBlock) -> str:
     return h5p_file_service().build_source_package_sidecar_path(question)
-
-
-def write_h5p_sidecar_files(question: PythonQuestionBlock) -> tuple[str, str]:
-    return h5p_file_service().write_h5p_sidecar_files(question)
 
 
 def write_source_package_sidecar(question: PythonQuestionBlock, source_archive: Path) -> str:
@@ -217,16 +205,6 @@ def build_imported_question_from_sidecar(course_dir: Path, identifier: str, sour
     return question
 
 
-def unescape_display_value(value: object) -> object:
-    if isinstance(value, dict):
-        return {key: unescape_display_value(item) for key, item in value.items()}
-    if isinstance(value, list):
-        return [unescape_display_value(item) for item in value]
-    if isinstance(value, str):
-        return html.unescape(value)
-    return value
-
-
 def escape_h5p_value(value: object) -> object:
     if isinstance(value, dict):
         return {key: escape_h5p_value(item) for key, item in value.items()}
@@ -237,86 +215,8 @@ def escape_h5p_value(value: object) -> object:
     return value
 
 
-def render_template_literal(value: str, *, indent: int = 0) -> str:
-    escaped = value.replace("\\", "\\\\").replace("`", "\\`").replace("${", "\\${")
-    if "\n" in escaped:
-        indented_lines = "\n".join(((" " * indent) + line) if line else "" for line in escaped.split("\n"))
-        separator = "" if escaped.endswith("\n") else "\n"
-        return "`\n" + indented_lines + separator + (" " * indent) + "`"
-    return f"`{escaped}`"
-
-
-def render_jsx_value(value: object, *, indent: int = 0) -> str:
-    if isinstance(value, dict):
-        if not value:
-            return "{}"
-        child_indent = indent + 2
-        lines = ["{"]
-        items = list(value.items())
-        for index, (key, item) in enumerate(items):
-            suffix = "," if index < len(items) - 1 else ""
-            rendered_item = render_jsx_value(item, indent=child_indent)
-            if "\n" in rendered_item:
-                rendered_lines = rendered_item.splitlines()
-                lines.append(" " * child_indent + json.dumps(key, ensure_ascii=False) + ": " + rendered_lines[0])
-                for rendered_line in rendered_lines[1:]:
-                    lines.append(rendered_line)
-                lines[-1] += suffix
-            else:
-                lines.append(" " * child_indent + json.dumps(key, ensure_ascii=False) + ": " + rendered_item + suffix)
-        lines.append(" " * indent + "}")
-        return "\n".join(lines)
-
-    if isinstance(value, list):
-        if not value:
-            return "[]"
-        child_indent = indent + 2
-        lines = ["["]
-        for index, item in enumerate(value):
-            suffix = "," if index < len(value) - 1 else ""
-            rendered_item = render_jsx_value(item, indent=child_indent)
-            rendered_lines = rendered_item.splitlines()
-            lines.append(" " * child_indent + rendered_lines[0])
-            for rendered_line in rendered_lines[1:]:
-                lines.append(rendered_line)
-            lines[-1] += suffix
-        lines.append(" " * indent + "]")
-        return "\n".join(lines)
-
-    if isinstance(value, str):
-        display_value = html.unescape(value)
-        if "\n" in display_value or '"' in display_value:
-            return render_template_literal(display_value, indent=indent)
-        return json.dumps(display_value, ensure_ascii=False)
-
-    return json.dumps(value, ensure_ascii=False)
-
-
-def normalize_template_literal(content: str) -> str:
-    return component_syncer().normalize_template_literal(content)
-
-
-def jsx_expression_to_json(expression: str) -> str:
-    return component_syncer().jsx_expression_to_json(expression)
-
-
 def parse_jsx_expression(expression: str) -> object:
     return component_syncer().parse_jsx_expression(expression)
-
-
-def diff_json_values(actual: object, default: object) -> object | None:
-    if isinstance(actual, dict) and isinstance(default, dict):
-        diff: dict[str, object] = {}
-        for key, value in actual.items():
-            nested = diff_json_values(value, default.get(key)) if key in default else clone_json_value(value)
-            if nested is not None:
-                diff[key] = nested
-        return diff or None
-
-    if isinstance(actual, list) and isinstance(default, list):
-        return None if actual == default else clone_json_value(actual)
-
-    return None if actual == default else clone_json_value(actual)
 
 
 def merge_json_values(default: object, override: object) -> object:
@@ -388,51 +288,6 @@ def default_object_from_semantics(fields: list[dict[str, object]]) -> dict[str, 
     return defaults
 
 
-def compact_by_semantics(value: object, field: dict[str, object]) -> object | None:
-    field_type = str(field.get("type") or "")
-
-    if field_type == "group":
-        if not isinstance(value, dict):
-            return clone_json_value(value)
-        children = {
-            str(child.get("name") or "").strip(): child
-            for child in field.get("fields", []) or []
-            if isinstance(child, dict) and str(child.get("name") or "").strip()
-        }
-        compacted: dict[str, object] = {}
-        for key, child_value in value.items():
-            child_field = children.get(key)
-            if child_field is None:
-                compacted[key] = clone_json_value(child_value)
-                continue
-            child_compacted = compact_by_semantics(child_value, child_field)
-            if child_compacted is not None:
-                compacted[key] = child_compacted
-        return compacted or None
-
-    if field_type == "list":
-        if not isinstance(value, list):
-            return clone_json_value(value)
-        item_field = field.get("field")
-        compacted_items: list[object] = []
-        for item in value:
-            if isinstance(item_field, dict):
-                compacted_item = compact_by_semantics(item, item_field)
-            else:
-                compacted_item = clone_json_value(item)
-            if compacted_item in (None, {}, []):
-                continue
-            compacted_items.append(compacted_item)
-        return compacted_items or None
-
-    default_value = default_from_semantics_field(field)
-    if value == default_value:
-        return None
-    if value in (None, "", [], {}) and default_value in (None, "", [], {}):
-        return None
-    return clone_json_value(value)
-
-
 def build_default_python_question_content(question: PythonQuestionBlock) -> dict[str, object]:
     defaults = default_object_from_semantics(load_python_question_semantics())
 
@@ -464,10 +319,6 @@ def build_default_imported_h5p_content(question: PythonQuestionBlock) -> dict[st
     if question.main_library != PYTHON_QUESTION_MACHINE_NAME:
         return {}
     return build_default_python_question_content(question)
-
-
-def build_editable_h5p_payload(question: PythonQuestionBlock) -> dict[str, object]:
-    return component_syncer().build_editable_h5p_payload(question)
 
 
 def apply_editable_h5p_payload(question: PythonQuestionBlock, payload: dict[str, object]) -> None:
@@ -577,10 +428,6 @@ def save_sync_metadata(course_dir: Path, metadata: SyncMetadata) -> Path:
 
 def compute_question_hash(question: PythonQuestionBlock) -> str:
     return component_syncer().compute_question_hash(question)
-
-
-def render_imported_course_mdx(course_slug: str, activities: list[MoodleH5PActivity]) -> str:
-    return moodle_syncer().render_imported_course_mdx(course_slug, activities)
 
 
 def import_moodle_course(course: str, remote_course_id: int, client: MoodleApiClient) -> Path:
@@ -699,20 +546,12 @@ def write_json(path: Path, payload: dict) -> None:
     os.replace(temp_path, path)
 
 
-def write_yaml(path: Path, payload: object) -> None:
-    CONTENT_STORE.write_yaml(path, payload)
-
-
 def read_h5p_content_payload(source_dir: Path) -> dict[str, object]:
     return CONTENT_STORE.read_h5p_content_payload(source_dir)
 
 
 def write_h5p_content_files(target_dir: Path, payload: dict[str, object]) -> None:
     CONTENT_STORE.write_h5p_content_files(target_dir, payload)
-
-
-def normalize_h5p_source_asset_path(relative_path: str, *, content_root_only: bool = False) -> str | None:
-    return h5p_file_service().normalize_h5p_source_asset_path(relative_path, content_root_only=content_root_only)
 
 
 def write_h5p_archive_from_directory(
@@ -744,14 +583,6 @@ def download_file(url: str, destination: Path) -> None:
 
 def find_library_dir(machine_name: str, major_version: int | None = None, minor_version: int | None = None) -> Path:
     return h5p_library_manager().find_library_dir(machine_name, major_version, minor_version)
-
-
-def extract_library_asset(archive_path: Path, machine_name: str) -> Path:
-    return h5p_library_manager().extract_library_asset(archive_path, machine_name)
-
-
-def register_local_library(library_dir: Path) -> None:
-    h5p_library_manager().register_local_library(library_dir)
 
 
 def ensure_h5p_runtime_libraries() -> None:

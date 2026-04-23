@@ -17,7 +17,6 @@ from scripts.main import (
     SyncMetadataEntry,
     build_moodle_ping_report,
     build_h5p_content,
-    build_editable_h5p_payload,
     build_course_status,
     build_imported_question_from_h5p_package,
     compute_question_hash,
@@ -460,7 +459,8 @@ print("quadrat")
         )
 
         assert question is not None
-        payload = build_editable_h5p_payload(question)
+        from scripts import main as module
+        payload = module.component_syncer().build_editable_h5p_payload(question)
 
         self.assertEqual(
             payload,
@@ -503,7 +503,8 @@ print("quadrat")
 
         assert question is not None
         self.assertEqual(question.instructions, "Lese zwei timestamps ein und berechne die Anzahl an Sekunden zwischen zwei Timestamps")
-        self.assertNotIn("instructions", json.dumps(build_editable_h5p_payload(question), ensure_ascii=False))
+        from scripts import main as module
+        self.assertNotIn("instructions", json.dumps(module.component_syncer().build_editable_h5p_payload(question), ensure_ascii=False))
 
     def test_non_python_imported_payload_uses_source_package_as_baseline(self) -> None:
         question = build_imported_question_from_h5p_package(
@@ -533,7 +534,8 @@ print("quadrat")
         )
         question.source_package_path = write_source_package_sidecar(question, source_archive)
 
-        self.assertEqual(build_editable_h5p_payload(question), {})
+        from scripts import main as module
+        self.assertEqual(module.component_syncer().build_editable_h5p_payload(question), {})
 
         mdx = "# Python Kurs\n\n" + "\n".join(render_imported_question_mdx(question)) + "\n"
         self.assertIn('identifier="quiz-division"', mdx)
