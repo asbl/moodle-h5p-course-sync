@@ -129,10 +129,6 @@ def write_source_package_sidecar(question: PythonQuestionBlock, source_archive: 
     return h5p_file_service().write_source_package_sidecar(question, source_archive)
 
 
-def load_h5p_sidecar_file(course_dir: Path, relative_path: str, *, description: str) -> dict[str, object]:
-    return h5p_file_service().load_h5p_sidecar_file(course_dir, relative_path, description=description)
-
-
 def load_h5p_payload_from_path(source_path: Path) -> tuple[dict[str, object], dict[str, object]] | None:
     return h5p_file_service().load_h5p_payload_from_path(source_path)
 
@@ -168,21 +164,6 @@ def build_imported_question_from_sidecar(course_dir: Path, identifier: str, sour
     question.course_dir = course_dir
     question.source_package_path = source_package_path
     return question
-
-
-def parse_jsx_expression(expression: str) -> object:
-    return component_syncer().parse_jsx_expression(expression)
-
-
-def load_python_question_semantics() -> list[dict[str, object]]:
-    payload = read_json(find_library_dir(PYTHON_QUESTION_MACHINE_NAME) / "semantics.json")
-    if not isinstance(payload, list):
-        raise ValueError("semantics.json fuer H5P.PythonQuestion muss ein JSON-Array sein.")
-    return [field for field in payload if isinstance(field, dict)]
-
-
-def apply_editable_h5p_payload(question: PythonQuestionBlock, payload: dict[str, object]) -> None:
-    component_syncer().apply_editable_h5p_payload(question, payload)
 
 
 def infer_source_package_sidecar_path(question: PythonQuestionBlock) -> str:
@@ -383,7 +364,13 @@ def template_renderer() -> TemplateRenderer:
 def component_syncer() -> ComponentSyncer:
     return _SERVICE_REGISTRY.get_component_syncer(
         python_question_machine_name=PYTHON_QUESTION_MACHINE_NAME,
-        load_python_question_semantics=load_python_question_semantics,
+        load_python_question_semantics=lambda: [
+            field
+            for field in payload
+            if isinstance(field, dict)
+        ]
+        if isinstance((payload := read_json(find_library_dir(PYTHON_QUESTION_MACHINE_NAME) / "semantics.json")), list)
+        else (_ for _ in ()).throw(ValueError("semantics.json fuer H5P.PythonQuestion muss ein JSON-Array sein.")),
         load_h5p_payload_from_source_package=load_h5p_payload_from_source_package,
         build_h5p_metadata=build_h5p_metadata,
     )
@@ -532,16 +519,16 @@ def mdx_course_parser() -> MdxCourseParser:
         fence_re=FENCE_RE,
         placeholder_template=PLACEHOLDER_TEMPLATE,
         python_question_machine_name=PYTHON_QUESTION_MACHINE_NAME,
-        parse_jsx_expression=parse_jsx_expression,
+        parse_jsx_expression=lambda expression: component_syncer().parse_jsx_expression(expression),
         normalize_whitespace=normalize_whitespace,
         infer_source_package_sidecar_path=infer_source_package_sidecar_path,
         build_imported_question_from_sidecar=build_imported_question_from_sidecar,
-        load_h5p_sidecar_file_wrapper=lambda course_dir, relative_path: load_h5p_sidecar_file(
+        load_h5p_sidecar_file_wrapper=lambda course_dir, relative_path: h5p_file_service().load_h5p_sidecar_file(
             course_dir,
             relative_path,
             description="H5P-Sidecar",
         ),
-        apply_editable_h5p_payload=apply_editable_h5p_payload,
+        apply_editable_h5p_payload=lambda question, payload: component_syncer().apply_editable_h5p_payload(question, payload),
     )
 
 
