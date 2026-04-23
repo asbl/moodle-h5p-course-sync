@@ -54,6 +54,7 @@ from scripts.classes.h5p_runtime_manager.runtime_manager import H5PRuntimeManage
 from scripts.classes.moodle_sync import MoodleSyncer
 from scripts.classes.moodle_sync import MoodleApiClient
 from scripts.classes.moodle_sync import MoodleBackupExtractor
+from scripts.classes.moodle_sync import MoodleClientResolver
 
 
 APP_CONFIG: AppConfig = settings.build_app_config()
@@ -115,24 +116,7 @@ def normalize_whitespace(value: str) -> str:
 
 
 def load_dotenv_file(dotenv_path: Path | None = None) -> None:
-    dotenv_path = dotenv_path or DOTENV_FILE
-    if not dotenv_path.exists():
-        return
-
-    for raw_line in dotenv_path.read_text(encoding="utf-8").splitlines():
-        line = raw_line.strip()
-        if not line or line.startswith("#") or "=" not in line:
-            continue
-
-        key, value = line.split("=", 1)
-        key = key.strip()
-        value = value.strip()
-        if not key or key in os.environ:
-            continue
-
-        if len(value) >= 2 and value[0] == value[-1] and value[0] in {'"', "'"}:
-            value = value[1:-1]
-        os.environ[key] = value
+    moodle_client_resolver().load_dotenv_file(dotenv_path)
 
 
 def strip_html(value: str) -> str:
@@ -713,33 +697,7 @@ def build_moodle_ping_report(client: MoodleApiClient) -> dict[str, object]:
 
 
 def resolve_moodle_client(base_url: str | None = None, token: str | None = None) -> MoodleApiClient:
-    load_dotenv_file()
-    resolved_base_url = (base_url or os.environ.get("MOODLE_BASE_URL", "")).strip()
-    resolved_token = (token or os.environ.get("MOODLE_TOKEN", "")).strip()
-    if not resolved_base_url:
-        raise RuntimeError("MOODLE_BASE_URL ist nicht gesetzt.")
-    if not resolved_token:
-        raise RuntimeError("MOODLE_TOKEN ist nicht gesetzt.")
-    backup_extractor = moodle_backup_extractor()
-    return MoodleApiClient(
-        resolved_base_url,
-        resolved_token,
-        make_stable_identifier=make_stable_identifier,
-        strip_html=strip_html,
-        fetch_text=fetch_text,
-        extract_h5p_package_url_from_activity_html=lambda page_html: extract_h5p_package_url_from_activity_html(
-            page_html,
-            base_url=resolved_base_url,
-        ),
-        download_file=download_file,
-        extract_h5p_package_from_course_backup=lambda base_url, activity, destination: backup_extractor.extract_h5p_package_from_course_backup(
-            base_url,
-            activity,
-            destination,
-        ),
-        build_imported_question_from_h5p_package=build_imported_question_from_h5p_package,
-        write_source_package_sidecar=write_source_package_sidecar,
-    )
+    return moodle_client_resolver().resolve_moodle_client(base_url, token)
 
 
 def ensure_directory(path: Path) -> None:
@@ -981,6 +939,25 @@ def h5p_file_service() -> H5PFileService:
         read_h5p_content_payload=read_h5p_content_payload,
         write_h5p_content_files=write_h5p_content_files,
         write_json=write_json,
+    )
+
+
+def moodle_client_resolver() -> MoodleClientResolver:
+    # Intentionally not cached so tests can monkeypatch module-level dependencies safely.
+    return MoodleClientResolver(
+        dotenv_file=DOTENV_FILE,
+        make_stable_identifier=make_stable_identifier,
+        strip_html=strip_html,
+        fetch_text=fetch_text,
+        extract_h5p_package_url_from_activity_html=lambda page_html, base_url: extract_h5p_package_url_from_activity_html(
+            page_html,
+            base_url=base_url,
+        ),
+        download_file=download_file,
+        moodle_backup_extractor_factory=moodle_backup_extractor,
+        build_imported_question_from_h5p_package=build_imported_question_from_h5p_package,
+        write_source_package_sidecar=write_source_package_sidecar,
+        environ=os.environ,
     )
 
 
