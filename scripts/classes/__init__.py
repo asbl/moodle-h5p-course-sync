@@ -24,6 +24,7 @@ from .runtime_html_rewriter import RuntimeHtmlRewriter
 from .moodle_sync import MoodleSyncer
 from .preview_view import PreviewViewBuilder
 from .template_renderer import TemplateRenderer
+from .text_operations import TextOperations
 
 __all__ = [
     "ContentStore",
@@ -53,5 +54,6 @@ __all__ = [
     "MoodleSyncer",
     "PreviewViewBuilder",
     "TemplateRenderer",
+    "TextOperations",
     "MdxCourseParser",
 ]

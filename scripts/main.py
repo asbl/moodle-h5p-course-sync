@@ -43,12 +43,12 @@ from scripts.classes import (
     SyncMetadataEntry,
     TemplateRenderer,
     TestCase,
+    TextOperations,
     build_course_preview_handler,
 )
 from scripts.classes.component_sync import ComponentSyncer
 from scripts.classes.content_types import ImportedQuestionFactory
 from scripts.config import AppConfig, settings
-from scripts.classes.h5p_runtime_manager import build_runtime_content_id as build_runtime_content_id_helper
 from scripts.classes.h5p_runtime_manager import quote_path_segment as quote_path_segment_helper
 from scripts.classes.h5p_runtime_manager.runtime_manager import H5PRuntimeManager
 from scripts.classes.moodle_sync import MoodleSyncer
@@ -112,44 +112,23 @@ def moodle_backup_extractor() -> MoodleBackupExtractor:
 
 
 def normalize_whitespace(value: str) -> str:
-    return textwrap.dedent(value).strip()
-
-
-def load_dotenv_file(dotenv_path: Path | None = None) -> None:
-    moodle_client_resolver().load_dotenv_file(dotenv_path)
+    return text_operations().normalize_whitespace(value)
 
 
 def strip_html(value: str) -> str:
-    return html.unescape(HTML_TAG_RE.sub(" ", value)).strip()
+    return text_operations().strip_html(value)
 
 
 def compact_text(value: str) -> str:
-    return WHITESPACE_RE.sub(" ", html.unescape(value)).strip()
+    return text_operations().compact_text(value)
 
 
 def slugify_identifier(value: str) -> str:
-    normalized = value.strip().lower()
-    for source, target in {
-        "ä": "ae",
-        "ö": "oe",
-        "ü": "ue",
-        "ß": "ss",
-    }.items():
-        normalized = normalized.replace(source, target)
-    normalized = unicodedata.normalize("NFKD", normalized).encode("ascii", "ignore").decode("ascii")
-    slug = re.sub(r"[^a-z0-9]+", "-", normalized).strip("-")
-    return slug or "h5p"
+    return text_operations().slugify_identifier(value)
 
 
 def make_stable_identifier(title: str, existing_identifiers: set[str]) -> str:
-    base = slugify_identifier(title)
-    identifier = base
-    suffix = 2
-    while identifier in existing_identifiers:
-        identifier = f"{base}-{suffix}"
-        suffix += 1
-    existing_identifiers.add(identifier)
-    return identifier
+    return text_operations().make_stable_identifier(title, existing_identifiers)
 
 
 def fetch_text(url: str) -> str:
@@ -311,12 +290,6 @@ def render_jsx_value(value: object, *, indent: int = 0) -> str:
         return json.dumps(display_value, ensure_ascii=False)
 
     return json.dumps(value, ensure_ascii=False)
-
-
-def render_tag_attribute(name: str, value: str) -> str:
-    if "\n" in value or '"' in value:
-        return f"  {name}={{{render_template_literal(value, indent=2)}}}"
-    return f'  {name}="{escape_mdx_attribute(value)}"'
 
 
 def normalize_template_literal(content: str) -> str:
@@ -577,10 +550,6 @@ def escape_mdx_attribute(value: str) -> str:
     return html.escape(value, quote=True)
 
 
-def parse_tag_attributes(raw_attrs: str) -> dict[str, object]:
-    return mdx_course_parser().parse_tag_attributes(raw_attrs)
-
-
 def parse_course(course_dir: Path) -> tuple[str, list[PythonQuestionBlock], str]:
     return mdx_course_parser().parse_course(course_dir)
 
@@ -773,10 +742,6 @@ def download_file(url: str, destination: Path) -> None:
         shutil.copyfileobj(response, target)
 
 
-def release_metadata_cache_path() -> Path:
-    return h5p_library_manager().release_metadata_cache_path()
-
-
 def find_library_dir(machine_name: str, major_version: int | None = None, minor_version: int | None = None) -> Path:
     return h5p_library_manager().find_library_dir(machine_name, major_version, minor_version)
 
@@ -789,10 +754,6 @@ def register_local_library(library_dir: Path) -> None:
     h5p_library_manager().register_local_library(library_dir)
 
 
-def ensure_custom_h5p_libraries() -> None:
-    h5p_library_manager().ensure_custom_h5p_libraries()
-
-
 def ensure_h5p_runtime_libraries() -> None:
     h5p_library_manager().ensure_h5p_runtime_libraries()
 
@@ -803,14 +764,6 @@ def collect_required_library_dirs(machine_name: str, major_version: int | None =
 
 def collect_required_library_dirs_from_metadata(metadata_payload: dict[str, object]) -> list[Path]:
     return h5p_library_manager().collect_required_library_dirs_from_metadata(metadata_payload)
-
-
-def is_port_open(host: str, port: int) -> bool:
-    return runtime_cli_service().is_port_open(host, port)
-
-
-def wait_for_port(host: str, port: int, timeout_seconds: float = 30.0) -> None:
-    runtime_cli_service().wait_for_port(host, port, timeout_seconds=timeout_seconds)
 
 
 def ensure_h5p_runtime_server(port: int = H5P_RUNTIME_PORT) -> subprocess.Popen[str] | None:
@@ -956,6 +909,14 @@ def moodle_client_resolver() -> MoodleClientResolver:
         build_imported_question_from_h5p_package=build_imported_question_from_h5p_package,
         write_source_package_sidecar=write_source_package_sidecar,
         environ=os.environ,
+    )
+
+
+def text_operations() -> TextOperations:
+    # Intentionally not cached so tests can monkeypatch module-level dependencies safely.
+    return TextOperations(
+        html_tag_re=HTML_TAG_RE,
+        whitespace_re=WHITESPACE_RE,
     )
 
 
@@ -1128,10 +1089,6 @@ def escape_inline(value: str) -> str:
 
 def quote_path_segment(value: str) -> str:
     return quote_path_segment_helper(value)
-
-
-def build_runtime_content_id(course_slug: str, identifier: str) -> str:
-    return build_runtime_content_id_helper(course_slug, identifier)
 
 
 def render_course_page(

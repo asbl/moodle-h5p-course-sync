@@ -19,18 +19,14 @@ from scripts.main import (
     build_h5p_content,
     build_editable_h5p_payload,
     build_course_status,
-    build_runtime_content_id,
     build_imported_question_from_h5p_package,
     compute_question_hash,
-    ensure_custom_h5p_libraries,
     extract_h5p_package_url_from_activity_html,
     import_moodle_course,
-    load_dotenv_file,
     load_course_preview_state,
     load_sync_metadata,
     make_stable_identifier,
     parse_course,
-    parse_tag_attributes,
     render_imported_question_mdx,
     render_course_page,
     resolve_moodle_client,
@@ -40,6 +36,7 @@ from scripts.main import (
     write_h5p_package,
     write_source_package_sidecar,
 )
+from scripts.classes.h5p_runtime_manager import build_runtime_content_id
 
 
 class CourseSyncTests(unittest.TestCase):
@@ -641,7 +638,9 @@ print("quadrat")
         self.assertNotIn("&quot;", mdx)
 
     def test_parse_tag_attributes_supports_template_literals(self) -> None:
-        attrs = parse_tag_attributes(
+        from scripts import main as module
+
+        attrs = module.mdx_course_parser().parse_tag_attributes(
             ' instructions={`Zeile 1\nZeile 2 mit "Zitat"`} h5p={{"contents": [{"text": `A "B"\n\nC`} ]}} '
         )
 
@@ -1005,6 +1004,8 @@ print("quadrat")
         self.assertEqual(reloaded.entries["12eck"].local_hash, "abc")
 
     def test_load_dotenv_file_sets_missing_values_only(self) -> None:
+        from scripts import main as module
+
         dotenv_path = self.root / ".env"
         dotenv_path.write_text(
             'MOODLE_BASE_URL="https://example.invalid"\nMOODLE_TOKEN=test-token\n',
@@ -1014,12 +1015,12 @@ print("quadrat")
         original_base = os.environ.pop("MOODLE_BASE_URL", None)
         original_token = os.environ.pop("MOODLE_TOKEN", None)
         try:
-            load_dotenv_file(dotenv_path)
+            module.moodle_client_resolver().load_dotenv_file(dotenv_path)
             self.assertEqual(os.environ["MOODLE_BASE_URL"], "https://example.invalid")
             self.assertEqual(os.environ["MOODLE_TOKEN"], "test-token")
 
             os.environ["MOODLE_TOKEN"] = "override-token"
-            load_dotenv_file(dotenv_path)
+            module.moodle_client_resolver().load_dotenv_file(dotenv_path)
             self.assertEqual(os.environ["MOODLE_TOKEN"], "override-token")
         finally:
             if original_base is None:
@@ -1333,7 +1334,7 @@ print("quadrat")
                 raise AssertionError(f"fetch_json should not be called: {url}")
 
             module.fetch_json = fail_fetch
-            ensure_custom_h5p_libraries()
+            module.h5p_library_manager().ensure_custom_h5p_libraries()
         finally:
             module.H5P_RUNTIME_LIBRARIES_DIR = original_libraries_dir
             module.H5P_RUNTIME_DOWNLOADS_DIR = original_downloads_dir
@@ -1354,7 +1355,7 @@ print("quadrat")
             module.H5P_RUNTIME_DOWNLOADS_DIR = self.root / ".h5p-runtime" / "downloads"
             module.H5P_RUNTIME_DOWNLOADS_DIR.mkdir(parents=True, exist_ok=True)
 
-            cache_path = module.release_metadata_cache_path()
+            cache_path = module.h5p_library_manager().release_metadata_cache_path()
             cache_path.write_text(
                 json.dumps(
                     {
@@ -1410,7 +1411,7 @@ print("quadrat")
             H5PLibraryManager.extract_library_asset = fake_extract
             H5PLibraryManager.register_local_library = fake_register
 
-            ensure_custom_h5p_libraries()
+            module.h5p_library_manager().ensure_custom_h5p_libraries()
         finally:
             module.H5P_RUNTIME_LIBRARIES_DIR = original_libraries_dir
             module.H5P_RUNTIME_DOWNLOADS_DIR = original_downloads_dir
