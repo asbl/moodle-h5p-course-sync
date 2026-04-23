@@ -45,6 +45,7 @@ from scripts.classes import (
 )
 from scripts.classes.component_sync import ComponentSyncer
 from scripts.classes.content_types import ImportedQuestionFactory
+from scripts.classes.sync_metadata_store import SyncMetadataStore
 from scripts.config import AppConfig, settings
 from scripts.classes.h5p_runtime_manager import quote_path_segment as quote_path_segment_helper
 from scripts.classes.h5p_runtime_manager.runtime_manager import H5PRuntimeManager
@@ -226,24 +227,15 @@ def parse_course(course_dir: Path) -> tuple[str, list[PythonQuestionBlock], str]
 
 
 def sync_metadata_path(course_dir: Path) -> Path:
-    return course_dir / SYNC_METADATA_FILE
+    return _SYNC_METADATA_STORE.path(course_dir)
 
 
 def load_sync_metadata(course_dir: Path) -> SyncMetadata | None:
-    metadata_path = sync_metadata_path(course_dir)
-    if not metadata_path.exists():
-        return None
-    payload = json.loads(metadata_path.read_text(encoding="utf-8"))
-    if not isinstance(payload, dict):
-        raise ValueError(f"Sync-Metadaten in {metadata_path} sind kein JSON-Objekt.")
-    return SyncMetadata.from_dict(payload)
+    return _SYNC_METADATA_STORE.load(course_dir)
 
 
 def save_sync_metadata(course_dir: Path, metadata: SyncMetadata) -> Path:
-    ensure_directory(course_dir)
-    metadata_path = sync_metadata_path(course_dir)
-    metadata_path.write_text(json.dumps(metadata.to_dict(), indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-    return metadata_path
+    return _SYNC_METADATA_STORE.save(course_dir, metadata)
 
 
 def compute_question_hash(question: PythonQuestionBlock) -> str:
@@ -272,6 +264,12 @@ def resolve_moodle_client(base_url: str | None = None, token: str | None = None)
 
 def ensure_directory(path: Path) -> None:
     path.mkdir(parents=True, exist_ok=True)
+
+
+_SYNC_METADATA_STORE = SyncMetadataStore(
+    sync_metadata_file=SYNC_METADATA_FILE,
+    ensure_directory=ensure_directory,
+)
 
 
 def read_json(path: Path) -> dict:

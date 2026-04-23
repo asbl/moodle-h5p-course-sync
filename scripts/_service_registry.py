@@ -3,6 +3,9 @@
 from __future__ import annotations
 
 import re
+from pathlib import Path
+from threading import RLock
+from typing import Callable, Protocol
 
 from scripts.classes import (
     CourseOrchestrator,
@@ -11,12 +14,22 @@ from scripts.classes import (
     MdxCourseParser,
     PreviewController,
     PreviewViewBuilder,
+    PythonQuestionBlock,
+    SyncMetadata,
     RuntimeHtmlRewriter,
     TemplateRenderer,
 )
 from scripts.classes.component_sync import ComponentSyncer
 from scripts.classes.h5p_runtime_manager.runtime_manager import H5PRuntimeManager
 from scripts.classes.moodle_sync import MoodleSyncer
+
+
+class RuntimePathBuilder(Protocol):
+    def __call__(self, question: PythonQuestionBlock, mode: str, *, simple: bool = False) -> str: ...
+
+
+class WaitingPageRenderer(Protocol):
+    def __call__(self, question: PythonQuestionBlock, *, mode: str = "view", simple: bool = False) -> str: ...
 
 
 class ServiceRegistry:
@@ -38,9 +51,9 @@ class ServiceRegistry:
     def get_preview_view_builder(
         self,
         runtime_proxy_prefix: str,
-        quote_path_segment: callable,  # type: ignore[type-arg]
-        escape_inline: callable,  # type: ignore[type-arg]
-        build_runtime_proxy_path: callable,  # type: ignore[type-arg]
+        quote_path_segment: Callable[[str], str],
+        escape_inline: Callable[[str], str],
+        build_runtime_proxy_path: RuntimePathBuilder,
     ) -> PreviewViewBuilder:
         if self._preview_view_builder is None:
             self._preview_view_builder = PreviewViewBuilder(
@@ -53,13 +66,13 @@ class ServiceRegistry:
 
     def get_preview_controller(
         self,
-        courses_dir: object,
-        load_course_preview_state: callable,  # type: ignore[type-arg]
-        get_runtime_preparation_state: callable,  # type: ignore[type-arg]
-        start_runtime_question_preparation: callable,  # type: ignore[type-arg]
-        is_runtime_question_ready: callable,  # type: ignore[type-arg]
-        build_runtime_proxy_path: callable,  # type: ignore[type-arg]
-        render_preview_waiting_page: callable,  # type: ignore[type-arg]
+        courses_dir: Path,
+        load_course_preview_state: Callable[[Path], tuple[list[PythonQuestionBlock], str]],
+        get_runtime_preparation_state: Callable[[PythonQuestionBlock], dict[str, str]],
+        start_runtime_question_preparation: Callable[[PythonQuestionBlock], None],
+        is_runtime_question_ready: Callable[[PythonQuestionBlock], bool],
+        build_runtime_proxy_path: RuntimePathBuilder,
+        render_preview_waiting_page: WaitingPageRenderer,
     ) -> PreviewController:
         if self._preview_controller is None:
             self._preview_controller = PreviewController(
@@ -75,7 +88,7 @@ class ServiceRegistry:
 
     def get_markdown_renderer(
         self,
-        escape_inline: callable,  # type: ignore[type-arg]
+        escape_inline: Callable[[str], str],
     ) -> MarkdownRenderer:
         if self._markdown_renderer is None:
             self._markdown_renderer = MarkdownRenderer(escape_inline=escape_inline)
@@ -83,7 +96,7 @@ class ServiceRegistry:
 
     def get_template_renderer(
         self,
-        escape_inline: callable,  # type: ignore[type-arg]
+        escape_inline: Callable[[str], str],
     ) -> TemplateRenderer:
         if self._template_renderer is None:
             self._template_renderer = TemplateRenderer(escape_inline=escape_inline)
@@ -92,9 +105,11 @@ class ServiceRegistry:
     def get_component_syncer(
         self,
         python_question_machine_name: str,
-        load_python_question_semantics: callable,  # type: ignore[type-arg]
-        load_h5p_payload_from_source_package: callable,  # type: ignore[type-arg]
-        build_h5p_metadata: callable,  # type: ignore[type-arg]
+        load_python_question_semantics: Callable[[], list[dict[str, object]]],
+        load_h5p_payload_from_source_package: Callable[
+            [PythonQuestionBlock], tuple[dict[str, object], dict[str, object]] | None
+        ],
+        build_h5p_metadata: Callable[[PythonQuestionBlock], dict],
     ) -> ComponentSyncer:
         if self._component_syncer is None:
             self._component_syncer = ComponentSyncer(
@@ -107,16 +122,16 @@ class ServiceRegistry:
 
     def get_h5p_runtime_manager(
         self,
-        runtime_dir: object,
+        runtime_dir: Path,
         runtime_port: int,
         runtime_proxy_prefix: str,
-        custom_h5p_library_short_names: dict,  # type: ignore[type-arg]
+        custom_h5p_library_short_names: dict[str, str],
         runtime_preparation: object,
-        get_preview_view_builder: callable,  # type: ignore[type-arg]
-        compute_question_hash: callable,  # type: ignore[type-arg]
-        write_h5p_package: callable,  # type: ignore[type-arg]
-        import_question_into_runtime: callable,  # type: ignore[type-arg]
-        read_json_or_default: callable,  # type: ignore[type-arg]
+        get_preview_view_builder: Callable[[], PreviewViewBuilder],
+        compute_question_hash: Callable[[PythonQuestionBlock], str],
+        write_h5p_package: Callable[[PythonQuestionBlock], Path],
+        import_question_into_runtime: Callable[[PythonQuestionBlock], None],
+        read_json_or_default: Callable[[Path, dict], dict],
     ) -> H5PRuntimeManager:
         if self._h5p_runtime_manager is None:
             self._h5p_runtime_manager = H5PRuntimeManager(
@@ -135,13 +150,13 @@ class ServiceRegistry:
 
     def get_moodle_syncer(
         self,
-        courses_dir: object,
-        ensure_directory: callable,  # type: ignore[type-arg]
-        render_imported_question_mdx: callable,  # type: ignore[type-arg]
-        parse_course: callable,  # type: ignore[type-arg]
-        compute_question_hash: callable,  # type: ignore[type-arg]
-        save_sync_metadata: callable,  # type: ignore[type-arg]
-        escape_mdx_attribute: callable,  # type: ignore[type-arg]
+        courses_dir: Path,
+        ensure_directory: Callable[[Path], None],
+        render_imported_question_mdx: Callable[[PythonQuestionBlock], list[str]],
+        parse_course: Callable[[Path], tuple[str, list[PythonQuestionBlock], str]],
+        compute_question_hash: Callable[[PythonQuestionBlock], str],
+        save_sync_metadata: Callable[[Path, SyncMetadata], Path],
+        escape_mdx_attribute: Callable[[str], str],
     ) -> MoodleSyncer:
         if self._moodle_syncer is None:
             self._moodle_syncer = MoodleSyncer(
@@ -157,14 +172,14 @@ class ServiceRegistry:
 
     def get_course_orchestrator(
         self,
-        workspace_lock: object,
-        courses_dir: object,
-        preview_cache: dict,  # type: ignore[type-arg]
-        parse_course: callable,  # type: ignore[type-arg]
-        write_h5p_package: callable,  # type: ignore[type-arg]
-        render_course_page: callable,  # type: ignore[type-arg]
-        load_sync_metadata: callable,  # type: ignore[type-arg]
-        compute_question_hash: callable,  # type: ignore[type-arg]
+        workspace_lock: RLock,
+        courses_dir: Path,
+        preview_cache: dict[str, tuple[int, list[PythonQuestionBlock], str]],
+        parse_course: Callable[[Path], tuple[str, list[PythonQuestionBlock], str]],
+        write_h5p_package: Callable[[PythonQuestionBlock], Path],
+        render_course_page: Callable[..., str],
+        load_sync_metadata: Callable[[Path], SyncMetadata | None],
+        compute_question_hash: Callable[[PythonQuestionBlock], str],
     ) -> CourseOrchestrator:
         if self._course_orchestrator is None:
             self._course_orchestrator = CourseOrchestrator(
@@ -193,16 +208,16 @@ class ServiceRegistry:
 
     def get_mdx_course_parser(
         self,
-        tag_re: re.Pattern,  # type: ignore[type-arg]
-        fence_re: re.Pattern,  # type: ignore[type-arg]
+        tag_re: re.Pattern[str],
+        fence_re: re.Pattern[str],
         placeholder_template: str,
         python_question_machine_name: str,
-        parse_jsx_expression: callable,  # type: ignore[type-arg]
-        normalize_whitespace: callable,  # type: ignore[type-arg]
-        infer_source_package_sidecar_path: callable,  # type: ignore[type-arg]
-        build_imported_question_from_sidecar: callable,  # type: ignore[type-arg]
-        load_h5p_sidecar_file_wrapper: callable,  # type: ignore[type-arg]
-        apply_editable_h5p_payload: callable,  # type: ignore[type-arg]
+        parse_jsx_expression: Callable[[str], object],
+        normalize_whitespace: Callable[[str], str],
+        infer_source_package_sidecar_path: Callable[[PythonQuestionBlock], str],
+        build_imported_question_from_sidecar: Callable[[Path, str, str], PythonQuestionBlock | None],
+        load_h5p_sidecar_file_wrapper: Callable[[Path, str], dict[str, object]],
+        apply_editable_h5p_payload: Callable[[PythonQuestionBlock, dict[str, object]], None],
     ) -> MdxCourseParser:
         if self._mdx_course_parser is None:
             self._mdx_course_parser = MdxCourseParser(
@@ -221,8 +236,8 @@ class ServiceRegistry:
 
     def get_h5p_import_mapper(
         self,
-        compact_text: callable,  # type: ignore[type-arg]
-        normalize_whitespace: callable,  # type: ignore[type-arg]
+        compact_text: Callable[[str], str],
+        normalize_whitespace: Callable[[str], str],
     ) -> H5PImportMapper:
         if self._h5p_import_mapper is None:
             self._h5p_import_mapper = H5PImportMapper(
