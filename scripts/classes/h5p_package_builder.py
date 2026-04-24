@@ -113,6 +113,8 @@ class H5PPackageBuilder:
                 content_payload = json.loads(json.dumps(question.h5p_content, ensure_ascii=False))
                 metadata_payload["title"] = question.title
                 metadata_payload["mainLibrary"] = question.main_library
+                if question.main_library == self._python_question_machine_name:
+                    metadata_payload = self._normalize_imported_python_question_metadata(question, metadata_payload)
                 if "pythonRunner" in content_payload or question.main_library == self._python_question_machine_name:
                     content_payload["pythonRunner"] = question.runner
 
@@ -172,3 +174,27 @@ class H5PPackageBuilder:
                 )
 
             return question.package_path
+
+    def _normalize_imported_python_question_metadata(
+        self,
+        question: PythonQuestionBlock,
+        metadata_payload: dict[str, object],
+    ) -> dict[str, object]:
+        """Fill required H5P metadata fields when imported sidecar metadata is incomplete."""
+        baseline = self.build_h5p_metadata(question)
+
+        dependencies = metadata_payload.get("preloadedDependencies")
+        if not isinstance(dependencies, list) or not dependencies:
+            metadata_payload["preloadedDependencies"] = baseline["preloadedDependencies"]
+
+        if not isinstance(metadata_payload.get("majorVersion"), int):
+            metadata_payload["majorVersion"] = baseline["majorVersion"]
+        if not isinstance(metadata_payload.get("minorVersion"), int):
+            metadata_payload["minorVersion"] = baseline["minorVersion"]
+        if not isinstance(metadata_payload.get("embedTypes"), list):
+            metadata_payload["embedTypes"] = baseline["embedTypes"]
+
+        metadata_payload.setdefault("language", baseline["language"])
+        metadata_payload.setdefault("defaultLanguage", baseline["defaultLanguage"])
+        metadata_payload.setdefault("license", baseline["license"])
+        return metadata_payload

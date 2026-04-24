@@ -775,6 +775,97 @@ print("quadrat")
             self.assertEqual(json.loads(archive.read("content/content.json").decode("utf-8"))["pythonRunner"], "skulpt")
             self.assertEqual(archive.read("content/extra.txt").decode("utf-8"), "behalten")
 
+    def test_write_h5p_package_recovers_missing_python_question_preloaded_dependencies(self) -> None:
+        from scripts import main as module
+
+        original_download_file = module.download_file
+        original_courses_dir = module.COURSES_DIR
+        original_runtime_libraries_dir = module.H5P_RUNTIME_LIBRARIES_DIR
+        original_ensure_runtime = module.ensure_h5p_runtime_libraries
+        try:
+            module.COURSES_DIR = self.root / "courses"
+            module.H5P_RUNTIME_LIBRARIES_DIR = self.root / ".h5p-runtime" / "libraries"
+            module.ensure_h5p_runtime_libraries = lambda: None
+
+            self._create_fake_library(module.H5P_RUNTIME_LIBRARIES_DIR, "H5P.Question", 1, 5, [])
+            self._create_fake_library(module.H5P_RUNTIME_LIBRARIES_DIR, "H5P.LibCodeTools", 6, 73, [])
+            self._create_fake_library(
+                module.H5P_RUNTIME_LIBRARIES_DIR,
+                "H5P.CodeQuestion",
+                6,
+                73,
+                [("H5P.Question", 1, 5), ("H5P.LibCodeTools", 6, 73)],
+            )
+            self._create_fake_library(
+                module.H5P_RUNTIME_LIBRARIES_DIR,
+                "H5P.PythonQuestion",
+                6,
+                73,
+                [("H5P.CodeQuestion", 6, 73), ("H5P.LibCodeTools", 6, 73)],
+            )
+
+            def fake_download(url: str, destination: Path) -> None:
+                with ZipFile(destination, "w") as archive:
+                    archive.writestr(
+                        "h5p.json",
+                        json.dumps({"title": "Original", "mainLibrary": "H5P.PythonQuestion"}),
+                    )
+                    archive.writestr(
+                        "content/content.json",
+                        json.dumps(
+                            {
+                                "contentType": "text_only",
+                                "pythonRunner": "skulpt",
+                                "contents": [{"type": "text", "text": "A"}],
+                                "editorSettings": {"instructions": "A", "options": {}},
+                                "gradingSettings": {},
+                            }
+                        ),
+                    )
+
+            module.download_file = fake_download
+            question = build_imported_question_from_h5p_package(
+                "python-2026",
+                MoodleH5PActivity(
+                    identifier="einfuehrung-farben",
+                    title="Einführung: Farben",
+                    course_id=5,
+                    activity_id=145,
+                    instance_id=105,
+                    section_title="Farben",
+                    intro="",
+                    url="https://example.invalid/mod/h5pactivity/view.php?id=145",
+                    package_url="https://example.invalid/pluginfile.php/168/mod_h5pactivity/package/0/einfuhrung-farben-891.h5p",
+                ),
+                {
+                    "title": "Einführung: Farben",
+                    "mainLibrary": "H5P.PythonQuestion",
+                },
+                {
+                    "contentType": "text_only",
+                    "pythonRunner": "skulpt",
+                    "contents": [{"type": "text", "text": "A"}],
+                    "editorSettings": {"instructions": "A", "options": {}},
+                    "gradingSettings": {},
+                },
+            )
+
+            assert question is not None
+            package_path = write_h5p_package(question)
+        finally:
+            module.download_file = original_download_file
+            module.COURSES_DIR = original_courses_dir
+            module.H5P_RUNTIME_LIBRARIES_DIR = original_runtime_libraries_dir
+            module.ensure_h5p_runtime_libraries = original_ensure_runtime
+
+        with ZipFile(package_path) as archive:
+            metadata = json.loads(archive.read("h5p.json").decode("utf-8"))
+
+        self.assertEqual(metadata["mainLibrary"], "H5P.PythonQuestion")
+        self.assertIn("preloadedDependencies", metadata)
+        self.assertIsInstance(metadata["preloadedDependencies"], list)
+        self.assertGreater(len(metadata["preloadedDependencies"]), 0)
+
     def test_extract_h5p_package_from_course_backup_recovers_hidden_activity(self) -> None:
         backup_path = self.root / "course.mbz"
         destination = self.root / "timestamps2.h5p"
