@@ -40,6 +40,26 @@ DEFAULT_BLOCKLY_CATEGORIES: dict[str, object] = {
     "functions": True,
 }
 
+DEFAULT_ADVANCED_OPTIONS: dict[str, object] = {
+    "showConsole": True,
+    "disableOutputPopups": False,
+    "enableSaveLoadButtons": True,
+    "execLimit": 0,
+    "blocklyCdnUrl": "",
+    "codeMirrorCdnUrl": "",
+    "markdownCdnUrl": "",
+    "fontAwesomeCdnUrl": "",
+    "sweetAlertCdnUrl": "",
+    "jsZipCdnUrl": "",
+    "p5CdnUrl": "",
+    "skulptCdnUrl": "",
+    "sqlJsUrl": "",
+}
+
+DEFAULT_PYODIDE_OPTIONS: dict[str, object] = {
+    "pyodideCdnUrl": "",
+}
+
 
 class ContentFormatStrategy(Protocol):
     suffixes: tuple[str, ...]
@@ -191,6 +211,7 @@ class ContentStore:
 
     def _strip_redundant_defaults(self, payload: dict[str, object]) -> dict[str, object]:
         compact = deepcopy(payload)
+        is_python_payload = self._is_python_question_payload(compact)
         contents = compact.get("contents")
         if isinstance(contents, list):
             for item in contents:
@@ -220,10 +241,24 @@ class ContentStore:
                 if not editor_blockly:
                     editor.pop("blocklyCategories", None)
 
+        if is_python_payload:
+            advanced_options = compact.get("advancedOptions")
+            if isinstance(advanced_options, dict):
+                self._strip_default_values(advanced_options, DEFAULT_ADVANCED_OPTIONS)
+                if not advanced_options:
+                    compact.pop("advancedOptions", None)
+
+            pyodide_options = compact.get("pyodideOptions")
+            if isinstance(pyodide_options, dict):
+                self._strip_default_values(pyodide_options, DEFAULT_PYODIDE_OPTIONS)
+                if not pyodide_options:
+                    compact.pop("pyodideOptions", None)
+
         return compact
 
     def _expand_compact_defaults(self, payload: dict[str, object]) -> dict[str, object]:
         expanded = deepcopy(payload)
+        is_python_payload = self._is_python_question_payload(expanded)
         contents = expanded.get("contents")
         if isinstance(contents, list):
             for item in contents:
@@ -255,7 +290,27 @@ class ContentStore:
                 editor["blocklyCategories"] = editor_blockly
             self._apply_default_values(editor_blockly, DEFAULT_BLOCKLY_CATEGORIES)
 
+        if is_python_payload:
+            advanced_options = expanded.get("advancedOptions")
+            if not isinstance(advanced_options, dict):
+                advanced_options = {}
+                expanded["advancedOptions"] = advanced_options
+            self._apply_default_values(advanced_options, DEFAULT_ADVANCED_OPTIONS)
+
+            pyodide_options = expanded.get("pyodideOptions")
+            if not isinstance(pyodide_options, dict):
+                pyodide_options = {}
+                expanded["pyodideOptions"] = pyodide_options
+            self._apply_default_values(pyodide_options, DEFAULT_PYODIDE_OPTIONS)
+
         return expanded
+
+    def _is_python_question_payload(self, payload: dict[str, object]) -> bool:
+        runner = payload.get("pythonRunner")
+        if isinstance(runner, str) and runner.strip():
+            return True
+        content_type = payload.get("contentType")
+        return isinstance(content_type, str) and content_type in {"ide_only", "text_only"}
 
     def _strip_default_values(self, target: dict[str, object], defaults: dict[str, object]) -> None:
         for key, default_value in defaults.items():

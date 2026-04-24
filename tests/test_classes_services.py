@@ -37,6 +37,7 @@ class ContentStoreTests(unittest.TestCase):
         store = ContentStore()
         payload = {
             "contentType": "text_only",
+            "pythonRunner": "skulpt",
             "contents": [
                 {
                     "type": "text",
@@ -112,6 +113,24 @@ class ContentStoreTests(unittest.TestCase):
                     "functions": True,
                 },
             },
+            "advancedOptions": {
+                "showConsole": True,
+                "disableOutputPopups": False,
+                "enableSaveLoadButtons": True,
+                "execLimit": 0,
+                "blocklyCdnUrl": "",
+                "codeMirrorCdnUrl": "",
+                "markdownCdnUrl": "",
+                "fontAwesomeCdnUrl": "",
+                "sweetAlertCdnUrl": "",
+                "jsZipCdnUrl": "",
+                "p5CdnUrl": "",
+                "skulptCdnUrl": "",
+                "sqlJsUrl": "",
+            },
+            "pyodideOptions": {
+                "pyodideCdnUrl": "",
+            },
         }
 
         with tempfile.TemporaryDirectory() as tmp:
@@ -123,12 +142,40 @@ class ContentStoreTests(unittest.TestCase):
         self.assertNotIn("showEditor", raw_yaml)
         self.assertNotIn("editorMode", raw_yaml)
         self.assertNotIn("blocklyCategories", raw_yaml)
+        self.assertNotIn("advancedOptions", raw_yaml)
+        self.assertNotIn("pyodideOptions", raw_yaml)
 
         self.assertEqual(loaded["contents"][0]["options"]["showEditor"], True)
         self.assertEqual(loaded["contents"][0]["options"]["editorMode"], "code")
         self.assertEqual(loaded["contents"][0]["blocklyCategories"]["variables"], True)
         self.assertEqual(loaded["editorSettings"]["options"]["allowAddingFiles"], False)
         self.assertEqual(loaded["editorSettings"]["blocklyCategories"]["functions"], True)
+        self.assertEqual(loaded["advancedOptions"]["p5CdnUrl"], "")
+        self.assertEqual(loaded["advancedOptions"]["showConsole"], True)
+        self.assertEqual(loaded["pyodideOptions"]["pyodideCdnUrl"], "")
+
+    def test_write_h5p_content_files_keeps_non_default_advanced_option(self) -> None:
+        store = ContentStore()
+        payload = {
+            "contentType": "text_only",
+            "pythonRunner": "skulpt",
+            "contents": [{"type": "text", "text": "Kurz"}],
+            "advancedOptions": {
+                "p5CdnUrl": "https://cdn.example/p5.js",
+                "showConsole": True,
+            },
+        }
+
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp)
+            store.write_h5p_content_files(target, payload)
+            raw_yaml = (target / "content.yml").read_text(encoding="utf-8")
+            loaded = store.read_h5p_content_payload(target)
+
+        self.assertIn("advancedOptions", raw_yaml)
+        self.assertIn("p5CdnUrl", raw_yaml)
+        self.assertIn("https://cdn.example/p5.js", raw_yaml)
+        self.assertEqual(loaded["advancedOptions"]["p5CdnUrl"], "https://cdn.example/p5.js")
 
 
 class RuntimePreparationServiceTests(unittest.TestCase):
