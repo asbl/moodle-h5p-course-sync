@@ -1,0 +1,97 @@
+# Example template for a complete PythonQuestion content.yml
+# Includes all commonly used fields before compaction.
+
+contentType: ide_only
+# pythonRunner alternatives:
+# - pyodide: modern Python runtime in WASM, supports many pure Python packages.
+# - skulpt: lightweight browser runtime, fast startup, fewer package features.
+#
+# Recommended defaults:
+# - use "pyodide" for most exercises
+# - use "skulpt" if you prioritize startup speed and do not need pyodide packages
+pythonRunner: pyodide
+
+contents:
+- type: text
+  text: |-
+    `Beschreibe hier die Aufgabe fuer Lernende.`
+  code: |-
+    ``
+  options:
+    showEditor: true
+    enableImageUploads: false
+    defaultImages:
+    - {}
+    enableSoundUploads: false
+    sourceFiles:
+    - visibleToLearner: true
+      learnerEditable: true
+    allowAddingFiles: false
+    editorMode: code
+  blocklyCategories:
+    variables: true
+    logic: true
+    loops: true
+    math: true
+    text: true
+    lists: true
+    functions: true
+
+editorSettings:
+  instructions: |-
+    `Optionale Zusatzhinweise fuer die Aufgabe.`
+  preCode: ''
+  startingCode: |-
+    `print("Hello World")
+    `
+  postCode: ''
+  options:
+    enableImageUploads: false
+    defaultImages:
+    - {}
+    enableSoundUploads: false
+    sourceFiles:
+    - code: ''
+      visibleToLearner: true
+      learnerEditable: true
+    allowAddingFiles: false
+    editorMode: code
+  blocklyCategories:
+    variables: true
+    logic: true
+    loops: true
+    math: true
+    text: true
+    lists: true
+    functions: true
+
+gradingSettings:
+  gradingMethod: please_choose
+  dueDateGroup:
+    enableDueDate: true
+    duedate: 01.01.1970 00:00:00
+  testCases: []
+  targetCode: ''
+
+advancedOptions:
+  showConsole: true
+  disableOutputPopups: false
+  enableSaveLoadButtons: true
+  execLimit: 0
+  blocklyCdnUrl: ''
+  codeMirrorCdnUrl: ''
+  markdownCdnUrl: ''
+  fontAwesomeCdnUrl: ''
+  sweetAlertCdnUrl: ''
+  jsZipCdnUrl: ''
+  p5CdnUrl: ''
+  skulptCdnUrl: ''
+  sqlJsUrl: ''
+
+pyodideOptions:
+  pyodideCdnUrl: ''
+  packages: []
+
+# Example runner switch:
+# pythonRunner: skulpt
+# pyodideOptions can be omitted when using skulpt.

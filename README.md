@@ -145,6 +145,8 @@ Beim Synchronisieren werden die H5P-Artefakte direkt unter `courses/<kurs>/h5p/`
 
 `content.yml` ist die lokale Quelle fuer den H5P-Content und ist fuer manuelle Bearbeitung lesbar, inklusive formatierten Sonderzeichen. Das `content/content.json` im `.h5p`-Archiv wird bei Bedarf aus `content.yml` generiert. Assets aus dem H5P-`content/`-Bereich liegen lokal ohne zusaetzliche Zwischenebene direkt im Aufgabenordner, also zum Beispiel unter `courses/<kurs>/h5p/<identifier>/images/`.
 
+Eine vollstaendige Vorlage fuer neue `content.yml`-Dateien (inklusive Runner-Alternativen `pyodide`/`skulpt`) liegt unter `docs/content-example.yml`.
+
 Die benoetigten H5P-Libraries werden nicht mehr kurslokal unter `courses/<kurs>/h5p/libraries/` abgelegt. Stattdessen liegen zentrale Kopien nur unter `libraries/`. Beim Bauen der `.h5p`-Archive werden die benoetigten Libraries von dort in das Paket aufgenommen.
 
 ## Moodle-Import und Status
