@@ -3,33 +3,12 @@ from __future__ import annotations
 import json
 import os
 from copy import deepcopy
+from io import StringIO
 from pathlib import Path
 from typing import Protocol
 
-import yaml
-from yaml.representer import SafeRepresenter
-
-
-class _BacktickLiteral(str):
-    """Marker string type to force YAML literal block output."""
-
-
-class _ContentYamlDumper(yaml.SafeDumper):
-    pass
-
-
-def _represent_backtick_literal(dumper: yaml.Dumper, value: _BacktickLiteral) -> yaml.ScalarNode:
-    return dumper.represent_scalar("tag:yaml.org,2002:str", str(value), style="|")
-
-
-def _represent_string_with_backtick_blocks(dumper: yaml.Dumper, value: str) -> yaml.ScalarNode:
-    if len(value) >= 2 and value.startswith("`") and value.endswith("`"):
-        return dumper.represent_scalar("tag:yaml.org,2002:str", value, style="|")
-    return SafeRepresenter.represent_str(dumper, value)
-
-
-_ContentYamlDumper.add_representer(_BacktickLiteral, _represent_backtick_literal)
-_ContentYamlDumper.add_representer(str, _represent_string_with_backtick_blocks)
+from ruamel.yaml import YAML
+from ruamel.yaml.scalarstring import LiteralScalarString
 
 
 DEFAULT_CONTENT_ITEM_OPTIONS: dict[str, object] = {
@@ -83,17 +62,32 @@ class JsonFormatStrategy:
 class YamlFormatStrategy:
     suffixes = (".yml", ".yaml")
 
+    def __init__(self) -> None:
+        self._yaml_reader = YAML(typ="safe")
+        self._yaml_writer = YAML()
+        self._yaml_writer.default_flow_style = False
+        self._yaml_writer.allow_unicode = True
+        self._yaml_writer.sort_base_mapping_type_on_output = False
+
     def load(self, path: Path) -> object:
-        return yaml.safe_load(path.read_text(encoding="utf-8"))
+        return self._yaml_reader.load(path.read_text(encoding="utf-8"))
 
     def dump(self, payload: object) -> str:
-        return yaml.dump(
-            payload,
-            Dumper=_ContentYamlDumper,
-            allow_unicode=True,
-            sort_keys=False,
-            default_flow_style=False,
-        )
+        stream = StringIO()
+        self._yaml_writer.dump(self._to_literal_scalars(payload), stream)
+        text = stream.getvalue()
+        if not text.endswith("\n"):
+            text += "\n"
+        return text
+
+    def _to_literal_scalars(self, node: object) -> object:
+        if isinstance(node, dict):
+            return {key: self._to_literal_scalars(value) for key, value in node.items()}
+        if isinstance(node, list):
+            return [self._to_literal_scalars(item) for item in node]
+        if isinstance(node, str) and len(node) >= 2 and node.startswith("`") and node.endswith("`"):
+            return LiteralScalarString(node)
+        return node
 
 
 class ContentStore:
@@ -170,7 +164,7 @@ class ContentStore:
             if isinstance(node, str) and parent_key in {"text", "code"}:
                 normalized = node.replace("\\r\\n", "\n").replace("\\n", "\n")
                 if "\n" in normalized or len(normalized) >= 120:
-                    return _BacktickLiteral(f"`{normalized}`")
+                    return f"`{normalized}`"
                 return normalized
             return node
 
