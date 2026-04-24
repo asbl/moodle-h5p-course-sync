@@ -33,6 +33,103 @@ class ContentStoreTests(unittest.TestCase):
             loaded = store.read_h5p_content_payload(target)
             self.assertEqual(loaded["key"], "value")
 
+    def test_write_h5p_content_files_uses_backtick_literals_for_long_text_fields(self) -> None:
+        store = ContentStore()
+        payload = {
+            "contentType": "text_only",
+            "contents": [
+                {
+                    "type": "text",
+                    "text": "Line 1\nLine 2",
+                    "options": {"showEditor": True},
+                },
+                {
+                    "type": "code",
+                    "code": "print('a')\nprint('b')\n",
+                    "options": {"showEditor": True},
+                },
+            ],
+            "editorSettings": {"options": {"allowAddingFiles": False}},
+        }
+
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp)
+            store.write_h5p_content_files(target, payload)
+
+            raw_yaml = (target / "content.yml").read_text(encoding="utf-8")
+            loaded = store.read_h5p_content_payload(target)
+
+        self.assertIn("`Line 1", raw_yaml)
+        self.assertIn("`print('a')", raw_yaml)
+        self.assertNotIn("\\n", raw_yaml)
+        self.assertEqual(loaded["contents"][0]["text"], "Line 1\nLine 2")
+        self.assertEqual(loaded["contents"][1]["code"], "print('a')\nprint('b')\n")
+
+    def test_write_h5p_content_files_compacts_defaults_and_restores_on_read(self) -> None:
+        store = ContentStore()
+        payload = {
+            "contentType": "text_only",
+            "contents": [
+                {
+                    "type": "text",
+                    "text": "Kurz",
+                    "options": {
+                        "showEditor": True,
+                        "enableImageUploads": False,
+                        "defaultImages": [{}],
+                        "enableSoundUploads": False,
+                        "sourceFiles": [{"visibleToLearner": True, "learnerEditable": True}],
+                        "allowAddingFiles": False,
+                        "editorMode": "code",
+                    },
+                    "blocklyCategories": {
+                        "variables": True,
+                        "logic": True,
+                        "loops": True,
+                        "math": True,
+                        "text": True,
+                        "lists": True,
+                        "functions": True,
+                    },
+                }
+            ],
+            "editorSettings": {
+                "options": {
+                    "enableImageUploads": False,
+                    "defaultImages": [{}],
+                    "enableSoundUploads": False,
+                    "sourceFiles": [{"code": "", "visibleToLearner": True, "learnerEditable": True}],
+                    "allowAddingFiles": False,
+                    "editorMode": "code",
+                },
+                "blocklyCategories": {
+                    "variables": True,
+                    "logic": True,
+                    "loops": True,
+                    "math": True,
+                    "text": True,
+                    "lists": True,
+                    "functions": True,
+                },
+            },
+        }
+
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp)
+            store.write_h5p_content_files(target, payload)
+            raw_yaml = (target / "content.yml").read_text(encoding="utf-8")
+            loaded = store.read_h5p_content_payload(target)
+
+        self.assertNotIn("showEditor", raw_yaml)
+        self.assertNotIn("editorMode", raw_yaml)
+        self.assertNotIn("blocklyCategories", raw_yaml)
+
+        self.assertEqual(loaded["contents"][0]["options"]["showEditor"], True)
+        self.assertEqual(loaded["contents"][0]["options"]["editorMode"], "code")
+        self.assertEqual(loaded["contents"][0]["blocklyCategories"]["variables"], True)
+        self.assertEqual(loaded["editorSettings"]["options"]["allowAddingFiles"], False)
+        self.assertEqual(loaded["editorSettings"]["blocklyCategories"]["functions"], True)
+
 
 class RuntimePreparationServiceTests(unittest.TestCase):
     def test_ensure_ready_imports_once_and_sets_ready_state(self) -> None:
