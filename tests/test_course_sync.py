@@ -27,6 +27,7 @@ from scripts.main import (
     load_sync_metadata,
     make_stable_identifier,
     parse_course,
+    prepare_preview_runtime,
     render_imported_question_mdx,
     render_course_page,
     resolve_moodle_client,
@@ -423,14 +424,99 @@ print("quadrat")
 
         self.assertEqual(len(questions), 1)
         parsed = questions[0]
+        from scripts import main as module
+
         self.assertEqual(parsed.h5p_metadata["title"], question.h5p_metadata["title"])
         self.assertEqual(parsed.h5p_metadata["mainLibrary"], question.h5p_metadata["mainLibrary"])
-        self.assertEqual(parsed.h5p_content, question.h5p_content)
+        self.assertEqual(
+            module.component_syncer().build_editable_h5p_payload(parsed),
+            module.component_syncer().build_editable_h5p_payload(question),
+        )
         self.assertEqual(parsed.source_package_path, "h5p/einfuehrung-farben")
         self.assertNotIn("h5p={{", mdx)
         self.assertNotIn("title=", mdx)
         self.assertNotIn("instructions=", mdx)
         self.assertNotIn("runner=", mdx)
+
+    def test_prepare_preview_runtime_prepares_all_questions_for_selected_course(self) -> None:
+        from scripts import main as module
+
+        original_ensure_h5p_runtime_libraries = module.ensure_h5p_runtime_libraries
+        original_load_course_preview_state = module.load_course_preview_state
+        original_ensure_runtime_question_ready = module.ensure_runtime_question_ready
+        try:
+            course_dir = self.course_dir
+            other_course_dir = self.root / "courses" / "python-2027"
+            other_course_dir.mkdir(parents=True)
+
+            first = build_imported_question_from_h5p_package(
+                "python-2026",
+                MoodleH5PActivity(
+                    identifier="eins",
+                    title="Eins",
+                    course_id=5,
+                    activity_id=1,
+                    instance_id=1,
+                    section_title="Intro",
+                    intro="",
+                    url="https://example.invalid/mod/h5pactivity/view.php?id=1",
+                ),
+                {"title": "Eins", "mainLibrary": "H5P.QuestionSet"},
+                {"questions": []},
+            )
+            second = build_imported_question_from_h5p_package(
+                "python-2026",
+                MoodleH5PActivity(
+                    identifier="zwei",
+                    title="Zwei",
+                    course_id=5,
+                    activity_id=2,
+                    instance_id=2,
+                    section_title="Intro",
+                    intro="",
+                    url="https://example.invalid/mod/h5pactivity/view.php?id=2",
+                ),
+                {"title": "Zwei", "mainLibrary": "H5P.QuestionSet"},
+                {"questions": []},
+            )
+            other = build_imported_question_from_h5p_package(
+                "python-2027",
+                MoodleH5PActivity(
+                    identifier="drei",
+                    title="Drei",
+                    course_id=6,
+                    activity_id=3,
+                    instance_id=3,
+                    section_title="Intro",
+                    intro="",
+                    url="https://example.invalid/mod/h5pactivity/view.php?id=3",
+                ),
+                {"title": "Drei", "mainLibrary": "H5P.QuestionSet"},
+                {"questions": []},
+            )
+
+            assert first is not None
+            assert second is not None
+            assert other is not None
+
+            library_calls: list[str] = []
+            prepared_ids: list[str] = []
+
+            module.ensure_h5p_runtime_libraries = lambda: library_calls.append("libraries")
+            module.load_course_preview_state = (
+                lambda current_course_dir: ([first, second], "") if current_course_dir == course_dir else ([other], "")
+            )
+            module.ensure_runtime_question_ready = lambda question: prepared_ids.append(question.identifier)
+
+            prepared = prepare_preview_runtime(course_dir)
+        finally:
+            module.ensure_h5p_runtime_libraries = original_ensure_h5p_runtime_libraries
+            module.load_course_preview_state = original_load_course_preview_state
+            module.ensure_runtime_question_ready = original_ensure_runtime_question_ready
+
+        self.assertEqual(library_calls, ["libraries"])
+        self.assertEqual(prepared_ids, ["eins", "zwei"])
+        self.assertEqual([question.identifier for question in prepared], ["eins", "zwei"])
 
     def test_build_editable_h5p_payload_omits_python_question_defaults(self) -> None:
         question = build_imported_question_from_h5p_package(

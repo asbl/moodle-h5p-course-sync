@@ -111,6 +111,12 @@ H5P-Dateien erzeugen:
 inv sync
 ```
 
+Alle H5Ps fuer die Vorschau im Batch vorbereiten:
+
+```bash
+inv build
+```
+
 Browser-Vorschau starten:
 
 ```bash
@@ -120,13 +126,16 @@ inv serve
 Weitere nuetzliche Tasks:
 
 - `inv test`
+- `inv build --course python-2026`
 - `inv smoke`
 - `inv clean`
 - `inv clean-runtime`
 - `inv import-moodle --course python-2026 --remote-course-id 5`
 - `inv status --course python-2026`
 
-Die Vorschau ist dann unter `http://127.0.0.1:8765/` erreichbar und synchronisiert die H5P-Dateien beim Laden automatisch.
+`inv build` bereitet die H5P-Pakete und deren lokale Preview-Runtime fuer alle Kurse im Batch vor. `inv serve` fuehrt diese Vorbereitung spaetestens beim Start automatisch aus.
+
+Die Vorschau ist dann unter `http://127.0.0.1:8765/` erreichbar.
 
 Jede Aufgabe wird in der Browser-Vorschau als kompakte Zeile dargestellt und oeffnet Vorschau, Edit oder Split View erst auf Klick in einem Popup.
 

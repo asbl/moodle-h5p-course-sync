@@ -32,6 +32,7 @@ class PreviewServerTests(unittest.TestCase):
             rewrite_runtime_html=lambda document, _runtime_path, _query="": document,
             escape_inline=lambda value: value,
             start_runtime_question_preparation=lambda _question: None,
+            prepare_preview_runtime=lambda: None,
             template_renderer=lambda: None,
         )
 
@@ -66,6 +67,7 @@ class PreviewServerTests(unittest.TestCase):
             rewrite_runtime_html=lambda document, _runtime_path, _query="": document,
             escape_inline=lambda value: value,
             start_runtime_question_preparation=lambda _question: None,
+            prepare_preview_runtime=lambda: None,
             template_renderer=lambda: None,
         )
 
@@ -97,8 +99,41 @@ class PreviewServerTests(unittest.TestCase):
                 rewrite_runtime_html=lambda document, _runtime_path, _query="": document,
                 escape_inline=lambda value: value,
                 start_runtime_question_preparation=lambda _question: None,
+                prepare_preview_runtime=lambda: None,
                 template_renderer=lambda: None,
             )
 
         server_cls.assert_not_called()
         build_handler.assert_not_called()
+
+    @patch("scripts.classes.cli.preview_server.build_course_preview_handler")
+    @patch("scripts.classes.cli.preview_server.ThreadingHTTPServer")
+    def test_serve_preview_prepares_runtime_before_serving(
+        self,
+        server_cls: Mock,
+        build_handler: Mock,
+    ) -> None:
+        server = Mock()
+        server_cls.return_value = server
+        build_handler.return_value = object()
+        calls: list[str] = []
+
+        serve_preview(
+            8877,
+            courses_dir=Path("courses"),
+            runtime_proxy_prefix="/runtime",
+            h5p_runtime_port=8820,
+            ensure_h5p_runtime_server=lambda: calls.append("runtime") or None,
+            load_course_preview_state=lambda _course_dir: ([], ""),
+            preview_controller=lambda *args, **kwargs: None,
+            resolve_runtime_question_from_path=lambda _path: None,
+            ensure_runtime_question_ready=lambda _question: None,
+            rewrite_runtime_html=lambda document, _runtime_path, _query="": document,
+            escape_inline=lambda value: value,
+            start_runtime_question_preparation=lambda _question: None,
+            prepare_preview_runtime=lambda: calls.append("prepare"),
+            template_renderer=lambda: None,
+        )
+
+        self.assertEqual(calls, ["runtime", "prepare"])
+        server.serve_forever.assert_called_once_with()

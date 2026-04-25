@@ -23,6 +23,7 @@ def run_cli_command(
     root_dir: Path,
     courses_dir: Path,
     sync_course: Callable[[Path], list[SyncQuestionLike]],
+    build_preview_runtime: Callable[[Path | None], list[SyncQuestionLike]],
     serve_preview: Callable[[int], None],
     resolve_moodle_client: Callable[[str | None, str | None], object],
     import_moodle_course: Callable[[str, int, object], Path],
@@ -37,6 +38,13 @@ def run_cli_command(
         if args.command == "sync":
             course_dir = resolve_course_dir(args.course, courses_dir)
             questions = sync_course(course_dir)
+            for question in questions:
+                print(question.package_path.relative_to(root_dir))
+            return
+
+        if args.command == "build":
+            course_dir = resolve_course_dir(args.course, courses_dir) if args.course else None
+            questions = build_preview_runtime(course_dir)
             for question in questions:
                 print(question.package_path.relative_to(root_dir))
             return

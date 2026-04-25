@@ -35,38 +35,44 @@ def serve_preview(
     rewrite_runtime_html: Callable[[str, str, str], str],
     escape_inline: Callable[[str], str],
     start_runtime_question_preparation: Callable[[QuestionLike], None],
+    prepare_preview_runtime: Callable[[], None],
     template_renderer: Callable[[], TemplateRendererLike],
 ) -> None:
     runtime_process = ensure_h5p_runtime_server()
-    if runtime_process is not None:
-        exit_code = runtime_process.poll()
-        if exit_code is not None:
-            raise RuntimeError(f"H5P-Runtime ist unerwartet beendet (Exit-Code {exit_code}).")
-
-    handler = build_course_preview_handler(
-        PreviewHandlerContext(
-            courses_dir=courses_dir,
-            runtime_proxy_prefix=runtime_proxy_prefix,
-            h5p_runtime_port=h5p_runtime_port,
-            load_course_preview_state=load_course_preview_state,
-            preview_controller=preview_controller,
-            resolve_runtime_question_from_path=resolve_runtime_question_from_path,
-            ensure_runtime_question_ready=ensure_runtime_question_ready,
-            ensure_h5p_runtime_server=ensure_h5p_runtime_server,
-            rewrite_runtime_html=rewrite_runtime_html,
-            escape_inline=escape_inline,
-            start_runtime_question_preparation=start_runtime_question_preparation,
-            template_renderer=template_renderer,
-        )
-    )
-    server = ThreadingHTTPServer(("127.0.0.1", port), handler)
-    print(f"Preview läuft auf http://127.0.0.1:{port}")
+    server: ThreadingHTTPServer | None = None
     try:
+        if runtime_process is not None:
+            exit_code = runtime_process.poll()
+            if exit_code is not None:
+                raise RuntimeError(f"H5P-Runtime ist unerwartet beendet (Exit-Code {exit_code}).")
+
+        prepare_preview_runtime()
+
+        handler = build_course_preview_handler(
+            PreviewHandlerContext(
+                courses_dir=courses_dir,
+                runtime_proxy_prefix=runtime_proxy_prefix,
+                h5p_runtime_port=h5p_runtime_port,
+                load_course_preview_state=load_course_preview_state,
+                preview_controller=preview_controller,
+                resolve_runtime_question_from_path=resolve_runtime_question_from_path,
+                ensure_runtime_question_ready=ensure_runtime_question_ready,
+                ensure_h5p_runtime_server=ensure_h5p_runtime_server,
+                rewrite_runtime_html=rewrite_runtime_html,
+                escape_inline=escape_inline,
+                start_runtime_question_preparation=start_runtime_question_preparation,
+                template_renderer=template_renderer,
+            )
+        )
+
+        server = ThreadingHTTPServer(("127.0.0.1", port), handler)
+        print(f"Preview läuft auf http://127.0.0.1:{port}")
         server.serve_forever()
     except KeyboardInterrupt:
         pass
     finally:
-        server.server_close()
+        if server is not None:
+            server.server_close()
         if runtime_process is not None:
             try:
                 runtime_process.terminate()

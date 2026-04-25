@@ -41,6 +41,15 @@ def sync(ctx, course: str = "python-2026") -> None:
     _run_python(ctx, str(COURSE_SYNC), "sync", course)
 
 
+@task(optional=["course"])
+def build(ctx, course: str = "") -> None:
+    """Batch-prepare H5P output and preview runtime."""
+    args = [str(COURSE_SYNC), "build"]
+    if course:
+        args.append(course)
+    _run_python(ctx, *args)
+
+
 @task(optional=["base_url", "token"])
 def import_moodle(ctx, course: str, remote_course_id: int, base_url: str = "", token: str = "") -> None:
     """Import a Moodle course into the local MDX structure."""

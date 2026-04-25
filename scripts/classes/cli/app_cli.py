@@ -12,6 +12,16 @@ def build_arg_parser(default_port: int) -> argparse.ArgumentParser:
     sync_parser = subparsers.add_parser("sync", help="Erzeugt H5P-Dateien aus einer Kurs-MDX.")
     sync_parser.add_argument("course", help="Kursordner unter courses/, zum Beispiel python-2026")
 
+    build_parser = subparsers.add_parser(
+        "build",
+        help="Bereitet H5P-Dateien und Preview-Runtime im Batch vor.",
+    )
+    build_parser.add_argument(
+        "course",
+        nargs="?",
+        help="Optionaler Kursordner unter courses/. Ohne Angabe werden alle Kurse vorbereitet.",
+    )
+
     serve_parser = subparsers.add_parser("serve", help="Startet die lokale Browser-Vorschau.")
     serve_parser.add_argument(
         "--port",

@@ -569,6 +569,10 @@ def sync_course(course_dir: Path) -> list[PythonQuestionBlock]:
     return course_orchestrator().sync_course(course_dir)
 
 
+def list_course_dirs() -> list[Path]:
+    return sorted(item for item in COURSES_DIR.iterdir() if item.is_dir())
+
+
 def load_course_preview_state(course_dir: Path) -> tuple[list[PythonQuestionBlock], str]:
     return course_orchestrator().load_course_preview_state(course_dir)
 
@@ -628,6 +632,18 @@ def render_course_page(
     return template_renderer().render_course_page(title=course_dir.name, content_html=content_html)
 
 
+def prepare_preview_runtime(course_dir: Path | None = None) -> list[PythonQuestionBlock]:
+    ensure_h5p_runtime_libraries()
+    target_course_dirs = [course_dir] if course_dir is not None else list_course_dirs()
+    prepared_questions: list[PythonQuestionBlock] = []
+    for target_course_dir in target_course_dirs:
+        questions, _ = load_course_preview_state(target_course_dir)
+        for question in questions:
+            ensure_runtime_question_ready(question)
+        prepared_questions.extend(questions)
+    return prepared_questions
+
+
 def main() -> None:
     parser = build_cli_arg_parser(DEFAULT_PORT)
     args = parser.parse_args()
@@ -637,6 +653,7 @@ def main() -> None:
         root_dir=ROOT_DIR,
         courses_dir=COURSES_DIR,
         sync_course=sync_course,
+        build_preview_runtime=prepare_preview_runtime,
         serve_preview=lambda port: serve_preview_impl(
             port,
             courses_dir=COURSES_DIR,
@@ -650,6 +667,7 @@ def main() -> None:
             rewrite_runtime_html=rewrite_runtime_html,
             escape_inline=escape_inline,
             start_runtime_question_preparation=start_runtime_question_preparation,
+            prepare_preview_runtime=lambda: prepare_preview_runtime(),
             template_renderer=template_renderer,
         ),
         resolve_moodle_client=resolve_moodle_client,
