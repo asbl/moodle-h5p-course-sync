@@ -144,6 +144,8 @@ print("quadrat")
         self.assertEqual(html.count("<iframe"), 1)
         self.assertIn('/preview/python-2026/12eck?mode=view&amp;simple=1', html)
         self.assertIn('/preview/python-2026/quadrat?mode=view&amp;simple=1', html)
+        self.assertIn('class="course-section course-section-h1"', html)
+        self.assertIn('class="course-section-body"', html)
         self.assertNotIn('PythonQuestion', html)
         self.assertNotIn('Vorschau und Bearbeitung nur auf Klick', html)
         self.assertIn('data-open-modal="true"', html)
@@ -151,7 +153,7 @@ print("quadrat")
         self.assertIn('>Öffnen<', html)
         self.assertNotIn('>Edit<', html)
         self.assertIn('>Split View<', html)
-        self.assertIn('>Delete<', html)
+        self.assertIn('>Löschen<', html)
         self.assertNotIn('<details', html)
 
     def test_rewrite_runtime_html_rewrites_paths_and_hides_view_chrome(self) -> None:
@@ -1471,6 +1473,81 @@ print("quadrat")
         self.assertEqual(metadata.remote_course_id, 5)
         self.assertEqual(metadata.entries["test-quadrat"].remote_activity_id, 134)
         self.assertFalse(metadata.entries["test-dreieck"].remote_visible)
+
+    def test_import_moodle_course_preserves_remote_section_and_activity_order(self) -> None:
+        class FakeMoodleClient:
+            base_url = "https://example.invalid"
+
+            def list_course_h5p_activities(self, course_id: int):
+                self.last_course_id = course_id
+                return [
+                    type(
+                        "RemoteActivity",
+                        (),
+                        {
+                            "identifier": "s2-b",
+                            "title": "S2-B",
+                            "activity_id": 203,
+                            "instance_id": 63,
+                            "section_title": "Sektion 2",
+                            "section_index": 2,
+                            "module_index": 1,
+                            "intro": "Zweite Sektion, zweites H5P.",
+                            "url": "https://example.invalid/mod/h5pactivity/view.php?id=203",
+                            "visible": True,
+                        },
+                    )(),
+                    type(
+                        "RemoteActivity",
+                        (),
+                        {
+                            "identifier": "s1-a",
+                            "title": "S1-A",
+                            "activity_id": 101,
+                            "instance_id": 61,
+                            "section_title": "Sektion 1",
+                            "section_index": 1,
+                            "module_index": 0,
+                            "intro": "Erste Sektion, erstes H5P.",
+                            "url": "https://example.invalid/mod/h5pactivity/view.php?id=101",
+                            "visible": True,
+                        },
+                    )(),
+                    type(
+                        "RemoteActivity",
+                        (),
+                        {
+                            "identifier": "s2-a",
+                            "title": "S2-A",
+                            "activity_id": 202,
+                            "instance_id": 62,
+                            "section_title": "Sektion 2",
+                            "section_index": 2,
+                            "module_index": 0,
+                            "intro": "Zweite Sektion, erstes H5P.",
+                            "url": "https://example.invalid/mod/h5pactivity/view.php?id=202",
+                            "visible": True,
+                        },
+                    )(),
+                ]
+
+            def download_activity_question(self, course_slug: str, activity: object):
+                return None
+
+        from scripts import main as module
+
+        original_courses_dir = module.COURSES_DIR
+        try:
+            module.COURSES_DIR = self.root / "courses"
+            target_course_dir = import_moodle_course("imported-order", 5, FakeMoodleClient())
+        finally:
+            module.COURSES_DIR = original_courses_dir
+
+        mdx = (target_course_dir / "index.mdx").read_text(encoding="utf-8")
+
+        self.assertLess(mdx.index("## Sektion 1"), mdx.index("## Sektion 2"))
+        self.assertLess(mdx.index('identifier="s1-a"'), mdx.index('identifier="s2-a"'))
+        self.assertLess(mdx.index('identifier="s2-a"'), mdx.index('identifier="s2-b"'))
 
     def test_download_activity_question_persists_source_archive_for_public_packages(self) -> None:
         package_path = self.root / "public-package.h5p"

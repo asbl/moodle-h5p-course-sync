@@ -87,6 +87,8 @@ class MoodleH5PActivity:
     activity_id: int
     instance_id: int | None
     section_title: str = ""
+    section_index: int = 0
+    module_index: int = 0
     intro: str = ""
     url: str = ""
     visible: bool = True

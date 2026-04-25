@@ -68,14 +68,14 @@ class MoodleApiClient:
 
         identifiers: set[str] = set()
         activities: list[MoodleH5PActivity] = []
-        for section in payload:
+        for section_index, section in enumerate(payload):
             if not isinstance(section, dict):
                 continue
             section_title = str(section.get("name") or section.get("section") or "").strip()
             modules = section.get("modules", [])
             if not isinstance(modules, list):
                 continue
-            for module in modules:
+            for module_index, module in enumerate(modules):
                 if not isinstance(module, dict):
                     continue
                 if module.get("modname") != "h5pactivity":
@@ -90,6 +90,8 @@ class MoodleApiClient:
                         activity_id=int(module["id"]),
                         instance_id=int(module["instance"]) if module.get("instance") is not None else None,
                         section_title=section_title,
+                        section_index=section_index,
+                        module_index=module_index,
                         intro=self._strip_html(str(module.get("description") or "")),
                         url=str(module.get("url") or ""),
                         visible=bool(module.get("visible", True)),

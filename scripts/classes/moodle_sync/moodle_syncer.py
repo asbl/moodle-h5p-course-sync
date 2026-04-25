@@ -60,10 +60,20 @@ class MoodleSyncer:
             course_dir=self._courses_dir / course_slug,
         )
 
+    def _ordered_activities(self, activities: list[MoodleH5PActivity]) -> list[MoodleH5PActivity]:
+        return sorted(
+            activities,
+            key=lambda activity: (
+                int(getattr(activity, "section_index", 0)),
+                int(getattr(activity, "module_index", 0)),
+                int(getattr(activity, "activity_id", 0)),
+            ),
+        )
+
     def render_imported_course_mdx(self, course_slug: str, activities: list[MoodleH5PActivity]) -> str:
         lines = [f"# {course_slug}", ""]
         current_section: str | None = None
-        for activity in activities:
+        for activity in self._ordered_activities(activities):
             question = activity.imported_question or self._build_scaffold_question(course_slug, activity)
             if activity.section_title and activity.section_title != current_section:
                 lines.extend([f"## {self._escape_mdx_attribute(activity.section_title)}", ""])
@@ -76,7 +86,7 @@ class MoodleSyncer:
         self._ensure_directory(course_dir)
         self._ensure_directory(course_dir / "assets")
 
-        activities = client.list_course_h5p_activities(remote_course_id)
+        activities = self._ordered_activities(client.list_course_h5p_activities(remote_course_id))
 
         for activity in activities:
             try:
