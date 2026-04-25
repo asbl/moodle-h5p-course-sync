@@ -13,6 +13,8 @@ if TYPE_CHECKING:
 class H5PFileService:
     """Handles H5P sidecar and archive file operations."""
 
+    _IGNORED_ARCHIVE_PARTS = {"__pycache__", "node_modules"}
+
     def __init__(
         self,
         *,
@@ -191,6 +193,7 @@ class H5PFileService:
         shared_libraries: Iterable[Path] = (),
         shared_libraries_root: Path | None = None,
     ) -> None:
+        written_entries: set[str] = set()
         content_payload: dict[str, object] | None = None
         try:
             content_payload = self._read_h5p_content_payload(source_dir)
@@ -198,23 +201,45 @@ class H5PFileService:
             content_payload = None
 
         if content_payload is not None:
-            archive.writestr("content/content.json", json.dumps(content_payload, ensure_ascii=False, indent=2) + "\n")
+            archive_name = "content/content.json"
+            archive.writestr(archive_name, json.dumps(content_payload, ensure_ascii=False, indent=2) + "\n")
+            written_entries.add(archive_name)
 
         for file_path in sorted(source_dir.rglob("*")):
             if not file_path.is_file():
                 continue
 
             relative_path = file_path.relative_to(source_dir).as_posix()
+            if self._should_skip_archive_path(relative_path):
+                continue
             if relative_path == "h5p.json":
                 archive_name = "h5p.json"
             elif relative_path in {"content.json", "content.yml", "content.yaml"}:
                 continue
             else:
                 archive_name = f"content/{relative_path}"
+            if archive_name in written_entries:
+                continue
             archive.write(file_path, archive_name)
+            written_entries.add(archive_name)
 
         library_root = shared_libraries_root or (self._courses_dir.parent / "libraries")
         for library_dir in shared_libraries:
             for file_path in sorted(library_dir.rglob("*")):
                 if file_path.is_file():
-                    archive.write(file_path, file_path.relative_to(library_root).as_posix())
+                    relative_archive_path = file_path.relative_to(library_root).as_posix()
+                    if self._should_skip_archive_path(relative_archive_path):
+                        continue
+                    if relative_archive_path in written_entries:
+                        continue
+                    archive.write(file_path, relative_archive_path)
+                    written_entries.add(relative_archive_path)
+
+    def _should_skip_archive_path(self, relative_path: str) -> bool:
+        parts = Path(relative_path).parts
+        for part in parts:
+            if part in self._IGNORED_ARCHIVE_PARTS:
+                return True
+            if part.startswith("."):
+                return True
+        return False

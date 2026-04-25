@@ -1647,6 +1647,52 @@ print("quadrat")
         self.assertIn("H5P.LibCodeTools-6.73/library.json", package_names)
         self.assertIn("H5P.Question-1.5/library.json", package_names)
 
+    def test_sync_course_package_skips_hidden_library_files_and_duplicate_entries(self) -> None:
+        from scripts import main as module
+
+        original_courses_dir = module.COURSES_DIR
+        original_runtime_libraries_dir = module.H5P_RUNTIME_LIBRARIES_DIR
+        original_ensure_runtime = module.ensure_h5p_runtime_libraries
+        try:
+            module.COURSES_DIR = self.root / "courses"
+            module.H5P_RUNTIME_LIBRARIES_DIR = self.root / ".h5p-runtime" / "libraries"
+            module.ensure_h5p_runtime_libraries = lambda: None
+            self._create_fake_library(module.H5P_RUNTIME_LIBRARIES_DIR, "H5P.Question", 1, 5, [])
+            self._create_fake_library(module.H5P_RUNTIME_LIBRARIES_DIR, "H5P.LibCodeTools", 6, 73, [])
+            self._create_fake_library(
+                module.H5P_RUNTIME_LIBRARIES_DIR,
+                "H5P.CodeQuestion",
+                6,
+                73,
+                [("H5P.Question", 1, 5), ("H5P.LibCodeTools", 6, 73)],
+            )
+            self._create_fake_library(
+                module.H5P_RUNTIME_LIBRARIES_DIR,
+                "H5P.PythonQuestion",
+                6,
+                73,
+                [("H5P.CodeQuestion", 6, 73), ("H5P.LibCodeTools", 6, 73)],
+            )
+
+            python_library_dir = self.root / "libraries" / "H5P.PythonQuestion-6.73"
+            (python_library_dir / ".git").mkdir(parents=True)
+            (python_library_dir / ".git" / "config").write_text("ignored", encoding="utf-8")
+            (python_library_dir / ".gitignore").write_text("ignored", encoding="utf-8")
+
+            sync_course(self.course_dir)
+        finally:
+            module.COURSES_DIR = original_courses_dir
+            module.H5P_RUNTIME_LIBRARIES_DIR = original_runtime_libraries_dir
+            module.ensure_h5p_runtime_libraries = original_ensure_runtime
+
+        archive = self.course_dir / "h5p" / "12eck.h5p"
+        with ZipFile(archive) as package:
+            package_names = package.namelist()
+
+        self.assertEqual(len(package_names), len(set(package_names)))
+        self.assertNotIn("H5P.PythonQuestion-6.73/.git/config", package_names)
+        self.assertNotIn("H5P.PythonQuestion-6.73/.gitignore", package_names)
+
     def test_ensure_custom_h5p_libraries_skips_release_lookup_when_libraries_exist(self) -> None:
         from scripts import main as module
 
