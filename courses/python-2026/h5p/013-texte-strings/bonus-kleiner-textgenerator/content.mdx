@@ -1,0 +1,103 @@
+Strings werden besonders interessant, wenn du sie mit Schleifen,
+Verzweigungen und Funktionen kombinierst. Dann kann dein Programm nicht nur
+einzelne Sätze ausgeben, sondern kleine Textmuster, Hinweise, Steckbriefe oder
+automatisch zusammengesetzte Spielmeldungen erzeugen.
+
+Das folgende Programm baut aus einem Wort ein kleines Muster:
+
+```python
+wort = input()
+wort = wort.strip()
+
+for i in range(1, len(wort) + 1):
+    print(wort[:i])
+```
+
+Wenn du `Maske` eingibst, entsteht:
+
+```python noeditor
+M
+Ma
+Mas
+Mask
+Maske
+```
+
+!!! note Was passiert in der Schleife?
+Bei jedem Durchlauf wird ein etwas längerer Anfang des Wortes ausgegeben.
+`wort[:i]` bedeutet: Nimm alles vom Anfang bis vor Index `i`.
+!!!
+
+### Text untersuchen
+
+Mit einer Schleife kannst du jedes Zeichen einzeln ansehen. So kann dein
+Programm zum Beispiel zählen, prüfen oder bestimmte Zeichen besonders
+behandeln.
+
+```python
+wort = input().strip().lower()
+vokale = "aeiou"
+anzahl = 0
+
+for zeichen in wort:
+    if zeichen in vokale:
+        anzahl = anzahl + 1
+
+print(f"{wort} enthält {anzahl} Vokale.")
+```
+
+```python noeditor
+wort:   maske
+Zeichen m a s k e
+Vokal?  - ✓ - - ✓
+Anzahl: 2
+```
+
+### Funktion für Texte
+
+Auch Funktionen können Strings verarbeiten und Strings zurückgeben. Das ist
+nützlich, wenn du denselben Textaufbau an mehreren Stellen verwenden möchtest.
+
+```python
+def rahmen(text):
+    linie = "*" * (len(text) + 4)
+    return linie + "\n* " + text + " *\n" + linie
+
+name = input("Wähle einen Titel für die Überschrift").strip()
+print(rahmen(f"Eintrag für {name}!"))
+```
+
+Die Funktion `rahmen()` bekommt einen Text, berechnet eine passende Linie und
+gibt einen neuen mehrzeiligen String zurück.
+
+### Übung: Kleiner Textgenerator
+
+Schreibe einen kleinen Textgenerator.
+
+Ideen:
+
+- Erzeuge aus einem Namen einen Einsatz-, Club- oder Turnier-Eintrag.
+- Gib den Text einmal normal, einmal groß und einmal klein aus.
+- Zeichne mit `*`, `-` oder `#` einen Rahmen um die Nachricht.
+- Zähle, wie viele Zeichen der Text enthält.
+- Verwende Slicing, um die ersten drei Zeichen oder das letzte Zeichen extra auszugeben.
+
+Beispiel:
+
+```python
+name = input().strip()
+text = f"Einsatz notiert: {name} öffnet Fach 13."
+linie = "=" * len(text)
+
+print(linie)
+print(text)
+print(linie)
+print(f"Rufzeichen: {name[:3].upper()}")
+print(f"Letztes Zeichen: {name[-1]}")
+```
+
+!!! note Idee für eigene Varianten
+Du kannst dieselbe Technik für Questkarten, Turniermeldungen,
+Nachrichtenprotokolle oder Dialogzeilen verwenden. Wichtig ist: Erst sammelst
+du Textteile, dann setzt du sie kontrolliert zusammen.
+!!!
