@@ -74,13 +74,34 @@ gibt einen neuen mehrzeiligen String zurück.
 
 Schreibe einen kleinen Textgenerator.
 
-Ideen:
+### Ziel
 
-- Erzeuge aus einem Namen einen Einsatz-, Club- oder Turnier-Eintrag.
-- Gib den Text einmal normal, einmal groß und einmal klein aus.
-- Zeichne mit `*`, `-` oder `#` einen Rahmen um die Nachricht.
-- Zähle, wie viele Zeichen der Text enthält.
-- Verwende Slicing, um die ersten drei Zeichen oder das letzte Zeichen extra auszugeben.
+Dein Programm soll aus einem eingegebenen Namen automatisch eine kurze
+Nachricht erzeugen und in mehreren Varianten ausgeben.
+
+### Eingabe
+
+- Ein Name (z. B. `Lena`)
+
+### Pflicht-Ausgabe
+
+1. Eine Hauptnachricht im Format:
+    `Einsatz notiert: <Name> öffnet Fach 13.`
+2. Einen Rahmen oberhalb und unterhalb der Hauptnachricht.
+3. Die Hauptnachricht einmal in GROSSBUCHSTABEN.
+4. Die Hauptnachricht einmal in kleinbuchstaben.
+5. Die Anzahl der Zeichen der Hauptnachricht.
+6. Das Rufzeichen (die ersten drei Zeichen des Namens in Großbuchstaben).
+7. Das letzte Zeichen des Namens.
+
+### Schritt für Schritt
+
+- Lies den Namen mit `input()` ein und entferne Leerzeichen mit `strip()`.
+- Baue daraus einen String `text`.
+- Erzeuge eine Linie mit `=` in derselben Laenge wie `text`.
+- Gib Linie, Text und Linie aus.
+- Gib danach die weiteren Informationen aus (groß/klein, Zeichenanzahl,
+  Rufzeichen, letztes Zeichen).
 
 Beispiel:
 
@@ -92,8 +113,24 @@ linie = "=" * len(text)
 print(linie)
 print(text)
 print(linie)
+print(text.upper())
+print(text.lower())
+print(f"Zeichenanzahl: {len(text)}")
 print(f"Rufzeichen: {name[:3].upper()}")
 print(f"Letztes Zeichen: {name[-1]}")
+```
+
+Mögliche Ausgabe für `name = "Lena"`:
+
+```python noeditor
+======================================
+Einsatz notiert: Lena öffnet Fach 13.
+======================================
+EINSATZ NOTIERT: LENA ÖFFNET FACH 13.
+einsatz notiert: lena öffnet fach 13.
+Zeichenanzahl: 37
+Rufzeichen: LEN
+Letztes Zeichen: a
 ```
 
 !!! note Idee für eigene Varianten
