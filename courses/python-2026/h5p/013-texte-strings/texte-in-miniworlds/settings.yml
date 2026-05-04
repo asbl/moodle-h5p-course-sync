@@ -1,0 +1,6 @@
+contentType: text_only
+pythonRunner: pyodide
+pyodideOptions:
+  packages:
+  - package: miniworlds
+  - package: sqlite3
