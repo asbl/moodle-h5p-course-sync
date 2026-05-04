@@ -13,6 +13,7 @@ world.add_background((232, 238, 245))
 ort = "verlassene Bibliothek"
 hinweis = miniworlds.Text((30, 30), f"Ort: {ort.title()}")
 hinweis.font_size = 26
+hinweis.color = (30, 36, 52)
 
 world.run()
 ```
@@ -22,8 +23,10 @@ einem Spiel als ein reines `print()`: Die Information steht direkt in der
 Szene.
 
 !!! note Text sichtbar machen
-`miniworlds.Text((x, y), text)` erzeugt einen Text-Actor. Die Position gibt
-an, wo der Text oben links beginnt.
+`miniworlds.Text((x, y), text)` erzeugt einen Text-Actor. Standardmäßig ist
+die Textfarbe weiß. Die Position `(x, y)` beschreibt die obere linke Ecke des
+Textes. Auf hellen Hintergründen solltest du daher oft eine dunkle
+Textfarbe setzen.
 !!!
 
 ### Text als Statusanzeige
@@ -43,6 +46,7 @@ schluessel = 2
 
 status = miniworlds.Text((25, 25), "")
 status.font_size = 22
+status.color = (25, 30, 45)
 status.text = f"{name} | {raum} | Schlüssel: {schluessel}"
 
 world.run()
@@ -70,6 +74,7 @@ world.add_background((245, 241, 232))
 status = "alarm".strip().lower()
 meldung = miniworlds.Text((25, 25), f"Status: {status.upper()}")
 meldung.font_size = 24
+meldung.color = (28, 32, 48)
 
 signal = miniworlds.Circle((260, 150), 45)
 
@@ -114,10 +119,12 @@ zeile = dialog[schritt]
 
 name_text = miniworlds.Text((35, 35), sprecher.upper())
 name_text.font_size = 22
+name_text.color = (24, 30, 44)
 
 box = miniworlds.Text((35, 80), f"{sprecher}: {zeile}")
 box.font_size = 20
 box.max_width = 480
+box.color = (24, 30, 44)
 
 world.run()
 ```
@@ -148,10 +155,12 @@ else:
 
 ueberschrift = miniworlds.Text((35, 35), "Entscheidung")
 ueberschrift.font_size = 26
+ueberschrift.color = (26, 32, 46)
 
 meldung = miniworlds.Text((35, 90), text)
 meldung.font_size = 21
 meldung.max_width = 490
+meldung.color = (26, 32, 46)
 
 world.run()
 ```
@@ -190,10 +199,12 @@ else:
 
 titel = miniworlds.Text((35, 35), f"Szene: {ort}")
 titel.font_size = 26
+titel.color = (24, 30, 42)
 
 text = miniworlds.Text((35, 90), dialog)
 text.font_size = 21
 text.max_width = 490
+text.color = (24, 30, 42)
 
 world.run()
 ```
