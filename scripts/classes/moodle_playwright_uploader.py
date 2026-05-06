@@ -336,7 +336,25 @@ class MoodlePlaywrightUploader:
             if self._course_is_in_edit_mode(page):
                 return
 
-        raise RuntimeError("Konnte den Moodle-Bearbeitungsmodus nicht einschalten.")
+        current_url = ""
+        try:
+            current_url = page.url
+        except Exception:
+            current_url = ""
+
+        login_form_visible = page.locator('input[name="username"]').count() > 0
+        if self.headless and not self.username and not self.password and login_form_visible:
+            raise RuntimeError(
+                "Konnte den Moodle-Bearbeitungsmodus nicht einschalten, weil die Seite im Login steht "
+                "(wahrscheinlich abgelaufener SSO-Storage-State). "
+                "Bitte den Storage-State im headed Browser neu erzeugen und den Upload erneut starten. "
+                f"Aktuelle URL: {current_url or 'unbekannt'}"
+            )
+
+        raise RuntimeError(
+            "Konnte den Moodle-Bearbeitungsmodus nicht einschalten. "
+            f"Aktuelle URL: {current_url or 'unbekannt'}"
+        )
 
     def _click_editing_switch(self, page: Any) -> bool:
         selectors = [
@@ -365,12 +383,23 @@ class MoodlePlaywrightUploader:
 
     def _turn_editing_on_by_url(self, page: Any) -> bool:
         sesskey = self._moodle_sesskey(page)
-        if not sesskey:
-            return False
-        for extra in [
-            {"sesskey": sesskey, "edit": "on"},
-            {"sesskey": sesskey, "setmode": "1"},
-        ]:
+        url_variants: list[dict[str, str]] = []
+        if sesskey:
+            url_variants.extend(
+                [
+                    {"sesskey": sesskey, "edit": "on"},
+                    {"sesskey": sesskey, "setmode": "1"},
+                ]
+            )
+        # Some Moodle setups accept edit toggles without an exposed sesskey.
+        url_variants.extend(
+            [
+                {"edit": "on"},
+                {"setmode": "1"},
+            ]
+        )
+
+        for extra in url_variants:
             parsed = urlparse(self.course_url)
             query = parse_qs(parsed.query)
             for key, value in extra.items():
