@@ -111,7 +111,7 @@ class MoodlePlaywrightUploaderTests(unittest.TestCase):
 
         self.assertEqual(order, ["strings-grundlagen", "test-namensschild"])
 
-    def test_find_or_create_section_continues_when_rename_form_is_missing(self) -> None:
+    def test_find_or_create_section_aborts_when_rename_form_is_missing(self) -> None:
         class UploaderWithMissingRenameForm(MoodlePlaywrightUploader):
             def __init__(self) -> None:
                 super().__init__(course_url="https://example.invalid/course/view.php?id=5", section_title="Texte")
@@ -135,11 +135,11 @@ class MoodlePlaywrightUploaderTests(unittest.TestCase):
             def _turn_editing_on(self, page):  # type: ignore[no-untyped-def]
                 return None
 
+            def _course_is_in_edit_mode(self, page):  # type: ignore[no-untyped-def]
+                return True
+
             def _section_by_number(self, page, section_number: int):  # type: ignore[no-untyped-def]
                 return {"selector": "[data-section='9']", "number": section_number, "title": ""}
-
-            def _last_section(self, page):  # type: ignore[no-untyped-def]
-                return {"selector": "[data-section='9']", "number": 9, "title": ""}
 
         class FakePage:
             def __init__(self) -> None:
@@ -151,17 +151,10 @@ class MoodlePlaywrightUploaderTests(unittest.TestCase):
         uploader = UploaderWithMissingRenameForm()
         page = FakePage()
 
-        section = uploader._find_or_create_section(page, [])
+        with self.assertRaisesRegex(RuntimeError, "konnte aber nicht in 'Texte' umbenannt werden"):
+            uploader._find_or_create_section(page, [])
 
         self.assertTrue(uploader.created)
-        self.assertEqual(section["number"], 9)
-        self.assertEqual(
-            page.urls,
-            [
-                "https://example.invalid/course/view.php?id=5",
-                "https://example.invalid/course/view.php?id=5",
-            ],
-        )
 
     def test_find_or_create_section_reuses_section_with_existing_packages(self) -> None:
         class UploaderWithExistingPackageSection(MoodlePlaywrightUploader):
@@ -210,6 +203,9 @@ class MoodlePlaywrightUploaderTests(unittest.TestCase):
             def _turn_editing_on(self, page):  # type: ignore[no-untyped-def]
                 return None
 
+            def _course_is_in_edit_mode(self, page):  # type: ignore[no-untyped-def]
+                return True
+
         class FakePage:
             def __init__(self) -> None:
                 self.urls: list[str] = []
@@ -248,6 +244,9 @@ class MoodlePlaywrightUploaderTests(unittest.TestCase):
 
             def _turn_editing_on(self, page):  # type: ignore[no-untyped-def]
                 return None
+
+            def _course_is_in_edit_mode(self, page):  # type: ignore[no-untyped-def]
+                return True
 
         class FakePage:
             def goto(self, url: str, **kwargs: object) -> None:
@@ -354,6 +353,94 @@ class MoodlePlaywrightUploaderTests(unittest.TestCase):
 
         with self.assertRaisesRegex(RuntimeError, "konnte keine neue Section"):
             uploader._create_section_at_end(object())
+
+    def test_create_section_by_url_prefers_existing_add_section_link(self) -> None:
+        class FakeLocator:
+            def __init__(self, href: str) -> None:
+                self._href = href
+                self.first = self
+
+            def count(self) -> int:
+                return 1
+
+            def get_attribute(self, name: str) -> str | None:
+                if name == "href":
+                    return self._href
+                return None
+
+        class EmptyLocator:
+            first = None
+
+            def count(self) -> int:
+                return 0
+
+        class FakePage:
+            def __init__(self) -> None:
+                self.urls: list[str] = []
+                self.section_number = 5
+
+            def goto(self, url: str, **kwargs: object) -> None:
+                self.urls.append(url)
+                if "insertsection=0" in url:
+                    self.section_number = 6
+
+            def locator(self, selector: str):
+                if selector == 'a[data-action="addSection"][href*="/course/changenumsections.php"]':
+                    return FakeLocator("/course/changenumsections.php?courseid=7845&insertsection=0&sesskey=test")
+                return EmptyLocator()
+
+        class UrlUploader(MoodlePlaywrightUploader):
+            def __init__(self) -> None:
+                super().__init__(course_url="https://example.invalid/course/view.php?id=7845", section_title="Funktionen")
+
+            def _course_is_in_edit_mode(self, page):  # type: ignore[no-untyped-def]
+                return True
+
+            def _turn_editing_on(self, page):  # type: ignore[no-untyped-def]
+                return None
+
+            def _last_section_number(self, page):  # type: ignore[no-untyped-def]
+                return page.section_number
+
+            def _moodle_sesskey(self, page):  # type: ignore[no-untyped-def]
+                return "test"
+
+        page = FakePage()
+        uploader = UrlUploader()
+
+        created = uploader._create_section_by_url(page, 5)
+
+        self.assertTrue(created)
+        self.assertEqual(
+            page.urls,
+            [
+                "https://example.invalid/course/changenumsections.php?courseid=7845&insertsection=0&sesskey=test",
+                "https://example.invalid/course/view.php?id=7845",
+            ],
+        )
+
+    def test_ensure_section_title_raises_if_rename_did_not_change_visible_title(self) -> None:
+        class RenameMismatchUploader(MoodlePlaywrightUploader):
+            def __init__(self) -> None:
+                super().__init__(course_url="https://example.invalid/course/view.php?id=5", section_title="Texte")
+
+            def _rename_section(self, page, section_number: int, title: str) -> bool:  # type: ignore[no-untyped-def]
+                return True
+
+            def _turn_editing_on(self, page):  # type: ignore[no-untyped-def]
+                return None
+
+            def _section_by_number(self, page, section_number: int):  # type: ignore[no-untyped-def]
+                return {"selector": "[data-section='7']", "number": section_number, "title": "Alter Titel"}
+
+        class FakePage:
+            def goto(self, url: str, **kwargs: object) -> None:
+                return None
+
+        uploader = RenameMismatchUploader()
+
+        with self.assertRaisesRegex(RuntimeError, "traegt aber nicht den erwarteten Titel"):
+            uploader._ensure_section_title(FakePage(), {"selector": "[data-section='7']", "number": 7, "title": "Alt"}, "Texte")
 
 
 if __name__ == "__main__":

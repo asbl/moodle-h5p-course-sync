@@ -478,6 +478,8 @@ class MoodlePlaywrightUploader:
         if hasattr(page, "goto"):
             page.goto(self.course_url, wait_until="domcontentloaded")
             self._turn_editing_on(page)
+            if not self._course_is_in_edit_mode(page):
+                raise RuntimeError("Bearbeitungsmodus ist nicht aktiv, obwohl die Section-Anlage gestartet wurde.")
         section = self._find_section(page)
         if section is not None:
             if packages and not self._section_contains_packages(page, section, packages):
@@ -518,20 +520,10 @@ class MoodlePlaywrightUploader:
                 flush=True,
             )
         if not rename_ok:
-            print(
-                f"Warnung: Die neue Moodle-Section {section['number']} konnte nicht umbenannt werden. "
-                "Der Upload wird trotzdem in diese neue Section fortgesetzt.",
-                flush=True,
+            raise RuntimeError(
+                f"Die neue Moodle-Section {section['number']} wurde angelegt, konnte aber nicht in "
+                f"'{self.section_title}' umbenannt werden."
             )
-            section_number = int(section["number"])
-            if hasattr(page, "goto"):
-                page.goto(self.course_url, wait_until="domcontentloaded")
-                self._turn_editing_on(page)
-                refreshed_section = self._section_by_number(page, section_number)
-                if refreshed_section is not None:
-                    return refreshed_section
-            latest_section = self._last_section(page)
-            return latest_section or section
         page.goto(self.course_url, wait_until="domcontentloaded")
         self._turn_editing_on(page)
         section = self._find_section(page)
@@ -570,6 +562,12 @@ class MoodlePlaywrightUploader:
         renamed_section = self._section_by_number(page, section_number) or self._find_section(page)
         if renamed_section is None:
             raise RuntimeError(f"Moodle-Section {section_number} wurde umbenannt, aber danach nicht gefunden.")
+        renamed_title = str(renamed_section.get("title") or "")
+        if normalize_moodle_section_title(renamed_title) != normalize_moodle_section_title(title):
+            raise RuntimeError(
+                f"Moodle-Section {section_number} existiert nach dem Umbenennen weiter, "
+                f"traegt aber nicht den erwarteten Titel '{title}' (gefunden: '{renamed_title}')."
+            )
         return renamed_section
 
     def _find_section_containing_packages(
@@ -698,29 +696,65 @@ class MoodlePlaywrightUploader:
         )
 
     def _create_section_by_url(self, page: Any, before: int) -> bool:
+        if not self._course_is_in_edit_mode(page):
+            page.goto(self.course_url, wait_until="domcontentloaded")
+            self._turn_editing_on(page)
+        if not self._course_is_in_edit_mode(page):
+            raise RuntimeError("Bearbeitungsmodus ist nicht aktiv. Moodle-Section kann nicht angelegt werden.")
+
         sesskey = self._moodle_sesskey(page)
         if not sesskey:
             return False
 
-        params = {
-            "courseid": str(self._course_id()),
-            "increase": "1",
-            "sesskey": sesskey,
-            "returnurl": self.course_url,
-        }
         print("Versuche Moodle-Section ueber changenumsections.php anzulegen.", flush=True)
-        page.goto(
-            urljoin(self.course_url, "/course/changenumsections.php") + "?" + urlencode(params),
-            wait_until="domcontentloaded",
+        target_urls: list[str] = []
+        add_section_link = self._add_section_href(page)
+        if add_section_link:
+            target_urls.append(add_section_link)
+        target_urls.append(
+            urljoin(self.course_url, "/course/changenumsections.php")
+            + "?"
+            + urlencode(
+                {
+                    "courseid": str(self._course_id()),
+                    "insertsection": "0",
+                    "sesskey": sesskey,
+                }
+            )
         )
+
+        for target_url in target_urls:
+            page.goto(target_url, wait_until="domcontentloaded")
+            page.goto(self.course_url, wait_until="domcontentloaded")
+            self._turn_editing_on(page)
+            if self._last_section_number(page) > before:
+                return True
+
         page.goto(self.course_url, wait_until="domcontentloaded")
         self._turn_editing_on(page)
         return self._last_section_number(page) > before
+
+    def _add_section_href(self, page: Any) -> str:
+        selectors = [
+            'a[data-action="addSection"][href*="/course/changenumsections.php"]',
+            'a.add-section[href*="/course/changenumsections.php"]',
+            'a[data-add-sections][href*="/course/changenumsections.php"]',
+        ]
+        for selector in selectors:
+            locator = page.locator(selector)
+            if locator.count() == 0:
+                continue
+            href = locator.first.get_attribute("href")
+            if href:
+                return urljoin(self.course_url, href)
+        return ""
 
     def _create_section_by_ui(self, page: Any, before: int) -> bool:
         print("Versuche Moodle-Section ueber die Kursoberflaeche anzulegen.", flush=True)
         page.goto(self.course_url, wait_until="domcontentloaded")
         self._turn_editing_on(page)
+        if not self._course_is_in_edit_mode(page):
+            raise RuntimeError("Bearbeitungsmodus ist nicht aktiv. Moodle-Section kann nicht ueber die UI angelegt werden.")
 
         selectors = [
             '[data-action="addSection"]',
@@ -729,7 +763,7 @@ class MoodlePlaywrightUploader:
             '.add-sections button',
             '.add-sections a',
             'button[name="addsection"]',
-            'a[href*="changenumsections.php"][href*="increase"]',
+            'a[href*="changenumsections.php"][href*="insertsection="]',
         ]
         for selector in selectors:
             locator = page.locator(selector)
@@ -760,10 +794,14 @@ class MoodlePlaywrightUploader:
 
     def _click_add_section_control(self, page: Any, locator: Any, before: int) -> bool:
         try:
-            locator.click()
-            page.wait_for_timeout(750)
-            self._confirm_add_section_dialog_if_needed(page)
-            page.wait_for_load_state("domcontentloaded")
+            href = locator.get_attribute("href") if hasattr(locator, "get_attribute") else None
+            if href and "changenumsections.php" in href:
+                page.goto(urljoin(self.course_url, href), wait_until="domcontentloaded")
+            else:
+                locator.click()
+                page.wait_for_timeout(750)
+                self._confirm_add_section_dialog_if_needed(page)
+                page.wait_for_load_state("domcontentloaded")
         except Exception:
             return False
 
@@ -817,8 +855,9 @@ class MoodlePlaywrightUploader:
                 if (!best || number > best.number) {
                   const marker = `course-sync-section-${Date.now()}-${Math.random().toString(16).slice(2)}`;
                   section.setAttribute('data-course-sync-section', marker);
+                                    const title = (section.getAttribute('data-sectionname') || section.querySelector('.sectionname, .section-title, h3, h4')?.textContent || '').trim();
                   const sectionDbId = section.getAttribute('data-id') || '';
-                  best = { selector: `[data-course-sync-section="${marker}"]`, number, title: '', sectionDbId };
+                                    best = { selector: `[data-course-sync-section="${marker}"]`, number, title, sectionDbId };
                 }
               }
               return best;
@@ -937,8 +976,9 @@ class MoodlePlaywrightUploader:
                 if (number !== wantedNumber) continue;
                 const marker = `course-sync-section-${Date.now()}-${Math.random().toString(16).slice(2)}`;
                 section.setAttribute('data-course-sync-section', marker);
+                                const title = (section.getAttribute('data-sectionname') || section.querySelector('.sectionname, .section-title, h3, h4')?.textContent || '').trim();
                 const sectionDbId = section.getAttribute('data-id') || '';
-                return { selector: `[data-course-sync-section="${marker}"]`, number, title: '', sectionDbId };
+                                return { selector: `[data-course-sync-section="${marker}"]`, number, title, sectionDbId };
               }
               return null;
             }
