@@ -482,6 +482,9 @@ class MoodlePlaywrightUploader:
                 raise RuntimeError("Bearbeitungsmodus ist nicht aktiv, obwohl die Section-Anlage gestartet wurde.")
         section = self._find_section(page)
         if section is not None:
+            # If the target section exists by name, keep using it consistently.
+            if self.section_title:
+                return section
             if packages and not self._section_contains_packages(page, section, packages):
                 package_section = self._find_section_containing_packages(page, packages)
                 if package_section is not None:
@@ -1252,15 +1255,17 @@ class MoodlePlaywrightUploader:
         return False
 
     def _fill_h5p_form(self, page: Any, package: MoodleH5PUploadPackage) -> None:
-        name_input = page.locator('input[name="name"], #id_name')
-        if name_input.count() > 0:
-            name_input.first.fill(package.title)
-
         if not self._upload_h5p_package_file(page, package):
             self._write_debug_artifacts(page, "missing-file-input")
             raise RuntimeError("Kein Datei-Uploadfeld im H5P-Formular gefunden.")
         self._confirm_file_overwrite_if_needed(page)
         self._close_open_moodle_dialogues(page)
+
+        # Set the activity title after package upload because Moodle may prefill
+        # the title from package metadata during upload processing.
+        name_input = page.locator('input[name="name"], #id_name')
+        if name_input.count() > 0:
+            name_input.first.fill(package.title)
 
         self._click_first_by_text(
             page,

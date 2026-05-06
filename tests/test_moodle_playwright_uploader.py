@@ -220,7 +220,7 @@ class MoodlePlaywrightUploaderTests(unittest.TestCase):
         self.assertEqual(uploader.renamed, [(26, "Texte")])
         self.assertEqual(section["title"], "Texte")
 
-    def test_find_or_create_section_prefers_package_section_over_matching_empty_title_section(self) -> None:
+    def test_find_or_create_section_keeps_explicit_target_section_even_if_packages_exist_elsewhere(self) -> None:
         class UploaderWithDuplicateTitleSection(MoodlePlaywrightUploader):
             def __init__(self) -> None:
                 super().__init__(course_url="https://example.invalid/course/view.php?id=5", section_title="Texte")
@@ -259,8 +259,8 @@ class MoodlePlaywrightUploaderTests(unittest.TestCase):
             [MoodleH5PUploadPackage("strings-grundlagen", "Strings: Grundlagen", Path("a.h5p"))],
         )
 
-        self.assertEqual(section["number"], 16)
-        self.assertEqual(uploader.renamed, [(16, "Texte")])
+        self.assertEqual(section["number"], 10)
+        self.assertEqual(uploader.renamed, [])
 
     def test_sort_section_h5p_activities_moves_reverse_into_desired_order(self) -> None:
         class SortUploader(MoodlePlaywrightUploader):
