@@ -585,6 +585,18 @@ class MoodlePlaywrightUploader:
             """
             (wantedValues) => {
               const wanted = new Set(wantedValues);
+                            const sectionSelector = 'li.section, li.course-section, section.course-section';
+                            const topLevelSection = (section) => {
+                                let current = section;
+                                while (current?.parentElement) {
+                                    const parent = current.parentElement.closest(sectionSelector);
+                                    if (!parent) {
+                                        break;
+                                    }
+                                    current = parent;
+                                }
+                                return current;
+                            };
               const normalize = (value) => (value || '')
                 .trim()
                 .toLowerCase()
@@ -612,7 +624,7 @@ class MoodlePlaywrightUploader:
                 if (!wanted.has(normalize(activityLabel(link)))) {
                   continue;
                 }
-                const section = link.closest('li.section, li.course-section, section.course-section');
+                                const section = topLevelSection(link.closest(sectionSelector));
                 if (!section) continue;
                 const numberValue = section.getAttribute('data-number')
                   || section.getAttribute('data-section')
@@ -636,6 +648,7 @@ class MoodlePlaywrightUploader:
         section_payload = page.evaluate(
             """
             (sectionTitle) => {
+                            const sectionSelector = 'li.section, li.course-section, section.course-section';
               const normalize = (value) => (value || '')
                 .trim()
                 .toLowerCase()
@@ -650,9 +663,11 @@ class MoodlePlaywrightUploader:
                 .replace(/\\s+/g, ' ')
                 .trim();
               const wanted = normalize(sectionTitle);
-              const sections = [...document.querySelectorAll('li.section, li.course-section, section.course-section')];
+                            const sections = [...document.querySelectorAll(sectionSelector)].filter((section) =>
+                                !section.parentElement?.closest(sectionSelector)
+                            );
               for (const section of sections) {
-                if (section.classList.contains('delegated-section')) {
+                                if (section.classList.contains('delegated-section') || section.classList.contains('subsection')) {
                   continue;
                 }
                 const titleNode = section.querySelector('.sectionname, .section-title, h3, h4');
@@ -742,12 +757,27 @@ class MoodlePlaywrightUploader:
         ]
         for selector in selectors:
             locator = page.locator(selector)
-            if locator.count() == 0:
+            count = locator.count()
+            if count == 0:
                 continue
-            href = locator.first.get_attribute("href")
-            if href:
-                return urljoin(self.course_url, href)
+            if hasattr(locator, "nth"):
+                candidates = [locator.nth(index) for index in range(count)]
+            else:
+                first = getattr(locator, "first", None)
+                candidates = [first] if first is not None else []
+            for candidate in candidates:
+                href = candidate.get_attribute("href")
+                if not href:
+                    continue
+                absolute_href = urljoin(self.course_url, href)
+                if self._is_top_level_add_section_href(absolute_href):
+                    return absolute_href
         return ""
+
+    def _is_top_level_add_section_href(self, href: str) -> bool:
+        parsed = urlparse(urljoin(self.course_url, href))
+        insert_sections = parse_qs(parsed.query).get("insertsection", [])
+        return any(value == "0" for value in insert_sections)
 
     def _create_section_by_ui(self, page: Any, before: int) -> bool:
         print("Versuche Moodle-Section ueber die Kursoberflaeche anzulegen.", flush=True)
@@ -757,6 +787,7 @@ class MoodlePlaywrightUploader:
             raise RuntimeError("Bearbeitungsmodus ist nicht aktiv. Moodle-Section kann nicht ueber die UI angelegt werden.")
 
         selectors = [
+            'a[href*="changenumsections.php"][href*="insertsection=0"]',
             '[data-action="addSection"]',
             '[data-action="add-section"]',
             '[data-add-sections]',
@@ -796,7 +827,10 @@ class MoodlePlaywrightUploader:
         try:
             href = locator.get_attribute("href") if hasattr(locator, "get_attribute") else None
             if href and "changenumsections.php" in href:
-                page.goto(urljoin(self.course_url, href), wait_until="domcontentloaded")
+                absolute_href = urljoin(self.course_url, href)
+                if not self._is_top_level_add_section_href(absolute_href):
+                    return False
+                page.goto(absolute_href, wait_until="domcontentloaded")
             else:
                 locator.click()
                 page.wait_for_timeout(750)
@@ -842,9 +876,13 @@ class MoodlePlaywrightUploader:
         return page.evaluate(
             """
             () => {
-              const sections = [...document.querySelectorAll('li.section, li.course-section, section.course-section')];
+                            const sectionSelector = 'li.section, li.course-section, section.course-section';
+                            const sections = [...document.querySelectorAll(sectionSelector)].filter((section) =>
+                                !section.parentElement?.closest(sectionSelector)
+                            );
               let best = null;
               for (const section of sections) {
+                                if (section.classList.contains('delegated-section') || section.classList.contains('subsection')) continue;
                 const numberValue = section.getAttribute('data-number')
                   || section.getAttribute('data-section')
                   || section.getAttribute('data-sectionid')
@@ -965,8 +1003,12 @@ class MoodlePlaywrightUploader:
         return page.evaluate(
             """
             (wantedNumber) => {
-              const sections = [...document.querySelectorAll('li.section, li.course-section, section.course-section')];
+                            const sectionSelector = 'li.section, li.course-section, section.course-section';
+                            const sections = [...document.querySelectorAll(sectionSelector)].filter((section) =>
+                                !section.parentElement?.closest(sectionSelector)
+                            );
               for (const section of sections) {
+                                if (section.classList.contains('delegated-section') || section.classList.contains('subsection')) continue;
                 const numberValue = section.getAttribute('data-number')
                   || section.getAttribute('data-section')
                   || section.getAttribute('data-sectionid')

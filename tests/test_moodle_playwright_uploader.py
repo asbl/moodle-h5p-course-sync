@@ -356,16 +356,19 @@ class MoodlePlaywrightUploaderTests(unittest.TestCase):
 
     def test_create_section_by_url_prefers_existing_add_section_link(self) -> None:
         class FakeLocator:
-            def __init__(self, href: str) -> None:
-                self._href = href
+            def __init__(self, hrefs: list[str]) -> None:
+                self._hrefs = hrefs
                 self.first = self
 
+            def nth(self, index: int):
+                return FakeLocator([self._hrefs[index]])
+
             def count(self) -> int:
-                return 1
+                return len(self._hrefs)
 
             def get_attribute(self, name: str) -> str | None:
-                if name == "href":
-                    return self._href
+                if name == "href" and self._hrefs:
+                    return self._hrefs[0]
                 return None
 
         class EmptyLocator:
@@ -386,7 +389,12 @@ class MoodlePlaywrightUploaderTests(unittest.TestCase):
 
             def locator(self, selector: str):
                 if selector == 'a[data-action="addSection"][href*="/course/changenumsections.php"]':
-                    return FakeLocator("/course/changenumsections.php?courseid=7845&insertsection=0&sesskey=test")
+                    return FakeLocator(
+                        [
+                            "/course/changenumsections.php?courseid=7845&insertsection=17&sesskey=test",
+                            "/course/changenumsections.php?courseid=7845&insertsection=0&sesskey=test",
+                        ]
+                    )
                 return EmptyLocator()
 
         class UrlUploader(MoodlePlaywrightUploader):
@@ -417,6 +425,23 @@ class MoodlePlaywrightUploaderTests(unittest.TestCase):
                 "https://example.invalid/course/changenumsections.php?courseid=7845&insertsection=0&sesskey=test",
                 "https://example.invalid/course/view.php?id=7845",
             ],
+        )
+
+    def test_is_top_level_add_section_href_accepts_only_course_end_insert(self) -> None:
+        uploader = MoodlePlaywrightUploader(
+            course_url="https://example.invalid/course/view.php?id=7845",
+            section_title="Funktionen",
+        )
+
+        self.assertTrue(
+            uploader._is_top_level_add_section_href(
+                "https://example.invalid/course/changenumsections.php?courseid=7845&insertsection=0&sesskey=test"
+            )
+        )
+        self.assertFalse(
+            uploader._is_top_level_add_section_href(
+                "https://example.invalid/course/changenumsections.php?courseid=7845&insertsection=17&sesskey=test"
+            )
         )
 
     def test_ensure_section_title_raises_if_rename_did_not_change_visible_title(self) -> None:
