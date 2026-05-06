@@ -10,6 +10,7 @@ from scripts.classes.moodle_playwright_uploader import (
     MoodleH5PUploadPackage,
     MoodlePlaywrightUploader,
     collect_h5p_upload_packages,
+    infer_h5p_package_points,
     normalize_moodle_identifier,
     normalize_moodle_section_title,
     read_chapter_question_order,
@@ -41,6 +42,35 @@ class MoodlePlaywrightUploaderTests(unittest.TestCase):
         self.assertEqual(packages[0].identifier, "miniworlds-tutorial")
         self.assertEqual(packages[0].title, "Minis erkunden")
         self.assertEqual(packages[0].path, package_path)
+        self.assertEqual(packages[0].points, 2)
+
+    def test_infer_h5p_package_points_returns_zero_for_ungraded_python_question(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            package_path = Path(tmp_dir) / "plain-text.h5p"
+            with zipfile.ZipFile(package_path, "w") as archive:
+                archive.writestr("h5p.json", json.dumps({"mainLibrary": "H5P.PythonQuestion"}))
+                archive.writestr(
+                    "content/content.json",
+                    json.dumps({"contentType": "text_only", "gradingSettings": {"gradingMethod": "please_choose"}}),
+                )
+
+            points = infer_h5p_package_points(package_path)
+
+        self.assertEqual(points, 0)
+
+    def test_infer_h5p_package_points_returns_two_for_graded_python_question(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            package_path = Path(tmp_dir) / "graded.h5p"
+            with zipfile.ZipFile(package_path, "w") as archive:
+                archive.writestr("h5p.json", json.dumps({"mainLibrary": "H5P.PythonQuestion"}))
+                archive.writestr(
+                    "content/content.json",
+                    json.dumps({"contentType": "ide_only", "gradingSettings": {"gradingMethod": "ioTestCases"}}),
+                )
+
+            points = infer_h5p_package_points(package_path)
+
+        self.assertEqual(points, 2)
 
     def test_collect_h5p_upload_packages_uses_chapter_question_order(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:

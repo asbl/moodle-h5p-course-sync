@@ -16,6 +16,7 @@ class MoodleH5PUploadPackage:
     identifier: str
     title: str
     path: Path
+    points: int = 2
 
 
 @dataclass(slots=True)
@@ -67,6 +68,40 @@ def read_h5p_package_title(package_path: Path) -> str:
     return title or package_path.stem
 
 
+def infer_h5p_package_points(package_path: Path) -> int:
+    """Infer Moodle grade points for one H5P package.
+
+    Rule: graded questions get 2 points, non-graded questions get 0 points.
+    """
+    try:
+        with package_path.open("rb") as archive_file:
+            import zipfile
+
+            with zipfile.ZipFile(archive_file) as archive:
+                metadata = json.loads(archive.read("h5p.json").decode("utf-8"))
+                content = json.loads(archive.read("content/content.json").decode("utf-8"))
+    except Exception:
+        # Fallback for unusual packages: keep graded default.
+        return 2
+
+    main_library = str(metadata.get("mainLibrary") or "").strip()
+    grading_settings = content.get("gradingSettings")
+    grading_method = ""
+    if isinstance(grading_settings, dict):
+        grading_method = str(grading_settings.get("gradingMethod") or "").strip()
+
+    if main_library == "H5P.PythonQuestion":
+        if grading_method in {"", "please_choose"}:
+            return 0
+        return 2
+
+    if grading_method and grading_method != "please_choose":
+        return 2
+    if isinstance(grading_settings, dict) and "gradingMethod" in grading_settings:
+        return 0
+    return 2
+
+
 def read_chapter_question_order(course_dir: Path, chapter: str) -> list[str]:
     chapter_slug = chapter.strip().strip("/")
     chapter_path = course_dir / "chapters" / f"{chapter_slug}.mdx"
@@ -96,6 +131,7 @@ def collect_h5p_upload_packages(course_dir: Path, chapter: str) -> list[MoodleH5
             identifier=package_path.stem,
             title=read_h5p_package_title(package_path),
             path=package_path,
+            points=infer_h5p_package_points(package_path),
         )
         for package_path in source_dir.glob("*.h5p")
     }
@@ -1267,6 +1303,8 @@ class MoodlePlaywrightUploader:
         if name_input.count() > 0:
             name_input.first.fill(package.title)
 
+        self._set_activity_points(page, package.points)
+
         self._click_first_by_text(
             page,
             [
@@ -1278,6 +1316,32 @@ class MoodlePlaywrightUploader:
             ],
         )
         page.wait_for_load_state("domcontentloaded")
+
+    def _set_activity_points(self, page: Any, points: int) -> None:
+        value = str(max(0, int(points)))
+
+        # Moodle variants use either a plain numeric field or a select.
+        for selector in (
+            'input[name="grade"]',
+            '#id_grade',
+            'input[name="maxgrade"]',
+            'select[name="grade"]',
+            '#id_grademethod + select',
+        ):
+            control = page.locator(selector)
+            if control.count() == 0:
+                continue
+            field = control.first
+            try:
+                field.fill(value)
+                return
+            except Exception:
+                pass
+            try:
+                field.select_option(value=value)
+                return
+            except Exception:
+                continue
 
     def _upload_h5p_package_file(self, page: Any, package: MoodleH5PUploadPackage) -> bool:
         def debug(message: str) -> None:
