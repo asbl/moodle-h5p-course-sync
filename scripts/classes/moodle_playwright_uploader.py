@@ -684,15 +684,18 @@ class MoodlePlaywrightUploader:
         before = self._last_section_number(page)
         if self._create_section_by_url(page, before):
             section = self._last_section(page)
-            if section is not None:
+            if section is not None and int(section["number"]) > before:
                 return section
 
         if self._create_section_by_ui(page, before):
             section = self._last_section(page)
-            if section is not None:
+            if section is not None and int(section["number"]) > before:
                 return section
 
-        raise RuntimeError("Moodle hat keine neue Section am Kursende angelegt.")
+        raise RuntimeError(
+            "Moodle konnte keine neue Section am Kursende anlegen. "
+            "Der Upload wird abgebrochen, damit keine Inhalte in einer falschen Section landen."
+        )
 
     def _create_section_by_url(self, page: Any, before: int) -> bool:
         sesskey = self._moodle_sesskey(page)
