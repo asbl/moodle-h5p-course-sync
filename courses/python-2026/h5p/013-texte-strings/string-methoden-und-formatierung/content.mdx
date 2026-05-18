@@ -1,0 +1,146 @@
+Strings besitzen viele nützliche **Methoden**. Methoden sind kleine Werkzeuge,
+die direkt zu einem Wert gehören. Bei Strings helfen sie dir zum Beispiel
+dabei, Eingaben aufzuräumen, Texte einheitlich zu schreiben oder nach
+bestimmten Wörtern zu suchen.
+
+Eine Methode ist eine Funktion, die zu einem Wert gehört.
+
+Bei Strings schreibst du zuerst den **String**, dann einen **Punkt** und dann Namen der **Methode**, z.B.
+`"Hallo Welt".upper()`
+
+```python noeditor
+text.upper()
+│    │
+│    └─ Methode: mache daraus Großbuchstaben
+└────── String oder String-Variable
+```
+
+```python
+text = "schattenbrief"
+
+print(text.upper())
+print(text.lower())
+```
+
+`upper()` erzeugt eine Version mit Großbuchstaben.
+`lower()` erzeugt eine Version mit Kleinbuchstaben.
+
+Der ursprüngliche String wird dabei nicht verändert:
+
+```python
+text = "schattenbrief"
+gross = text.upper()
+
+print(text)
+print(gross)
+```
+
+!!! note Merke
+String-Methoden erzeugen meistens einen neuen String. Wenn du das Ergebnis
+später brauchst, speichere es in einer Variable.
+!!!
+
+### Leerzeichen entfernen
+
+Manchmal enthalten Eingaben am Anfang oder Ende Leerzeichen. Das passiert
+schnell, wenn jemand beim Tippen aus Versehen vor oder nach dem eigentlichen
+Wort eine Leertaste drückt.
+
+Mit `strip()` kannst du sie entfernen:
+
+```python
+eingabe = "  geheime Notiz aus dem Turm  "
+
+print(eingabe)
+print(eingabe.strip())
+```
+
+`strip()` entfernt nur außen Leerzeichen. Leerzeichen zwischen Wörtern bleiben
+erhalten.
+
+### Texte untersuchen
+
+Mit `in` kannst du prüfen, ob ein Text in einem anderen Text vorkommt:
+
+```python
+satz = "Im alten Spind liegt eine schwarze Karte"
+
+print("Karte" in satz)
+print("rote" in satz)
+```
+
+Das Ergebnis ist ein Wahrheitswert: `True` oder `False`.
+
+!!! note Groß- und Kleinschreibung
+`"karte" in satz` ist etwas anderes als `"Karte" in satz`. Wenn dir die
+Schreibweise egal sein soll, kannst du vorher `satz.lower()` verwenden.
+!!!
+
+### Exkurs: f-Strings
+
+Wenn du Variablen in einen Text einsetzen möchtest, sind **f-Strings** oft
+übersichtlicher als viele `+`-Zeichen.
+
+```python
+figur = "Iva"
+punkte = 17
+
+print(f"{figur} hat {punkte} Punkte.")
+```
+
+Vor dem String steht ein `f`. Innerhalb des Strings kannst du Variablen in
+geschweifte Klammern schreiben.
+
+In den geschweiften Klammern dürfen auch kleine Ausdrücke stehen:
+
+```python
+figur = "Iva"
+punkte = 17
+maximum = 20
+
+print(f"{figur}: {punkte}/{maximum} Erfahrungspunkte")
+print(f"Noch {maximum - punkte} Punkte bis zum nächsten Levelaufstieg.")
+```
+
+Du kannst dort auch String-Methoden verwenden:
+
+```python
+name = "  sora  "
+name = name.strip()
+
+print(f"Willkommen, {name.title()}!")
+print(f"Dein Kürzel ist {name[:3].upper()}.")
+```
+
+f-Strings verändern die Variablen nicht. Sie bauen nur einen neuen Text für
+die Ausgabe.
+
+```python noeditor
+name = "sora"
+f"Willkommen, {name.title()}!"
+             └────────────┘
+             wird zuerst ausgewertet
+```
+
+### Kombination
+
+Im nächsten Beispiel wird eine Eingabe zuerst bereinigt und dann in einem
+Satz verwendet. Das ist ein typischer Ablauf in kleinen Programmen:
+
+```python noeditor
+Eingabe -> bereinigen -> auswerten -> lesbare Ausgabe bauen
+```
+
+```python
+name = input()
+name = name.strip()
+
+print(f"Eintrag auf der Einsatztafel: {name.upper()}")
+print(f"Dieses Codewort hat {len(name)} Zeichen.")
+```
+
+Variiere das Programm:
+
+- Gib Rufnamen mit Leerzeichen am Anfang ein.
+- Ersetze `upper()` durch `lower()`.
+- Baue einen Satz, in dem der erste und der letzte Buchstabe vorkommen.

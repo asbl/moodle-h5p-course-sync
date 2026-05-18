@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import shlex
 import shutil
+import subprocess
 import sys
 from pathlib import Path
 
@@ -17,9 +18,12 @@ def _quote(value: str | Path) -> str:
     return shlex.quote(str(value))
 
 
-def _run_python(ctx, *args: str) -> None:
-    command = " ".join([_quote(PYTHON), *(_quote(arg) for arg in args)])
-    ctx.run(command)
+def _run_python(ctx, *args: str, pty: bool = False) -> None:
+    del ctx, pty
+    command_args = list(args)
+    if command_args and command_args[0] == str(COURSE_SYNC):
+        command_args = ["-m", "scripts.main", *command_args[1:]]
+    subprocess.run([PYTHON, *command_args], check=True, cwd=ROOT_DIR)
 
 
 def _remove_path(path: Path) -> None:
@@ -48,6 +52,59 @@ def build(ctx, course: str = "") -> None:
     if course:
         args.append(course)
     _run_python(ctx, *args)
+
+
+@task(name="update-h5p-libraries", optional=["tag"])
+def update_h5p_libraries(ctx, tag: str = "") -> None:
+    """Download the latest custom H5P libraries from GitHub into libraries/."""
+    args = [str(COURSE_SYNC), "update-h5p-libraries"]
+    if tag:
+        args.extend(["--tag", tag])
+    _run_python(ctx, *args)
+
+
+@task(optional=["course", "output"])
+def export_chapter(ctx, chapter: str, course: str = "python-2026", output: str = "") -> None:
+    """Copy one chapter's built H5P packages into an upload folder."""
+    args = [str(COURSE_SYNC), "export-chapter", course, chapter]
+    if output:
+        args.extend(["--output", output])
+    _run_python(ctx, *args)
+
+
+@task(optional=["course", "course_url", "target", "section", "username", "password", "storage_state", "headless", "timeout"])
+def upload_chapter_moodle(
+    ctx,
+    chapter: str,
+    course: str = "python-2026",
+    course_url: str = "",
+    target: str = "",
+    section: str = "",
+    username: str = "",
+    password: str = "",
+    storage_state: str = "",
+    headless: bool = False,
+    timeout: int = 30000,
+) -> None:
+    """Upload or update one chapter's H5P packages in Moodle via Playwright."""
+    args = [str(COURSE_SYNC), "upload-chapter-moodle", course, chapter]
+    if course_url:
+        args.extend(["--course-url", course_url])
+    if target:
+        args.extend(["--target", target])
+    if section:
+        args.extend(["--section", section])
+    if username:
+        args.extend(["--username", username])
+    if password:
+        args.extend(["--password", password])
+    if storage_state:
+        args.extend(["--storage-state", storage_state])
+    if headless:
+        args.append("--headless")
+    if timeout != 30000:
+        args.extend(["--timeout", str(timeout)])
+    _run_python(ctx, *args, pty=not headless)
 
 
 @task(optional=["base_url", "token"])
@@ -95,8 +152,8 @@ def clean(ctx) -> None:
         _remove_path(cache_dir)
 
     courses_dir = ROOT_DIR / "courses"
-    for h5p_dir in courses_dir.glob("*/h5p"):
-        _remove_path(h5p_dir)
+    for build_dir in courses_dir.glob("*/build"):
+        _remove_path(build_dir)
 
 
 @task(name="clean-runtime")

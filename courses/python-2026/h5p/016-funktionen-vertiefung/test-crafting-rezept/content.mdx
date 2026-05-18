@@ -1,0 +1,31 @@
+<Instructions>
+Schreibe die Funktion `kann_fackel_bauen(inventar)`.
+
+Sie soll `True` zurückgeben, wenn in der Liste mindestens einmal `"Stock"` und
+mindestens einmal `"Kohle"` vorkommen. Sonst soll sie `False` zurückgeben.
+</Instructions>
+
+```python editor:startingCode
+def kann_fackel_bauen(inventar):
+    pass
+
+
+print(kann_fackel_bauen(["Stock", "Kohle", "Stein"]))
+```
+
+```python grading:targetCode
+def kann_fackel_bauen(inventar):
+    return "Stock" in inventar and "Kohle" in inventar
+
+
+print(kann_fackel_bauen(["Stock", "Kohle", "Stein"]))
+```
+
+```yaml grading
+gradingMethod: ioTestCases
+testCases:
+- hidden: false
+  inputs: []
+  outputs:
+  - 'True'
+```

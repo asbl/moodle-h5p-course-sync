@@ -70,6 +70,8 @@ class ServiceRegistry:
         load_course_preview_state: Callable[[Path], tuple[list[PythonQuestionBlock], str]],
         get_runtime_preparation_state: Callable[[PythonQuestionBlock], dict[str, str]],
         start_runtime_question_preparation: Callable[[PythonQuestionBlock], None],
+        rebuild_runtime_question: Callable[[PythonQuestionBlock], None],
+        invalidate_course_preview_cache: Callable[[str], None],
         is_runtime_question_ready: Callable[[PythonQuestionBlock], bool],
         build_runtime_proxy_path: RuntimePathBuilder,
         render_preview_waiting_page: WaitingPageRenderer,
@@ -80,6 +82,8 @@ class ServiceRegistry:
                 load_course_preview_state=load_course_preview_state,
                 get_runtime_preparation_state=get_runtime_preparation_state,
                 start_runtime_question_preparation=start_runtime_question_preparation,
+                rebuild_runtime_question=rebuild_runtime_question,
+                invalidate_course_preview_cache=invalidate_course_preview_cache,
                 is_runtime_question_ready=is_runtime_question_ready,
                 build_runtime_proxy_path=build_runtime_proxy_path,
                 render_preview_waiting_page=render_preview_waiting_page,
@@ -245,4 +249,3 @@ class ServiceRegistry:
                 normalize_whitespace=normalize_whitespace,
             )
         return self._h5p_import_mapper
-

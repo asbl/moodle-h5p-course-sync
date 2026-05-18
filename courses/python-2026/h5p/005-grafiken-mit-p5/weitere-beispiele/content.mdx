@@ -1,0 +1,220 @@
+Experimentiere mit den folgenden Beispielen und "spiele" mit ihnen.
+
+Schaue, wie du sie verändern kannst.
+
+```python
+import p5
+
+import math
+
+t = 0
+
+def setup():
+    p5.createCanvas(200, 200)
+
+def draw():
+    global t
+    p5.clear()
+    x = 100 + 50 * math.cos(t)
+    y = 100 + 50 * math.sin(t)
+    p5.circle(x, y, 20)
+    t += 0.1
+
+p5.run()
+```
+
+- Ändere den Radius der Umlaufbahn.
+- Ändere die Geschwindigkeit der Bewegung.
+- Verschiebe den Mittelpunkt der Umlaufbahn auf einen anderen Punkt auf der Leinwand.
+
+```python
+import p5
+
+t = 0
+
+def setup():
+    p5.createCanvas(200, 200)
+
+def draw():
+    global t
+    p5.clear()
+    r = 30 + 20 * p5.sin(t)
+    p5.circle(100, 100, r)
+    t += 0.1
+
+p5.run()
+```
+
+- Verändere die maximale und minimale Größe des pulsierenden Kreises.
+- Ändere die Geschwindigkeit des Pulsierens.
+- Zeichne mehrere pulsierende Kreise gleichzeitig.
+
+```python
+# Balkendiagramm aus Daten
+import p5
+
+values = [30, 80, 50]
+
+def setup():
+    p5.createCanvas(200, 200)
+
+def draw():
+    p5.clear()
+    
+    for i, v in enumerate(values):
+        # Enumerate ergänzt einen Index zu der Liste:
+        # i: 0, 1, 2
+        # v: 30, 80, 50
+        p5.rect(20 + i*50, 150 - v, 30, v)
+
+p5.run()
+```
+
+- Ändere die Werte in der Liste – was passiert mit den Balken?
+- Ändere die Breite oder den Abstand der Balken.
+- Stelle die Daten mit Kreisen statt mit Rechtecken dar.
+
+```python
+# Geometrische Muster
+import p5
+
+def setup():
+    p5.createCanvas(200, 200)
+
+def draw():
+    p5.clear()
+    for i in range(5):
+        for j in range(5):
+            p5.circle(20 + i*30, 20 + j*30, 15)
+
+p5.run()
+```
+
+- Verändere das Grundelement – probiere Kreise, Rechtecke oder Linien.
+- Ändere Abstand oder Größe der Elemente.
+- Erzeuge ein dichteres oder luftigeres Muster.
+
+### Physik
+
+Folgendermaßen wird typischerweise Physik in 2D-Spielen umgesetzt:
+
+```python
+import p5
+
+y = 0
+g = 2  # Erdbeschleunigung (vereinfacht)
+
+def setup():
+    p5.createCanvas(200, 200)
+
+def draw():
+    global y
+    p5.clear()
+    p5.circle(100, y, 20)
+    y += g  # Ball fällt nach unten
+
+p5.run()
+```
+
+- Ändere die Größe des Balls.
+- Ändere die Geschwindigkeit des Falls (g).
+- Zeichne mehrere Bälle, die gleichzeitig fallen.
+
+```python
+import p5
+
+x = 0
+v = 5  # Geschwindigkeit
+
+def setup():
+    p5.createCanvas(200, 200)
+
+def draw():
+    global x
+    p5.clear()
+    p5.circle(x, 100, 20)
+    x += v  # konstante Geschwindigkeit
+
+p5.run()
+```
+
+- Ändere die Geschwindigkeit (v).
+- Verändere die Höhe des Kreises (100).
+- Zeichne mehrere Kreise mit unterschiedlichen Geschwindigkeiten.
+
+```python
+import p5
+import math
+
+t = 0
+
+def setup():
+    p5.createCanvas(200, 200)
+
+def draw():
+    global t
+    p5.clear()
+    y = 100 + 50 * math.sin(t)  # Sinus-Schwingung
+    p5.circle(100, y, 20)
+    t += 0.1
+
+p5.run()
+```
+
+- Ändere die Amplitude (50) – die Schwingung wird größer oder kleiner.
+- Ändere die Geschwindigkeit (t += 0.1).
+- Zeichne mehrere schwingende Kreise nebeneinander.
+
+```python
+import p5
+
+y = [0, 0, 0]
+g = [1, 2, 3]
+
+def setup():
+    p5.createCanvas(200, 200)
+
+def draw():
+    p5.clear()
+    for i in range(3):
+        p5.circle(50 + i*50, y[i], 20)
+        y[i] += g[i]
+
+p5.run()
+```
+
+- Ändere die Gravitation (g[i]) – welche fällt schneller?
+- Ändere Startpositionen der Bälle.
+- Zeichne mehrere Bälle gleichzeitig mit unterschiedlichen Größen.
+
+### Kunst
+
+```python
+import p5
+import math
+
+t = 0
+
+def setup():
+    p5.createCanvas(400, 400)
+    p5.background(0)
+
+def draw():
+    global t
+    p5.stroke((t*5) % 255, 200, 255 - (t*5) % 255)
+    p5.strokeWeight(2)
+    
+    for i in range(0, 360, 10):  # Linien in einem Kreis
+        angle = math.radians(i + t*5)
+        x = 200 + 150 * math.cos(angle)
+        y = 200 + 150 * math.sin(angle)
+        p5.line(200, 200, x, y)
+    
+    t += 1
+
+p5.run()
+```
+
+- Aus dem Mittelpunkt „strahlen“ Linien in alle Richtungen
+- Die Farben verändern sich im Laufe der Zeit
+- Die Linien drehen sich langsam → hypnotischer Fächer-Effekt

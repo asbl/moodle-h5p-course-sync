@@ -1,0 +1,134 @@
+Immer wenn du eine Methode auf einem Objekt aufrufst, muss Python wissen:
+Welches Objekt ist gemeint? In der Regel verwendest du dazu den Namen des Objekts.
+
+Oft ist es aber hilfreich, wenn ein Objekt selbst seine eigenen Attribute und Methode aufrufen kann.
+
+In miniworlds begegnest du `self` direkt, sobald du **Ereignis-Funktionen**
+(Event-Handler) schreibst. Dort musst du `self` selbst hinschreiben.
+
+### @objekt.register
+
+Mit `@objekt.register` legst du fest, was bei einem bestimmten Ereignis
+passieren soll. Der erste Parameter der Funktion ist immer `self` – das
+Objekt, zu dem der Handler gehört:
+
+```python
+import miniworlds
+
+world = miniworlds.World(400, 300)
+world.add_background((225, 238, 252))
+
+spieler = miniworlds.Actor((80, 150))
+spieler.color = (60, 130, 220)
+spieler.size = (40, 40)
+
+@spieler.register
+def on_key_down_right(self):
+    self.x = self.x + 15
+
+world.run()
+```
+
+In `on_key_down_right` ist `self` dasselbe wie `spieler`. Deshalb ist
+`self.x = self.x + 15` genau dasselbe wie `spieler.x = spieler.x + 15`.
+
+!!! note Warum self und nicht direkt der Variablenname?
+`self` hat einen Vorteil: 
+Die Funktion muss nicht wissen, wie das Objekt
+heißt. Ob es `spieler`, `figur` oder `held` heißt – `self` verweist immer
+auf das Objekt, zu dem der Handler gehört.
+!!!
+
+### Beispiel: on_setup: Startzustand per self setzen
+
+Das Ereignis `on_setup` wird einmal aufgerufen, wenn das Objekt erzeugt wird.
+Man kann eine Methode `on_setup` registrieren, um auf das Ereignis (Objekt wurde erzeugt) zu reagieren.
+
+```python
+import miniworlds
+
+world = miniworlds.World(400, 300)
+world.add_background((228, 240, 252))
+
+kreis = miniworlds.Circle((200, 150), 10)
+
+@kreis.register
+def on_setup(self):
+    self.color = (255, 140, 50)
+    self.size = 70
+
+world.run()
+```
+
+Der Kreis startet normalerweisemit Radius `10`, aber `on_setup` setzt sofort Farbe und
+Größe über `self`.
+
+### Vier Richtungen steuern
+
+```python
+import miniworlds
+
+world = miniworlds.World(460, 300)
+world.add_background((225, 238, 252))
+
+figur = miniworlds.Actor((230, 150))
+figur.color = (60, 130, 220)
+figur.size = (36, 36)
+
+@figur.register
+def on_key_down_right(self):
+    self.x = self.x + 18
+
+@figur.register
+def on_key_down_left(self):
+    self.x = self.x - 18
+
+@figur.register
+def on_key_down_up(self):
+    self.y = self.y - 18
+
+@figur.register
+def on_key_down_down(self):
+    self.y = self.y + 18
+
+world.run()
+```
+
+Jeder Handler kennt über `self` die aktuelle Position der Figur und kann
+sie verändern.
+
+### self bei mehreren gleichartigen Objekten
+
+Der Vorteil von `self` wird besonders klar, wenn **viele**  Objekte dieselbe
+Reaktion teilen:
+
+```python
+import miniworlds
+
+world = miniworlds.World(460, 300)
+world.add_background((228, 238, 252))
+
+for x in range(55, 420, 90):
+    kreis = miniworlds.Circle((x, 150), 28)
+    kreis.color = (80, 140, 220)
+
+    @kreis.register
+    def on_key_down_up(self):
+        self.y = self.y - 12
+
+    @kreis.register
+    def on_key_down_down(self):
+        self.y = self.y + 12
+
+world.run()
+```
+
+Drücke Pfeil-oben oder Pfeil-unten: Jeder Kreis reagiert, weil jeder seinen
+eigenen Handler hat. `self` sorgt dafür, dass jeder Handler auf sein eigenes
+Objekt zugreift – nicht auf alle.
+
+!!! note self zusammengefasst
+- `self` ist der erste Parameter eines Event-Handlers
+- `self` verweist auf das Objekt, zu dem der Handler gehört
+- Python übergibt `self` automatisch beim Aufruf
+!!!

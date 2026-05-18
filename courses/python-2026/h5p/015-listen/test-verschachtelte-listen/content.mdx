@@ -1,0 +1,68 @@
+<Instructions>
+Schreibe die Funktion `zaehle_diamanten_im_spielfeld(spielfeld)`.
+
+`spielfeld` ist eine verschachtelte Liste. Jede innere Liste ist eine Zeile.
+Die Funktion soll zählen, wie oft `"Diamant"` im gesamten Spielfeld vorkommt.
+
+```text noeditor
+[
+    ["Gras", "Diamant", "Stein"],
+    ["Diamant", "Erde", "Gras"],
+    ["Wasser", "Stein", "Diamant"],
+]
+
+Ergebnis: 3
+```
+</Instructions>
+
+```python editor:startingCode
+def zaehle_diamanten_im_spielfeld(spielfeld):
+    anzahl = 0
+    # Ergänze zwei Schleifen.
+    return anzahl
+```
+
+```python editor:postCode
+spielfeld = []
+for i in range(3):
+    zeile = input().split()
+    spielfeld.append(zeile)
+
+print(zaehle_diamanten_im_spielfeld(spielfeld))
+```
+
+```python grading:targetCode
+def zaehle_diamanten_im_spielfeld(spielfeld):
+    anzahl = 0
+    for zeile in spielfeld:
+        for block in zeile:
+            if block == "Diamant":
+                anzahl = anzahl + 1
+    return anzahl
+```
+
+```yaml grading
+gradingMethod: ioTestCases
+testCases:
+- hidden: false
+  inputs:
+  - Gras Diamant Stein
+  - Diamant Erde Gras
+  - Wasser Stein Diamant
+  outputs:
+  - '3'
+- hidden: false
+  inputs:
+  - Gras Gras Gras
+  - Stein Erde Wasser
+  - Gold Kohle Stein
+  outputs:
+  - '0'
+- hidden: true
+  inputs:
+  - Diamant Diamant
+  - Diamant Stein
+  - Erde Diamant
+  outputs:
+  - '4'
+```

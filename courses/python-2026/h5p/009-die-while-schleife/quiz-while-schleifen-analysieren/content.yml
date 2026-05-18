@@ -1,0 +1,284 @@
+introPage:
+  showIntroPage: false
+  startButtonText: Start Quiz
+  introduction: ''
+progressType: dots
+passPercentage: 50
+questions:
+- params:
+    media:
+      type:
+        params:
+          decorative: false
+          contentName: Image
+          file:
+            path: images/file-65493ce58480a.png
+            mime: image/png
+            copyright:
+              license: U
+            width: 368
+            height: 277
+          expandImage: Bild vergrößern
+          minimizeImage: Bild verkleinern
+        library: H5P.Image 1.1
+        metadata:
+          contentType: Image
+          license: U
+          title: Untitled Image
+        subContentId: f85e5356-7ada-4a66-b366-27d8fd666ca9
+      disableImageZooming: false
+    answers:
+    - correct: false
+      tipsAndFeedback:
+        tip: ''
+        chosenFeedback: ''
+        notChosenFeedback: ''
+      text: |-
+        `<div>0</div>
+        `
+    - correct: false
+      tipsAndFeedback:
+        tip: ''
+        chosenFeedback: ''
+        notChosenFeedback: ''
+      text: |-
+        `<div>10</div>
+        `
+    - correct: true
+      tipsAndFeedback:
+        tip: ''
+        chosenFeedback: ''
+        notChosenFeedback: ''
+      text: |-
+        `<div>55</div>
+        `
+    - correct: false
+      tipsAndFeedback:
+        tip: ''
+        chosenFeedback: ''
+        notChosenFeedback: ''
+      text: |-
+        `<div>15</div>
+        `
+    overallFeedback:
+    - from: 0
+      to: 100
+    behaviour:
+      enableRetry: true
+      enableSolutionsButton: true
+      enableCheckButton: true
+      type: auto
+      singlePoint: false
+      randomAnswers: true
+      showSolutionsRequiresInput: true
+      confirmCheckDialog: false
+      confirmRetryDialog: false
+      autoCheck: false
+      passPercentage: 100
+      showScorePoints: true
+    UI:
+      checkAnswerButton: Check
+      submitAnswerButton: Submit
+      showSolutionButton: Show solution
+      tryAgainButton: Retry
+      tipsLabel: Show tip
+      scoreBarLabel: You got :num out of :total points
+      tipAvailable: Tip available
+      feedbackAvailable: Feedback available
+      readFeedback: Read feedback
+      wrongAnswer: Wrong answer
+      correctAnswer: Correct answer
+      shouldCheck: Should have been checked
+      shouldNotCheck: Should not have been checked
+      noInput: Please answer before viewing the solution
+      a11yCheck: Check the answers. The responses will be marked as correct, 
+        incorrect, or unanswered.
+      a11yShowSolution: Show the solution. The task will be marked with its 
+        correct solution.
+      a11yRetry: Retry the task. Reset all responses and start the task over 
+        again.
+    confirmCheck:
+      header: Finish ?
+      body: Are you sure you wish to finish ?
+      cancelLabel: Cancel
+      confirmLabel: Finish
+    confirmRetry:
+      header: Retry ?
+      body: Are you sure you wish to retry ?
+      cancelLabel: Cancel
+      confirmLabel: Confirm
+    question: "<p>Welches Ergebnis gibt der abgebildete Code aus?</p>\n"
+  library: H5P.MultiChoice 1.16
+  metadata:
+    contentType: Multiple Choice
+    license: U
+    title: Frage1
+  subContentId: 16a3d101-b37f-401c-986a-f758cc37f5f7
+- params:
+    media:
+      type:
+        params:
+          decorative: false
+          contentName: Image
+          file:
+            path: images/file-65493de5b9426.png
+            mime: image/png
+            copyright:
+              license: U
+            width: 867
+            height: 368
+          expandImage: Bild vergrößern
+          minimizeImage: Bild verkleinern
+        library: H5P.Image 1.1
+        metadata:
+          contentType: Image
+          license: U
+          title: Untitled Image
+        subContentId: f04688b1-4199-4d8c-a055-833c8f597f8c
+      disableImageZooming: true
+    answers:
+    - correct: false
+      tipsAndFeedback:
+        tip: ''
+        chosenFeedback: ''
+        notChosenFeedback: ''
+      text: |-
+        `<div>1</div>
+        `
+    - correct: false
+      tipsAndFeedback:
+        tip: ''
+        chosenFeedback: ''
+        notChosenFeedback: ''
+      text: |-
+        `<div>2</div>
+        `
+    - correct: false
+      tipsAndFeedback:
+        tip: ''
+        chosenFeedback: ''
+        notChosenFeedback: ''
+      text: |-
+        `<div>3</div>
+        `
+    - correct: false
+      tipsAndFeedback:
+        tip: ''
+        chosenFeedback: ''
+        notChosenFeedback: ''
+      text: |-
+        `<div>4</div>
+        `
+    - correct: false
+      tipsAndFeedback:
+        tip: ''
+        chosenFeedback: ''
+        notChosenFeedback: ''
+      text: |-
+        `<div>5</div>
+        `
+    - correct: true
+      tipsAndFeedback:
+        tip: ''
+        chosenFeedback: ''
+        notChosenFeedback: ''
+      text: |-
+        `<div>6</div>
+        `
+    - correct: false
+      tipsAndFeedback:
+        tip: ''
+        chosenFeedback: ''
+        notChosenFeedback: ''
+      text: |-
+        `<div>7</div>
+        `
+    overallFeedback:
+    - from: 0
+      to: 100
+    behaviour:
+      enableRetry: true
+      enableSolutionsButton: true
+      enableCheckButton: true
+      type: auto
+      singlePoint: false
+      randomAnswers: true
+      showSolutionsRequiresInput: true
+      confirmCheckDialog: false
+      confirmRetryDialog: false
+      autoCheck: false
+      passPercentage: 100
+      showScorePoints: true
+    UI:
+      checkAnswerButton: Check
+      submitAnswerButton: Submit
+      showSolutionButton: Show solution
+      tryAgainButton: Retry
+      tipsLabel: Show tip
+      scoreBarLabel: You got :num out of :total points
+      tipAvailable: Tip available
+      feedbackAvailable: Feedback available
+      readFeedback: Read feedback
+      wrongAnswer: Wrong answer
+      correctAnswer: Correct answer
+      shouldCheck: Should have been checked
+      shouldNotCheck: Should not have been checked
+      noInput: Please answer before viewing the solution
+      a11yCheck: Check the answers. The responses will be marked as correct, 
+        incorrect, or unanswered.
+      a11yShowSolution: Show the solution. The task will be marked with its 
+        correct solution.
+      a11yRetry: Retry the task. Reset all responses and start the task over 
+        again.
+    confirmCheck:
+      header: Finish ?
+      body: Are you sure you wish to finish ?
+      cancelLabel: Cancel
+      confirmLabel: Finish
+    confirmRetry:
+      header: Retry ?
+      body: Are you sure you wish to retry ?
+      cancelLabel: Cancel
+      confirmLabel: Confirm
+    question: "<p>Welche Ausgabe hat der Code bei Eingabe der Zahl 4?</p>\n"
+  library: H5P.MultiChoice 1.16
+  metadata:
+    contentType: Multiple Choice
+    license: U
+    title: Frage2
+  subContentId: 5e649829-4213-4dec-b494-8c2c35590eb7
+disableBackwardsNavigation: false
+randomQuestions: false
+endGame:
+  showResultPage: true
+  showSolutionButton: true
+  showRetryButton: true
+  noResultMessage: Finished
+  message: 'Your result:'
+  scoreBarLabel: You got @finals out of @totals points
+  overallFeedback:
+  - from: 0
+    to: 100
+  solutionButtonText: Show solution
+  retryButtonText: Retry
+  finishButtonText: Finish
+  submitButtonText: Submit
+  showAnimations: false
+  skippable: false
+  skipButtonText: Skip video
+override:
+  checkButton: true
+texts:
+  prevButton: Previous question
+  nextButton: Next question
+  finishButton: Finish
+  submitButton: Submit
+  textualProgress: 'Question: @current of @total questions'
+  jumpToQuestion: Question %d of %total
+  questionLabel: Question
+  readSpeakerProgress: Question @current of @total
+  unansweredText: Unanswered
+  answeredText: Answered
+  currentQuestionText: Current question
+  navigationLabel: Questions
+  questionSetInstruction: Choose question to display

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import uuid
 from pathlib import Path
 
 from .content_store import ContentStore
@@ -34,7 +35,7 @@ class WorkspaceIO:
 
     def write_json(self, path: Path, payload: dict) -> None:
         self.ensure_directory(path.parent)
-        temp_path = path.with_name(f".{path.name}.tmp")
+        temp_path = path.with_name(f".{path.name}.{os.getpid()}.{uuid.uuid4().hex}.tmp")
         temp_path.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
         os.replace(temp_path, path)
 

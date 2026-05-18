@@ -1,0 +1,146 @@
+Ein **Datentyp** bezeichnet bestimmte Wertebereiche, auf denen bestimmte
+Operationen definiert sind.
+
+Python unterscheidet verschiedene Datentypen:
+
+  * **int**: Positive und negative ganze Zahlen.
+  * **float**: Dezimalzahlen (Man spricht auch von `Fließkommazahlen`)
+  * **str** (string) : Zeichenkette.
+  * **bool** (boolean): Wahrheitswert: `True` oder `False`
+
+Später wirst du noch weitere Datentypen kennenlernen.
+
+Operationen haben in diesem Fall unterschiedliche Bedeutug.
+Betrachte z.B. das Beispiel:
+
+```python
+print("3" + "4")
+```
+
+Als Ergebnis liefert Python das Ergebnis `"34"`,
+da Python erkennt, dass es sich um Zeichenketten handelt
+und der + Operator in Python bei Zeichenketten als
+*Konkatenation* (d.h. Aneinanderhängung) der
+beiden Zeichenketten definiert ist.
+
+### Type
+
+Den Typ von konkreten Werten kannst du mit der 
+Funktion `type` erfragen:
+
+```python
+print(type(4))
+print(type(4.0))
+print(type("test"))
+print(type(True))
+print(type(4 * 2))
+print(type(4 / 2))
+```
+
+### Typumwandlungen
+
+Man kann in bestimmten Fällen Datentypen ineinander umwandeln.
+Wenn du z.B. Werte mit `input` einliest sind dies immer zunächst
+strings.
+
+Gib in dem Folgendem Programm die Zahlen **3** und **4** an:
+
+```python
+x = input()
+y = input()
+print(x + y)
+```
+
+Hier besteht wieder das selbe Problem wie vorher:
+
+Dadurch, dass zwei Strings mit dem
+
+```python
+
+```
+
+python
+wird nicht die Summe berechnet, sondern die Strings werden
+aneinandergehängt.
+
+### Strings in Zahlen umwandeln
+
+Wenn du die Strings als Zahlen verarbeiten möchtest, musst du
+sie vorher explizit in eine Zahl umwandeln:
+
+```python
+
+python
+x = int("3")
+y = float("4.5")
+
+print(x + y)
+```
+
+python
+
+x wird in die ganze Zahl 3 umgewandelt, y in die Dezimalzahl 4,5.
+
+!!! warning Achtung
+Beachte, dass dies in manchen Fällen zu Problemen führt.
+Das Programm bricht mit einem Fehler ab, wenn keine ganze Zahl eingibst
+
+```python
+
+int("x")
+```
+
+python
+!!!
+
+### Eingaben umwandeln
+
+So kann ein Programm aussehen, wenn du die Benutzereingabe direkt in eine Zahl umwandeln kannst.
+
+```python
+
+python
+x = float(input())
+y = float(input())
+
+print(x + y)
+```
+
+python
+
+### Zahlen in Texte umwandeln
+
+Umgekehrt kannst du auch Zahlen in Strings umwandeln.
+
+Das folgende Programm führt zu einem Fehler:
+
+```python
+
+python
+x = int(input())
+y = int(input())
+print("Das Ergebnis von " + x + "+" y + " ist " + (x + y))
+```
+
+python
+
+#### Problem:
+
+Das Problem hier ist, dass x und y zahlen sind, hier aber Texte erwartet werden,
+damit die Operation + Sinn ergibt.
+
+### str()
+
+Mit der Funktion str() kann man die Zahlen
+in Strings umwandeln, so dass man diese mit den
+anderen Zeichenketten konkatenieren kann.
+
+So sieht eine korrigierte Version des Programms aus:
+
+```python
+
+python
+x = int(input())
+y = int(input())
+print("Das Ergebnis von " + str(x) + "+" + str(y) + " ist " + str((x + y)))
+```

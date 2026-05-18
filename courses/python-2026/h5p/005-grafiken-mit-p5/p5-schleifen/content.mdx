@@ -1,0 +1,52 @@
+Auch in p5 kannst du mit Schleifen zeichnen.
+
+- Überlege dir **zuerst**, was der folgende Code bewirkt
+- Führe ihn aus.
+- Variiere - Was kannst du mit Schleifen und Linien noch zeichnen?
+
+```python
+import p5
+
+def setup():
+    p5.createCanvas(200, 200)
+    # Die Schleife springt in 20er Schritten von 0 bis 400
+    for i in range(0, 400, 20):
+        p5.line(0, i, 400, i)
+
+p5.run()
+```
+
+Du kannst statt Linien auch andere Objekte zeichnen,
+z.B. Rechtecke:
+
+```python
+import p5
+
+def setup():
+    p5.createCanvas(200, 200)
+    size =50
+    for i in range(20):
+        p5.rect(50 + i*15, 50 + i*15, size, size)
+
+p5.run()
+```
+
+Mit **stroke** kann man die Farbe ändern
+
+- Variiere im folgenden Beispiel die Farbe. Gib den Strichen einen Rot oder Blauton.
+- Variiere die Figuren in der Zeichnung.
+
+```python
+import p5
+
+def setup():
+    p5.createCanvas(200, 200)
+    x = 100
+    y = 100
+    for i in range(10):
+        color = p5.color(0, i * 25, 0)
+        p5.stroke(color)
+        p5.line(x, y, i * 10, y + i * 10)
+
+p5.run()
+```

@@ -1,0 +1,57 @@
+Einer der **Grundkonzepte** der Programmierung ist es, 
+Abläufe zu **automatisieren**.
+
+Dies hilft dir außerdem, deine Programme übersichtlicher zu gestalten,
+da du Code-Zeilen nicht wiederholen musst.
+
+Betrachte das Quadrat aus dem letzten Kapitel:
+
+```python
+import turtle
+
+turtle.forward(100)
+turtle.right(90)
+
+turtle.forward(100)
+turtle.right(90)
+
+turtle.forward(100)
+turtle.right(90)
+
+turtle.forward(100)
+```
+
+Mit einer Schleife geht dies effizienter:
+
+```python
+import turtle
+
+for _ in range(4):
+    turtle.forward(100)
+    turtle.right(90)
+```
+
+Eine Schleife besteht aus mehreren Teilen:
+
+```python
+for _ in range(4):
+```
+
+Diese Zeil bedeutet: 
+Wiederhole 4x den folgenden eingerückten Code.
+
+Die Zeile endet mit einem **Doppelpunkt** - In Python bedeutet das 
+immer, dass sich diese Zeile auf den kompletten Code der nächsten Zeilen bezieht, der eingerückt ist.
+
+Du siehst den Unterschied, wenn du dein Programm anders einrückst:
+
+```python
+import turtle
+
+for _ in range(4):
+    turtle.forward(100)
+turtle.right(90)
+```
+
+Es wird 4x die Zeile ```turtle.forward(100)``` ausgeführt. 
+Erst danach dreht sich die Turtle um 90°

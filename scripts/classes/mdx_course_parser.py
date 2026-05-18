@@ -7,10 +7,13 @@ from pathlib import Path
 from typing import Callable, Pattern
 
 from .models import PythonQuestionBlock, SourceFile, TestCase
+from .python_runner_policy import ensure_miniworlds_packages, resolve_python_runner, validate_graphics_runner
 
 
 class MdxCourseParser:
     """Parses MDX course files into strongly typed question blocks."""
+
+    _chapter_re = re.compile(r"<Chapter(?P<attrs>.*?)\/>", re.DOTALL)
 
     def __init__(
         self,
@@ -131,7 +134,18 @@ class MdxCourseParser:
             attrs[key] = raw_attrs[value_start:index]
         return attrs
 
-    def build_question_from_attrs(self, course_dir: Path, attrs: dict[str, object]) -> PythonQuestionBlock:
+    def _chapter_h5p_subdir(self, chapter_src: str) -> str:
+        if not chapter_src:
+            return ""
+        return Path(chapter_src).with_suffix("").name
+
+    def build_question_from_attrs(
+        self,
+        course_dir: Path,
+        attrs: dict[str, object],
+        *,
+        h5p_subdir: str = "",
+    ) -> PythonQuestionBlock:
         course_slug = course_dir.name
         identifier = str(attrs.get("identifier", "")).strip()
         if not identifier:
@@ -148,9 +162,10 @@ class MdxCourseParser:
         h5p_metadata_path = str(attrs.get("h5pMetadataPath", attrs.get("h5p-metadata-path", ""))).strip()
         h5p_content_path = str(attrs.get("h5pContentPath", attrs.get("h5p-content-path", ""))).strip()
         source_package_path = str(attrs.get("sourcePackagePath", attrs.get("source-package-path", ""))).strip()
-        runner = str(attrs.get("runner", "pyodide")).strip() or "pyodide"
+        h5p_subdir = str(attrs.get("h5pSubdir", attrs.get("h5p-subdir", h5p_subdir))).strip()
         grading_method = str(attrs.get("gradingMethod", attrs.get("grading-method", "please_choose")))
-        packages = self.split_csv(str(attrs.get("packages", "")))
+        packages = ensure_miniworlds_packages(self.split_csv(str(attrs.get("packages", ""))))
+        runner = resolve_python_runner(attrs.get("runner", ""), packages=packages)
         show_console = self.parse_bool(str(attrs.get("showConsole", "true")), default=True)
         allow_adding_files = self.parse_bool(str(attrs.get("allowAddingFiles", "false")), default=False)
         editable_h5p_payload = attrs.get("h5p")
@@ -163,6 +178,7 @@ class MdxCourseParser:
                     instructions="",
                     course_slug=course_slug,
                     course_dir=course_dir,
+                    h5p_subdir=h5p_subdir,
                 )
             )
 
@@ -184,6 +200,7 @@ class MdxCourseParser:
                 h5p_metadata_path=h5p_metadata_path,
                 h5p_content_path=h5p_content_path,
                 source_package_path=source_package_path,
+                h5p_subdir=h5p_subdir,
                 runner=runner,
                 packages=packages,
                 grading_method=grading_method,
@@ -207,6 +224,7 @@ class MdxCourseParser:
             question.raw_package = raw_package
         if source_package_path:
             question.source_package_path = source_package_path
+        question.h5p_subdir = h5p_subdir
         if "runner" in attrs:
             question.runner = runner
         if "packages" in attrs:
@@ -231,6 +249,45 @@ class MdxCourseParser:
         if isinstance(editable_h5p_payload, dict):
             self._apply_editable_h5p_payload(question, editable_h5p_payload)
         return question
+
+    def _expand_chapters(self, course_dir: Path, source: str) -> tuple[str, dict[int, str]]:
+        chapter_subdirs: dict[int, str] = {}
+        chunks: list[str] = []
+        last_end = 0
+        for match in self._chapter_re.finditer(source):
+            chunks.append(source[last_end:match.start()])
+            attrs = self.parse_tag_attributes(match.group("attrs"))
+            chapter_src = str(attrs.get("src", "")).strip()
+            if not chapter_src:
+                raise ValueError("Chapter benötigt ein src-Attribut.")
+
+            chapter_path = (course_dir / chapter_src).resolve()
+            if not chapter_path.is_file():
+                raise ValueError(f"Chapter-Datei '{chapter_src}' wurde nicht gefunden.")
+
+            start = sum(len(chunk) for chunk in chunks)
+            chapter_source = chapter_path.read_text(encoding="utf-8")
+            chunks.append(chapter_source)
+            end = start + len(chapter_source)
+            chapter_subdirs[start] = self._chapter_h5p_subdir(chapter_src)
+            chapter_subdirs[end] = ""
+            last_end = match.end()
+
+        chunks.append(source[last_end:])
+        return "".join(chunks), chapter_subdirs
+
+    def _h5p_subdir_for_position(
+        self,
+        position: int,
+        chapter_subdirs: dict[int, str],
+        sorted_keys: list[int] | None = None,
+    ) -> str:
+        h5p_subdir = ""
+        for start in (sorted_keys if sorted_keys is not None else sorted(chapter_subdirs)):
+            if start > position:
+                break
+            h5p_subdir = chapter_subdirs[start]
+        return h5p_subdir
 
     def parse_test_case(self, raw: str) -> TestCase:
         payload = json.loads(raw)
@@ -279,13 +336,19 @@ class MdxCourseParser:
     def parse_course(self, course_dir: Path) -> tuple[str, list[PythonQuestionBlock], str]:
         mdx_path = course_dir / "index.mdx"
         source = mdx_path.read_text(encoding="utf-8")
+        parse_source, chapter_subdirs = self._expand_chapters(course_dir, source)
 
         questions: dict[str, PythonQuestionBlock] = {}
-        rendered_source = source
+        rendered_source = parse_source
+        sorted_chapter_keys = sorted(chapter_subdirs)
 
-        for match in self._tag_re.finditer(source):
+        for match in self._tag_re.finditer(parse_source):
             attrs = self.parse_tag_attributes(match.group("attrs"))
-            question = self.build_question_from_attrs(course_dir, attrs)
+            question = self.build_question_from_attrs(
+                course_dir,
+                attrs,
+                h5p_subdir=self._h5p_subdir_for_position(match.start(), chapter_subdirs, sorted_chapter_keys),
+            )
             question.course_dir = course_dir
             if question.identifier in questions:
                 raise ValueError(
@@ -298,7 +361,7 @@ class MdxCourseParser:
                 1,
             )
 
-        for fence in self._fence_re.finditer(source):
+        for fence in self._fence_re.finditer(parse_source):
             spec = fence.group("spec").strip()
             if not spec:
                 continue
@@ -339,6 +402,9 @@ class MdxCourseParser:
             else:
                 raise ValueError(f"Unbekannte PythonQuestion-Rolle '{role}' in {mdx_path}.")
 
+        for question in questions.values():
+            self._validate_question_runner(mdx_path, question)
+
         def strip_question_fence(match: re.Match[str]) -> str:
             spec = match.group("spec").strip()
             spec_parts = spec.split()
@@ -349,3 +415,20 @@ class MdxCourseParser:
         rendered_source = self._fence_re.sub(strip_question_fence, rendered_source)
 
         return source, list(questions.values()), rendered_source
+
+    def _validate_question_runner(self, mdx_path: Path, question: PythonQuestionBlock) -> None:
+        source = "\n".join(
+            [
+                question.starter_code,
+                question.solution_code,
+                question.pre_code,
+                question.post_code,
+                *[source_file.code for source_file in question.source_files],
+            ]
+        )
+        question.packages = ensure_miniworlds_packages(question.packages, source=source)
+        validate_graphics_runner(
+            runner=question.runner,
+            source=source,
+            location=f"{mdx_path.as_posix()}#{question.identifier}",
+        )

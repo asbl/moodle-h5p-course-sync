@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import shutil
+import subprocess
 from pathlib import Path
 from typing import TYPE_CHECKING, Callable, Iterable
 from zipfile import BadZipFile, ZipFile
@@ -13,7 +14,8 @@ if TYPE_CHECKING:
 class H5PFileService:
     """Handles H5P sidecar and archive file operations."""
 
-    _IGNORED_ARCHIVE_PARTS = {"__pycache__", "node_modules"}
+    _IGNORED_ARCHIVE_PARTS = {"__pycache__", "node_modules", "editable-images"}
+    _EDITABLE_IMAGE_DIR = "editable-images"
 
     def __init__(
         self,
@@ -33,11 +35,17 @@ class H5PFileService:
         self._write_json = write_json
 
     def build_h5p_sidecar_paths(self, question: PythonQuestionBlock) -> tuple[str, str]:
-        base_dir = Path("h5p") / question.identifier
-        return (base_dir / "h5p.json").as_posix(), (base_dir / "content.yml").as_posix()
+        base_dir = Path("h5p")
+        if question.h5p_subdir:
+            base_dir /= question.h5p_subdir
+        base_dir /= question.identifier
+        return (base_dir / "h5p.json").as_posix(), (base_dir / "settings.yml").as_posix()
 
     def build_source_package_sidecar_path(self, question: PythonQuestionBlock) -> str:
-        return (Path("h5p") / question.identifier).as_posix()
+        base_dir = Path("h5p")
+        if question.h5p_subdir:
+            base_dir /= question.h5p_subdir
+        return (base_dir / question.identifier).as_posix()
 
     def write_h5p_sidecar_files(self, question: PythonQuestionBlock) -> tuple[str, str]:
         if question.course_dir is None or question.h5p_metadata is None or question.h5p_content is None:
@@ -115,7 +123,16 @@ class H5PFileService:
         normalized = relative_path.strip("/")
         if not normalized:
             return None
-        if normalized in {"h5p.json", "content.json", "content.yml", "content.yaml", "content/content.json"}:
+        if normalized in {
+            "h5p.json",
+            "content.json",
+            "content.yml",
+            "content.yaml",
+            "content.mdx",
+            "settings.yml",
+            "settings.yaml",
+            "content/content.json",
+        }:
             return None
         if normalized.startswith("content/"):
             asset_path = normalized[len("content/"):]
@@ -140,7 +157,7 @@ class H5PFileService:
         if source_path.is_dir():
             content_root_only = not any(
                 (source_path / candidate).exists()
-                for candidate in ("content.json", "content.yml", "content.yaml")
+                for candidate in ("content.json", "content.yml", "content.yaml", "content.mdx")
             )
             excluded_roots = {
                 child.name
@@ -193,6 +210,7 @@ class H5PFileService:
         shared_libraries: Iterable[Path] = (),
         shared_libraries_root: Path | None = None,
     ) -> None:
+        self.render_editable_images(source_dir)
         written_entries: set[str] = set()
         content_payload: dict[str, object] | None = None
         try:
@@ -214,7 +232,7 @@ class H5PFileService:
                 continue
             if relative_path == "h5p.json":
                 archive_name = "h5p.json"
-            elif relative_path in {"content.json", "content.yml", "content.yaml"}:
+            elif relative_path in {"content.json", "content.yml", "content.yaml", "content.mdx", "settings.yml", "settings.yaml"}:
                 continue
             else:
                 archive_name = f"content/{relative_path}"
@@ -243,3 +261,29 @@ class H5PFileService:
             if part.startswith("."):
                 return True
         return False
+
+    def render_editable_images(self, source_dir: Path) -> list[Path]:
+        editable_dir = source_dir / self._EDITABLE_IMAGE_DIR
+        if not editable_dir.is_dir():
+            return []
+
+        rendered: list[Path] = []
+        for source_path in sorted(editable_dir.glob("*.svg")):
+            target_path = source_dir / "images" / f"{source_path.stem}.png"
+            if target_path.exists() and target_path.stat().st_mtime_ns >= source_path.stat().st_mtime_ns:
+                continue
+            self._ensure_directory(target_path.parent)
+            self._render_svg_to_png(source_path, target_path)
+            rendered.append(target_path)
+        return rendered
+
+    def _render_svg_to_png(self, source_path: Path, target_path: Path) -> None:
+        for candidate in ("magick", "convert"):
+            executable = shutil.which(candidate)
+            if executable:
+                subprocess.run([executable, str(source_path), str(target_path)], check=True)
+                return
+        raise RuntimeError(
+            "Editierbare H5P-Bilder koennen nicht gerendert werden: "
+            "ImageMagick fehlt. Installiere 'magick' oder 'convert'."
+        )

@@ -1,0 +1,24 @@
+Mit verschachtelten Schleifen kannst du in Turtle-Grafik Muster zeichnen:
+
+```python
+import turtle
+
+t = turtle.Turtle()
+t.speed(0)
+
+rows = 3
+cols = 3
+size = 20   # Radius der Kreise
+distance = 60  # Abstand zwischen den Kreisen
+
+for i in range(rows):
+    for j in range(cols):
+
+        t.penup()
+        t.goto(j*distance, -i*distance)
+        t.pendown()
+
+        t.circle(size)
+
+turtle.done()
+```

@@ -24,6 +24,12 @@ python -m pip install -r "$REQUIREMENTS_FILE"
 
 export PYTHONPATH="$ROOT_DIR${PYTHONPATH:+:$PYTHONPATH}"
 
+# H5P-Libraries herunterladen, falls noch nicht vorhanden
+if [[ ! -d "$ROOT_DIR/libraries" ]] || [[ -z "$(ls -A "$ROOT_DIR/libraries" 2>/dev/null)" ]]; then
+  echo "H5P-Libraries werden heruntergeladen..."
+  inv update-h5p-libraries
+fi
+
 echo "Virtuelle Umgebung aktiv: $VIRTUAL_ENV"
 echo "Verfuegbare Tasks:"
 inv -l

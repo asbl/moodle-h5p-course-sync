@@ -106,13 +106,13 @@ class TestBuildDefaultPythonQuestionContent(unittest.TestCase):
         content = syncer._build_default_python_question_content(q)
         self.assertEqual(content["pythonRunner"], "skulpt")
 
-    def test_packages_mapped_to_list_of_objects(self) -> None:
+    def test_packages_mapped_to_scalar_list(self) -> None:
         syncer = _make_syncer()
         q = _make_question(packages=["miniworlds", "numpy"])
         content = syncer._build_default_python_question_content(q)
         self.assertEqual(
             content["pyodideOptions"]["packages"],  # type: ignore[index]
-            [{"package": "miniworlds"}, {"package": "numpy"}],
+            ["miniworlds", "numpy", "sqlite3"],
         )
 
     def test_show_console_propagated(self) -> None:

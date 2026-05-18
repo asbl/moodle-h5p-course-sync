@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import threading
+import shutil
 from pathlib import Path
 from typing import Callable, Protocol
 
@@ -20,11 +21,33 @@ class RuntimePreparationService:
         self._threads: dict[str, threading.Thread] = {}
         self._errors: dict[str, str] = {}
 
+    def _hash_marker_path(self, content_id: str) -> Path:
+        return self._content_root / content_id / ".course-sync-ready-hash"
+
+    def _load_persisted_hash(self, content_id: str) -> str:
+        marker_path = self._hash_marker_path(content_id)
+        if not marker_path.exists():
+            return ""
+        try:
+            return marker_path.read_text(encoding="utf-8").strip()
+        except OSError:
+            return ""
+
+    def _persist_hash(self, content_id: str, question_hash: str) -> None:
+        marker_path = self._hash_marker_path(content_id)
+        marker_path.parent.mkdir(parents=True, exist_ok=True)
+        marker_path.write_text(question_hash + "\n", encoding="utf-8")
+
     def is_ready(self, question: QuestionLike, compute_hash: Callable[[QuestionLike], str]) -> bool:
         question_hash = compute_hash(question)
-        cached_hash = self._import_cache.get(question.runtime_content_id)
-        content_dir = self._content_root / question.runtime_content_id
-        return cached_hash == question_hash and content_dir.exists() and question.package_path.exists()
+        content_id = question.runtime_content_id
+        cached_hash = self._import_cache.get(content_id)
+        content_dir = self._content_root / content_id
+        if not (content_dir.exists() and question.package_path.exists()):
+            return False
+        if cached_hash == question_hash:
+            return True
+        return self._load_persisted_hash(content_id) == question_hash
 
     def ensure_ready(
         self,
@@ -34,11 +57,49 @@ class RuntimePreparationService:
         write_package: Callable[[QuestionLike], Path],
         import_into_runtime: Callable[[QuestionLike], None],
     ) -> None:
+        question_hash = compute_hash(question)
+        content_id = question.runtime_content_id
+        content_dir = self._content_root / content_id
+        if content_dir.exists() and question.package_path.exists():
+            if self._import_cache.get(content_id) == question_hash or self._load_persisted_hash(content_id) == question_hash:
+                self._import_cache[content_id] = question_hash
+                return
+
         if self.is_ready(question, compute_hash):
             return
         write_package(question)
         import_into_runtime(question)
-        self._import_cache[question.runtime_content_id] = compute_hash(question)
+        self._import_cache[content_id] = question_hash
+        self._persist_hash(content_id, question_hash)
+
+    def rebuild(
+        self,
+        question: QuestionLike,
+        *,
+        compute_hash: Callable[[QuestionLike], str],
+        write_package: Callable[[QuestionLike], Path],
+        import_into_runtime: Callable[[QuestionLike], None],
+    ) -> None:
+        content_id = question.runtime_content_id
+        with self._lock:
+            thread = self._threads.get(content_id)
+            if thread is not None and thread.is_alive():
+                raise RuntimeError("H5P wird bereits vorbereitet.")
+            self._errors.pop(content_id, None)
+            self._import_cache.pop(content_id, None)
+
+        content_dir = self._content_root / content_id
+        if content_dir.exists():
+            shutil.rmtree(content_dir)
+
+        question_hash = compute_hash(question)
+        write_package(question)
+        import_into_runtime(question)
+
+        with self._lock:
+            self._import_cache[content_id] = question_hash
+            self._errors.pop(content_id, None)
+        self._persist_hash(content_id, question_hash)
 
     def start_preparation(
         self,

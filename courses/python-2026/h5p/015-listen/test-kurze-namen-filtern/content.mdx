@@ -1,0 +1,52 @@
+<Instructions>
+Schreibe die Funktion `filtere_kurze_namen(namen)`.
+
+Sie bekommt eine Liste mit Namen und soll eine neue Liste zurückgeben. In der
+neuen Liste sollen nur Namen mit höchstens fünf Buchstaben stehen.
+
+| `namen` | Rückgabe |
+| --- | --- |
+| `["Alex", "Steve", "Enderman", "Zoe", "Creeper", "Kim"]` | `["Alex", "Steve", "Zoe", "Kim"]` |
+| `["Ada", "Grace", "Katherine"]` | `["Ada", "Grace"]` |
+</Instructions>
+
+```python editor:startingCode
+def filtere_kurze_namen(namen):
+    kurze_namen = []
+    # Ergänze hier die Schleife.
+    return kurze_namen
+```
+
+```python editor:postCode
+namen = input().split()
+print(filtere_kurze_namen(namen))
+```
+
+```python grading:targetCode
+def filtere_kurze_namen(namen):
+    kurze_namen = []
+    for name in namen:
+        if len(name) <= 5:
+            kurze_namen.append(name)
+    return kurze_namen
+```
+
+```yaml grading
+gradingMethod: ioTestCases
+testCases:
+- hidden: false
+  inputs:
+  - Alex Steve Enderman Zoe Creeper Kim
+  outputs:
+  - "['Alex', 'Steve', 'Zoe', 'Kim']"
+- hidden: false
+  inputs:
+  - Ada Grace Katherine
+  outputs:
+  - "['Ada', 'Grace']"
+- hidden: true
+  inputs:
+  - Max Alexandra Bo Li
+  outputs:
+  - "['Max', 'Bo', 'Li']"
+```

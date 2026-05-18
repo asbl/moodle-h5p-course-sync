@@ -1,9 +1,12 @@
 from __future__ import annotations
 
+import re
+import unicodedata
 from pathlib import Path
 from typing import Callable, Protocol
 
 from scripts.classes.models import MoodleH5PActivity, PythonQuestionBlock, SyncMetadata, SyncMetadataEntry
+from scripts.classes.python_runner_policy import DEFAULT_PYTHON_RUNNER
 
 
 class MoodleImportClient(Protocol):
@@ -55,10 +58,30 @@ class MoodleSyncer:
             instructions=activity.intro or f"Importiert aus Moodle: {activity.title}",
             preview_url=activity.url,
             package_url=getattr(activity, "package_url", ""),
-            runner="pyodide",
+            h5p_subdir=getattr(activity, "h5p_subdir", ""),
+            runner=DEFAULT_PYTHON_RUNNER,
             course_slug=course_slug,
             course_dir=self._courses_dir / course_slug,
         )
+
+    def _slugify(self, value: str, fallback: str) -> str:
+        normalized = unicodedata.normalize("NFKD", value).encode("ascii", "ignore").decode("ascii")
+        slug = re.sub(r"[^a-z0-9]+", "-", normalized.lower()).strip("-")
+        return slug or fallback
+
+    def _assign_activity_h5p_subdirs(self, activities: list[MoodleH5PActivity]) -> list[tuple[str, str]]:
+        chapters: list[tuple[str, str]] = []
+        chapter_by_section: dict[tuple[int, str], str] = {}
+        for activity in self._ordered_activities(activities):
+            section_title = activity.section_title or "Ohne Abschnitt"
+            section_index = int(getattr(activity, "section_index", 0))
+            key = (section_index, section_title)
+            if key not in chapter_by_section:
+                chapter_slug = f"{len(chapters) + 1:03d}-{self._slugify(section_title, f'abschnitt-{section_index}')}"
+                chapter_by_section[key] = chapter_slug
+                chapters.append((chapter_slug, section_title))
+            activity.h5p_subdir = chapter_by_section[key]
+        return chapters
 
     def _ordered_activities(self, activities: list[MoodleH5PActivity]) -> list[MoodleH5PActivity]:
         return sorted(
@@ -66,6 +89,8 @@ class MoodleSyncer:
             key=lambda activity: (
                 int(getattr(activity, "section_index", 0)),
                 int(getattr(activity, "module_index", 0)),
+                int(getattr(activity, "subsection_index", -1)),
+                int(getattr(activity, "submodule_index", -1)),
                 int(getattr(activity, "activity_id", 0)),
             ),
         )
@@ -73,11 +98,19 @@ class MoodleSyncer:
     def render_imported_course_mdx(self, course_slug: str, activities: list[MoodleH5PActivity]) -> str:
         lines = [f"# {course_slug}", ""]
         current_section: str | None = None
+        current_subsection: str | None = None
         for activity in self._ordered_activities(activities):
             question = activity.imported_question or self._build_scaffold_question(course_slug, activity)
             if activity.section_title and activity.section_title != current_section:
                 lines.extend([f"## {self._escape_mdx_attribute(activity.section_title)}", ""])
                 current_section = activity.section_title
+                current_subsection = None
+            subsection_title = str(getattr(activity, "subsection_title", "") or "")
+            if subsection_title and subsection_title != current_subsection:
+                lines.extend([f"### {self._escape_mdx_attribute(subsection_title)}", ""])
+                current_subsection = subsection_title
+            elif not subsection_title:
+                current_subsection = None
             lines.extend(self._render_imported_question_mdx(question))
         return "\n".join(line for line in lines if line != "") + "\n"
 
@@ -87,6 +120,19 @@ class MoodleSyncer:
         self._ensure_directory(course_dir / "assets")
 
         activities = self._ordered_activities(client.list_course_h5p_activities(remote_course_id))
+        chapters = self._assign_activity_h5p_subdirs(activities)
+
+        print("Import-Reihenfolge (Sektion/Modul):")
+        for activity in activities:
+            subsection_title = str(getattr(activity, "subsection_title", "") or "")
+            section_label = activity.section_title or "-"
+            if subsection_title:
+                section_label = f"{section_label} / {subsection_title}"
+            print(
+                f"- [{getattr(activity, 'section_index', 0)}:{getattr(activity, 'module_index', 0)}"
+                f":{getattr(activity, 'submodule_index', -1)}] "
+                f"{section_label} -> {activity.identifier}"
+            )
 
         for activity in activities:
             try:
@@ -94,8 +140,22 @@ class MoodleSyncer:
             except RuntimeError:
                 activity.imported_question = None
 
-        mdx = self.render_imported_course_mdx(course, activities)
-        (course_dir / "index.mdx").write_text(mdx, encoding="utf-8")
+        chapters_dir = course_dir / "chapters"
+        self._ensure_directory(chapters_dir)
+        index_lines = [f"# {course}", ""]
+        for chapter_slug, section_title in chapters:
+            chapter_activities = [
+                activity
+                for activity in activities
+                if getattr(activity, "h5p_subdir", "") == chapter_slug
+            ]
+            chapter_mdx = self.render_imported_course_mdx(course, chapter_activities)
+            chapter_lines = chapter_mdx.splitlines()
+            if chapter_lines and chapter_lines[0].startswith("# "):
+                chapter_lines = chapter_lines[1:]
+            (chapters_dir / f"{chapter_slug}.mdx").write_text("\n".join(chapter_lines).strip() + "\n", encoding="utf-8")
+            index_lines.append(f'<Chapter src="./chapters/{chapter_slug}.mdx" title="{self._escape_mdx_attribute(section_title)}" />')
+        (course_dir / "index.mdx").write_text("\n".join(index_lines).strip() + "\n", encoding="utf-8")
 
         _, questions, _ = self._parse_course(course_dir)
         question_by_identifier = {question.identifier: question for question in questions}

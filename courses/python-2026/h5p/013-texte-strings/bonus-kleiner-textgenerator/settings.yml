@@ -1,0 +1,4 @@
+contentType: text_only
+pythonRunner: skulpt
+pyodideOptions:
+  packages: []

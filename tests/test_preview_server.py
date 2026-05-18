@@ -8,12 +8,14 @@ from scripts.classes.cli.preview_server import serve_preview
 
 
 class PreviewServerTests(unittest.TestCase):
+    @patch("builtins.print")
     @patch("scripts.classes.cli.preview_server.build_course_preview_handler")
     @patch("scripts.classes.cli.preview_server.ThreadingHTTPServer")
     def test_serve_preview_closes_server_without_runtime_process(
         self,
         server_cls: Mock,
         build_handler: Mock,
+        print_mock: Mock,
     ) -> None:
         server = Mock()
         server_cls.return_value = server
@@ -38,13 +40,16 @@ class PreviewServerTests(unittest.TestCase):
 
         server.serve_forever.assert_called_once_with()
         server.server_close.assert_called_once_with()
+        self.assertEqual(print_mock.call_args_list[0].args[0], "Preview wird vorbereitet. Der Server ist erst nach Abschluss der H5P-Vorbereitung erreichbar.")
 
+    @patch("builtins.print")
     @patch("scripts.classes.cli.preview_server.build_course_preview_handler")
     @patch("scripts.classes.cli.preview_server.ThreadingHTTPServer")
     def test_serve_preview_terminates_runtime_process_on_shutdown(
         self,
         server_cls: Mock,
         build_handler: Mock,
+        print_mock: Mock,
     ) -> None:
         server = Mock()
         server.serve_forever.side_effect = KeyboardInterrupt()
@@ -74,13 +79,16 @@ class PreviewServerTests(unittest.TestCase):
         server.server_close.assert_called_once_with()
         runtime_process.terminate.assert_called_once_with()
         runtime_process.wait.assert_called_once_with(timeout=5)
+        self.assertEqual(print_mock.call_args_list[0].args[0], "Preview wird vorbereitet. Der Server ist erst nach Abschluss der H5P-Vorbereitung erreichbar.")
 
+    @patch("builtins.print")
     @patch("scripts.classes.cli.preview_server.build_course_preview_handler")
     @patch("scripts.classes.cli.preview_server.ThreadingHTTPServer")
     def test_serve_preview_raises_when_runtime_process_already_exited(
         self,
         server_cls: Mock,
         build_handler: Mock,
+        _print_mock: Mock,
     ) -> None:
         runtime_process = Mock()
         runtime_process.poll.return_value = 1
@@ -106,12 +114,14 @@ class PreviewServerTests(unittest.TestCase):
         server_cls.assert_not_called()
         build_handler.assert_not_called()
 
+    @patch("builtins.print")
     @patch("scripts.classes.cli.preview_server.build_course_preview_handler")
     @patch("scripts.classes.cli.preview_server.ThreadingHTTPServer")
     def test_serve_preview_prepares_runtime_before_serving(
         self,
         server_cls: Mock,
         build_handler: Mock,
+        print_mock: Mock,
     ) -> None:
         server = Mock()
         server_cls.return_value = server
@@ -137,3 +147,10 @@ class PreviewServerTests(unittest.TestCase):
 
         self.assertEqual(calls, ["runtime", "prepare"])
         server.serve_forever.assert_called_once_with()
+        self.assertEqual(
+            [call.args[0] for call in print_mock.call_args_list],
+            [
+                "Preview wird vorbereitet. Der Server ist erst nach Abschluss der H5P-Vorbereitung erreichbar.",
+                "Preview läuft auf http://127.0.0.1:8877",
+            ],
+        )

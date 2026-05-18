@@ -1,0 +1,69 @@
+<Instructions>
+Erstelle einen Prüfcode für ein Codewort.
+
+Manchmal werden Befehle oder Codewörter mit Leerzeichen und unterschiedlicher
+Großschreibung eingegeben. Dein Programm soll daraus eine saubere
+Kleinbuchstaben-Version machen und zusätzlich kurze Informationen über den
+Text ausgeben.
+
+Die Variable `ergebnis` baut aus der Eingabe ein Codewort folgendermaßen auf:
+
+Die **Ausgabe** wird nach folgenden **Regeln** gebaut:
+
+- Zuerst das Eingabewort (ohne Leerzeichen am Anfang/Ende) in Kleinbuchstaben
+- dann ein Bindestrich `-`
+- dann die Anzahl der Zeichen des Eingabewortes
+- dann ein Bindestrich `-`
+- und zuletzt das erste und letzte Zeichen in Kleinbuchstaben
+
+#### Eingabe
+  Spindfach  
+
+#### Ausgabe
+spindfach-9-sh
+</Instructions>
+
+```python editor:preCode
+text = input()
+```
+
+```python editor:startingCode
+text = text.strip()
+ergebnis =
+```
+
+```python editor:postCode
+print(ergebnis)
+```
+
+```python grading:targetCode
+text = input()
+text = text.strip()
+klein = text.lower()
+
+ergebnis = f"{klein}-{len(text)}-{klein[0]}{klein[-1]}"
+print(ergebnis)
+```
+
+```yaml grading
+gradingMethod: ioTestCases
+dueDateGroup:
+  enableDueDate: true
+  duedate: '2026-06-01T07:00:00.000Z'
+testCases:
+- hidden: false
+  inputs:
+  - '  Spindfach  '
+  outputs:
+  - spindfach-9-sh
+- hidden: false
+  inputs:
+  - ALARM
+  outputs:
+  - alarm-5-am
+- hidden: true
+  inputs:
+  - '  Sternkarte '
+  outputs:
+  - sternkarte-10-se
+```

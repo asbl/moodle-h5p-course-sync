@@ -26,6 +26,7 @@ class PreviewHandlerContext:
     rewrite_runtime_html: Callable[[str, str, str], str]
     escape_inline: Callable[[str], str]
     start_runtime_question_preparation: Callable[[object], None]
+    rebuild_runtime_question: Callable[[object], None]
     template_renderer: Callable[[], object]
 
 
@@ -57,8 +58,8 @@ def build_course_preview_handler(context: PreviewHandlerContext) -> type[BaseHTT
                     self.send_error(HTTPStatus.NOT_FOUND, "Kurs nicht gefunden.")
                     return
                 questions, html_content = context.load_course_preview_state(course_dir)
-                if questions:
-                    context.start_runtime_question_preparation(questions[0])
+                for question in questions:
+                    context.start_runtime_question_preparation(question)
                 self.respond_html(html_content)
                 return
 
@@ -115,6 +116,19 @@ def build_course_preview_handler(context: PreviewHandlerContext) -> type[BaseHTT
             path = unquote(parsed.path)
             if path.startswith(f"{context.runtime_proxy_prefix}/"):
                 self.proxy_runtime_request("POST", parsed)
+                return
+            if path.startswith("/preview-rebuild/"):
+                parts = path.strip("/").split("/")
+                if len(parts) != 3:
+                    self.send_error(HTTPStatus.NOT_FOUND, "Unbekannter Preview-Rebuild-Pfad.")
+                    return
+
+                result = context.preview_controller().rebuild_preview(parts[1], parts[2])
+                if result.status_code != HTTPStatus.OK or result.payload is None:
+                    self.send_error(result.status_code, result.error_message or "Unbekannter Fehler.")
+                    return
+
+                self.respond_json(result.payload)
                 return
             self.send_error(HTTPStatus.NOT_FOUND, "Route nicht gefunden.")
 

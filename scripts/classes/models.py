@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from scripts.classes.h5p_runtime_manager.runtime_ids import build_runtime_content_id
+from scripts.classes.python_runner_policy import DEFAULT_PYTHON_RUNNER
 
 
 DEFAULT_COURSES_DIR = Path(__file__).resolve().parent.parent.parent / "courses"
@@ -40,7 +41,8 @@ class PythonQuestionBlock:
     h5p_metadata_path: str = ""
     h5p_content_path: str = ""
     source_package_path: str = ""
-    runner: str = "pyodide"
+    h5p_subdir: str = ""
+    runner: str = DEFAULT_PYTHON_RUNNER
     packages: list[str] = field(default_factory=list)
     starter_code: str = ""
     solution_code: str = ""
@@ -57,12 +59,13 @@ class PythonQuestionBlock:
     @property
     def package_path(self) -> Path:
         course_dir = self.course_dir or (DEFAULT_COURSES_DIR / self.course_slug)
-        return course_dir / "h5p" / f"{self.identifier}.h5p"
+        build_dir = course_dir / "build" / "h5p"
+        return build_dir / self.h5p_subdir / f"{self.identifier}.h5p" if self.h5p_subdir else build_dir / f"{self.identifier}.h5p"
 
     @property
     def h5p_dir(self) -> Path:
         course_dir = self.course_dir or (DEFAULT_COURSES_DIR / self.course_slug)
-        return course_dir / "h5p"
+        return course_dir / "h5p" / self.h5p_subdir if self.h5p_subdir else course_dir / "h5p"
 
     @property
     def exploded_dir(self) -> Path:
@@ -87,12 +90,16 @@ class MoodleH5PActivity:
     activity_id: int
     instance_id: int | None
     section_title: str = ""
+    subsection_title: str = ""
     section_index: int = 0
     module_index: int = 0
+    subsection_index: int = -1
+    submodule_index: int = -1
     intro: str = ""
     url: str = ""
     visible: bool = True
     package_url: str = ""
+    h5p_subdir: str = ""
     imported_question: PythonQuestionBlock | None = None
 
 
@@ -156,7 +163,7 @@ class SyncMetadata:
     def from_dict(cls, payload: dict[str, object]) -> SyncMetadata:
         entries = {
             entry.identifier: entry
-            for entry in [SyncMetadataEntry.from_dict(item) for item in payload.get("entries", [])]
+            for entry in (SyncMetadataEntry.from_dict(item) for item in payload.get("entries", []))
         }
         return cls(
             course_slug=str(payload.get("course", "")),

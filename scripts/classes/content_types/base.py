@@ -20,12 +20,15 @@ class H5PContentsMixin:
     @property
     def package_path(self) -> Path:
         course_dir = self.course_dir or (_DEFAULT_COURSES_DIR / self.course_slug)  # type: ignore[attr-defined]
-        return course_dir / "h5p" / f"{self.identifier}.h5p"  # type: ignore[attr-defined]
+        build_dir = course_dir / "build" / "h5p"
+        h5p_subdir = getattr(self, "h5p_subdir", "")
+        return build_dir / h5p_subdir / f"{self.identifier}.h5p" if h5p_subdir else build_dir / f"{self.identifier}.h5p"  # type: ignore[attr-defined]
 
     @property
     def h5p_dir(self) -> Path:
         course_dir = self.course_dir or (_DEFAULT_COURSES_DIR / self.course_slug)  # type: ignore[attr-defined]
-        return course_dir / "h5p"
+        h5p_subdir = getattr(self, "h5p_subdir", "")
+        return course_dir / "h5p" / h5p_subdir if h5p_subdir else course_dir / "h5p"
 
     @property
     def exploded_dir(self) -> Path:

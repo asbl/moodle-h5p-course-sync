@@ -1,0 +1,75 @@
+Oft gibt es Situationen, in denen Entscheidungen abhängig von einer Bedingung 
+getroffen werden müssen. 
+
+In einem Flussdiagramm können solche Entscheidungen so aussehen:
+
+### Grundlagen: Verzweigungen:
+
+In Python kann man dies mit einer If-Anweisung umsetzen:
+
+```python
+if Bedingung:
+  Anweisung 1
+  Anweisung 2
+```
+
+### Bedingungen
+
+Bei einer **IF-Verzweigung** wird Code abhängig von einer **Bedingung** ausgeführt:
+
+* Mit `==` kannst du überprüfen, ob zwei Zahlen den gleichen Wert haben.
+* Genauso kannst du mit `!=` überprüfen, ob zwei Zahlen **nicht** den gleichen Wert haben.
+* Mit `>`, `<`, `>=` und `<=` kannst du zwei Zahlen vergleichen.
+
+#### Beispiel:
+
+```python
+print(3 == 4) # False
+print(3 == 3) # True
+print(3 != 1) # True
+```
+
+Damit kannst du nun die **IF-Verzweigung** bauen:
+
+```python
+import random
+
+x = random.randint(0, 3)
+# x ist eine zufällige Zahl zwischen 0 und 3
+
+if x == 3: 
+    print("Die Zahl ist 3") # Dies wird ausgegeben, wenn x = 3 ist.
+if x != 3: 
+    print("Die Zahl ist NICHT 3, sondern", x) # Dies wird ausgegeben, wenn x nicht = 3 ist.
+```
+
+Die allgemeine Syntax für die IF-Anweisung lautet wie folgt:
+
+```python
+if bedingung:
+    codeblock
+```
+
+!!! info  Hinweis
+Auch hier gilt. Man rückt Code-Blöcke üblicherweise mit 4 Leerzeichen ein.
+!!!
+
+#### Beispiel:
+
+```python
+alter = int(input())
+if alter >= 18:
+    print("Du bist volljährig!")
+if alter < 18:
+    print("Du bist noch nicht volljährig")
+```
+
+Wie bei der **for-Anweisung** kannst du auch bei der **IF-Anweisung** 
+durch Einrückung mehrere Zeilen gleichzeitig abhängig von der Bedingung ausführen:
+
+```python
+alter = int(input())
+if alter => 18:
+    print("Herzlichen Glückwunsch!")
+    print("Du bist volljährig!")
+```

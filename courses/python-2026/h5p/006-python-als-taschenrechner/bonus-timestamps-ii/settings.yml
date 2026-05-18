@@ -1,0 +1,20 @@
+contentType: ide_only
+l10n:
+  checkAnswer: Check Anwer
+  run: ▶ Run
+  stop: Stop
+  failedText: You failed - Try again
+  successText: All tests passed
+  testCase: Test Case
+  hidden: '[hidden]'
+  testInput: Test Input
+  lastOutput: Last Output
+  passed: passed?
+  expectedOutput: Expected Output
+  canvas: Canvas
+  instructions: Instructions
+  showCode: Show Code
+  exportImage: Export Image
+pythonRunner: skulpt
+pyodideOptions:
+  packages: []

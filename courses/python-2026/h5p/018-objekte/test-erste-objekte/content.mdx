@@ -1,0 +1,35 @@
+<Instructions>
+Erstelle ein Turtle-Objekt und zeichne damit ein gleichseitiges Dreieck.
+
+- Erstelle ein Turtle-Objekt mit `t = turtle.Turtle()`
+- Setze die Farbe auf `"darkgreen"` mit `t.color("darkgreen")`
+- Zeichne ein gleichseitiges Dreieck mit Seitenlänge `100`
+  - Vorwärts `100` Schritte, dann `120°` nach rechts drehen
+  - Das ganze dreimal
+</Instructions>
+
+```python editor:startingCode
+import turtle
+
+t = turtle.Turtle()
+```
+
+```python grading:targetCode
+import turtle
+
+t = turtle.Turtle()
+t.color("darkgreen")
+
+for _ in range(3):
+    t.forward(100)
+    t.right(120)
+```
+
+```yaml grading
+gradingMethod: targetImage
+testCases:
+- hidden: false
+dueDateGroup:
+  enableDueDate: true
+  duedate: '2026-09-01T07:00:00.000Z'
+```

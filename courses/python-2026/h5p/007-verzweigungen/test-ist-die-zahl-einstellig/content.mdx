@@ -1,0 +1,40 @@
+<Instructions>
+Es soll überprüft werden, ob eine Zahl **einstellig** ist.
+
+* **Eingabe**: Eine beliebige Zahl:
+* **Ausgabe:** Der Text `Einstellige Zahl` soll ausgegeben werden, wenn die Zahl
+  kleiner als 10 ist. Ansonsten soll nichts ausgegeben werden.
+</Instructions>
+
+```python editor:preCode
+x = int(input())
+```
+
+```yaml grading
+gradingMethod: ioTestCases
+testCases:
+- hidden: false
+  inputs:
+  - '4'
+  outputs:
+  - Einstellige Zahl
+- hidden: false
+  inputs:
+  - '8'
+  outputs:
+  - Einstellige Zahl
+- hidden: false
+  inputs:
+  - '12'
+- hidden: false
+  inputs:
+  - '10'
+- hidden: false
+  inputs:
+  - '0'
+  outputs:
+  - Einstellige Zahl
+dueDateGroup:
+  enableDueDate: true
+  duedate: '2026-03-09T07:00:00.000Z'
+```

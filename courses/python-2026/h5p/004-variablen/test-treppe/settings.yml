@@ -1,0 +1,30 @@
+contentType: text_and_ide
+editorSettings:
+  preCode: "import turtle\nx = int(input())\n"
+  startingCode: "for i in range(x):\n    ...\n"
+  postCode: ''
+  instructions: "Schreibe ein Programm, dass bei Eingabe x eine\nTurtle-Treppe der
+    Länge x zeichnet. \n\nJede Stufe soll die Breite 50 und die Höhe 50 haben.\n"
+gradingSettings:
+  gradingMethod: targetImage
+  targetCode: "import turtle\nx = int(input())\n\nfor i in range(x):\n    turtle.forward(50)\n\
+    \    turtle.left(90)\n    turtle.forward(50)\n    turtle.right(90)\n"
+  testCases:
+  - hidden: false
+    inputs:
+    - '1'
+  - hidden: false
+    inputs:
+    - '2'
+  - hidden: false
+    inputs:
+    - '3'
+  - hidden: false
+    inputs:
+    - '4'
+  dueDateGroup:
+    enableDueDate: true
+    duedate: '2026-02-22T23:00:00.000Z'
+pythonRunner: skulpt
+pyodideOptions:
+  packages: []

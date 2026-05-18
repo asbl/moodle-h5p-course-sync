@@ -1,0 +1,6 @@
+contentType: ide_only
+pythonRunner: skulpt
+advancedOptions:
+  enableSaveLoadButtons: false
+pyodideOptions:
+  packages: []

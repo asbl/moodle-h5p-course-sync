@@ -1,0 +1,78 @@
+Listen können u.a. **wachsen** und **verändert** werden. 
+
+Das macht sie in Spielen für Inventar-Listen besonders nützlich.
+
+### Listenelemente an eine Liste anhängen
+
+Mit `append()` kannst du ein Listenelement zu einer Liste hinzufügen:
+
+```python
+inventar = ["Holz", "Stein"]
+inventar.append("Fackel")
+
+print(inventar)
+```
+
+| Schritt | Inhalt der Liste |
+| --- | --- |
+| Start | `["Holz", "Stein"]` |
+| nach `append("Fackel")` | `["Holz", "Stein", "Fackel"]` |
+
+`append(...)` hängt den neuen Wert an das Ende der Liste.
+
+### Listenelemente ersetzen
+
+Du kannst ein Element über seinen Index ersetzen.
+
+```python
+inventar = ["Holz", "Stein", "Erde"]
+inventar[2] = "Glas"
+
+print(inventar)
+```
+
+| Index | `0` | `1` | `2` |
+| --- | --- | --- | --- |
+| vorher | `"Holz"` | `"Stein"` | `"Erde"` |
+| nach `inventar[2] = "Glas"` | `"Holz"` | `"Stein"` | `"Glas"` |
+
+### Prüfen, ob etwas vorhanden ist
+
+Mit `in` kannst du prüfen, ob ein Wert in der Liste vorkommt.
+
+```python
+inventar = ["Holz", "Stein", "Fackel"]
+
+if "Fackel" in inventar:
+    print("Du kannst in die Höhle gehen.")
+else:
+    print("Es ist zu dunkel.")
+```
+
+Python sucht dabei durch die Liste:
+
+```python noeditor
+["Holz", "Stein", "Fackel"]
+                  ^
+                  gefunden
+```
+
+### Aufgabe
+
+Ergänze den Code so, dass am Ende genau diese Ausgaben entstehen:
+
+```python noeditor
+Holz
+Stein
+Fackel
+Diamant
+```
+
+```python
+inventar = ["Holz", "Stein"]
+
+# Ergänze hier zwei Zeilen.
+
+for gegenstand in inventar:
+    print(gegenstand)
+```

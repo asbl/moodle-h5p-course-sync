@@ -1,0 +1,141 @@
+Mit der Bibliothek **p5** kannst du Grafiken einbinden. 
+
+Wir schauen uns einige einfache Beispiele an:
+
+```python
+import p5
+
+def setup():
+    p5.createCanvas(200, 200)
+    x = 100
+    y = 100
+    dx = 50
+    
+    p5.line(x, y, x + dx, y)
+
+p5.run()
+```
+
+Variere die Variable dx und schaue, wie sich die Grafik verändert.
+
+### Weitere Objekte
+
+Neben Linien gibt es noch weitere Objekte
+
+```python
+import p5
+
+def setup():
+    p5.createCanvas(400, 400)
+    x = 200
+    y = 200
+
+    p5.point(x, y)
+    
+    x = 300
+    y = 300
+    r = 30
+    p5.circle(x, y, r)
+    
+    x = 200
+    y = 100
+    w = 60
+    h = 40
+    p5.rect(x, y, 40, 60)
+    
+    x = 50
+    y = 50
+    w = 30
+    h = 20
+
+    p5.ellipse(x, y, w, h)
+
+p5.run()
+```
+
+### Farben
+
+Auch mit Farben kannst du wieder spielen.
+
+*
+
+```python
+
+```
+
+python
+*
+
+```python
+
+fill
+```
+
+python
+
+```python
+
+python
+import p5
+
+def setup():
+    p5.createCanvas(200, 200)
+
+    x = 100
+    y = 100
+    d = 80
+
+    p5.stroke(255, 0, 0)    # Linienfarbe: Rot
+    p5.fill(0, 0, 255)      # Füllfarbe: Blau
+
+    p5.circle(x, y, d)
+
+p5.run()
+```
+
+python
+
+#### Aufgaben
+
+* Mache den Kreis grün
+* Experimentiere mit
+
+```python
+
+p5.noStroke()
+```
+
+und
+
+```python
+
+```
+
+python
+
+### Das Koordinatensystem
+
+Beachte, dass das Koordinatensystem seinen Ursprung oben links hat.
+
+Zeichne den folgenden Kreis...
+* oben links
+* oben links, so dass der komplette Kreis noch im Zeichenbereich(Canvas) ist.
+* zentriert
+* unten rechts
+* oben rechts
+
+```python
+
+python
+import p5
+
+def setup():
+    p5.createCanvas(200, 200)
+    x = 100
+    y = 150
+    r = 25
+    
+    p5.circle(x, y, r)
+
+p5.run()
+```

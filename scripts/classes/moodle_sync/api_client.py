@@ -68,7 +68,49 @@ class MoodleApiClient:
 
         identifiers: set[str] = set()
         activities: list[MoodleH5PActivity] = []
-        for section_index, section in enumerate(payload):
+
+        sections = [section for section in payload if isinstance(section, dict)]
+        subsection_sections: dict[int, dict[str, object]] = {}
+        for section in sections:
+            if str(section.get("component") or "") != "mod_subsection":
+                continue
+            try:
+                subsection_sections[int(section.get("itemid", -1))] = section
+            except (TypeError, ValueError):
+                continue
+
+        def build_activity(
+            *,
+            section_title: str,
+            subsection_title: str = "",
+            section_index: int,
+            module_index: int,
+            module: dict[str, object],
+            subsection_index: int = -1,
+            submodule_index: int = -1,
+        ) -> MoodleH5PActivity:
+            title = str(module.get("name") or f"h5p-{module.get('id', 'unknown')}").strip()
+            identifier = self._make_stable_identifier(title, identifiers)
+            return MoodleH5PActivity(
+                identifier=identifier,
+                title=title,
+                course_id=course_id,
+                activity_id=int(module["id"]),
+                instance_id=int(module["instance"]) if module.get("instance") is not None else None,
+                section_title=section_title,
+                subsection_title=subsection_title,
+                section_index=section_index,
+                module_index=module_index,
+                subsection_index=subsection_index,
+                submodule_index=submodule_index,
+                intro=self._strip_html(str(module.get("description") or "")),
+                url=str(module.get("url") or ""),
+                visible=bool(module.get("visible", True)),
+            )
+
+        for section_index, section in enumerate(sections):
+            if str(section.get("component") or "") == "mod_subsection":
+                continue
             if not isinstance(section, dict):
                 continue
             section_title = str(section.get("name") or section.get("section") or "").strip()
@@ -79,22 +121,42 @@ class MoodleApiClient:
                 if not isinstance(module, dict):
                     continue
                 if module.get("modname") != "h5pactivity":
+                    if module.get("modname") == "subsection":
+                        try:
+                            subsection_section = subsection_sections.get(int(module.get("instance", -1)))
+                        except (TypeError, ValueError):
+                            subsection_section = None
+                        if subsection_section is None:
+                            continue
+
+                        subsection_title = str(
+                            subsection_section.get("name") or module.get("name") or ""
+                        ).strip()
+                        subsection_modules = subsection_section.get("modules", [])
+                        if not isinstance(subsection_modules, list):
+                            continue
+                        subsection_index = int(subsection_section.get("section", section_index))
+                        for submodule_index, submodule in enumerate(subsection_modules):
+                            if not isinstance(submodule, dict) or submodule.get("modname") != "h5pactivity":
+                                continue
+                            activities.append(
+                                build_activity(
+                                    section_title=section_title,
+                                    subsection_title=subsection_title,
+                                    section_index=section_index,
+                                    module_index=module_index,
+                                    module=submodule,
+                                    subsection_index=subsection_index,
+                                    submodule_index=submodule_index,
+                                )
+                            )
                     continue
-                title = str(module.get("name") or f"h5p-{module.get('id', 'unknown')}").strip()
-                identifier = self._make_stable_identifier(title, identifiers)
                 activities.append(
-                    MoodleH5PActivity(
-                        identifier=identifier,
-                        title=title,
-                        course_id=course_id,
-                        activity_id=int(module["id"]),
-                        instance_id=int(module["instance"]) if module.get("instance") is not None else None,
+                    build_activity(
                         section_title=section_title,
                         section_index=section_index,
                         module_index=module_index,
-                        intro=self._strip_html(str(module.get("description") or "")),
-                        url=str(module.get("url") or ""),
-                        visible=bool(module.get("visible", True)),
+                        module=module,
                     )
                 )
         return activities

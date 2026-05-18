@@ -1,0 +1,52 @@
+<Instructions>
+Schreibe die Funktion `filtere_wertvolle_bloecke(bloecke)`.
+
+Sie bekommt eine Liste mit Blocknamen und soll eine neue Liste zurückgeben.
+In der neuen Liste sollen nur `"Diamant"` und `"Gold"` stehen.
+
+| `bloecke` | Rückgabe |
+| --- | --- |
+| `["Erde", "Gold", "Stein", "Diamant"]` | `["Gold", "Diamant"]` |
+| `["Stein", "Kohle"]` | `[]` |
+</Instructions>
+
+```python editor:startingCode
+def filtere_wertvolle_bloecke(bloecke):
+    wertvoll = []
+    # Ergänze die Schleife.
+    return wertvoll
+```
+
+```python editor:postCode
+bloecke = input().split()
+print(filtere_wertvolle_bloecke(bloecke))
+```
+
+```python grading:targetCode
+def filtere_wertvolle_bloecke(bloecke):
+    wertvoll = []
+    for block in bloecke:
+        if block == "Diamant" or block == "Gold":
+            wertvoll.append(block)
+    return wertvoll
+```
+
+```yaml grading
+gradingMethod: ioTestCases
+testCases:
+- hidden: false
+  inputs:
+  - Erde Gold Stein Diamant
+  outputs:
+  - "['Gold', 'Diamant']"
+- hidden: false
+  inputs:
+  - Stein Kohle
+  outputs:
+  - '[]'
+- hidden: true
+  inputs:
+  - Diamant Gold Gold Erde
+  outputs:
+  - "['Diamant', 'Gold', 'Gold']"
+```

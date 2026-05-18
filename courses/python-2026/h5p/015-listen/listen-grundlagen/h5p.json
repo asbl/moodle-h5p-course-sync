@@ -1,0 +1,29 @@
+{
+  "title": "Listen: Grundlagen",
+  "language": "de",
+  "defaultLanguage": "de",
+  "mainLibrary": "H5P.PythonQuestion",
+  "embedTypes": [
+    "div"
+  ],
+  "license": "U",
+  "preloadedDependencies": [
+    {
+      "machineName": "H5P.PythonQuestion",
+      "majorVersion": 6,
+      "minorVersion": 73
+    },
+    {
+      "machineName": "H5P.CodeQuestion",
+      "majorVersion": 6,
+      "minorVersion": 73
+    },
+    {
+      "machineName": "H5P.LibCodeTools",
+      "majorVersion": 6,
+      "minorVersion": 73
+    }
+  ],
+  "majorVersion": 6,
+  "minorVersion": 73
+}

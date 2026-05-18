@@ -1,0 +1,242 @@
+### Vorlage - Basis
+
+```python
+# Diese Variablen werden innerhalb der Schleife verändert.
+zustand = "starterwahl"
+spiel_laeuft = True
+
+
+while spiel_laeuft:
+    # 1. Beschreibe den aktuellen Zustand
+    if zustand == "starterwahl":
+        print("""
+Wähle dein Starter-Pokémon:
+
+a: Feuer-Pokémon
+b: Wasser-Pokémon
+c: Pflanzen-Pokémon
+x: Spiel beenden
+""")
+
+    if zustand == "feuer_event":
+        print("""
+Du hast das Feuer-Pokémon gewählt.
+
+Es will sofort trainieren!
+
+a: Trainieren
+b: Pause machen
+""")
+
+    if zustand == "ende":
+        print("Das Abenteuer ist vorbei.")
+        spiel_laeuft = False
+        continue
+
+
+    # Mache eine Eingabe
+    eingabe = input("> ")
+
+    
+    #3 . Bestimme den Folgezustand abhängig von deiner Beschreibung.
+
+    # Starterwahl
+    if zustand == "starterwahl" and eingabe == "a":
+        zustand = "feuer_event"
+
+    if zustand == "starterwahl" and eingabe == "b":
+        print("Du wählst das Wasser-Pokémon.")
+        zustand = "ende"
+
+    if zustand == "starterwahl" and eingabe == "c":
+        print("Du wählst das Pflanzen-Pokémon.")
+        zustand = "ende"
+
+    if zustand == "starterwahl" and eingabe == "x":
+        spiel_laeuft = False
+
+
+    # Zusatzentscheidung nur für Feuer-Pokémon
+    if zustand == "feuer_event" and eingabe == "a":
+        print("Ihr trainiert hart!")
+        zustand = "ende"
+
+    if zustand == "feuer_event" and eingabe == "b":
+        print("Ihr macht eine Pause.")
+        zustand = "ende"
+
+
+print("Spiel beendet.")
+```
+
+Zur Übersicht kann es helfen, sich das Programm aufzuzeichnen. 
+
+Dazu kannst du einen Automat zeichnen (Mit Automaten werden wir uns in der Q3 intensiver beschäftigen)
+
+### Für Fortgeschrittene: Variante mit Funktionen
+
+Die folgende Variante ist etwas komplizierter, da sie Funktionen nutzt. Dafür wird dein Programm übersichtlicher, 
+selbst dann wenn es etwas größer wird:
+
+```python
+def starterwahl():
+    print("""
+Wähle dein Starter-Pokémon:
+
+a: Feuer-Pokémon
+b: Wasser-Pokémon
+c: Pflanzen-Pokémon
+x: Spiel beenden
+""")
+    
+    eingabe = input("> ")
+
+    if eingabe == "a":
+        return "feuer_event"
+    if eingabe == "b":
+        print("Du wählst das Wasser-Pokémon.")
+        return "ende"
+    if eingabe == "c":
+        print("Du wählst das Pflanzen-Pokémon.")
+        return "ende"
+    if eingabe == "x":
+        return "ende"
+    
+    print("Ungültige Eingabe.")
+    return "starterwahl"
+
+
+def feuer_event():
+    print("""
+Du hast das Feuer-Pokémon gewählt.
+
+Es will sofort trainieren!
+
+a: Trainieren
+b: Pause machen
+""")
+    eingabe = input("> ")
+
+    if eingabe == "a":
+        print("Ihr trainiert hart!")
+        return "ende"
+    if eingabe == "b":
+        print("Ihr macht eine Pause.")
+        return "ende"
+
+    print("Ungültige Eingabe.")
+    return "feuer_event"
+
+
+def ende():
+    print("Das Abenteuer ist vorbei.")
+    return "ende"
+
+
+# ===== HAUPTSCHLEIFE =====
+
+zustand = "starterwahl"
+
+while zustand != "ende":
+    if zustand == "starterwahl":
+        zustand = starterwahl()
+    elif zustand == "feuer_event":
+        zustand = feuer_event()
+
+# Ende
+ende()
+print("Spiel beendet.")
+```
+
+### Vorlage 3: Textadventure mit Gegenständen
+
+Dies ist Variante 1 ergänzt um die Möglichkeiten Gegenstände zu haben.
+
+Dies ist eine Ergänzung zu Variante 1. 
+
+Es gibt hier eine Liste Namens `pokemonliste`.
+
+* Mit `pokemonliste.append("element")` kann man einen Text namens elemnt in die Liste einfügen.
+* Mit `print(pokemonliste)` kann man die Liste ausgeben
+* Mit `pokemonliste.pop(3)` kann man das 4. Element aus der Liste entfernen (man beginnt von 0 an zu zählen
+* Mit `pokemonliste.remove("Glurak")` kann man Glurak aus der Liste entfernen. Wenn Glurak mehrfach in der Liste ist, benötigt man:
+
+```python
+  while "Glurak" in pokemon:
+    pokemon.remove("Glurak")
+```
+
+```python
+# Diese Variablen werden innerhalb der Schleife verändert.
+zustand = "starterwahl"
+spiel_laeuft = True
+pokemonliste = []
+
+
+while spiel_laeuft:
+    # 1. Beschreibe den aktuellen Zustand
+    if zustand == "starterwahl":
+        print("""
+Wähle dein Starter-Pokémon:
+
+a: Feuer-Pokémon
+b: Wasser-Pokémon
+c: Pflanzen-Pokémon
+x: Spiel beenden
+""")
+
+    if zustand == "feuer_event":
+        print("""
+Du hast das Feuer-Pokémon gewählt.
+
+Es will sofort trainieren!
+
+a: Trainieren
+b: Pause machen
+""")
+
+    if zustand == "ende":
+        print("Das Abenteuer ist vorbei.")
+        spiel_laeuft = False
+        continue
+
+
+    # Mache eine Eingabe
+    eingabe = input("> ")
+
+    
+    #3 . Bestimme den Folgezustand abhängig von deiner Beschreibung.
+
+    # Starterwahl
+    if zustand == "starterwahl" and eingabe == "a":
+        pokemonliste.append("Glurak")
+        zustand = "feuer_event"
+
+    if zustand == "starterwahl" and eingabe == "b":
+        print("Du wählst das Wasser-Pokémon.")
+        pokemonliste.append("Blastoise")
+        zustand = "ende"
+
+    if zustand == "starterwahl" and eingabe == "c":
+        print("Du wählst das Pflanzen-Pokémon.")
+        pokemonliste.append("Tangela")
+        zustand = "ende"
+
+    if zustand == "starterwahl" and eingabe == "x":
+        spiel_laeuft = False
+
+
+    # Zusatzentscheidung nur für Feuer-Pokémon
+    if zustand == "feuer_event" and eingabe == "a":
+        print("Ihr trainiert hart!")
+        zustand = "ende"
+
+    if zustand == "feuer_event" and eingabe == "b":
+        print("Ihr macht eine Pause.")
+        zustand = "ende"
+
+
+if "Glurak" in pokemonliste:
+    print("Glurak legt sich schlafen")
+print("Spiel beendet.")
+```

@@ -1,0 +1,66 @@
+Du kennst Objekte jetzt von der Turtle: Daten + Fähigkeiten, gebündelt an
+einem Ort. In miniworlds ist dasselbe Prinzip sichtbar – nur mit anderen
+Klassen.
+
+Die **Welt** selbst ist ein Objekt:
+
+```python noeditor
+import miniworlds
+
+world = miniworlds.World(460, 300)
+world.add_background((225, 238, 252))
+
+world.run()
+```
+
+`world` ist eine Instanz der Klasse `miniworlds.World`. Sie hat Attribute
+(z.B. die Breite und Höhe) und Methoden (z.B. `add_background()`).
+
+### Actors sind Objekte
+
+Alles, was du in der Welt platzierst, ist ebenfalls ein Objekt:
+
+```python noeditor
+import miniworlds
+
+world = miniworlds.World(460, 300)
+world.add_background((225, 238, 252))
+
+kreis = miniworlds.Circle((200, 150), 40)
+
+world.run()
+```
+
+`kreis` ist eine Instanz der Klasse `miniworlds.Circle`.
+
+```python noeditor
+Objekt "kreis" (ein Circle):
+  ┌─────────────────────────────────────┐
+  │ Daten:       Position (200, 150)    │
+  │              Größe: 40              │
+  │              Farbe: (255, 255, 255) │
+  │                                     │
+  │ Fähigkeiten: move_right(), ...      │
+  └─────────────────────────────────────┘
+```
+
+### Attribute setzen und lesen
+
+Attribute verwendest du – genau wie bei der Turtle – über den Punkt-Operator:
+
+```python
+import miniworlds
+
+world = miniworlds.World(460, 300)
+world.add_background((225, 238, 252))
+
+kreis = miniworlds.Circle((200, 150), 40)
+
+kreis.color = (255, 130, 50)   # Attribut setzen
+kreis.size = 80                 # Attribut setzen
+
+print(kreis.x)                  # Attribut lesen: x-Position
+print(kreis.y)                  # Attribut lesen: y-Position
+
+world.run()
+```

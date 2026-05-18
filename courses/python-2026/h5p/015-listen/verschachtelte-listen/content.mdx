@@ -1,0 +1,70 @@
+Eine Liste kann auch wieder Listen enthalten. Das nennt man eine
+**verschachtelte Liste**.
+
+```python
+spielfeld = [
+    ["Gras", "Gras", "Wasser"],
+    ["Stein", "Diamant", "Gras"],
+    ["Wasser", "Stein", "Gold"],
+]
+```
+
+So eine Liste passt gut zu einem Spielfeld mit Zeilen und Spalten.
+
+| Zeile | Spalte `0` | Spalte `1` | Spalte `2` |
+| --- | --- | --- | --- |
+| `0` | `"Gras"` | `"Gras"` | `"Wasser"` |
+| `1` | `"Stein"` | `"Diamant"` | `"Gras"` |
+| `2` | `"Wasser"` | `"Stein"` | `"Gold"` |
+
+### Einzelne Felder lesen
+
+Bei verschachtelten Listen brauchst du zwei Indizes:
+
+```python
+spielfeld = [
+    ["Gras", "Gras", "Wasser"],
+    ["Stein", "Diamant", "Gras"],
+    ["Wasser", "Stein", "Gold"],
+]
+
+print(spielfeld[1][1])
+print(spielfeld[2][2])
+```
+
+| Ausdruck | Bedeutung | Wert |
+| --- | --- | --- |
+| `spielfeld[1]` | zweite Zeile | `["Stein", "Diamant", "Gras"]` |
+| `spielfeld[1][1]` | zweite Zeile, zweite Spalte | `"Diamant"` |
+| `spielfeld[2][2]` | dritte Zeile, dritte Spalte | `"Gold"` |
+
+!!! note Reihenfolge
+Bei `spielfeld[1][2]` wird zuerst die Zeile ausgewählt und danach ein Feld in
+dieser Zeile.
+!!!
+
+### Durch alle Felder laufen
+
+Mit zwei Schleifen kannst du jedes Feld eines Spielfelds ansehen.
+
+```python
+spielfeld = [
+    ["Gras", "Gras", "Wasser"],
+    ["Stein", "Diamant", "Gras"],
+    ["Wasser", "Stein", "Gold"],
+]
+
+for zeile in spielfeld:
+    for block in zeile:
+        print(block)
+```
+
+Die äußere Schleife nimmt eine ganze Zeile. Die innere Schleife geht dann durch
+die einzelnen Blöcke in dieser Zeile.
+
+```python noeditor
+spielfeld
+  zeile 0 -> Gras, Gras, Wasser
+  zeile 1 -> Stein, Diamant, Gras
+  zeile 2 -> Wasser, Stein, Gold
+```

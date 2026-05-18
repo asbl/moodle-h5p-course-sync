@@ -1,0 +1,90 @@
+Du hast gelernt, dass Schildkröten und Kreise in miniworlds Objekte sind.
+Aber Python geht noch weiter: **Fast alles in Python ist ein Objekt** – auch
+Strings, Zahlen und Listen.
+
+Wenn du `text.upper()` schreibst, rufst du eine **Methode auf einem
+String-Objekt** auf. Das ist kein Zufall.
+
+```python
+text = "schattenarchiv"
+
+print(text.upper())          # Methode: Großbuchstaben
+print(text.capitalize())     # Methode: Erster Buchstabe groß
+print(text.replace("a", "@")) # Methode: ersetzen
+print(len(text))             # Funktion, kein Methodenaufruf
+```
+
+Und genauso wie bei Turtle gibt es einen Klassenname hinter jedem Wert:
+
+```python
+text = "Leuchtturm"
+zahl = 42
+liste = [3, 1, 4, 1, 5]
+
+print(type(text))    # <class 'str'>
+print(type(zahl))    # <class 'int'>
+print(type(liste))   # <class 'list'>
+```
+
+`type()` zeigt dir die Klasse eines Objekts. `"Leuchtturm"` ist eine Instanz
+der Klasse `str`, `42` ist eine Instanz der Klasse `int`.
+
+### Methoden auf verschiedenen Typen
+
+Jede Klasse hat ihre eigenen Methoden:
+
+```python
+# str-Methoden:
+wort = "signalfeuer"
+print(wort.upper())
+print(wort.count("e"))
+print(wort.startswith("sig"))
+
+# list-Methoden:
+punkte = [8, 3, 5, 9, 2]
+punkte.sort()
+print(punkte)
+punkte.append(7)
+print(punkte)
+
+# int hat weniger Methoden, aber welche gibt es:
+zahl = 255
+print(zahl.bit_length())   # wie viele Bits braucht diese Zahl?
+```
+
+### Alles zusammen
+
+```python noeditor
+          Klasse  │  Beispielinstanz  │  Beispielmethode
+          ─────────┼───────────────────┼──────────────────
+          str     │  "Hallo"          │  .upper()
+          int     │  42               │  .bit_length()
+          list    │  [1, 2, 3]        │  .sort()
+          Turtle  │  turtle.Turtle()  │  .forward()
+          Circle  │  miniworlds.Circle│  .move_right()
+```
+
+Alle folgen demselben Muster: Klasse → Instanz → Methoden und Attribute.
+
+!!! note Alles ist ein Objekt
+In Python sind fast alle Werte Objekte. Du hast die ganze Zeit mit Objekten
+gearbeitet, wenn du `text.upper()` oder `liste.append(x)` geschrieben hast.
+Der Unterschied zu Turtle und miniworlds: Bei Strings musst du keine Instanz
+selbst erzeugen – `"Hallo"` ist automatisch eine `str`-Instanz.
+!!!
+
+### Ausprobieren: Methoden entdecken
+
+Mit `dir()` kannst du alle Methoden und Attribute eines Objekts auflisten:
+
+```python
+text = "Archiv"
+alle = dir(text)
+
+for name in alle:
+    if not name.startswith("_"):
+        print(name)
+```
+
+Das sind alle Methoden, die ein String kennt. Such dir eine aus, die du noch
+nicht kennst, und probiere sie aus!

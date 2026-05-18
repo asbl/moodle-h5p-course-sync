@@ -1,0 +1,322 @@
+introPage:
+  showIntroPage: false
+  startButtonText: Start Quiz
+  introduction: ''
+progressType: dots
+passPercentage: 50
+questions:
+- params:
+    media:
+      type:
+        params:
+          decorative: false
+          contentName: Image
+          file:
+            path: images/file-654938c2cec98.png
+            mime: image/png
+            copyright:
+              license: U
+            width: 363
+            height: 187
+          expandImage: Bild vergrößern
+          minimizeImage: Bild verkleinern
+        library: H5P.Image 1.1
+        metadata:
+          contentType: Image
+          license: U
+          title: Untitled Image
+        subContentId: 7c183fa0-a1e0-46a9-aae2-cf0211e2df7e
+      disableImageZooming: false
+    answers:
+    - correct: false
+      tipsAndFeedback:
+        tip: ''
+        chosenFeedback: ''
+        notChosenFeedback: ''
+      text: |-
+        `<div>Ja</div>
+        `
+    - correct: true
+      tipsAndFeedback:
+        tip: ''
+        chosenFeedback: "<div>Korrekt.</div>\n\n<div>i wird immer kleiner und ist
+          irgendwann kleiner als 0</div>\n"
+        notChosenFeedback: ''
+      text: |-
+        `<div>Nein</div>
+        `
+    overallFeedback:
+    - from: 0
+      to: 100
+    behaviour:
+      enableRetry: true
+      enableSolutionsButton: true
+      enableCheckButton: true
+      type: auto
+      singlePoint: false
+      randomAnswers: true
+      showSolutionsRequiresInput: true
+      confirmCheckDialog: false
+      confirmRetryDialog: false
+      autoCheck: false
+      passPercentage: 100
+      showScorePoints: true
+    UI:
+      checkAnswerButton: Check
+      submitAnswerButton: Submit
+      showSolutionButton: Show solution
+      tryAgainButton: Retry
+      tipsLabel: Show tip
+      scoreBarLabel: You got :num out of :total points
+      tipAvailable: Tip available
+      feedbackAvailable: Feedback available
+      readFeedback: Read feedback
+      wrongAnswer: Wrong answer
+      correctAnswer: Correct answer
+      shouldCheck: Should have been checked
+      shouldNotCheck: Should not have been checked
+      noInput: Please answer before viewing the solution
+      a11yCheck: Check the answers. The responses will be marked as correct, 
+        incorrect, or unanswered.
+      a11yShowSolution: Show the solution. The task will be marked with its 
+        correct solution.
+      a11yRetry: Retry the task. Reset all responses and start the task over 
+        again.
+    confirmCheck:
+      header: Finish ?
+      body: Are you sure you wish to finish ?
+      cancelLabel: Cancel
+      confirmLabel: Finish
+    confirmRetry:
+      header: Retry ?
+      body: Are you sure you wish to retry ?
+      cancelLabel: Cancel
+      confirmLabel: Confirm
+    question: "Entscheide, ob sich das Programm in einer Endlosschleife aufhängt.\n"
+  library: H5P.MultiChoice 1.16
+  metadata:
+    contentType: Multiple Choice
+    license: U
+    title: Endlosschleife?1
+  subContentId: 7d34643a-f8e9-4844-9c52-a999f07c55c0
+- params:
+    media:
+      type:
+        params:
+          decorative: false
+          contentName: Image
+          file:
+            path: images/file-65493975860e8.png
+            mime: image/png
+            copyright:
+              license: U
+            width: 444
+            height: 180
+          expandImage: Bild vergrößern
+          minimizeImage: Bild verkleinern
+        library: H5P.Image 1.1
+        metadata:
+          contentType: Image
+          license: U
+          title: Untitled Image
+        subContentId: ffb9da96-3a02-4974-b39a-340df3f438e1
+      disableImageZooming: true
+    answers:
+    - correct: true
+      tipsAndFeedback:
+        tip: ''
+        chosenFeedback: "<div>Ja, denn 0,5 wird \"überprungen\"</div>\n"
+        notChosenFeedback: ''
+      text: |-
+        `<div>Ja</div>
+        `
+    - correct: false
+      tipsAndFeedback:
+        tip: ''
+        chosenFeedback: ''
+        notChosenFeedback: ''
+      text: |-
+        `<div>Nein</div>
+        `
+    overallFeedback:
+    - from: 0
+      to: 100
+    behaviour:
+      enableRetry: true
+      enableSolutionsButton: true
+      enableCheckButton: true
+      type: auto
+      singlePoint: false
+      randomAnswers: true
+      showSolutionsRequiresInput: true
+      confirmCheckDialog: false
+      confirmRetryDialog: false
+      autoCheck: false
+      passPercentage: 100
+      showScorePoints: true
+    UI:
+      checkAnswerButton: Check
+      submitAnswerButton: Submit
+      showSolutionButton: Show solution
+      tryAgainButton: Retry
+      tipsLabel: Show tip
+      scoreBarLabel: You got :num out of :total points
+      tipAvailable: Tip available
+      feedbackAvailable: Feedback available
+      readFeedback: Read feedback
+      wrongAnswer: Wrong answer
+      correctAnswer: Correct answer
+      shouldCheck: Should have been checked
+      shouldNotCheck: Should not have been checked
+      noInput: Please answer before viewing the solution
+      a11yCheck: Check the answers. The responses will be marked as correct, 
+        incorrect, or unanswered.
+      a11yShowSolution: Show the solution. The task will be marked with its 
+        correct solution.
+      a11yRetry: Retry the task. Reset all responses and start the task over 
+        again.
+    confirmCheck:
+      header: Finish ?
+      body: Are you sure you wish to finish ?
+      cancelLabel: Cancel
+      confirmLabel: Finish
+    confirmRetry:
+      header: Retry ?
+      body: Are you sure you wish to retry ?
+      cancelLabel: Cancel
+      confirmLabel: Confirm
+    question: "Entscheide, ob sich das Programm in einer Endlosschleife aufhängt.\n"
+  library: H5P.MultiChoice 1.16
+  metadata:
+    contentType: Multiple Choice
+    license: U
+    title: Endlosschleife2?
+  subContentId: 57a8840d-c6ec-4fcf-95a5-e5e35a4de139
+- params:
+    media:
+      type:
+        params:
+          decorative: false
+          contentName: Image
+          file:
+            path: images/file-654939fd98ea5.png
+            mime: image/png
+            copyright:
+              license: U
+            width: 345
+            height: 181
+          expandImage: Bild vergrößern
+          minimizeImage: Bild verkleinern
+        library: H5P.Image 1.1
+        metadata:
+          contentType: Image
+          license: U
+          title: Untitled Image
+        subContentId: 5dc887dc-a34d-4f90-9ef1-6e6400a5241c
+      disableImageZooming: true
+    answers:
+    - correct: true
+      tipsAndFeedback:
+        tip: ''
+        chosenFeedback: "<div>i wird halbiert, aber dadurch wird 0 niemals erreicht.</div>\n"
+        notChosenFeedback: ''
+      text: |-
+        `<div>Ja</div>
+        `
+    - correct: false
+      tipsAndFeedback:
+        tip: ''
+        chosenFeedback: ''
+        notChosenFeedback: ''
+      text: |-
+        `<div>Nein</div>
+        `
+    overallFeedback:
+    - from: 0
+      to: 100
+    behaviour:
+      enableRetry: true
+      enableSolutionsButton: true
+      enableCheckButton: true
+      type: auto
+      singlePoint: false
+      randomAnswers: true
+      showSolutionsRequiresInput: true
+      confirmCheckDialog: false
+      confirmRetryDialog: false
+      autoCheck: false
+      passPercentage: 100
+      showScorePoints: true
+    UI:
+      checkAnswerButton: Check
+      submitAnswerButton: Submit
+      showSolutionButton: Show solution
+      tryAgainButton: Retry
+      tipsLabel: Show tip
+      scoreBarLabel: You got :num out of :total points
+      tipAvailable: Tip available
+      feedbackAvailable: Feedback available
+      readFeedback: Read feedback
+      wrongAnswer: Wrong answer
+      correctAnswer: Correct answer
+      shouldCheck: Should have been checked
+      shouldNotCheck: Should not have been checked
+      noInput: Please answer before viewing the solution
+      a11yCheck: Check the answers. The responses will be marked as correct, 
+        incorrect, or unanswered.
+      a11yShowSolution: Show the solution. The task will be marked with its 
+        correct solution.
+      a11yRetry: Retry the task. Reset all responses and start the task over 
+        again.
+    confirmCheck:
+      header: Finish ?
+      body: Are you sure you wish to finish ?
+      cancelLabel: Cancel
+      confirmLabel: Finish
+    confirmRetry:
+      header: Retry ?
+      body: Are you sure you wish to retry ?
+      cancelLabel: Cancel
+      confirmLabel: Confirm
+    question: "<p>Entscheide, ob sich das Programm in einer Endlosschleife aufhängt</p>\n"
+  library: H5P.MultiChoice 1.16
+  metadata:
+    contentType: Multiple Choice
+    license: U
+    title: Endlosschleife?3
+  subContentId: fac8eb82-4802-4fcf-8d08-dceb41d535dd
+disableBackwardsNavigation: false
+randomQuestions: false
+endGame:
+  showResultPage: true
+  showSolutionButton: true
+  showRetryButton: true
+  noResultMessage: Finished
+  message: 'Your result:'
+  scoreBarLabel: You got @finals out of @totals points
+  overallFeedback:
+  - from: 0
+    to: 100
+  solutionButtonText: Show solution
+  retryButtonText: Retry
+  finishButtonText: Finish
+  submitButtonText: Submit
+  showAnimations: false
+  skippable: false
+  skipButtonText: Skip video
+override:
+  checkButton: true
+texts:
+  prevButton: Previous question
+  nextButton: Next question
+  finishButton: Finish
+  submitButton: Submit
+  textualProgress: 'Question: @current of @total questions'
+  jumpToQuestion: Question %d of %total
+  questionLabel: Question
+  readSpeakerProgress: Question @current of @total
+  unansweredText: Unanswered
+  answeredText: Answered
+  currentQuestionText: Current question
+  navigationLabel: Questions
+  questionSetInstruction: Choose question to display

@@ -29,6 +29,12 @@ class RuntimeHtmlRewriter:
     .submenu {
         display: none !important;
     }
+    a[href*="/split/"],
+    a[href*="/remove/"],
+    form[action*="/remove/"],
+    button[formaction*="/remove/"] {
+        display: none !important;
+    }
 </style>
 <script>
 window.addEventListener('load', () => {
@@ -37,6 +43,9 @@ window.addEventListener('load', () => {
     if (sessionContainer) {
         sessionContainer.remove();
     }
+    document.querySelectorAll('a[href*="/split/"], a[href*="/remove/"], form[action*="/remove/"], button[formaction*="/remove/"]').forEach((element) => {
+        element.remove();
+    });
 });
 </script>
 """.strip()

@@ -1,0 +1,74 @@
+<Instructions>
+Folgende Formeln dienen als Faustformel zur Berechnung des Anhaltewegs eines Autos.
+
+
+* Reaktionsweg (in m) = (Geschwindigkeit (in km/h) durch 10) mal 3
+* Bremsweg (in m)     = (Geschw. (in km/h) durch 10) mal (Geschw. (in km/h) durch 10)
+* Anhalteweg (in m)   = Reaktionsweg plus Bremsweg
+
+Ergänze die jeweiligen Funktionen.
+</Instructions>
+
+```python editor:preCode
+geschwindigkeit = float(input()) # Geschwindigkeit in km/h
+```
+
+```python editor:startingCode
+def reaktionsweg(g):
+    pass
+
+def bremsweg(g):
+    pass
+
+
+def anhalteweg(g):
+    pass
+
+
+print(reaktionsweg(geschwindigkeit))
+print(bremsweg(geschwindigkeit))
+print(anhalteweg(geschwindigkeit))
+```
+
+```yaml grading
+gradingMethod: ioTestCases
+testCases:
+- hidden: false
+  inputs:
+  - '5'
+  outputs:
+  - '1.5'
+  - '0.25'
+  - '1.75'
+- hidden: true
+  inputs:
+  - '10'
+  outputs:
+  - '3.0'
+  - '1.0'
+  - '4.0'
+- hidden: false
+  inputs:
+  - '50'
+  outputs:
+  - '15.0'
+  - '25.0'
+  - '40.0'
+- hidden: false
+  inputs:
+  - '70'
+  outputs:
+  - '21.0'
+  - '49.0'
+  - '70.0'
+- hidden: false
+  inputs:
+  - '100'
+  outputs:
+  - '30.0'
+  - '100.0'
+  - '130.0'
+dueDateGroup:
+  enableDueDate: true
+  duedate: '2026-05-05T21:59:00.000Z'
+```

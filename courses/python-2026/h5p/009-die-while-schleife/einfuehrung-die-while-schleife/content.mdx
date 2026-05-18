@@ -1,0 +1,49 @@
+Du hast bereits die for-Schleife kennengelernt:
+
+```python
+for i in range(10):
+  tue etwas
+```
+
+Diese Schleife hat einen entscheidenden Nachteil: 
+
+Du kannst mit ihr keine Endlosschleifen programmieren.
+
+Schau dir z.B. ein Computerspiel an: Dort wird eine Schleife 
+(Zeichne den Bildschirm->Frage die Aktion des Spielers ab, Bewege alle Nichtspielercharaktere) 
+immer wieder wiederholt solange bis der Spieler das Spiel irgendwann abbricht. 
+Die Schleife kann (theoretisch) unendlich lange laufen.
+
+Die for-Schleife läuft aber nur endlich lange. 
+Du kannst mit ihr also nicht ein solches Computerspiel programmieren.
+
+### Die erste While-Schleife
+
+Es folgt das erste Programm mit einer While-Schleife
+
+```python
+import random
+geheime_zahl = random.randint(0, 10)
+geratene_zahl = 0
+
+while geratene_zahl != geheime_zahl:
+    geratene_zahl  = int(input("Rate die geheime Zahl!"))
+print("Du hast richtig geraten!")
+```
+
+Dies ist bereits ein kleines Spiel: Das Spiel kann unendlich lange laufen und endet, sobald die geheime Zahl geraten wurde.
+
+## Allgemein: Die While-Schleife
+
+Die while-Schleife läuft, solange eine bestimmte Bedingung erfüllt ist.
+
+```python
+while bedingung:
+    dosomething
+```
+
+Die while-Schleife ist ein zentrales Konzept bei der Programmierung.
+
+Die meisten Programme denen du im Alltag begnetest, laufen in einer mainloop ab, d.h. es wird immer wieder 
+etwas wiederholt (z.B. auf eine Anweisung des Benutzers gewartet und anschließend 
+ein Ereignis aufgerufen) bis das Programm beendet wird.

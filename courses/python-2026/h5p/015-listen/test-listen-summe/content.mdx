@@ -1,0 +1,58 @@
+<Instructions>
+Schreibe die Funktion `summe_liste(zahlen)`.
+
+Sie bekommt eine Liste mit Zahlen und soll die Summe aller Zahlen zurückgeben.
+
+| `zahlen` | Ergebnis |
+| --- | --- |
+| `[3, 5, 2]` | `10` |
+| `[10, -4, 6]` | `12` |
+</Instructions>
+
+```python editor:startingCode
+def summe_liste(zahlen):
+    summe = 0
+    # Ergänze die Schleife.
+    return summe
+```
+
+```python editor:postCode
+zahlen = []
+for wert in input().split():
+    zahlen.append(int(wert))
+
+print(summe_liste(zahlen))
+```
+
+```python grading:targetCode
+def summe_liste(zahlen):
+    summe = 0
+    for zahl in zahlen:
+        summe = summe + zahl
+    return summe
+```
+
+```yaml grading
+gradingMethod: ioTestCases
+testCases:
+- hidden: false
+  inputs:
+  - 3 5 2
+  outputs:
+  - '10'
+- hidden: false
+  inputs:
+  - 10 -4 6
+  outputs:
+  - '12'
+- hidden: true
+  inputs:
+  - '7'
+  outputs:
+  - '7'
+- hidden: true
+  inputs:
+  - ''
+  outputs:
+  - '0'
+```

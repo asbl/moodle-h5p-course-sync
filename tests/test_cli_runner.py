@@ -15,6 +15,13 @@ class DummyQuestion:
     package_path: Path
 
 
+@dataclass(slots=True)
+class DummyUploadResult:
+    identifier: str
+    title: str
+    action: str
+
+
 class DummyParser:
     def __init__(self) -> None:
         self.exit_calls: list[tuple[int, str]] = []
@@ -52,7 +59,7 @@ class CliRunnerTests(unittest.TestCase):
     def test_run_cli_command_sync_prints_relative_package_paths(self) -> None:
         args = SimpleNamespace(command="sync", course="python-2026")
         parser = DummyParser()
-        package_path = self.root_dir / "courses" / "python-2026" / "h5p" / "q1.h5p"
+        package_path = self.root_dir / "courses" / "python-2026" / "build" / "h5p" / "q1.h5p"
 
         with patch("builtins.print") as print_mock:
             run_cli_command(
@@ -73,12 +80,12 @@ class CliRunnerTests(unittest.TestCase):
                 print_course_status=lambda _status: None,
             )
 
-        print_mock.assert_called_once_with(Path("courses/python-2026/h5p/q1.h5p"))
+        print_mock.assert_called_once_with(Path("courses/python-2026/build/h5p/q1.h5p"))
 
     def test_run_cli_command_build_prints_relative_package_paths(self) -> None:
         args = SimpleNamespace(command="build", course="python-2026")
         parser = DummyParser()
-        package_path = self.root_dir / "courses" / "python-2026" / "h5p" / "q1.h5p"
+        package_path = self.root_dir / "courses" / "python-2026" / "build" / "h5p" / "q1.h5p"
 
         with patch("builtins.print") as print_mock:
             run_cli_command(
@@ -99,7 +106,7 @@ class CliRunnerTests(unittest.TestCase):
                 print_course_status=lambda _status: None,
             )
 
-        print_mock.assert_called_once_with(Path("courses/python-2026/h5p/q1.h5p"))
+        print_mock.assert_called_once_with(Path("courses/python-2026/build/h5p/q1.h5p"))
 
     def test_run_cli_command_build_without_course_prepares_all_courses(self) -> None:
         args = SimpleNamespace(command="build", course=None)
@@ -125,6 +132,73 @@ class CliRunnerTests(unittest.TestCase):
         )
 
         self.assertEqual(captured, [None])
+
+    def test_run_cli_command_export_chapter_prints_exported_package_paths(self) -> None:
+        args = SimpleNamespace(command="export-chapter", course="python-2026", chapter="012-miniworlds", output=None)
+        parser = DummyParser()
+        package_path = self.root_dir / "courses" / "python-2026" / "exports" / "012-miniworlds" / "miniworlds-tutorial.h5p"
+
+        with patch("builtins.print") as print_mock:
+            run_cli_command(
+                args,
+                parser=parser,
+                root_dir=self.root_dir,
+                courses_dir=self.courses_dir,
+                sync_course=lambda _course_dir: [],
+                build_preview_runtime=lambda _course_dir: [],
+                serve_preview=lambda _port: None,
+                resolve_moodle_client=lambda _base_url, _token: object(),
+                import_moodle_course=lambda _course, _remote_id, _client: self.course_dir,
+                push_moodle_course=lambda _course_dir, _remote_id, _client: None,
+                sync_metadata_path=lambda _course_dir: self.course_dir / "sync-metadata.json",
+                build_moodle_ping_report=lambda _client: {},
+                print_moodle_ping_report=lambda _report: None,
+                build_course_status=lambda _course_dir: {},
+                print_course_status=lambda _status: None,
+                export_chapter=lambda course_dir, chapter, output_dir: [package_path],
+            )
+
+        print_mock.assert_called_once_with(Path("courses/python-2026/exports/012-miniworlds/miniworlds-tutorial.h5p"))
+
+    def test_run_cli_command_upload_chapter_moodle_prints_upload_results(self) -> None:
+        args = SimpleNamespace(
+            command="upload-chapter-moodle",
+            course="python-2026",
+            chapter="012-miniworlds",
+            course_url=None,
+            section=None,
+            username=None,
+            password=None,
+            storage_state=None,
+            headless=False,
+            timeout=30000,
+            target=None,
+        )
+        parser = DummyParser()
+
+        with patch("builtins.print") as print_mock:
+            run_cli_command(
+                args,
+                parser=parser,
+                root_dir=self.root_dir,
+                courses_dir=self.courses_dir,
+                sync_course=lambda _course_dir: [],
+                build_preview_runtime=lambda _course_dir: [],
+                serve_preview=lambda _port: None,
+                resolve_moodle_client=lambda _base_url, _token: object(),
+                import_moodle_course=lambda _course, _remote_id, _client: self.course_dir,
+                push_moodle_course=lambda _course_dir, _remote_id, _client: None,
+                sync_metadata_path=lambda _course_dir: self.course_dir / "sync-metadata.json",
+                build_moodle_ping_report=lambda _client: {},
+                print_moodle_ping_report=lambda _report: None,
+                build_course_status=lambda _course_dir: {},
+                print_course_status=lambda _status: None,
+                upload_moodle_chapter=lambda *args: [
+                    DummyUploadResult("miniworlds-tutorial", "miniworlds-tutorial", "updated")
+                ],
+            )
+
+        print_mock.assert_called_once_with("updated: miniworlds-tutorial (miniworlds-tutorial)")
 
     def test_run_cli_command_serve_calls_serve_preview_with_port(self) -> None:
         args = SimpleNamespace(command="serve", port=8810)

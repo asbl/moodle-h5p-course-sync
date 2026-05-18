@@ -48,62 +48,114 @@
         box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
       }
       code { font-family: "Fira Code", "SFMono-Regular", Consolas, monospace; }
-      .python-question-card {
-        padding: 18px;
-        margin: 28px 0;
+      .course-section {
+        margin: 18px 0;
+        padding: 18px 20px;
         border: 1px solid var(--border);
-        border-radius: 28px;
-        background: var(--surface);
-        box-shadow: var(--shadow);
-        backdrop-filter: blur(10px);
+        border-radius: 24px;
+        background: rgba(255, 251, 246, 0.82);
+        box-shadow: 0 12px 28px rgba(73, 43, 22, 0.08);
+      }
+      .course-section-header {
+        margin-bottom: 12px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid rgba(92, 58, 32, 0.12);
+      }
+      .course-section-header h1,
+      .course-section-header h2,
+      .course-section-header h3 {
+        margin: 0;
+      }
+      .course-section-body > :first-child {
+        margin-top: 0;
+      }
+      .course-section-body > :last-child {
+        margin-bottom: 0;
+      }
+      .python-question-card {
+        position: relative;
+        padding: 10px 0 0;
+        margin: 12px 0 0;
+        border-top: 1px solid rgba(92, 58, 32, 0.12);
       }
       .question-toolbar {
         display: flex;
         align-items: center;
         justify-content: space-between;
         gap: 16px;
-        margin-bottom: 14px;
-        padding: 10px 12px 14px;
-        border-bottom: 1px solid var(--border);
+        width: 100%;
+        margin: 0;
+        padding: 8px 106px 8px 10px;
       }
       .question-toolbar-title {
         min-width: 0;
-        font-size: 1rem;
+        font-size: 0.95rem;
+        font-weight: 600;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
       }
-      .question-toolbar-actions {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: flex-end;
-        gap: 10px;
+      .question-row-button {
+        appearance: none;
+        border: 1px solid transparent;
+        border-radius: 10px;
+        background: transparent;
+        color: inherit;
+        font-family: inherit;
+        text-align: left;
+        cursor: pointer;
+      }
+      .question-row-button:hover,
+      .question-row-button:focus-visible {
+        background: rgba(182, 83, 47, 0.08);
+        border-color: rgba(182, 83, 47, 0.16);
+        color: var(--accent);
       }
       .question-action-link,
       .question-action-button {
         display: inline-flex;
         align-items: center;
-        padding: 8px 12px;
+        padding: 5px 10px;
         border-radius: 999px;
         text-decoration: none;
-        color: var(--ink);
-        background: var(--accent-soft);
-        border: 1px solid rgba(182, 83, 47, 0.18);
+        color: var(--muted);
+        background: rgba(255, 255, 255, 0.5);
+        border: 1px solid rgba(92, 58, 32, 0.12);
         font: inherit;
+        font-size: 0.88rem;
         cursor: pointer;
       }
       .question-action-button {
         appearance: none;
       }
-      .question-action-button.primary {
-        background: var(--accent);
-        border-color: var(--accent);
-        color: #fff7f0;
+      .question-rebuild-button {
+        position: absolute;
+        right: 10px;
+        top: 18px;
+        appearance: none;
+        border: 1px solid rgba(92, 58, 32, 0.12);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.62);
+        color: var(--muted);
+        font: inherit;
+        font-size: 0.82rem;
+        padding: 4px 9px;
+        cursor: pointer;
       }
-      .question-action-button.danger {
-        background: rgba(126, 33, 23, 0.08);
-        border-color: rgba(126, 33, 23, 0.18);
-        color: #7e2117;
+      .question-rebuild-button:hover,
+      .question-rebuild-button:focus-visible {
+        border-color: rgba(182, 83, 47, 0.22);
+        background: rgba(182, 83, 47, 0.1);
+        color: var(--accent);
+      }
+      .question-rebuild-button[disabled] {
+        cursor: wait;
+        opacity: 0.68;
+      }
+      .question-action-button.primary {
+        background: rgba(182, 83, 47, 0.1);
+        border-color: rgba(182, 83, 47, 0.18);
+        color: var(--accent);
       }
       .preview-modal {
         position: fixed;
@@ -158,6 +210,7 @@
         .question-toolbar {
           align-items: flex-start;
           flex-direction: column;
+          padding-right: 96px;
         }
         .question-toolbar-actions {
           justify-content: flex-start;
@@ -188,7 +241,7 @@
           </div>
         </div>
         <div class="preview-modal-body">
-          <iframe class="preview-modal-frame" id="preview-modal-frame" loading="lazy" title="H5P Vorschau"></iframe>
+          <iframe class="preview-modal-frame" id="preview-modal-frame" title="H5P Vorschau"></iframe>
         </div>
       </div>
     </div>
@@ -203,7 +256,6 @@
         }
         modal.classList.remove("is-open");
         modal.setAttribute("aria-hidden", "true");
-        modalFrame.src = "about:blank";
       };
 
       const openModal = (frameSrc, frameTitle) => {
@@ -213,16 +265,85 @@
         modal.classList.add("is-open");
         modal.setAttribute("aria-hidden", "false");
         modalTitle.textContent = frameTitle || "H5P Vorschau";
-        modalFrame.src = frameSrc;
+        if (modalFrame.src !== new URL(frameSrc, window.location.href).href) {
+          modalFrame.src = frameSrc;
+        }
       };
 
+      const prewarmedPreviewUrls = new Set();
+      const prewarmPreview = (trigger) => {
+        const statusUrl = trigger.dataset.statusUrl;
+        if (!statusUrl || prewarmedPreviewUrls.has(statusUrl)) {
+          return;
+        }
+        prewarmedPreviewUrls.add(statusUrl);
+        fetch(statusUrl, { cache: "no-store" }).catch(() => {});
+      };
+
+      const rebuildPreview = async (trigger) => {
+        const rebuildUrl = trigger.dataset.rebuildUrl;
+        if (!rebuildUrl) {
+          return;
+        }
+        const previousLabel = trigger.textContent;
+        trigger.disabled = true;
+        trigger.textContent = "Baue...";
+        try {
+          const response = await fetch(rebuildUrl, { method: "POST", cache: "no-store" });
+          if (!response.ok) {
+            throw new Error(await response.text());
+          }
+          if (trigger.dataset.statusUrl) {
+            prewarmedPreviewUrls.delete(trigger.dataset.statusUrl);
+            prewarmPreview(trigger);
+          }
+          if (modal instanceof HTMLElement && modal.classList.contains("is-open") && modalFrame instanceof HTMLIFrameElement && trigger.dataset.frameSrc) {
+            const separator = trigger.dataset.frameSrc.includes("?") ? "&" : "?";
+            modalFrame.src = `${trigger.dataset.frameSrc}${separator}rebuild=${Date.now()}`;
+          }
+          trigger.textContent = "Fertig";
+          window.setTimeout(() => {
+            trigger.textContent = previousLabel || "Neu bauen";
+          }, 1200);
+        } catch (error) {
+          console.error(error);
+          trigger.textContent = "Fehler";
+          window.setTimeout(() => {
+            trigger.textContent = previousLabel || "Neu bauen";
+          }, 1800);
+        } finally {
+          trigger.disabled = false;
+        }
+      };
+
+      document.querySelectorAll("[data-status-url]").forEach((element) => {
+        if (element instanceof HTMLElement) {
+          window.setTimeout(() => prewarmPreview(element), 0);
+        }
+      });
+
       document.addEventListener("click", (event) => {
-        const target = event.target;
+        if (event.target === modal) {
+          closeModal();
+          return;
+        }
+
+        const target = event.target instanceof HTMLElement
+          ? event.target.closest("[data-open-modal], [data-modal-action], [data-rebuild-url]")
+          : null;
         if (!(target instanceof HTMLElement)) {
           return;
         }
 
+        if (target.dataset.rebuildUrl) {
+          event.preventDefault();
+          event.stopPropagation();
+          rebuildPreview(target);
+          return;
+        }
+
         if (target.dataset.openModal === "true" && target.dataset.frameSrc) {
+          prewarmPreview(target);
           openModal(target.dataset.frameSrc, target.dataset.frameTitle || target.textContent || "H5P Vorschau");
           return;
         }
@@ -232,32 +353,6 @@
           return;
         }
 
-        if (target.dataset.action === "delete-runtime") {
-          const card = target.closest(".python-question-card");
-          const deleteUrl = target.dataset.deleteUrl;
-          if (!deleteUrl) {
-            return;
-          }
-
-          if (!window.confirm("Are you sure you want to delete this H5P content?")) {
-            return;
-          }
-
-          fetch(deleteUrl, { method: "POST" })
-            .then((response) => {
-              if (!response.ok) {
-                throw new Error(`Delete failed: ${response.status}`);
-              }
-              closeModal();
-              if (card instanceof HTMLElement) {
-                card.remove();
-              }
-            })
-            .catch((error) => {
-              console.error(error);
-              window.alert("Löschen fehlgeschlagen.");
-            });
-        }
       });
 
       document.addEventListener("keydown", (event) => {

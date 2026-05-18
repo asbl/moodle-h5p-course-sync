@@ -1,0 +1,69 @@
+Woher kommt ein Objekt? Objekte werden aus **Klassen** erzeugt.
+
+Eine **Klasse** ist eine Vorlage oder Bauanleitung. Sie legt fest, welche
+Attribute und Methoden alle Objekte dieser Art haben sollen.
+
+Eine **Instanz** ist ein konkretes Objekt, das nach dieser Vorlage gebaut wurde.
+
+```python noeditor
+Klasse: Turtle         ← die Vorlage
+   │
+   ├──► Instanz t1     ← ein konkretes Objekt (Schildkröte 1)
+   └──► Instanz t2     ← ein zweites konkretes Objekt (Schildkröte 2)
+```
+
+Das Erzeugen einer Instanz nennt man **Instanziierung**. Die Schreibweise
+ist immer gleich: Klassenname mit runden Klammern.
+
+```python
+import turtle
+
+t = turtle.Turtle()
+t.forward(80)
+t.right(90)
+t.forward(50)
+```
+
+Nach `t = turtle.Turtle()` existiert `t` als vollständiges Turtle-Objekt mit
+eigener Position, Richtung und Farbe. Das ist deine Instanz.
+
+!!! note Merke
+Klasse = Vorlage. Instanz = konkretes Objekt, gebaut nach der Vorlage.
+Das Erzeugen einer Instanz heißt **Instanziierung** – geschrieben mit `()`.
+!!!
+
+### Mehrere Instanzen derselben Klasse
+
+Du kannst beliebig viele Instanzen derselben Klasse erzeugen:
+
+```python
+import turtle
+
+t1 = turtle.Turtle()
+t2 = turtle.Turtle()
+
+t1.forward(80)
+t2.left(90)
+t2.forward(80)
+```
+
+`t1` und `t2` sind zwei unabhängige Instanzen der Klasse `Turtle`. Jede hat
+ihre eigene Position und Richtung.
+
+### In einer Schleife instanziieren
+
+Wenn du viele gleichartige Objekte brauchst, erzeugst du sie in einer Schleife:
+
+```python
+import turtle
+
+for i in range(4):
+    t = turtle.Turtle()
+    t.penup()
+    t.goto(-90 + i * 60, 0)
+    t.pendown()
+    t.circle(20)
+```
+
+Jeder Schleifendurchlauf erzeugt eine neue Instanz – vier Kreise, vier
+unabhängige Turtle-Objekte.

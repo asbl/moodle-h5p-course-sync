@@ -1,0 +1,102 @@
+In miniworlds sind Listen besonders nützlich, sobald mehrere Dinge gleichartig
+behandelt werden sollen: mehrere Münzen, mehrere Gegner, mehrere Texte oder
+mehrere Inventarplätze.
+
+### Mehrere Positionen speichern
+
+Statt für jede Münze eigene Variablen anzulegen, kann eine Liste alle
+Startpositionen enthalten.
+
+```python
+import miniworlds
+
+world = miniworlds.World(560, 300)
+world.add_background((228, 238, 232))
+
+muenzen_positionen = [(90, 150), (190, 90), (300, 180), (430, 120)]
+
+for position in muenzen_positionen:
+    muenze = miniworlds.Circle(position, 18)
+    muenze.color = (245, 195, 40)
+
+world.run()
+```
+
+| Listeneintrag | Bedeutung im Spiel |
+| --- | --- |
+| `(90, 150)` | erste Münze |
+| `(190, 90)` | zweite Münze |
+| `(300, 180)` | dritte Münze |
+| `(430, 120)` | vierte Münze |
+
+Die Schleife erzeugt aus jedem Eintrag ein sichtbares Objekt. Wenn du eine
+weitere Position in die Liste schreibst, entsteht automatisch eine weitere
+Münze.
+
+### Actors in einer Liste sammeln
+
+Manchmal möchtest du später wieder auf alle erzeugten Objekte zugreifen. Dann
+speicherst du die Actors selbst in einer Liste.
+
+```python
+import miniworlds
+
+world = miniworlds.World(560, 300)
+world.add_background((235, 235, 242))
+
+gegner = []
+
+for x in [90, 190, 290, 390]:
+    alien = miniworlds.Actor((x, 140))
+    alien.size = (45, 45)
+    alien.color = (160, 80, 190)
+    gegner.append(alien)
+
+@world.register
+def act(self):
+    for alien in gegner:
+        alien.y = alien.y + 1
+
+world.run()
+```
+
+```python noeditor
+gegner = [alien1, alien2, alien3, alien4]
+             |       |       |       |
+             v       v       v       v
+          alle werden gemeinsam verschoben
+```
+
+Die erste Schleife baut die Liste auf. Die zweite Schleife verändert danach
+alle gespeicherten Actors.
+
+### Inventar und Anzeige trennen
+
+Eine Liste kann den Spielzustand speichern. Die miniworlds-Objekte zeigen
+diesen Zustand nur an.
+
+```python
+import miniworlds
+
+world = miniworlds.World(560, 280)
+world.add_background((232, 238, 244))
+
+inventar = ["Holz", "Stein", "Fackel"]
+
+x = 60
+for gegenstand in inventar:
+    feld = miniworlds.Actor((x, 170))
+    feld.size = (95, 55)
+    feld.origin = "topleft" # Dies bedeutet: als feld.position Wert wird die linke obere Ecke gewählt.
+    feld.color = (210, 220, 230)
+
+    text = miniworlds.Text((0,0), gegenstand)
+    text.origin = "topleft"
+    text.position = (x + 10, 180)
+    text.font_size = 18
+    text.color = (25, 30, 45)
+
+    x = x + 120
+
+world.run()
+```

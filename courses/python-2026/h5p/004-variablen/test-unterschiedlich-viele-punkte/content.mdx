@@ -1,0 +1,80 @@
+<Instructions>
+Zeichne x Punkte mit dem Durchmesser 20. 
+Verwende die Befehle: 
+
+```python
+turtle.turtle.pendown()
+turtle.turtle.penup()
+turtle.dot(20)
+turtle.forward(50)
+```
+sowie eine Schleife
+
+
+
+!!! note Hinweis
+Mit ```float(input())``` wird ein Wert eingelesen und in eine Zahl umgewandelt.
+!!!
+
+Für die Eingabe 4 soll das Ergebnis so aussehen:
+</Instructions>
+
+```python editor:preCode
+import turtle
+
+x = int(input())
+```
+
+```python editor:startingCode
+for 
+    turtle.pendown()
+    turtle.dot(20)
+    
+    turtle.forward(50)
+
+
+turtle.hideturtle()
+```
+
+```yaml editor
+instructionsImage:
+  path: images/instructionsImage-697851861f32e.png
+  mime: image/png
+  copyright:
+    license: U
+  width: 177
+  height: 165
+```
+
+```python grading:targetCode
+import turtle
+
+x = int(input())
+
+for i in range(x):
+    turtle.pendown()
+    turtle.dot(20)
+    turtle.penup()
+    turtle.forward(50)
+
+
+
+turtle.hideturtle()
+```
+
+```yaml grading
+gradingMethod: targetImage
+dueDateGroup:
+  enableDueDate: true
+  duedate: '2026-02-22T23:00:00.000Z'
+testCases:
+- hidden: false
+  inputs:
+  - '1'
+- hidden: false
+  inputs:
+  - '3'
+- hidden: false
+  inputs:
+  - '4'
+```

@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Callable, Protocol
 
 from scripts.classes.models import MoodleH5PActivity, PythonQuestionBlock, TestCase
+from scripts.classes.python_runner_policy import DEFAULT_PYTHON_RUNNER
 
 
 class H5PImportMapperProtocol(Protocol):
@@ -74,18 +75,20 @@ class ImportedQuestionFactory:
 
         metadata_copy = json.loads(json.dumps(metadata_payload, ensure_ascii=False))
         content_copy = json.loads(json.dumps(content_payload, ensure_ascii=False))
+        title = activity.title or str(metadata_payload.get("title") or activity.identifier)
 
         if main_library == "H5P.QuestionSet":
             return PythonQuestionBlock(
                 identifier=activity.identifier,
-                title=str(metadata_payload.get("title") or activity.title),
+                title=title,
                 instructions=self._summarize_questionset(content_payload),
                 preview_url=activity.url,
                 main_library=main_library,
                 package_url=getattr(activity, "package_url", ""),
                 h5p_metadata=metadata_copy,
                 h5p_content=content_copy,
-                runner="pyodide",
+                h5p_subdir=getattr(activity, "h5p_subdir", ""),
+                runner=DEFAULT_PYTHON_RUNNER,
                 course_slug=course_slug,
                 course_dir=self._courses_dir / course_slug,
             )
@@ -93,7 +96,7 @@ class ImportedQuestionFactory:
         if main_library != self._python_question_machine_name:
             return PythonQuestionBlock(
                 identifier=activity.identifier,
-                title=str(metadata_payload.get("title") or activity.title),
+                title=title,
                 instructions=activity.intro or f"Importiert aus Moodle: {activity.title}",
                 preview_url=activity.url,
                 main_library=main_library,
@@ -101,7 +104,8 @@ class ImportedQuestionFactory:
                 raw_package=True,
                 h5p_metadata=metadata_copy,
                 h5p_content=content_copy,
-                runner="pyodide",
+                h5p_subdir=getattr(activity, "h5p_subdir", ""),
+                runner=DEFAULT_PYTHON_RUNNER,
                 course_slug=course_slug,
                 course_dir=self._courses_dir / course_slug,
             )
@@ -109,14 +113,15 @@ class ImportedQuestionFactory:
         if content_type and content_type != "ide_only":
             return PythonQuestionBlock(
                 identifier=activity.identifier,
-                title=str(metadata_payload.get("title") or activity.title),
+                title=title,
                 instructions=self._import_mapper.summarize_instructions(activity, content_payload),
                 preview_url=activity.url,
                 main_library=main_library,
                 package_url=getattr(activity, "package_url", ""),
                 h5p_metadata=metadata_copy,
                 h5p_content=content_copy,
-                runner=str(content_payload.get("pythonRunner") or "pyodide").strip() or "pyodide",
+                h5p_subdir=getattr(activity, "h5p_subdir", ""),
+                runner=str(content_payload.get("pythonRunner") or DEFAULT_PYTHON_RUNNER).strip() or DEFAULT_PYTHON_RUNNER,
                 course_slug=course_slug,
                 course_dir=self._courses_dir / course_slug,
             )
@@ -147,7 +152,7 @@ class ImportedQuestionFactory:
 
         return PythonQuestionBlock(
             identifier=activity.identifier,
-            title=str(metadata_payload.get("title") or activity.title),
+            title=title,
             instructions=self._import_mapper.extract_editor_instructions(content_payload)
             or self._import_mapper.summarize_instructions(activity, content_payload),
             preview_url=activity.url,
@@ -155,7 +160,8 @@ class ImportedQuestionFactory:
             package_url=getattr(activity, "package_url", ""),
             h5p_metadata=metadata_copy,
             h5p_content=content_copy,
-            runner=str(content_payload.get("pythonRunner") or "pyodide").strip() or "pyodide",
+            h5p_subdir=getattr(activity, "h5p_subdir", ""),
+            runner=str(content_payload.get("pythonRunner") or DEFAULT_PYTHON_RUNNER).strip() or DEFAULT_PYTHON_RUNNER,
             packages=self._import_mapper.extract_packages(content_payload),
             starter_code=self._normalize_whitespace(html.unescape(str(editor_settings.get("startingCode") or ""))),
             solution_code=self._normalize_whitespace(html.unescape(str(grading_settings.get("targetCode") or ""))),

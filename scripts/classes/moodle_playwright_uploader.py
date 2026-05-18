@@ -190,29 +190,38 @@ class MoodlePlaywrightUploader:
             context = browser.new_context(**context_kwargs)
             page = context.new_page()
             page.set_default_timeout(self.timeout_ms)
+            current_package: MoodleH5PUploadPackage | None = None
+            current_step = "Moodle-Kurs oeffnen"
 
             try:
                 print(f"Oeffne Moodle-Kurs: {self.course_url}", flush=True)
                 page.goto(self.course_url, wait_until="domcontentloaded")
+                current_step = "Login pruefen"
                 self._login_if_needed(page)
                 self._wait_for_manual_login_confirmation(page)
+                self._return_to_course_after_login(page)
                 self._wait_for_editing_controls_after_manual_login(page)
                 print("Schalte Moodle-Bearbeitungsmodus ein.", flush=True)
+                current_step = "Bearbeitungsmodus einschalten"
                 self._turn_editing_on(page)
                 section: dict[str, str | int] | None = None
                 known_activities: dict[str, int] = {}
 
                 def ensure_section() -> dict[str, str | int]:
-                    nonlocal section, known_activities
+                    nonlocal section, known_activities, current_step
                     if section is not None:
                         return section
+                    current_step = "Moodle-Section suchen"
                     print(f"Suche Moodle-Section: {self.section_title or '(erste gefundene Section)'}", flush=True)
                     section = self._find_or_create_section(page, packages)
                     print(f"Verwende Moodle-Section {section['number']}. Sammle vorhandene H5P-Aktivitaeten.", flush=True)
+                    current_step = f"H5P-Aktivitaeten in Section {section['number']} sammeln"
                     known_activities = self._collect_section_h5p_activities(page, section["selector"])
                     return section
 
                 for package in packages:
+                    current_package = package
+                    current_step = f"H5P-Paket verarbeiten: {package.identifier}"
                     print(f"Verarbeite H5P-Paket: {package.identifier} ({package.title})", flush=True)
                     activity_id = self.existing_activity_ids.get(package.identifier)
                     if activity_id is None:
@@ -223,6 +232,7 @@ class MoodlePlaywrightUploader:
                         activity_id = known_activities.get(normalize_moodle_identifier(package.title))
 
                     if activity_id is not None:
+                        current_step = f"H5P-Aktivitaet aktualisieren: {package.identifier}"
                         print(f"Aktualisiere H5P-Aktivitaet {activity_id}: {package.title}", flush=True)
                         result = self._update_h5p_activity(page, activity_id, package)
                         if result is not None:
@@ -240,6 +250,7 @@ class MoodlePlaywrightUploader:
                         normalize_moodle_identifier(package.title)
                     )
                     if refreshed_activity_id is not None:
+                        current_step = f"H5P-Aktivitaet aktualisieren: {package.identifier}"
                         print(f"Aktualisiere H5P-Aktivitaet {refreshed_activity_id}: {package.title}", flush=True)
                         result = self._update_h5p_activity(page, refreshed_activity_id, package)
                         if result is not None:
@@ -247,19 +258,27 @@ class MoodlePlaywrightUploader:
                             continue
 
                     print(f"Lege neue H5P-Aktivitaet an: {package.title}", flush=True)
+                    current_step = f"H5P-Aktivitaet anlegen: {package.identifier}"
                     result = self._create_h5p_activity(page, section_number, package)
                     results.append(result)
 
                 if packages:
+                    current_package = None
+                    current_step = "H5P-Aktivitaeten sortieren"
                     target_section = ensure_section()
                     self._sort_section_h5p_activities(page, int(target_section["number"]), packages)
 
                 if self.storage_state:
+                    current_step = "Moodle-Login-Status speichern"
                     print(f"Speichere Moodle-Login-Status: {self.storage_state}", flush=True)
                     self.storage_state.parent.mkdir(parents=True, exist_ok=True)
                     context.storage_state(path=str(self.storage_state))
             except PlaywrightTimeoutError as error:
-                raise RuntimeError(f"Moodle-Upload hat zu lange gewartet: {error}") from error
+                debug_label = normalize_moodle_identifier(current_step)
+                self._write_debug_artifacts(page, f"timeout-{debug_label}")
+                raise RuntimeError(
+                    self._format_timeout_error(error, current_step=current_step, package=current_package)
+                ) from error
             finally:
                 context.close()
                 browser.close()
@@ -271,16 +290,20 @@ class MoodlePlaywrightUploader:
             self._login_with_credentials_if_needed(page)
             return
 
-        if page.locator('input[name="username"]').count() == 0:
+        if not self._login_is_required(page):
             return
 
         if self.headless:
-            raise RuntimeError("Moodle verlangt Login. Setze MOODLE_USERNAME/MOODLE_PASSWORD oder nutze den headed Browser.")
+            raise RuntimeError(
+                "Moodle verlangt Login (wahrscheinlich abgelaufener SSO-Storage-State). "
+                "Bitte den Storage-State im headed Browser neu erzeugen und den Upload erneut starten. "
+                f"Aktuelle URL: {self._current_page_url(page) or 'unbekannt'}"
+            )
 
         print("Moodle verlangt Login. Bitte im Browser anmelden.")
         deadline = time.monotonic() + 300
         while time.monotonic() < deadline:
-            if page.locator('input[name="username"]').count() == 0:
+            if not self._login_is_required(page):
                 return
             page.wait_for_timeout(1000)
         raise RuntimeError("Login wurde nicht innerhalb von 5 Minuten abgeschlossen.")
@@ -289,14 +312,31 @@ class MoodlePlaywrightUploader:
         if self._looks_logged_in(page):
             return
 
+        if self._schulportal_hessen_login_page_is_open(page):
+            self._login_with_schulportal_hessen_credentials(page)
+            self._finish_credential_login(page)
+            return
+
         login_url = urljoin(self.course_url, "/login/index.php")
         print("Melde mit hinterlegten Moodle-Zugangsdaten an.", flush=True)
         if page.locator('input[name="username"]').count() == 0:
             page.goto(login_url, wait_until="domcontentloaded")
 
+        if self._schulportal_hessen_login_page_is_open(page):
+            self._login_with_schulportal_hessen_credentials(page)
+            self._finish_credential_login(page)
+            return
+
         username_input = page.locator('input[name="username"]')
         password_input = page.locator('input[name="password"]')
         if username_input.count() == 0 or password_input.count() == 0:
+            if self._external_login_page_is_open(page):
+                raise RuntimeError(
+                    "Moodle hat auf einen externen SSO-Login umgeleitet. "
+                    "Die hinterlegten MOODLE_USERNAME/MOODLE_PASSWORD koennen dort nicht automatisch verwendet werden. "
+                    "Bitte den Storage-State im headed Browser neu erzeugen und den Upload erneut starten. "
+                    f"Aktuelle URL: {self._current_page_url(page) or 'unbekannt'}"
+                )
             raise RuntimeError("Moodle-Loginformular wurde nicht gefunden, obwohl Zugangsdaten gesetzt sind.")
 
         username_input.first.fill(self.username or "")
@@ -307,7 +347,119 @@ class MoodlePlaywrightUploader:
         if page.locator('input[name="username"]').count() > 0:
             raise RuntimeError("Moodle-Login mit den hinterlegten Zugangsdaten ist fehlgeschlagen.")
 
+        self._finish_credential_login(page)
+
+    def _finish_credential_login(self, page: Any) -> None:
         page.goto(self.course_url, wait_until="domcontentloaded")
+        if self._login_is_required(page):
+            raise RuntimeError(
+                "Moodle verlangt nach dem Login erneut Zugangsdaten. "
+                "Bitte pruefe Benutzername/Passwort oder erneuere den SSO-Login im sichtbaren Browser. "
+                f"Aktuelle URL: {self._current_page_url(page) or 'unbekannt'}"
+            )
+
+    def _login_with_schulportal_hessen_credentials(self, page: Any) -> None:
+        print("Melde ueber Schulportal Hessen SSO an.", flush=True)
+        schulportal_login_url = self._schulportal_hessen_login_url()
+        if schulportal_login_url and not self._current_schulportal_login_url_has_instance(page):
+            page.goto(schulportal_login_url, wait_until="domcontentloaded")
+
+        username_input = self._first_visible_enabled_locator(
+            page,
+            [
+                'input[name="username"]',
+                'input[name="user"]',
+                'input[name="login"]',
+                'input[name="email"]',
+                'input[name="kennung"]',
+                'input[id*="username" i]',
+                'input[id*="login" i]',
+                'input[id*="email" i]',
+                'input[type="email"]',
+                'input[type="text"]',
+            ],
+        )
+        if username_input is None:
+            raise RuntimeError(
+                "Schulportal-Hessen-Loginfeld wurde nicht gefunden. "
+                f"Aktuelle URL: {self._current_page_url(page) or 'unbekannt'}"
+            )
+        username_input.fill(self.username or "")
+
+        password_input = self._first_visible_enabled_locator(page, ['input[name="password"]', 'input[type="password"]'])
+        if password_input is None:
+            self._click_first_by_text(page, ["Weiter", "Next", "Fortfahren"])
+            page.wait_for_load_state("domcontentloaded")
+            password_input = self._first_visible_enabled_locator(page, ['input[name="password"]', 'input[type="password"]'])
+        if password_input is None:
+            raise RuntimeError(
+                "Schulportal-Hessen-Passwortfeld wurde nicht gefunden. "
+                f"Aktuelle URL: {self._current_page_url(page) or 'unbekannt'}"
+            )
+        password_input.fill(self.password or "")
+
+        submit = self._first_existing_locator(
+            page,
+            [
+                'button[type="submit"]',
+                'input[type="submit"]',
+                'button[name="submit"]',
+                'button[id*="login" i]',
+            ],
+        )
+        if submit is not None:
+            submit.click()
+        else:
+            self._click_first_by_text(page, ["Anmelden", "Einloggen", "Login", "Log in", "Weiter"])
+        page.wait_for_load_state("domcontentloaded")
+        self._continue_schulportal_hessen_login(page)
+
+    def _continue_schulportal_hessen_login(self, page: Any) -> None:
+        for _ in range(3):
+            if not self._schulportal_hessen_login_page_is_open(page):
+                return
+            try:
+                self._click_first_by_text(page, ["Weiter", "Fortfahren", "Zustimmen", "Akzeptieren", "Erlauben"])
+            except RuntimeError:
+                return
+            page.wait_for_load_state("domcontentloaded")
+
+    def _first_existing_locator(self, page: Any, selectors: list[str]) -> Any | None:
+        for selector in selectors:
+            locator = page.locator(selector)
+            if locator.count() > 0:
+                return locator.first
+        return None
+
+    def _first_visible_enabled_locator(self, page: Any, selectors: list[str]) -> Any | None:
+        for selector in selectors:
+            locator = page.locator(selector)
+            for index in range(locator.count()):
+                candidate = locator.nth(index)
+                try:
+                    if not candidate.is_visible() or not candidate.is_enabled():
+                        continue
+                except Exception:
+                    continue
+                return candidate
+        return None
+
+    def _return_to_course_after_login(self, page: Any) -> None:
+        if page.url == self.course_url and self._looks_logged_in(page):
+            return
+        page.goto(self.course_url, wait_until="domcontentloaded")
+        if self.username and self.password and self._login_is_required(page):
+            raise RuntimeError(
+                "Moodle verlangt nach dem Login erneut Zugangsdaten auf der Kursseite. "
+                f"Aktuelle URL: {self._current_page_url(page) or 'unbekannt'}"
+            )
+        if self.headless and not self.username and not self.password and self._login_is_required(page):
+            raise RuntimeError(
+                "Moodle verlangt Login nach dem Wechsel auf die Kursseite "
+                "(wahrscheinlich abgelaufener SSO-Storage-State). "
+                "Bitte den Storage-State im headed Browser neu erzeugen und den Upload erneut starten. "
+                f"Aktuelle URL: {self._current_page_url(page) or 'unbekannt'}"
+            )
 
     def _looks_logged_in(self, page: Any) -> bool:
         if page.locator('input[name="username"]').count() > 0:
@@ -318,6 +470,50 @@ class MoodlePlaywrightUploader:
             ".usermenu, [data-region='usermenu'], a[href*='login/logout.php'], "
             ".logininfo a[href*='login/logout.php']"
         ).count() > 0
+
+    def _login_is_required(self, page: Any) -> bool:
+        return page.locator('input[name="username"]').count() > 0 or self._external_login_page_is_open(page)
+
+    def _external_login_page_is_open(self, page: Any) -> bool:
+        current_url = self._current_page_url(page)
+        if not current_url:
+            return False
+        current = urlparse(current_url)
+        course = urlparse(self.course_url)
+        if not current.netloc or current.netloc == course.netloc:
+            return False
+        auth_markers = ("login", "saml", "sso", "singleSignOn", "oauth", "openid", "idp", "auth")
+        haystack = f"{current.netloc}{current.path}".lower()
+        return any(marker.lower() in haystack for marker in auth_markers)
+
+    def _schulportal_hessen_login_page_is_open(self, page: Any) -> bool:
+        current_url = self._current_page_url(page)
+        if not current_url:
+            return False
+        host = urlparse(current_url).netloc.lower()
+        return host == "login.schulportal.hessen.de"
+
+    def _current_schulportal_login_url_has_instance(self, page: Any) -> bool:
+        current_url = self._current_page_url(page)
+        if not current_url:
+            return False
+        parsed = urlparse(current_url)
+        if parsed.netloc.lower() != "login.schulportal.hessen.de":
+            return False
+        return bool(parse_qs(parsed.query).get("i", [""])[0])
+
+    def _schulportal_hessen_login_url(self) -> str:
+        course_host = urlparse(self.course_url).netloc.lower()
+        match = re.search(r"\bmo(\d+)\.", course_host)
+        if not match:
+            return ""
+        return f"https://login.schulportal.hessen.de/?i={match.group(1)}"
+
+    def _current_page_url(self, page: Any) -> str:
+        try:
+            return str(page.url)
+        except Exception:
+            return ""
 
     def _wait_for_manual_login_confirmation(self, page: Any) -> None:
         if self.username and self.password:
@@ -334,6 +530,14 @@ class MoodlePlaywrightUploader:
     def _turn_editing_on(self, page: Any) -> None:
         if self._course_is_in_edit_mode(page):
             return
+
+        if self.headless and not self.username and not self.password and self._login_is_required(page):
+            raise RuntimeError(
+                "Konnte den Moodle-Bearbeitungsmodus nicht einschalten, weil die Seite im Login steht "
+                "(wahrscheinlich abgelaufener SSO-Storage-State). "
+                "Bitte den Storage-State im headed Browser neu erzeugen und den Upload erneut starten. "
+                f"Aktuelle URL: {self._current_page_url(page) or 'unbekannt'}"
+            )
 
         if self._click_editing_switch(page):
             return
@@ -372,14 +576,8 @@ class MoodlePlaywrightUploader:
             if self._course_is_in_edit_mode(page):
                 return
 
-        current_url = ""
-        try:
-            current_url = page.url
-        except Exception:
-            current_url = ""
-
-        login_form_visible = page.locator('input[name="username"]').count() > 0
-        if self.headless and not self.username and not self.password and login_form_visible:
+        current_url = self._current_page_url(page)
+        if self.headless and not self.username and not self.password and self._login_is_required(page):
             raise RuntimeError(
                 "Konnte den Moodle-Bearbeitungsmodus nicht einschalten, weil die Seite im Login steht "
                 "(wahrscheinlich abgelaufener SSO-Storage-State). "
@@ -1304,6 +1502,7 @@ class MoodlePlaywrightUploader:
             name_input.first.fill(package.title)
 
         self._set_activity_points(page, package.points)
+        self._set_completion_tracking(page, gradepass=1)
 
         self._click_first_by_text(
             page,
@@ -1333,7 +1532,7 @@ class MoodlePlaywrightUploader:
                 continue
             field = control.first
             try:
-                field.fill(value)
+                self._set_form_control_value(field, value)
                 return
             except Exception:
                 pass
@@ -1342,6 +1541,69 @@ class MoodlePlaywrightUploader:
                 return
             except Exception:
                 continue
+
+    def _set_completion_tracking(self, page: Any, gradepass: int = 1) -> None:
+        # Set the passing grade in the grade section (gradepass field).
+        gradepass_input = page.locator('input[name="gradepass"], #id_gradepass')
+        if gradepass_input.count() > 0:
+            self._set_form_control_value(gradepass_input.first, str(gradepass))
+
+        # Enable completion tracking if not already set to "show activity as complete
+        # when conditions are met" (value 2).
+        completion_select = page.locator('select[name="completion"], #id_completion')
+        if completion_select.count() > 0:
+            try:
+                completion_select.first.select_option(value="2")
+            except Exception:
+                pass
+
+        # Condition: student must receive a grade (completionusegrade = 1).
+        grade_condition = page.locator(
+            'input[name="completionusegrade"], #id_completionusegrade'
+        )
+        if grade_condition.count() > 0 and not grade_condition.first.is_checked():
+            self._set_checkbox_checked(grade_condition.first)
+
+        # Condition: student must reach the passing grade (completionpassgrade = 1).
+        # Moodle 4.x exposes this as a separate checkbox that only appears after
+        # completionusegrade is checked, so wait briefly for it to become visible.
+        page.wait_for_timeout(300)
+        passgrade_condition = page.locator(
+            'input[name="completionpassgrade"], #id_completionpassgrade'
+        )
+        if passgrade_condition.count() > 0 and not passgrade_condition.first.is_checked():
+            self._set_checkbox_checked(passgrade_condition.first)
+
+    def _set_form_control_value(self, locator: Any, value: str) -> None:
+        try:
+            if locator.is_visible():
+                locator.fill(value)
+                return
+        except Exception:
+            pass
+        locator.evaluate(
+            """(element, value) => {
+                element.value = value;
+                element.dispatchEvent(new Event('input', { bubbles: true }));
+                element.dispatchEvent(new Event('change', { bubbles: true }));
+            }""",
+            value,
+        )
+
+    def _set_checkbox_checked(self, locator: Any) -> None:
+        try:
+            if locator.is_visible():
+                locator.check()
+                return
+        except Exception:
+            pass
+        locator.evaluate(
+            """(element) => {
+                element.checked = true;
+                element.dispatchEvent(new Event('input', { bubbles: true }));
+                element.dispatchEvent(new Event('change', { bubbles: true }));
+            }"""
+        )
 
     def _upload_h5p_package_file(self, page: Any, package: MoodleH5PUploadPackage) -> bool:
         def debug(message: str) -> None:
@@ -1640,6 +1902,36 @@ class MoodlePlaywrightUploader:
             print(f"Debug gespeichert: {html_path} und {screenshot_path}", flush=True)
         except Exception as error:
             print(f"Debug konnte nicht gespeichert werden: {error}", flush=True)
+
+    def _format_timeout_error(
+        self,
+        error: Exception,
+        *,
+        current_step: str,
+        package: MoodleH5PUploadPackage | None,
+    ) -> str:
+        raw_lines = [line.strip() for line in str(error).splitlines() if line.strip()]
+        summary = raw_lines[0] if raw_lines else error.__class__.__name__
+        details = [
+            "Moodle-Upload hat zu lange gewartet.",
+            f"Schritt: {current_step}",
+            f"Kurs: {self.course_url}",
+        ]
+        if package is not None:
+            details.extend(
+                [
+                    f"H5P-Paket: {package.identifier}",
+                    f"Titel: {package.title}",
+                    f"Datei: {package.path}",
+                ]
+            )
+        details.extend(
+            [
+                f"Playwright: {summary}",
+                "Debug: temp/moodle-upload-debug/timeout-*.html und .png",
+            ]
+        )
+        return "\n".join(details)
 
     def _click_first_by_text(self, page: Any, labels: list[str]) -> None:
         for label in labels:

@@ -1,0 +1,52 @@
+Eine Funktion kann etwas **ausgeben** oder einen Wert **zurückgeben**. Das ist
+nicht dasselbe.
+
+```python
+def zeige_block(block):
+    print("Block:", block)
+
+
+zeige_block("Gras")
+```
+
+Diese Funktion gibt Text auf der Konsole aus. Der Aufruf selbst liefert keinen
+nützlichen Wert zurück.
+
+```python
+def block_text(block):
+    return "Block: " + block
+
+
+text = block_text("Gras")
+print(text)
+```
+
+Hier wird ein String zurückgegeben. Er kann gespeichert, verglichen oder später
+ausgegeben werden.
+
+### Faustregel
+
+Nutze `return`, wenn das Ergebnis weiterverwendet werden soll.
+
+```python
+def ist_wertvoll(block):
+    return block == "Diamant" or block == "Gold"
+
+
+if ist_wertvoll("Diamant"):
+    print("Einpacken!")
+```
+
+### Aufgabe
+
+Schreibe die Funktion so um, dass sie nicht direkt druckt, sondern einen String
+zurückgibt.
+
+```python
+def beschreibe_fund(block, anzahl):
+    print(str(anzahl) + "x " + block)
+
+
+fund = beschreibe_fund("Stein", 12)
+print("Gefunden:", fund)
+```

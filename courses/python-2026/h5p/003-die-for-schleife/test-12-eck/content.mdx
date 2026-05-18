@@ -1,0 +1,34 @@
+<Instructions>
+Zeichne mit Hilfe einer Schleife ein (regelmäßiges) Zwölf-Eck mit Seitenlänge 50
+</Instructions>
+
+```python editor:startingCode
+import turtle
+
+
+
+
+
+turtle.hideturtle()
+```
+
+```python grading:targetCode
+import turtle
+
+t = turtle.Turtle()
+
+for _ in range(12):
+    t.forward(50)
+    t.left(30)
+    
+t.hideturtle()
+```
+
+```yaml grading
+gradingMethod: targetImage
+dueDateGroup:
+  enableDueDate: true
+  duedate: '2026-02-22T23:00:00.000Z'
+testCases:
+- hidden: false
+```

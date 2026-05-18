@@ -1,0 +1,86 @@
+In Turtle-Programmen hast du schon gesehen und vielleicht auch geschrieben:
+
+```python
+import turtle
+
+t = turtle.Turtle()
+t.forward(100)
+t.right(90)
+```
+
+Aber was passiert da eigentlich? Was ist `t`?
+
+`t` ist ein **Objekt**.
+
+In Python ist fast alles ein Objekt: eine Schildkröte, ein Kreis in miniworlds,
+sogar ein String wie `"Hallo"`. Die Idee dahinter ist einfach:
+
+Ein Objekt bündelt **Daten** und **Fähigkeiten** an einem Ort.
+
+```python noeditor
+Objekt "t" (eine Turtle):
+  ┌─────────────────────────────────────┐
+  │ Daten:       Position (0, 0)        │
+  │              Richtung: 0°           │
+  │              Farbe: "black"         │
+  │                                     │
+  │ Fähigkeiten: forward(), right()     │
+  │              color(), penup(), ...  │
+  └─────────────────────────────────────┘
+```
+
+* Die **Daten** eines Objekts nennt man seine **Attribute**.
+* Die **Fähigkeiten** eines Objekts nennt man seine **Methoden**.
+
+Du erkennst beides am **Punkt** zwischen Objekt und Name:
+
+```python noeditor
+t.forward(100)
+│  │
+│  └── Methode  (Fähigkeit, hat Klammern)
+└───── Objekt
+
+t.pensize
+│  │
+│  └── Attribut (Datum, keine Klammern)
+└───── Objekt
+```
+
+Hier siehst du beides in Aktion:
+
+```python
+import turtle
+
+t = turtle.Turtle()
+
+t.color("steelblue")   # Methode: Farbe setzen
+t.pensize = 3          # Attribut: Stiftdicke direkt ändern
+t.forward(100)         # Methode: vorwärts gehen
+t.right(90)            # Methode: drehen
+t.forward(60)
+```
+
+### Warum Objekte?
+
+Ohne Objekte müsstest du für jede Schildkröte alle Daten selbst verwalten:
+
+```python noeditor
+# Ohne Objekte:
+t1_x = 0
+t1_y = 0
+t1_richtung = 0
+t1_farbe = "black"
+
+# Mit Objekten:
+t1 = turtle.Turtle()
+t1.x = 0
+t1.y = 0
+t1.richtung = 0
+t1.farbe = "black"
+```
+
+Technisch wäre beides möglich, aber im ersten Fall hättest du sehr schnell sehr viele Variablen und Methoden - es würde sehr unübersichtlich werden.
+
+Ein Objekt hält alle zusammengehörigen Daten an einem Ort.
+
+Außerdem "denken" wir Menschen auch objektorientiert - Daher hilft uns die Verwendung von Objekten auch dabei, Code zu organisieren und zu verstehen.

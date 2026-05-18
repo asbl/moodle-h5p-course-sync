@@ -1,0 +1,17 @@
+contentType: text_and_ide
+editorSettings:
+  preCode: ''
+  startingCode: "import turtle \nturtle.goto(0,0) \nturtle.forward(300) \nturtle.goto(10,10)\
+    \ \nturtle.setheading(90) \nturtle.forward(100) \nturtle.goto(0,0) \nturtle.setheading(180)\
+    \ \nturtle.forward(100) \nturtle.goto(0,0) \nturtle.setheading(270) \nturtle.forward(100)\n"
+  postCode: ''
+  instructions: "Du bist dran: Verändere das folgende Programm und \nspiele mit den
+    Koordinaten.\n"
+gradingSettings:
+  gradingMethod: please_choose
+  dueDateGroup:
+    enableDueDate: true
+    duedate: '1969-12-31T23:00:00.000Z'
+pythonRunner: skulpt
+pyodideOptions:
+  packages: []

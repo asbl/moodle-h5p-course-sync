@@ -1,0 +1,507 @@
+introPage:
+  showIntroPage: false
+  startButtonText: Start Quiz
+  introduction: ''
+progressType: dots
+passPercentage: 100
+questions:
+- params:
+    media:
+      disableImageZooming: false
+    answers:
+    - correct: true
+      tipsAndFeedback:
+        tip: ''
+        chosenFeedback: ''
+        notChosenFeedback: ''
+      text: |-
+        `<div>2.8</div>
+        `
+    - correct: false
+      tipsAndFeedback:
+        tip: ''
+        chosenFeedback: ''
+        notChosenFeedback: ''
+      text: |-
+        `<div>2</div>
+        `
+    - correct: false
+      tipsAndFeedback:
+        tip: ''
+        chosenFeedback: ''
+        notChosenFeedback: ''
+      text: |-
+        `<div>4</div>
+        `
+    overallFeedback:
+    - from: 0
+      to: 90
+    - from: 91
+      to: 100
+      feedback: Korrekt, da / die normale Division bezeichnet.
+    behaviour:
+      enableRetry: true
+      enableSolutionsButton: true
+      enableCheckButton: true
+      type: auto
+      singlePoint: false
+      randomAnswers: true
+      showSolutionsRequiresInput: true
+      confirmCheckDialog: false
+      confirmRetryDialog: false
+      autoCheck: false
+      passPercentage: 100
+      showScorePoints: true
+    UI:
+      checkAnswerButton: Check
+      submitAnswerButton: Submit
+      showSolutionButton: Show solution
+      tryAgainButton: Retry
+      tipsLabel: Show tip
+      scoreBarLabel: You got :num out of :total points
+      tipAvailable: Tip available
+      feedbackAvailable: Feedback available
+      readFeedback: Read feedback
+      wrongAnswer: Wrong answer
+      correctAnswer: Correct answer
+      shouldCheck: Should have been checked
+      shouldNotCheck: Should not have been checked
+      noInput: Please answer before viewing the solution
+      a11yCheck: Check the answers. The responses will be marked as correct, 
+        incorrect, or unanswered.
+      a11yShowSolution: Show the solution. The task will be marked with its 
+        correct solution.
+      a11yRetry: Retry the task. Reset all responses and start the task over 
+        again.
+    confirmCheck:
+      header: Finish ?
+      body: Are you sure you wish to finish ?
+      cancelLabel: Cancel
+      confirmLabel: Finish
+    confirmRetry:
+      header: Retry ?
+      body: Are you sure you wish to retry ?
+      cancelLabel: Cancel
+      confirmLabel: Confirm
+    question: "<p>Das Ergebnis von 14 / 5 ist ...</p>\n"
+  library: H5P.MultiChoice 1.16
+  metadata:
+    contentType: Multiple Choice
+    license: U
+    title: Das Ergebnis von 14 / 5 ist ...
+  subContentId: 19397533-f393-4221-b961-50de65fb15d1
+- params:
+    media:
+      disableImageZooming: false
+    answers:
+    - correct: true
+      tipsAndFeedback:
+        tip: ''
+        chosenFeedback: ''
+        notChosenFeedback: ''
+      text: |-
+        `<div>2</div>
+        `
+    - correct: false
+      tipsAndFeedback:
+        tip: ''
+        chosenFeedback: ''
+        notChosenFeedback: ''
+      text: |-
+        `<div>4</div>
+        `
+    - correct: false
+      tipsAndFeedback:
+        tip: ''
+        chosenFeedback: ''
+        notChosenFeedback: ''
+      text: |-
+        `<div>2.8</div>
+        `
+    overallFeedback:
+    - from: 0
+      to: 90
+      feedback: '1'
+    - from: 91
+      to: 100
+      feedback: Korrekt, da // den ganzzahligen Anteil der Division bezeichnet.
+    behaviour:
+      enableRetry: true
+      enableSolutionsButton: true
+      enableCheckButton: true
+      type: auto
+      singlePoint: false
+      randomAnswers: true
+      showSolutionsRequiresInput: true
+      confirmCheckDialog: false
+      confirmRetryDialog: false
+      autoCheck: false
+      passPercentage: 100
+      showScorePoints: true
+    UI:
+      checkAnswerButton: Check
+      submitAnswerButton: Submit
+      showSolutionButton: Show solution
+      tryAgainButton: Retry
+      tipsLabel: Show tip
+      scoreBarLabel: You got :num out of :total points
+      tipAvailable: Tip available
+      feedbackAvailable: Feedback available
+      readFeedback: Read feedback
+      wrongAnswer: Wrong answer
+      correctAnswer: Correct answer
+      shouldCheck: Should have been checked
+      shouldNotCheck: Should not have been checked
+      noInput: Please answer before viewing the solution
+      a11yCheck: Check the answers. The responses will be marked as correct, 
+        incorrect, or unanswered.
+      a11yShowSolution: Show the solution. The task will be marked with its 
+        correct solution.
+      a11yRetry: Retry the task. Reset all responses and start the task over 
+        again.
+    confirmCheck:
+      header: Finish ?
+      body: Are you sure you wish to finish ?
+      cancelLabel: Cancel
+      confirmLabel: Finish
+    confirmRetry:
+      header: Retry ?
+      body: Are you sure you wish to retry ?
+      cancelLabel: Cancel
+      confirmLabel: Confirm
+    question: "<p>Das Erggebnis von 14 // 5 ist...</p>\n"
+  library: H5P.MultiChoice 1.16
+  metadata:
+    contentType: Multiple Choice
+    license: U
+    title: Das Erggebnis von 14 // 5 ist...
+  subContentId: f4dfd315-4434-465f-99b4-f54cd846768d
+- params:
+    media:
+      disableImageZooming: false
+    answers:
+    - correct: false
+      tipsAndFeedback:
+        tip: ''
+        chosenFeedback: ''
+        notChosenFeedback: ''
+      text: |-
+        `<div>2</div>
+        `
+    - correct: false
+      tipsAndFeedback:
+        tip: ''
+        chosenFeedback: ''
+        notChosenFeedback: ''
+      text: |-
+        `<div>2.4</div>
+        `
+    - correct: true
+      tipsAndFeedback:
+        tip: ''
+        chosenFeedback: ''
+        notChosenFeedback: ''
+      text: |-
+        `<div>4</div>
+        `
+    overallFeedback:
+    - from: 0
+      to: 91
+    - from: 92
+      to: 100
+      feedback: Korrekt, da % den Rest der Division bezeichnet.
+    behaviour:
+      enableRetry: true
+      enableSolutionsButton: true
+      enableCheckButton: true
+      type: auto
+      singlePoint: false
+      randomAnswers: true
+      showSolutionsRequiresInput: true
+      confirmCheckDialog: false
+      confirmRetryDialog: false
+      autoCheck: false
+      passPercentage: 100
+      showScorePoints: true
+    UI:
+      checkAnswerButton: Check
+      submitAnswerButton: Submit
+      showSolutionButton: Show solution
+      tryAgainButton: Retry
+      tipsLabel: Show tip
+      scoreBarLabel: You got :num out of :total points
+      tipAvailable: Tip available
+      feedbackAvailable: Feedback available
+      readFeedback: Read feedback
+      wrongAnswer: Wrong answer
+      correctAnswer: Correct answer
+      shouldCheck: Should have been checked
+      shouldNotCheck: Should not have been checked
+      noInput: Please answer before viewing the solution
+      a11yCheck: Check the answers. The responses will be marked as correct, 
+        incorrect, or unanswered.
+      a11yShowSolution: Show the solution. The task will be marked with its 
+        correct solution.
+      a11yRetry: Retry the task. Reset all responses and start the task over 
+        again.
+    confirmCheck:
+      header: Finish ?
+      body: Are you sure you wish to finish ?
+      cancelLabel: Cancel
+      confirmLabel: Finish
+    confirmRetry:
+      header: Retry ?
+      body: Are you sure you wish to retry ?
+      cancelLabel: Cancel
+      confirmLabel: Confirm
+    question: "<p>Was ist das Ergebnis von 14 % 5 ...</p>\n"
+  library: H5P.MultiChoice 1.16
+  metadata:
+    contentType: Multiple Choice
+    license: U
+    title: Was ist das Ergebnis von 14 % 5 ...
+  subContentId: 55a3394c-eae4-4e1c-a76a-2dabd1678363
+- params:
+    media:
+      disableImageZooming: false
+    answers:
+    - correct: false
+      tipsAndFeedback:
+        tip: ''
+        chosenFeedback: ''
+        notChosenFeedback: ''
+      text: |-
+        `<div>2</div>
+        `
+    - correct: false
+      tipsAndFeedback:
+        tip: ''
+        chosenFeedback: ''
+        notChosenFeedback: ''
+      text: |-
+        `<div>4</div>
+        `
+    - correct: true
+      tipsAndFeedback:
+        tip: ''
+        chosenFeedback: ''
+        notChosenFeedback: ''
+      text: |-
+        `<div>1</div>
+        `
+    overallFeedback:
+    - from: 0
+      to: 100
+    behaviour:
+      enableRetry: true
+      enableSolutionsButton: true
+      enableCheckButton: true
+      type: auto
+      singlePoint: false
+      randomAnswers: true
+      showSolutionsRequiresInput: true
+      confirmCheckDialog: false
+      confirmRetryDialog: false
+      autoCheck: false
+      passPercentage: 100
+      showScorePoints: true
+    UI:
+      checkAnswerButton: Check
+      submitAnswerButton: Submit
+      showSolutionButton: Show solution
+      tryAgainButton: Retry
+      tipsLabel: Show tip
+      scoreBarLabel: You got :num out of :total points
+      tipAvailable: Tip available
+      feedbackAvailable: Feedback available
+      readFeedback: Read feedback
+      wrongAnswer: Wrong answer
+      correctAnswer: Correct answer
+      shouldCheck: Should have been checked
+      shouldNotCheck: Should not have been checked
+      noInput: Please answer before viewing the solution
+      a11yCheck: Check the answers. The responses will be marked as correct, 
+        incorrect, or unanswered.
+      a11yShowSolution: Show the solution. The task will be marked with its 
+        correct solution.
+      a11yRetry: Retry the task. Reset all responses and start the task over 
+        again.
+    confirmCheck:
+      header: Finish ?
+      body: Are you sure you wish to finish ?
+      cancelLabel: Cancel
+      confirmLabel: Finish
+    confirmRetry:
+      header: Retry ?
+      body: Are you sure you wish to retry ?
+      cancelLabel: Cancel
+      confirmLabel: Confirm
+    question: "<p>Was ist das Ergebnis von 17 % 8 ...</p>\n"
+  library: H5P.MultiChoice 1.16
+  metadata:
+    contentType: Multiple Choice
+    license: U
+    title: Was ist das Ergebnis von 17 % 8 ...
+  subContentId: d062f51d-d5b1-4df4-9f2b-67ded01c5507
+- params:
+    media:
+      type:
+        params:
+          decorative: false
+          contentName: Image
+          file:
+            path: images/file-6544944168d75.png
+            mime: image/png
+            copyright:
+              license: U
+            width: 272
+            height: 29
+          alt: print(((3 * 4 + 1) // 3 / 4))
+          title: print(((3 * 4 + 1) // 3 / 4))
+          expandImage: Bild vergrößern
+          minimizeImage: Bild verkleinern
+        library: H5P.Image 1.1
+        metadata:
+          contentType: Image
+          license: U
+          title: Untitled Image
+        subContentId: d3309fea-f155-4a51-8895-258bb56a7174
+      disableImageZooming: true
+    answers:
+    - correct: false
+      tipsAndFeedback:
+        tip: ''
+        chosenFeedback: ''
+        notChosenFeedback: ''
+      text: |-
+        `<div>3.0</div>
+        `
+    - correct: false
+      tipsAndFeedback:
+        tip: ''
+        chosenFeedback: ''
+        notChosenFeedback: ''
+      text: |-
+        `<div>3</div>
+        `
+    - correct: false
+      tipsAndFeedback:
+        tip: ''
+        chosenFeedback: ''
+        notChosenFeedback: ''
+      text: |-
+        `<div>4</div>
+        `
+    - correct: false
+      tipsAndFeedback:
+        tip: ''
+        chosenFeedback: ''
+        notChosenFeedback: ''
+      text: |-
+        `<div>4.0</div>
+        `
+    - correct: false
+      tipsAndFeedback:
+        tip: ''
+        chosenFeedback: ''
+        notChosenFeedback: ''
+      text: |-
+        `<div>1</div>
+        `
+    - correct: true
+      tipsAndFeedback:
+        tip: ''
+        chosenFeedback: ''
+        notChosenFeedback: ''
+      text: |-
+        `<div>1.0</div>
+        `
+    overallFeedback:
+    - from: 0
+      to: 100
+    behaviour:
+      enableRetry: true
+      enableSolutionsButton: true
+      enableCheckButton: true
+      type: auto
+      singlePoint: false
+      randomAnswers: true
+      showSolutionsRequiresInput: true
+      confirmCheckDialog: false
+      confirmRetryDialog: false
+      autoCheck: false
+      passPercentage: 100
+      showScorePoints: true
+    UI:
+      checkAnswerButton: Check
+      submitAnswerButton: Submit
+      showSolutionButton: Show solution
+      tryAgainButton: Retry
+      tipsLabel: Show tip
+      scoreBarLabel: You got :num out of :total points
+      tipAvailable: Tip available
+      feedbackAvailable: Feedback available
+      readFeedback: Read feedback
+      wrongAnswer: Wrong answer
+      correctAnswer: Correct answer
+      shouldCheck: Should have been checked
+      shouldNotCheck: Should not have been checked
+      noInput: Please answer before viewing the solution
+      a11yCheck: Check the answers. The responses will be marked as correct, 
+        incorrect, or unanswered.
+      a11yShowSolution: Show the solution. The task will be marked with its 
+        correct solution.
+      a11yRetry: Retry the task. Reset all responses and start the task over 
+        again.
+    confirmCheck:
+      header: Finish ?
+      body: Are you sure you wish to finish ?
+      cancelLabel: Cancel
+      confirmLabel: Finish
+    confirmRetry:
+      header: Retry ?
+      body: Are you sure you wish to retry ?
+      cancelLabel: Cancel
+      confirmLabel: Confirm
+    question: "<p>Was ist das Ergebnis der abgebildeten Operation?</p>\n"
+  library: H5P.MultiChoice 1.16
+  metadata:
+    contentType: Multiple Choice
+    license: U
+    title: Was ist das Ergebnis der abgebildeten Operation?
+  subContentId: 2a8126a8-c4aa-4d04-8eca-52a35335f883
+disableBackwardsNavigation: false
+randomQuestions: false
+endGame:
+  showResultPage: true
+  showSolutionButton: true
+  showRetryButton: true
+  noResultMessage: Finished
+  message: 'Your result:'
+  scoreBarLabel: You got @finals out of @totals points
+  overallFeedback:
+  - from: 0
+    to: 100
+  solutionButtonText: Show solution
+  retryButtonText: Retry
+  finishButtonText: Finish
+  submitButtonText: Submit
+  showAnimations: false
+  skippable: false
+  skipButtonText: Skip video
+override:
+  checkButton: true
+texts:
+  prevButton: Previous question
+  nextButton: Next question
+  finishButton: Finish
+  submitButton: Submit
+  textualProgress: 'Question: @current of @total questions'
+  jumpToQuestion: Question %d of %total
+  questionLabel: Question
+  readSpeakerProgress: Question @current of @total
+  unansweredText: Unanswered
+  answeredText: Answered
+  currentQuestionText: Current question
+  navigationLabel: Questions
+  questionSetInstruction: Choose question to display

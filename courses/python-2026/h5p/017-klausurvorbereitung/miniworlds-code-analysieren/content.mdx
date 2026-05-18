@@ -1,0 +1,30 @@
+In miniworlds-Code erkennst du oft drei Ebenen:
+
+* Welt und Hintergrund
+* Actors und Eigenschaften
+* Ereignisse wie `act` oder Tastendruck
+
+```python
+import miniworlds
+
+world = miniworlds.World(520, 260)
+world.add_background((230, 238, 245))
+
+spieler = miniworlds.Actor((80, 180))
+spieler.size = (35, 35)
+spieler.color = (70, 120, 220)
+
+ziel = miniworlds.Circle((420, 180), 25)
+ziel.color = (230, 180, 60)
+
+@spieler.register
+def on_key_down_right(self):
+    self.x = self.x + 20
+
+world.run()
+```
+
+### Übung
+
+Beschreibe in eigenen Worten, was beim Drücken der rechten Pfeiltaste passiert.
+Ergänze danach eine linke Bewegung.

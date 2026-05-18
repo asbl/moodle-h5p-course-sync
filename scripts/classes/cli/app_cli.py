@@ -22,6 +22,26 @@ def build_arg_parser(default_port: int) -> argparse.ArgumentParser:
         help="Optionaler Kursordner unter courses/. Ohne Angabe werden alle Kurse vorbereitet.",
     )
 
+    update_libraries_parser = subparsers.add_parser(
+        "update-h5p-libraries",
+        help="Laedt die neuesten H5P-Libraries aus dem GitHub-Release und aktualisiert libraries/.",
+    )
+    update_libraries_parser.add_argument(
+        "--tag",
+        help="Optionaler GitHub-Release-Tag. Ohne Angabe wird das neueste Release verwendet.",
+    )
+
+    export_parser = subparsers.add_parser(
+        "export-chapter",
+        help="Kopiert die gebauten H5P-Pakete eines Kapitels in einen Upload-Ordner.",
+    )
+    export_parser.add_argument("course", help="Kursordner unter courses/, zum Beispiel python-2026")
+    export_parser.add_argument("chapter", help="Kapitel-Slug, zum Beispiel 012-miniworlds")
+    export_parser.add_argument(
+        "--output",
+        help="Optionaler Zielordner. Standard: courses/<kurs>/exports/<kapitel>/",
+    )
+
     serve_parser = subparsers.add_parser("serve", help="Startet die lokale Browser-Vorschau.")
     serve_parser.add_argument(
         "--port",
@@ -45,6 +65,38 @@ def build_arg_parser(default_port: int) -> argparse.ArgumentParser:
     push_parser.add_argument("remote_course_id", type=int, help="Remote Moodle Course ID")
     push_parser.add_argument("--base-url", help="Moodle-Basis-URL. Faellt sonst auf MOODLE_BASE_URL zurueck.")
     push_parser.add_argument("--token", help="Moodle-Token. Faellt sonst auf MOODLE_TOKEN zurueck.")
+
+    upload_parser = subparsers.add_parser(
+        "upload-chapter-moodle",
+        help="Laedt alle H5P-Pakete eines Kapitels per Playwright in eine Moodle-Section hoch.",
+    )
+    upload_parser.add_argument("course", help="Lokaler Kursordner unter courses/, zum Beispiel python-2026")
+    upload_parser.add_argument("chapter", help="Kapitel-Slug, zum Beispiel 012-miniworlds")
+    upload_parser.add_argument(
+        "--course-url",
+        help="Moodle-Kurs-URL. Standard: moodleBaseUrl + remoteCourseId aus .course-sync.json.",
+    )
+    upload_parser.add_argument(
+        "--target",
+        help="Benanntes Moodle-Ziel aus .env, z.B. staging oder schule2.",
+    )
+    upload_parser.add_argument(
+        "--section",
+        help="Moodle-Section-Titel. Standard: Chapter-title aus index.mdx oder Kapitel-Slug.",
+    )
+    upload_parser.add_argument("--username", help="Moodle-Login. Faellt sonst auf MOODLE_USERNAME zurueck.")
+    upload_parser.add_argument("--password", help="Moodle-Passwort. Faellt sonst auf MOODLE_PASSWORD zurueck.")
+    upload_parser.add_argument(
+        "--storage-state",
+        help="Playwright-Login-Statusdatei. Standard: courses/<kurs>/.moodle-storage-state.json.",
+    )
+    upload_parser.add_argument("--headless", action="store_true", help="Browser ohne sichtbares Fenster starten.")
+    upload_parser.add_argument(
+        "--timeout",
+        type=int,
+        default=30_000,
+        help="Playwright-Timeout in Millisekunden. Standard: 30000.",
+    )
 
     ping_parser = subparsers.add_parser(
         "moodle-ping", help="Prueft, ob die konfigurierte Moodle-Webservice-Verbindung funktioniert."

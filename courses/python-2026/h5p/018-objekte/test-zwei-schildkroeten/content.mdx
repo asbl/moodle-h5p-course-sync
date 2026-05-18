@@ -1,0 +1,54 @@
+<Instructions>
+Zeichne mit zwei Turtle-Objekten ein großes "L".
+
+- Erstelle zwei Turtle-Objekte: `t1` und `t2`
+- `t1` zeichnet den senkrechten Strich des L:
+  - Farbe `"navy"`, Stiftgröße `3`
+  - Startposition `(-30, 80)`, Richtung nach unten (d.h. `right(90)`)
+  - Länge `120`
+- `t2` zeichnet den waagrechten Strich des L:
+  - Farbe `"navy"`, Stiftgröße `3`
+  - Startposition `(-30, -40)`, Richtung nach rechts (Standard)
+  - Länge `80`
+
+Verwende das Attribut `color` und die Methoden `pos()`, `forward()`, `right()`, 
+`penup()`, `pendown()`, `setpos(x, y)` (oder `goto(x, y)`).
+</Instructions>
+
+```python editor:startingCode
+import turtle
+
+t1 = turtle.Turtle()
+
+t2 = turtle.Turtle()
+```
+
+```python grading:targetCode
+import turtle
+
+t1 = turtle.Turtle()
+t1.color("navy")
+t1.pensize = 3
+t1.penup()
+t1.goto(-30, 80)
+t1.pendown()
+t1.right(90)
+t1.forward(120)
+
+t2 = turtle.Turtle()
+t2.color("navy")
+t2.pensize = 3
+t2.penup()
+t2.goto(-30, -40)
+t2.pendown()
+t2.forward(80)
+```
+
+```yaml grading
+gradingMethod: targetImage
+testCases:
+- hidden: false
+dueDateGroup:
+  enableDueDate: true
+  duedate: '2026-09-01T07:00:00.000Z'
+```

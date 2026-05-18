@@ -45,16 +45,22 @@ class PreviewViewBuilder:
 
     def build_question_component(self, question: QuestionLike) -> str:
         frame_src = self.build_local_preview_path_with_options(question, mode="view", simple=True)
-        split_src = self.build_local_preview_path_with_options(question, mode="split")
-        delete_src = f"{self.runtime_proxy_prefix}/remove/{self.quote_path_segment(question.runtime_content_id)}"
+        status_src = (
+            f"/preview-status/{self.quote_path_segment(question.course_slug)}/"
+            f"{self.quote_path_segment(question.identifier)}"
+        )
+        rebuild_src = (
+            f"/preview-rebuild/{self.quote_path_segment(question.course_slug)}/"
+            f"{self.quote_path_segment(question.identifier)}"
+        )
         template = (_TEMPLATES_DIR / "question_card.html").read_text("utf-8")
         return _fill(
             template,
             identifier=self.escape_inline(question.identifier),
             title=self.escape_inline(question.title),
             frame_src=self.escape_inline(frame_src),
-            split_src=self.escape_inline(split_src),
-            delete_src=self.escape_inline(delete_src),
+            status_src=self.escape_inline(status_src),
+            rebuild_src=self.escape_inline(rebuild_src),
         ).strip()
 
     def render_preview_waiting_page(self, question: QuestionLike, *, mode: str = "view", simple: bool = False) -> str:

@@ -66,6 +66,14 @@ class H5PRuntimeManager:
             import_into_runtime=self._import_question_into_runtime,
         )
 
+    def rebuild_runtime_question(self, question: PythonQuestionBlock) -> None:
+        self._runtime_preparation.rebuild(
+            question,
+            compute_hash=self._compute_question_hash,
+            write_package=self._write_h5p_package,
+            import_into_runtime=self._import_question_into_runtime,
+        )
+
     def is_runtime_question_ready(self, question: PythonQuestionBlock) -> bool:
         return self._runtime_preparation.is_ready(question, compute_hash=self._compute_question_hash)
 

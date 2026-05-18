@@ -1,0 +1,35 @@
+Listen werden besonders stark, wenn du sie mit Bedingungen und Schleifen
+kombinierst.
+
+```python
+bloecke = ["Erde", "Stein", "Diamant", "Stein", "Gold"]
+
+wertvoll = []
+for block in bloecke:
+    if block == "Diamant" or block == "Gold":
+        wertvoll.append(block)
+
+print(wertvoll)
+```
+
+Hier entsteht eine neue Liste. Sie enthält nur die Blöcke, die zur Bedingung
+passen.
+
+| `block` | Bedingung erfüllt? | `wertvoll` danach |
+| --- | --- | --- |
+| `"Erde"` | nein | `[]` |
+| `"Stein"` | nein | `[]` |
+| `"Diamant"` | ja | `["Diamant"]` |
+| `"Stein"` | nein | `["Diamant"]` |
+| `"Gold"` | ja | `["Diamant", "Gold"]` |
+
+### Muster: filtern
+
+Dieses Muster heißt **filtern**:
+
+```python noeditor
+neue_liste = []
+for element in alte_liste:
+    if bedingung:
+        neue_liste.append(element)
+```

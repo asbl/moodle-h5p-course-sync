@@ -1,0 +1,67 @@
+<Instructions>
+Baue ein Namensschild aus einer Charakterklasse und einem Namen.
+
+Die Eingaben werden vom Test vorgegeben. In deinem sichtbaren Code sollst du
+daraus den String `namensschild` zusammensetzen.
+
+Die Variable `character_class` enthält die Charakterklasse. Die Variable
+`name` enthält den Namen.
+
+Achte besonders auf die Leerzeichen und Klammern.
+
+Das fertige Namensschild soll genau diese Form haben:
+
+#### Eingabe
+Magierin
+Iva
+
+#### Ausgabe
+Iva (Magierin)
+</Instructions>
+
+```python editor:preCode
+character_class = input()
+name = input()
+```
+
+```python editor:startingCode
+namensschild =
+```
+
+```python editor:postCode
+print(namensschild)
+```
+
+```python grading:targetCode
+character_class = input()
+name = input()
+
+namensschild = name + " (" + character_class + ")"
+print(namensschild)
+```
+
+```yaml grading
+dueDateGroup:
+  enableDueDate: true
+  duedate: '2026-06-01T07:00:00.000Z'
+gradingMethod: ioTestCases
+testCases:
+- hidden: false
+  inputs:
+  - Magierin
+  - Iva
+  outputs:
+  - Iva (Magierin)
+- hidden: false
+  inputs:
+  - Waldläufer
+  - Theo
+  outputs:
+  - Theo (Waldläufer)
+- hidden: true
+  inputs:
+  - Schurkin
+  - Yara
+  outputs:
+  - Yara (Schurkin)
+```

@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 230" width="560" height="230" role="img" aria-label="Markov-Kette mit den Zuständen Sonne, Wolken und Regen">
+  <defs>
+    <marker id="arrow2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#7c3aed"/>
+    </marker>
+  </defs>
+  <rect x="1" y="1" width="558" height="228" rx="14" fill="#fffbeb" stroke="#f59e0b"/>
+  <circle cx="110" cy="115" r="46" fill="#fef3c7" stroke="#d97706" stroke-width="3"/>
+  <circle cx="280" cy="115" r="46" fill="#e0f2fe" stroke="#0284c7" stroke-width="3"/>
+  <circle cx="450" cy="115" r="46" fill="#e0e7ff" stroke="#4f46e5" stroke-width="3"/>
+  <text x="110" y="121" text-anchor="middle" font-size="18" font-family="Arial" fill="#0f172a">Sonne</text>
+  <text x="280" y="121" text-anchor="middle" font-size="18" font-family="Arial" fill="#0f172a">Wolken</text>
+  <text x="450" y="121" text-anchor="middle" font-size="18" font-family="Arial" fill="#0f172a">Regen</text>
+  <line x1="156" y1="115" x2="234" y2="115" stroke="#7c3aed" stroke-width="3" marker-end="url(#arrow2)"/>
+  <line x1="326" y1="115" x2="404" y2="115" stroke="#7c3aed" stroke-width="3" marker-end="url(#arrow2)"/>
+  <path d="M 80 78 C 40 35, 170 35, 140 78" fill="none" stroke="#7c3aed" stroke-width="3" marker-end="url(#arrow2)"/>
+  <path d="M 420 152 C 375 198, 505 198, 480 152" fill="none" stroke="#7c3aed" stroke-width="3" marker-end="url(#arrow2)"/>
+  <path d="M 434 82 C 350 20, 210 20, 126 82" fill="none" stroke="#7c3aed" stroke-width="3" marker-end="url(#arrow2)"/>
+  <text x="195" y="101" text-anchor="middle" font-size="13" font-family="Arial" fill="#334155">0.3</text>
+  <text x="365" y="101" text-anchor="middle" font-size="13" font-family="Arial" fill="#334155">0.4</text>
+  <text x="110" y="43" text-anchor="middle" font-size="13" font-family="Arial" fill="#334155">0.7</text>
+  <text x="450" y="204" text-anchor="middle" font-size="13" font-family="Arial" fill="#334155">0.6</text>
+  <text x="280" y="34" text-anchor="middle" font-size="13" font-family="Arial" fill="#334155">0.2</text>
+</svg>

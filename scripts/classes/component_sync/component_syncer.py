@@ -5,6 +5,7 @@ import textwrap
 from typing import Callable
 
 from scripts.classes.models import PythonQuestionBlock
+from scripts.classes.python_runner_policy import ensure_miniworlds_packages
 from scripts.classes.content_types import PythonQuestion as PythonQuestionContentType
 from scripts.classes.content_types import block_to_content_type
 from scripts.classes.content_types._helpers import (
@@ -39,7 +40,7 @@ class ComponentSyncer:
             defaults["advancedOptions"]["showConsole"] = question.show_console
         defaults.setdefault("pyodideOptions", {})
         if isinstance(defaults["pyodideOptions"], dict):
-            defaults["pyodideOptions"]["packages"] = [{"package": p} for p in question.packages]
+            defaults["pyodideOptions"]["packages"] = ensure_miniworlds_packages(question.packages)
         defaults.setdefault("editorSettings", {})
         if isinstance(defaults["editorSettings"], dict):
             defaults["editorSettings"]["instructions"] = question.instructions

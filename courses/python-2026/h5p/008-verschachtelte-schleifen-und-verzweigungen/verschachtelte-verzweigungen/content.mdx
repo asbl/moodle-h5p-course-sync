@@ -1,0 +1,40 @@
+Eine verschachtelte Bedingung prüft mehrere Regeln hintereinander.
+
+```python
+pokemon = input("Welchen Typ hat dein Pokémon? (Feuer/Wasser/Pflanze): ").lower()
+gegner = input("Welchen Typ hat dein Gegner? (Feuer/Wasser/Pflanze): ").lower()
+#text.lower() wandelt einen String in Kleinbuchstaben um - Dies vermeidet Fehler bei Vergleichen
+
+if pokemon == "feuer":
+    if gegner == "pflanze":
+        print("Dein Feuer-Pokémon ist stark gegen Pflanze!")
+    if gegner == "feuer":
+        print("Dein Pokemon ist neutral gegen Feuer")
+    if gegner == "wasser":
+        print("Dein Pokemon ist schwach gegen Wasser")
+elif pokemon == "wasser":
+    if gegner == "feuer":
+        print("Dein Wasser-Pokémon ist stark gegen Feuer!")
+```
+
+Wie du siehst wird für diese Abfragen einfach weiter eingerückt.
+
+Man nennt so ein `If` innerhalb eines `If`s eine **verschachtelte Verzweigung** (oder auchh verschachtelte Bedingung).
+
+Oft kann man Verschachtelungen auch vermeiden, so kann man z.B. diesen Code:
+
+```python
+if pokemon == "feuer":
+    if gegner == "pflanze":
+        print("Dein Feuer-Pokémon ist stark gegen Pflanze!")
+```
+
+mit Hilfe der Verknüpfung `and` auch schreiben als:
+
+```python
+if pokemon == "feuer" and gegner == "pflanze":
+        print("Dein Feuer-Pokémon ist stark gegen Pflanze!")
+```
+
+Vor allem in komplexeren Programmen versucht man tief verschachtelte Verzweigungen möglichst zu vermeiden, 
+da diese schwerer zu lesen und zu verstehen sind.

@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import shutil
 import tempfile
+from copy import deepcopy
 from pathlib import Path
 from threading import RLock
 from typing import Callable, Iterable
@@ -95,28 +97,100 @@ class H5PPackageBuilder:
             shared_libraries.append(destination)
         return shared_libraries
 
+    def _build_state_path(self, question: PythonQuestionBlock) -> Path:
+        if question.course_dir is None:
+            return question.exploded_dir / ".build-hash"
+        hash_dir = question.course_dir / "build" / "hashes"
+        return hash_dir / question.h5p_subdir / f"{question.identifier}.build-hash" if question.h5p_subdir else hash_dir / f"{question.identifier}.build-hash"
+
+    def _legacy_package_path(self, question: PythonQuestionBlock) -> Path:
+        return question.h5p_dir / f"{question.identifier}.h5p"
+
+    def _legacy_build_state_path(self, question: PythonQuestionBlock) -> Path:
+        return question.h5p_dir / f".{question.identifier}.build-hash"
+
+    def _remove_legacy_build_outputs(self, question: PythonQuestionBlock) -> None:
+        legacy_paths = [
+            self._legacy_package_path(question),
+            self._legacy_build_state_path(question),
+            question.exploded_dir / f"{question.identifier}.h5p",
+            question.exploded_dir / ".build-hash",
+        ]
+        for path in legacy_paths:
+            if path.exists() and path.is_file():
+                path.unlink()
+
+    def _read_build_state(self, question: PythonQuestionBlock) -> str:
+        state_path = self._build_state_path(question)
+        if not state_path.exists():
+            return ""
+        try:
+            return state_path.read_text(encoding="utf-8").strip()
+        except OSError:
+            return ""
+
+    def _write_build_state(self, question: PythonQuestionBlock, fingerprint: str) -> None:
+        state_path = self._build_state_path(question)
+        self._ensure_directory(state_path.parent)
+        state_path.write_text(fingerprint + "\n", encoding="utf-8")
+
+    def _fingerprint_payload(self, payload: object) -> str:
+        serialized = json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+        return hashlib.sha256(serialized.encode("utf-8")).hexdigest()
+
+    def _write_package_archive(
+        self,
+        question: PythonQuestionBlock,
+        *,
+        shared_libraries: Iterable[Path],
+    ) -> None:
+        self._ensure_directory(question.package_path.parent)
+        with tempfile.TemporaryDirectory(dir=question.package_path.parent) as temp_dir:
+            temp_package_path = Path(temp_dir) / question.package_path.name
+            with ZipFile(temp_package_path, "w", compression=ZIP_DEFLATED) as archive:
+                self._write_h5p_archive_from_directory(
+                    archive,
+                    question.exploded_dir,
+                    shared_libraries=shared_libraries,
+                    shared_libraries_root=question.shared_libraries_dir,
+                )
+            shutil.move(str(temp_package_path), question.package_path)
+
+    def _can_reuse_package(self, question: PythonQuestionBlock, fingerprint: str) -> bool:
+        if not question.package_path.exists():
+            return False
+        return self._read_build_state(question) == fingerprint
+
     def write_h5p_package(self, question: PythonQuestionBlock) -> Path:
         with self._workspace_lock:
             self._ensure_directory(question.package_path.parent)
+            self._remove_legacy_build_outputs(question)
 
             source_archive_path = (question.course_dir / question.source_package_path) if question.source_package_path else None
             source_mtime_ns = self._source_tree_mtime_ns(source_archive_path)
-            index_mtime_ns = (question.course_dir / "index.mdx").stat().st_mtime_ns
-            freshness_reference = max(index_mtime_ns, source_mtime_ns)
 
             if (question.package_url or source_archive_path is not None) and question.h5p_metadata is not None and question.h5p_content is not None:
-                if question.package_path.exists() and question.package_path.stat().st_mtime_ns >= freshness_reference:
-                    return question.package_path
-
                 self._ensure_h5p_runtime_libraries()
-                metadata_payload = json.loads(json.dumps(question.h5p_metadata, ensure_ascii=False))
-                content_payload = json.loads(json.dumps(question.h5p_content, ensure_ascii=False))
+                metadata_payload = deepcopy(question.h5p_metadata)
+                content_payload = deepcopy(question.h5p_content)
                 metadata_payload["title"] = question.title
                 metadata_payload["mainLibrary"] = question.main_library
                 if question.main_library == self._python_question_machine_name:
                     metadata_payload = self._normalize_imported_python_question_metadata(question, metadata_payload)
                 if "pythonRunner" in content_payload or question.main_library == self._python_question_machine_name:
                     content_payload["pythonRunner"] = question.runner
+
+                imported_fingerprint = self._fingerprint_payload(
+                    {
+                        "mode": "imported",
+                        "metadata": metadata_payload,
+                        "content": content_payload,
+                        "sourceMtime": source_mtime_ns,
+                        "packageUrl": question.package_url,
+                    }
+                )
+                if self._can_reuse_package(question, imported_fingerprint):
+                    return question.package_path
 
                 with tempfile.TemporaryDirectory() as temp_dir:
                     source_path = Path(temp_dir) / "source"
@@ -135,29 +209,45 @@ class H5PPackageBuilder:
                         self._collect_required_library_dirs_from_metadata(metadata_payload),
                     )
 
-                    with ZipFile(question.package_path, "w", compression=ZIP_DEFLATED) as target_archive:
-                        self._write_h5p_archive_from_directory(
-                            target_archive,
-                            question.exploded_dir,
-                            shared_libraries=shared_libraries,
-                            shared_libraries_root=question.shared_libraries_dir,
-                        )
+                    self._write_package_archive(question, shared_libraries=shared_libraries)
+
+                self._write_build_state(question, imported_fingerprint)
 
                 return question.package_path
 
             if question.package_url and (question.raw_package or question.main_library != self._python_question_machine_name):
-                if question.package_path.exists() and question.package_path.stat().st_mtime_ns >= freshness_reference:
+                raw_fingerprint = self._fingerprint_payload(
+                    {
+                        "mode": "raw",
+                        "packageUrl": question.package_url,
+                        "mainLibrary": question.main_library,
+                        "sourceMtime": source_mtime_ns,
+                    }
+                )
+                if self._can_reuse_package(question, raw_fingerprint):
                     return question.package_path
                 self._download_file(question.package_url, question.package_path)
+                self._write_build_state(question, raw_fingerprint)
                 return question.package_path
 
             self._ensure_h5p_runtime_libraries()
+            h5p_json = self.build_h5p_metadata(question)
+            content_json = self._build_h5p_content(question)
+            scratch_fingerprint = self._fingerprint_payload(
+                {
+                    "mode": "scratch",
+                    "metadata": h5p_json,
+                    "content": content_json,
+                    "sourceMtime": self._source_tree_mtime_ns(question.exploded_dir),
+                }
+            )
+            if self._can_reuse_package(question, scratch_fingerprint):
+                return question.package_path
+
             if question.exploded_dir.exists():
                 shutil.rmtree(question.exploded_dir)
             self._ensure_directory(question.exploded_dir)
 
-            h5p_json = self.build_h5p_metadata(question)
-            content_json = self._build_h5p_content(question)
             required_libraries = self._collect_required_library_dirs(question.main_library)
             shared_libraries = self.sync_shared_h5p_libraries(question, required_libraries)
 
@@ -165,13 +255,9 @@ class H5PPackageBuilder:
             (question.exploded_dir / "h5p.json").write_text(json.dumps(h5p_json, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
             self._write_h5p_content_files(question.exploded_dir, content_json)
 
-            with ZipFile(question.package_path, "w", compression=ZIP_DEFLATED) as archive:
-                self._write_h5p_archive_from_directory(
-                    archive,
-                    question.exploded_dir,
-                    shared_libraries=shared_libraries,
-                    shared_libraries_root=question.shared_libraries_dir,
-                )
+            self._write_package_archive(question, shared_libraries=shared_libraries)
+
+            self._write_build_state(question, scratch_fingerprint)
 
             return question.package_path
 

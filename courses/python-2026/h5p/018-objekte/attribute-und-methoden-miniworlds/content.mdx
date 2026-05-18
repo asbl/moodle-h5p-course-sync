@@ -1,0 +1,75 @@
+Bei der Turtle hast du Attribute wie `pensize` gelesen und gesetzt und
+Methoden wie `forward()` aufgerufen. In miniworlds gilt dasselbe Prinzip.
+
+### Attribute in miniworlds
+
+miniworlds-Objekte haben Attribute für Position, Größe und Farbe:
+
+```python
+import miniworlds
+
+world = miniworlds.World(460, 300)
+world.add_background((225, 238, 252))
+
+kreis = miniworlds.Circle((200, 150), 40)
+
+# Attribute lesen:
+print(kreis.x)        # x-Position
+print(kreis.y)        # y-Position
+print(kreis.size)     # Größe (Durchmesser)
+
+# Attribute setzen:
+kreis.color = (255, 130, 50)
+kreis.size = 80
+kreis.x = 100
+
+world.run()
+```
+
+Jede Zuweisung `objekt.attribut = wert` verändert nur dieses eine Objekt.
+
+### Methoden in miniworlds
+
+miniworlds-Objekte haben Methoden zum Bewegen und Verändern:
+
+```python
+import miniworlds
+
+world = miniworlds.World(460, 300)
+world.add_background((225, 238, 252))
+
+figur = miniworlds.Actor((100, 150))
+figur.color = (60, 130, 220)
+figur.size = (40, 40)
+
+figur.move_right(100)   # Methode: 100 Pixel nach rechts
+figur.move_down(50)     # Methode: 50 Pixel nach unten
+
+world.run()
+```
+
+### Noch ein Beispiel
+
+Hier nochmal ein Beispiel mit mehreren Objekten, welche aus unterschiedlichen Klassen instanziiert werden:
+
+```python
+import miniworlds
+
+world = miniworlds.World(460, 300)
+world.add_background((225, 238, 252))
+
+kreis = miniworlds.Circle((80, 150), 30)
+kreis.color = (80, 160, 255)
+
+rechteck = miniworlds.Rectangle((230, 120), 100, 60)
+rechteck.color = (255, 130, 50)
+
+text = miniworlds.Text((50, 250), "")
+text.font_size = 18
+text.color = (20, 30, 55)
+text.text = f"Kreis bei x={kreis.x}, Rechteck bei x={rechteck.x}"
+
+world.run()
+```
+
+Der Text-Actor liest Attribute von anderen Objekten und zeigt sie an.

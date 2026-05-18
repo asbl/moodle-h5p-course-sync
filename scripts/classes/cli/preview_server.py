@@ -37,7 +37,12 @@ def serve_preview(
     start_runtime_question_preparation: Callable[[QuestionLike], None],
     prepare_preview_runtime: Callable[[], None],
     template_renderer: Callable[[], TemplateRendererLike],
+    rebuild_runtime_question: Callable[[QuestionLike], None] | None = None,
 ) -> None:
+    print(
+        "Preview wird vorbereitet. Der Server ist erst nach Abschluss der H5P-Vorbereitung erreichbar.",
+        flush=True,
+    )
     runtime_process = ensure_h5p_runtime_server()
     server: ThreadingHTTPServer | None = None
     try:
@@ -61,12 +66,13 @@ def serve_preview(
                 rewrite_runtime_html=rewrite_runtime_html,
                 escape_inline=escape_inline,
                 start_runtime_question_preparation=start_runtime_question_preparation,
+                rebuild_runtime_question=rebuild_runtime_question or (lambda _question: None),
                 template_renderer=template_renderer,
             )
         )
 
         server = ThreadingHTTPServer(("127.0.0.1", port), handler)
-        print(f"Preview läuft auf http://127.0.0.1:{port}")
+        print(f"Preview läuft auf http://127.0.0.1:{port}", flush=True)
         server.serve_forever()
     except KeyboardInterrupt:
         pass

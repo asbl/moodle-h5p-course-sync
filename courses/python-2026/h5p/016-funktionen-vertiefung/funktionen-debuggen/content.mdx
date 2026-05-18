@@ -1,0 +1,40 @@
+Bei Funktionen passieren typische Fehler. Viele davon lassen sich finden, wenn
+du Aufruf, Parameter und Rückgabe getrennt prüfst.
+
+### Fehler 1: Rückgabe vergessen
+
+```python
+def verdoppeln(zahl):
+    ergebnis = zahl * 2
+
+
+print(verdoppeln(5))
+```
+
+Die Funktion berechnet zwar etwas, gibt es aber nicht zurück. Deshalb wird
+`None` ausgegeben.
+
+### Fehler 2: Funktion nicht aufrufen
+
+```python
+def gib_brot():
+    return "Brot"
+
+
+print(gib_brot)
+```
+
+Hier fehlt die Klammer. Es muss `gib_brot()` heißen.
+
+### Aufgabe
+
+Korrigiere die zwei Fehler im Code.
+
+```python
+def baue_schild(text):
+    schild = "[" + text + "]"
+
+
+nachricht = baue_schild
+print(nachricht("Mine"))
+```

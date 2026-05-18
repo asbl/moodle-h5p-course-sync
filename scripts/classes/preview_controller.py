@@ -25,6 +25,13 @@ class PreviewRenderResult:
     error_message: str = ""
 
 
+@dataclass(slots=True)
+class PreviewRebuildResult:
+    status_code: int
+    payload: dict[str, str] | None = None
+    error_message: str = ""
+
+
 class PreviewController:
     """Controller for preview-specific route decisions."""
 
@@ -38,11 +45,15 @@ class PreviewController:
         is_runtime_question_ready: Callable[[QuestionLike], bool],
         build_runtime_proxy_path: Callable[..., str],
         render_preview_waiting_page: Callable[..., str],
+        rebuild_runtime_question: Callable[[QuestionLike], None] | None = None,
+        invalidate_course_preview_cache: Callable[[str], None] | None = None,
     ) -> None:
         self._courses_dir = courses_dir
         self._load_course_preview_state = load_course_preview_state
         self._get_runtime_preparation_state = get_runtime_preparation_state
         self._start_runtime_question_preparation = start_runtime_question_preparation
+        self._rebuild_runtime_question = rebuild_runtime_question or (lambda _question: None)
+        self._invalidate_course_preview_cache = invalidate_course_preview_cache or (lambda _course_slug: None)
         self._is_runtime_question_ready = is_runtime_question_ready
         self._build_runtime_proxy_path = build_runtime_proxy_path
         self._render_preview_waiting_page = render_preview_waiting_page
@@ -92,3 +103,15 @@ class PreviewController:
             status_code=HTTPStatus.OK,
             waiting_page_html=self._render_preview_waiting_page(question, mode=mode, simple=simple),
         )
+
+    def rebuild_preview(self, course_slug: str, identifier: str) -> PreviewRebuildResult:
+        self._invalidate_course_preview_cache(course_slug)
+        question, error_message = self._resolve_question(course_slug, identifier)
+        if question is None:
+            return PreviewRebuildResult(status_code=HTTPStatus.NOT_FOUND, error_message=error_message)
+
+        try:
+            self._rebuild_runtime_question(question)
+        except RuntimeError as exc:
+            return PreviewRebuildResult(status_code=HTTPStatus.CONFLICT, error_message=str(exc))
+        return PreviewRebuildResult(status_code=HTTPStatus.OK, payload={"status": "ready", "error": ""})

@@ -1,0 +1,69 @@
+<Instructions>
+In Turtle-Zeichnungen verhindern Funktionen, dass derselbe Code immer wieder
+kopiert wird.
+
+Ergänze die Funktion `quadrat(seite, farbe)` und nutze sie dreimal, sodass ein
+kleiner Stapel aus drei farbigen Blöcken entsteht.
+</Instructions>
+
+```python editor:startingCode
+import turtle
+
+turtle.speed(0)
+
+def quadrat(seite, farbe):
+    turtle.color("black", farbe)
+    turtle.begin_fill()
+    # Ergänze das Quadrat.
+    turtle.end_fill()
+
+
+turtle.penup()
+turtle.goto(-120, -40)
+turtle.pendown()
+
+quadrat(70, "sienna")
+turtle.penup()
+turtle.forward(80)
+turtle.pendown()
+quadrat(70, "gray")
+turtle.penup()
+turtle.forward(80)
+turtle.pendown()
+quadrat(70, "gold")
+```
+
+```python grading:targetCode
+import turtle
+
+turtle.speed(0)
+
+def quadrat(seite, farbe):
+    turtle.color("black", farbe)
+    turtle.begin_fill()
+    for i in range(4):
+        turtle.forward(seite)
+        turtle.left(90)
+    turtle.end_fill()
+
+
+turtle.penup()
+turtle.goto(-120, -40)
+turtle.pendown()
+
+quadrat(70, "sienna")
+turtle.penup()
+turtle.forward(80)
+turtle.pendown()
+quadrat(70, "gray")
+turtle.penup()
+turtle.forward(80)
+turtle.pendown()
+quadrat(70, "gold")
+```
+
+```yaml grading
+gradingMethod: targetImage
+testCases:
+- hidden: false
+```

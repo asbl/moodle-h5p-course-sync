@@ -1,10 +1,8 @@
 <section class="python-question-card" id="question-${IDENTIFIER}" data-question-id="${IDENTIFIER}">
-    <nav class="question-toolbar" aria-label="Aktionen für ${TITLE}">
-        <strong class="question-toolbar-title">${TITLE}</strong>
-        <div class="question-toolbar-actions">
-            <button class="question-action-button primary" type="button" data-open-modal="true" data-frame-src="${FRAME_SRC}" data-frame-title="${TITLE}">Öffnen</button>
-            <button class="question-action-button" type="button" data-open-modal="true" data-frame-src="${SPLIT_SRC}" data-frame-title="${TITLE} - Split View">Split View</button>
-            <button class="question-action-button danger" type="button" data-action="delete-runtime" data-delete-url="${DELETE_SRC}">Delete</button>
-        </div>
-    </nav>
+    <button class="question-toolbar question-row-button" type="button" aria-label="${TITLE} öffnen" data-open-modal="true" data-frame-src="${FRAME_SRC}" data-frame-title="${TITLE}" data-status-url="${STATUS_SRC}">
+        <span class="question-toolbar-title">${TITLE}</span>
+    </button>
+    <button class="question-rebuild-button" type="button" aria-label="${TITLE} neu bauen" title="H5P neu bauen" data-rebuild-url="${REBUILD_SRC}" data-frame-src="${FRAME_SRC}" data-status-url="${STATUS_SRC}">
+        Neu bauen
+    </button>
 </section>

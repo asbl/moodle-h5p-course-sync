@@ -1,0 +1,81 @@
+Die eingebaute Funktion
+
+```python
+
+```
+
+python
+
+```python
+
+python
+```
+
+python
+
+python
+Sie hat zwei mögliche Aufrufvarianten:
+
+```python
+
+python
+
+python
+round(number)                # Rundet auf die nächste ganze Zahl
+round(number, ndigits)       # Rundet auf *ndigits* Nachkommastellen
+```
+
+python
+
+python
+
+Beispiele:
+
+```python
+
+python
+
+python
+print(round(3.14159)) # Rundet auf eine ganze Zahl
+print(round(3.14159, 2)) # Rundet auf zwei Stellen
+print(round(2.51)) # Rundet auf
+print(round(3.49)) # Rundet ab
+```
+
+python
+
+python
+
+Man kann auch auf negative Stellen runden:
+
+```python
+
+python
+
+python
+round(1234, -2)
+```
+
+python
+
+python
+
+!!! caution Spezialfall 0.5
+
+Achtung: .5 wird auf die nächste **gerade Zahl** gerundet:
+!!!
+
+```python
+
+python
+
+python
+print(round(2.5)) # --> 2
+print(round(5.5)) # --> 6
+```
+
+Man nennt dies **kaufmännisches Runden** - Die Idee dahinter ist, dass bei längeren Rechnungen, bei denen
+mit gerundeten Werten gerechnet wird, nicht immer aufgerundet wird.
+
+Dadurch, dass auf die nächste gerade Zahl gerundet wird, wird mal auf- und mal abgerundet,
+was die Fehlerfortpflanzung minimiert.

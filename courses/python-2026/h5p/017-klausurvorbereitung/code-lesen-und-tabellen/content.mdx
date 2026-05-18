@@ -1,0 +1,31 @@
+In einer Klausur musst du Code nicht nur schreiben, sondern oft zuerst
+**analysieren**. Eine Wertetabelle hilft dabei.
+
+```python
+energie = 3
+for runde in range(4):
+    energie = energie + runde
+    print(runde, energie)
+```
+
+Lege für solche Programme eine Tabelle an:
+
+```python noeditor
+runde | energie nach der Zuweisung | Ausgabe
+0     | 3                           | 0 3
+1     | 4                           | 1 4
+...
+```
+
+### Übung
+
+Fülle zuerst eine Tabelle auf Papier aus. Starte den Code erst danach.
+
+```python
+punkte = 2
+for schritt in range(1, 5):
+    punkte = punkte * 2
+    if punkte > 10:
+        punkte = punkte - 3
+    print(schritt, punkte)
+```

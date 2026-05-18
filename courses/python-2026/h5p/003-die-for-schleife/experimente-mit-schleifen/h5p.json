@@ -1,0 +1,64 @@
+{
+  "title": "Experimentieren mit Schleifen",
+  "language": "und",
+  "mainLibrary": "H5P.PythonQuestion",
+  "embedTypes": [
+    "iframe"
+  ],
+  "license": "U",
+  "defaultLanguage": "de-wp",
+  "preloadedDependencies": [
+    {
+      "machineName": "H5P.PythonQuestion",
+      "majorVersion": "6",
+      "minorVersion": "69"
+    },
+    {
+      "machineName": "H5P.LibCodeTools",
+      "majorVersion": "6",
+      "minorVersion": "69"
+    },
+    {
+      "machineName": "H5P.CodeQuestion",
+      "majorVersion": "6",
+      "minorVersion": "69"
+    },
+    {
+      "machineName": "H5P.Question",
+      "majorVersion": "1",
+      "minorVersion": "5"
+    },
+    {
+      "machineName": "FontAwesome",
+      "majorVersion": "4",
+      "minorVersion": "5"
+    },
+    {
+      "machineName": "H5P.JoubelUI",
+      "majorVersion": "1",
+      "minorVersion": "3"
+    },
+    {
+      "machineName": "H5P.FontIcons",
+      "majorVersion": "1",
+      "minorVersion": "0"
+    },
+    {
+      "machineName": "H5P.Transition",
+      "majorVersion": "1",
+      "minorVersion": "0"
+    },
+    {
+      "machineName": "H5P.Components",
+      "majorVersion": "1",
+      "minorVersion": "0"
+    },
+    {
+      "machineName": "jQuery.ui",
+      "majorVersion": "1",
+      "minorVersion": "10"
+    }
+  ],
+  "majorVersion": 6,
+  "minorVersion": 73
+}

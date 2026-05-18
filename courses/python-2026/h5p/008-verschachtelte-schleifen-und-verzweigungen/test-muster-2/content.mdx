@@ -1,0 +1,96 @@
+<Instructions>
+Variere das abgebildete Programm, so dass die Kreise abwechselnd klein ungerade
+groß - So wie bei einem Schachbrettmuster gezeichnet werden.
+
+* Kleine Kreise haben wieder 5px Radius
+* Große Kreise haben 10px Radius
+
+!!! note Hinweis
+Verwende den modulo-Operator
+```
+4 % 2 == 0 # true, da 4 gerade ist.
+5 % 2 == 0 # true, da 5 ungerade ist.
+```
+!!!
+</Instructions>
+
+```python editor:preCode
+import turtle
+rows = int(input("Gib die Zeilen ein"))
+cols = int(input("Gib die Spalten ein"))
+```
+
+```python editor:startingCode
+t = turtle.Turtle()
+t.speed(0)
+
+rows = 3
+cols = 3
+size = 10   # Radius der Kreise
+distance = 30  # Abstand zwischen den Kreisen
+
+for i in range(rows):
+    for j in range(cols):
+
+        t.penup()
+        t.goto(j * distance, i * distance)
+        t.pendown()
+        
+        # Todo: Verändere hier size.
+
+        t.circle(size)
+
+t.hideturtle()
+turtle.done()
+```
+
+```yaml editor
+instructionsImage:
+  path: images/instructionsImage-69ae876c0dd97.png
+  mime: image/png
+  copyright:
+    license: U
+  width: 181
+  height: 173
+```
+
+```python grading:targetCode
+import turtle
+rows = int(input())
+cols = int(input())
+
+t = turtle.Turtle()
+t.speed(0)
+
+size = 20   # Radius der Kreise
+distance = 30  # Abstand zwischen den Kreisen
+
+for i in range(rows):
+    for j in range(cols):
+
+        t.penup()
+        t.goto(j*distance, i*distance)
+        t.pendown()
+        
+        if (i + j) % 2 == 0:
+            size = 10
+        else: 
+            size = 5
+
+        t.circle(size)
+
+t.hideturtle()
+turtle.done()
+```
+
+```yaml grading
+gradingMethod: targetImage
+dueDateGroup:
+  enableDueDate: true
+  duedate: '2026-03-16T09:00:00.000Z'
+testCases:
+- hidden: false
+  inputs:
+  - '3'
+  - '3'
+```

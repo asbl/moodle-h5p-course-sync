@@ -87,6 +87,119 @@ class H5PLibraryManager:
         self._write_json(cache_path, release)
         return {asset["name"]: asset["browser_download_url"] for asset in release.get("assets", [])}
 
+    def load_github_release(self, tag: str | None = None) -> dict:
+        endpoint = f"releases/tags/{tag}" if tag else "releases/latest"
+        try:
+            return self._fetch_json(f"https://api.github.com/repos/{self._release_repo}/{endpoint}")
+        except HTTPError as error:
+            if error.code == HTTPStatus.FORBIDDEN:
+                raise RuntimeError("GitHub API Rate-Limit erreicht. Bitte spaeter erneut versuchen.") from error
+            raise
+
+    def _asset_prefix_for_latest_release(self, machine_name: str) -> str:
+        configured_prefix = self._asset_prefixes.get(machine_name, "")
+        if configured_prefix:
+            return configured_prefix.split("_", 1)[0].rsplit("-", 1)[0] + "-"
+        return f"{machine_name}-"
+
+    def _find_release_asset_name(self, assets: dict[str, str], machine_name: str) -> str:
+        prefix = self._asset_prefix_for_latest_release(machine_name)
+        candidates = sorted(name for name in assets if name.startswith(prefix) and name.endswith(".h5p"))
+        if not candidates:
+            raise RuntimeError(f"Release-Asset fuer {machine_name} mit Praefix '{prefix}' wurde nicht gefunden.")
+        return candidates[-1]
+
+    def _remove_library_dirs_for_machine_name(self, root: Path, machine_name: str) -> None:
+        for library_dir in sorted(root.glob(f"{machine_name}-*")):
+            if library_dir.is_dir():
+                shutil.rmtree(library_dir)
+
+    def _extract_library_root_from_archive_to(self, archive: ZipFile, library_root: str, destination_root: Path) -> Path:
+        destination = destination_root / Path(library_root).name
+        if destination.exists():
+            shutil.rmtree(destination)
+
+        extracted_root = False
+        for member in archive.namelist():
+            normalized = member.strip("/")
+            if not normalized or not normalized.startswith(f"{library_root}/"):
+                continue
+
+            relative_path = Path(normalized).relative_to(library_root)
+            if not relative_path.parts or relative_path.parts[0] == "content":
+                continue
+
+            target_path = destination / relative_path
+            if normalized.endswith("/"):
+                self._ensure_directory(target_path)
+                continue
+
+            self._ensure_directory(target_path.parent)
+            with archive.open(member) as source, target_path.open("wb") as target:
+                shutil.copyfileobj(source, target)
+            extracted_root = True
+
+        if not extracted_root:
+            raise RuntimeError(f"Die Library '{Path(library_root).name}' konnte nicht aus dem Archiv extrahiert werden.")
+
+        return destination
+
+    def extract_library_asset_to(self, archive_path: Path, machine_name: str, destination_root: Path) -> Path:
+        with ZipFile(archive_path) as archive:
+            library_root = None
+            for member in archive.namelist():
+                normalized = member.strip("/")
+                if not normalized.endswith("/library.json"):
+                    continue
+                metadata = json.loads(archive.read(member).decode("utf-8"))
+                if metadata.get("machineName") == machine_name:
+                    library_root = normalized.rsplit("/", 1)[0]
+                    break
+
+            if library_root is None:
+                raise RuntimeError(f"Kein library.json fuer {machine_name} in {archive_path.name} gefunden.")
+            return self._extract_library_root_from_archive_to(archive, library_root, destination_root)
+
+    def update_custom_libraries_from_github(self, tag: str | None = None) -> list[dict[str, str]]:
+        with self._workspace_lock:
+            self._ensure_directory(self._runtime_downloads_dir)
+            self._ensure_directory(self._runtime_libraries_dir)
+            self._ensure_directory(self._shared_libraries_dir)
+
+            release = self.load_github_release(tag)
+            release_tag = str(release.get("tag_name") or tag or "latest")
+            assets = {
+                asset["name"]: asset["browser_download_url"]
+                for asset in release.get("assets", [])
+                if isinstance(asset, dict) and asset.get("name") and asset.get("browser_download_url")
+            }
+            if not assets:
+                raise RuntimeError(f"GitHub-Release {release_tag} enthaelt keine downloadbaren Assets.")
+
+            updated: list[dict[str, str]] = []
+            for machine_name in self._asset_prefixes:
+                asset_name = self._find_release_asset_name(assets, machine_name)
+                archive_path = self._runtime_downloads_dir / asset_name
+                if not archive_path.exists():
+                    self._download_file(assets[asset_name], archive_path)
+
+                self._remove_library_dirs_for_machine_name(self._shared_libraries_dir, machine_name)
+                self._remove_library_dirs_for_machine_name(self._runtime_libraries_dir, machine_name)
+                shared_library_dir = self.extract_library_asset_to(archive_path, machine_name, self._shared_libraries_dir)
+                runtime_library_dir = self._copy_library_dir_to_runtime(shared_library_dir)
+                self.register_local_library(runtime_library_dir)
+                updated.append(
+                    {
+                        "machineName": machine_name,
+                        "asset": asset_name,
+                        "release": release_tag,
+                        "path": str(shared_library_dir),
+                    }
+                )
+
+            self.ensure_registered_local_libraries()
+            return updated
+
     def get_h5p_cli_command(self) -> list[str]:
         if self._resolve_cli_command is not None:
             return self._resolve_cli_command()
@@ -227,7 +340,7 @@ class H5PLibraryManager:
         if not self._courses_dir.exists():
             return None
 
-        archive_paths = sorted(self._courses_dir.glob("*/h5p/*.h5p"))
+        archive_paths = sorted(self._courses_dir.glob("*/build/h5p/**/*.h5p"))
         fallback_root: str | None = None
         fallback_archive: Path | None = None
 
@@ -300,22 +413,29 @@ class H5PLibraryManager:
                 raise RuntimeError(f"Kein library.json in {archive_path.name} gefunden.")
             return self._extract_library_root_from_archive(archive, library_root)
 
+    def _update_registry_entry(self, library_json: dict, registry: dict) -> None:
+        machine_name = library_json["machineName"]
+        existing_entry = registry.get(machine_name, {})
+        short_name = (
+            self._custom_short_names.get(machine_name)
+            or existing_entry.get("shortName")
+            or machine_name.lower().replace(".", "-")
+        )
+        registry[machine_name] = {
+            **existing_entry,
+            "id": machine_name,
+            "title": library_json.get("title", machine_name),
+            "author": library_json.get("author", ""),
+            "runnable": library_json.get("runnable", 0),
+            "shortName": short_name,
+        }
+
     def register_local_library(self, library_dir: Path) -> None:
         with self._workspace_lock:
             library_json = self._read_json(library_dir / "library.json")
             registry_path = self._runtime_dir / "libraryRegistry.json"
             registry = self._read_json_or_default(registry_path, {})
-            machine_name = library_json["machineName"]
-            existing_entry = registry.get(machine_name, {})
-            short_name = self._custom_short_names.get(machine_name) or existing_entry.get("shortName") or machine_name.lower().replace(".", "-")
-            registry[machine_name] = {
-                **existing_entry,
-                "id": machine_name,
-                "title": library_json.get("title", machine_name),
-                "author": library_json.get("author", ""),
-                "runnable": library_json.get("runnable", 0),
-                "shortName": short_name,
-            }
+            self._update_registry_entry(library_json, registry)
             self._write_json(registry_path, registry)
 
     def ensure_custom_h5p_libraries(self) -> None:
@@ -355,10 +475,14 @@ class H5PLibraryManager:
             self.register_local_library(library_dir)
 
     def ensure_registered_local_libraries(self) -> None:
-        for library_dir in sorted(self._runtime_libraries_dir.glob("*")):
-            library_json = library_dir / "library.json"
-            if library_json.exists():
-                self.register_local_library(library_dir)
+        with self._workspace_lock:
+            registry_path = self._runtime_dir / "libraryRegistry.json"
+            registry = self._read_json_or_default(registry_path, {})
+            for library_dir in sorted(self._runtime_libraries_dir.glob("*")):
+                library_json_path = library_dir / "library.json"
+                if library_json_path.exists():
+                    self._update_registry_entry(self._read_json(library_json_path), registry)
+            self._write_json(registry_path, registry)
 
     def ensure_h5p_editor_dependencies(self) -> None:
         if not list(self._runtime_libraries_dir.glob("H5PEditor.ShowWhen-*")):

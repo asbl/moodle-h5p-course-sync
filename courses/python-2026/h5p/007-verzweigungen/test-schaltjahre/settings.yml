@@ -1,0 +1,44 @@
+contentType: text_and_ide
+editorSettings:
+  preCode: "jahr = int(input())\n"
+  startingCode: "\n"
+  postCode: ''
+  instructions: "Schreibe nun ein Programm, dass erkennt,\nob ein eingegebenes Jahr
+    ein Schaltjahr ist.\n\n### Eingabe: \n\n  * Eine Jahreszahl\n\n### Ausgabe:\n\n\
+    \  * **\"Das Jahr ist ein Schaltjahr\"**, falls das eingegebene Jahr ein Schaltjahr
+    ist. \n  * **\"Das Jahr ist kein Schaltjahr\"**, falls das eingegebene Jahr kein
+    Schaltjahr ist.\n"
+gradingSettings:
+  gradingMethod: ioTestCases
+  testCases:
+  - hidden: false
+    inputs:
+    - '2000'
+    outputs:
+    - Das Jahr ist ein Schaltjahr
+  - hidden: false
+    outputs:
+    - Das Jahr ist kein Schaltjahr
+    inputs:
+    - '2018'
+  - hidden: false
+    inputs:
+    - '1600'
+    outputs:
+    - Das Jahr ist ein Schaltjahr
+  - hidden: true
+    outputs:
+    - Das Jahr ist kein Schaltjahr
+    inputs:
+    - '2021'
+  - hidden: true
+    inputs:
+    - '2024'
+    outputs:
+    - Das Jahr ist ein Schaltjahr
+  dueDateGroup:
+    enableDueDate: true
+    duedate: '2026-03-09T07:00:00.000Z'
+pythonRunner: skulpt
+pyodideOptions:
+  packages: []

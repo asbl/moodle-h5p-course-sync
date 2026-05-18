@@ -4,6 +4,7 @@ import html
 from typing import Callable
 
 from scripts.classes.models import MoodleH5PActivity, SourceFile
+from scripts.classes.python_runner_policy import ensure_miniworlds_packages
 
 
 class H5PImportMapper:
@@ -26,7 +27,7 @@ class H5PImportMapper:
                 package_name = str(entry).strip()
             if package_name and package_name not in packages:
                 packages.append(package_name)
-        return packages
+        return ensure_miniworlds_packages(packages)
 
     def summarize_instructions(self, activity: MoodleH5PActivity, content_payload: dict[str, object]) -> str:
         editor_settings = content_payload.get("editorSettings", {})

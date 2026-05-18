@@ -1,0 +1,129 @@
+Ein String sieht oft wie ein zusammenhängender Text aus. Für Python besteht er
+aber aus einzelnen Zeichen, die in einer festen Reihenfolge nebeneinander
+liegen.
+
+Python nummeriert diese Zeichen von links nach rechts. Die Nummer heißt
+**Index**.
+
+Wichtig: Python beginnt bei `0`.
+
+```python
+wort = "Kompass"
+
+print(wort[0])
+print(wort[1])
+print(wort[6])
+```
+
+Bei `"Kompass"` ist `K` also an Position `0`, `o` an Position `1` und `s` an
+Position `6`.
+
+```python noeditor
+Zeichen: K o m p a s s
+Index:   0 1 2 3 4 5 6
+```
+
+!!! note Warum beginnt Python bei 0?
+Viele Programmiersprachen zählen Positionen ab `0`. Das wirkt am Anfang
+ungewohnt, passt aber gut dazu, wie Computer Speicherplätze und Abstände
+denken.
+!!!
+
+### Negative Indizes
+
+Du kannst auch von hinten zählen. Das ist besonders praktisch, wenn du das
+letzte Zeichen brauchst, ohne vorher die Länge auszurechnen.
+
+```python
+wort = "Amulett"
+
+print(wort[-1])
+print(wort[-2])
+```
+
+`-1` ist das letzte Zeichen.
+
+```python noeditor
+Zeichen:     A  m  u  l  e  t  t
+Index:       0  1  2  3  4  5  6
+von hinten: -7 -6 -5 -4 -3 -2 -1
+```
+
+### Länge eines Strings
+
+Mit `len()` bekommst du die Anzahl der Zeichen:
+
+```python
+satz = "Brief im Spind"
+
+print(len(satz))
+```
+
+Das Leerzeichen wird mitgezählt.
+
+!!! note Merke
+`len(text)` zählt **Zeichen, nicht Wörter**. 
+Leerzeichen und Satzzeichen werden daher mitgezählt.
+!!!
+
+### Teilstrings
+
+Mit **Slicing** kannst du einen Teil aus einem String ausschneiden. Du gibst
+dabei an, wo Python anfangen soll und vor welcher Position Python wieder
+aufhören soll.
+
+```python
+wort = "WaukeensRast"
+
+print(wort[0:7])
+print(wort[8:12])
+```
+
+`wort[0:7]` bedeutet:
+
+- Beginne bei Index `0`.
+- Höre vor Index `8` auf.
+
+Der zweite Index wird also nicht mehr mitgenommen.
+
+```python noeditor
+W a u k e e n s R a s  t
+0 1 2 3 4 5 6 7 8 9 10 11
+[0:7]  -> Waukeen
+[8:12]   -> Rast
+```
+
+!!! note Halb offenes Intervall
+Ein Slice `text[start:ende]` nimmt `start` mit, aber `ende` nicht mehr. Das
+nennt man ein halb offenes Intervall.
+!!!
+
+### Anfang und Ende weglassen
+
+Man kann beim Slicing Anfang und Ende auch weglassen, dann geht der ausgeschnittene
+Text vom Anfang (bzw. bis zum Ende)
+
+```python
+wort = "WaukeensRast"
+
+print(wort[:7]) # 
+print(wort[8:])
+```
+
+### Teste dich selbst!
+
+Überlege zuerst, was ausgegeben wird. 
+Führe erst danach den Code danach aus und vergleiche
+deine Vermutung mit der tatsächlichen Ausgabe.
+
+```python
+text = "Drachenkarte"
+
+print(text[0])
+print(text[-1])
+print(text[:5])
+print(text[5:])
+print(len(text))
+```
+
+Wenn du Schwierigkeiten hast, schreibe wie in den Beispielen die Indizes über die Buchstaben.

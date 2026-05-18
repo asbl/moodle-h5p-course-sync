@@ -36,10 +36,46 @@ class CourseOrchestrator:
             _, questions, _ = self._parse_course(course_dir)
             for question in questions:
                 self._write_h5p_package(question)
+            self._remove_legacy_h5p_root_outputs(course_dir)
+            self._remove_legacy_h5p_source_build_outputs(course_dir)
             return questions
 
+    def _remove_legacy_h5p_root_outputs(self, course_dir: Path) -> None:
+        h5p_dir = course_dir / "h5p"
+        if not h5p_dir.exists():
+            return
+
+        for pattern in ("*.h5p", ".*.build-hash"):
+            for path in h5p_dir.glob(pattern):
+                if path.is_file():
+                    path.unlink()
+
+    def _remove_legacy_h5p_source_build_outputs(self, course_dir: Path) -> None:
+        h5p_dir = course_dir / "h5p"
+        if not h5p_dir.exists():
+            return
+
+        for pattern in ("**/*.h5p", "**/.build-hash"):
+            for path in h5p_dir.glob(pattern):
+                if path.is_file():
+                    path.unlink()
+
+    def _course_preview_mtime_ns(self, course_dir: Path) -> int:
+        paths = [
+            course_dir / "index.mdx",
+            *(course_dir / "chapters").glob("*.mdx"),
+            *(course_dir / "h5p").glob("**/content.mdx"),
+            *(course_dir / "h5p").glob("**/settings.yml"),
+            *(course_dir / "h5p").glob("**/h5p.json"),
+        ]
+        mtimes = [path.stat().st_mtime_ns for path in paths if path.exists()]
+        return max(mtimes, default=0)
+
+    def invalidate_course_preview_cache(self, course_slug: str) -> None:
+        self._preview_cache.pop(course_slug, None)
+
     def load_course_preview_state(self, course_dir: Path) -> tuple[list[PythonQuestionBlock], str]:
-        mdx_mtime_ns = (course_dir / "index.mdx").stat().st_mtime_ns
+        mdx_mtime_ns = self._course_preview_mtime_ns(course_dir)
         cached = self._preview_cache.get(course_dir.name)
         if cached and cached[0] == mdx_mtime_ns:
             return cached[1], cached[2]

@@ -1,0 +1,201 @@
+# Normale Worlds aus Listen erstellen
+
+Auch in einer normalen `World` kannst du ein Level mit einer Liste planen. Der
+Unterschied zur `TiledWorld`: Die Liste beschreibt nur den Bauplan. Die echten
+Positionen müssen anschließend in Pixel umgerechnet werden.
+
+```python
+level = [
+    "############",
+    "#S.........#",
+    "#..###.....#",
+    "#......Z...#",
+    "############",
+]
+```
+
+Wir wählen eine Feldgröße von 40 Pixeln. Dann wird aus `(x, y)` die
+Pixelposition `(x * 40, y * 40)`.
+
+### Felder als Rechtecke zeichnen
+
+```python
+import miniworlds
+
+level = [
+    "############",
+    "#S.........#",
+    "#..###.....#",
+    "#......Z...#",
+    "############",
+]
+
+feld = 40
+world = miniworlds.World(480, 200)
+
+world.add_background((225, 235, 245))
+
+for y, zeile in enumerate(level):
+    for x, zeichen in enumerate(zeile):
+        pixel_x = x * feld
+        pixel_y = y * feld
+
+        if zeichen == "#":
+            wand = miniworlds.Rectangle.from_topleft((pixel_x, pixel_y), feld, feld)
+            wand.color = (80, 90, 95)
+
+world.run()
+```
+
+Die Liste hat weiterhin Felder. Die `World` zeigt aber Pixel. Darum rechnen wir
+vor dem Erstellen jedes Rechtecks um.
+
+### Mittelpunkt berechnen
+
+Actors werden meistens über ihren Mittelpunkt positioniert. Für ein Feld
+brauchst du also:
+
+```python
+mitte_x = x * feld + feld / 2
+mitte_y = y * feld + feld / 2
+```
+
+Damit können Spieler und Ziel sauber in der Feldmitte stehen.
+
+```python
+import miniworlds
+
+level = [
+    "############",
+    "#S.........#",
+    "#..###.....#",
+    "#......Z...#",
+    "############",
+]
+
+feld = 40
+world = miniworlds.World(480, 200)
+world.add_background((225, 235, 245))
+
+spieler = None
+ziel = None
+waende = []
+
+for y, zeile in enumerate(level):
+    for x, zeichen in enumerate(zeile):
+        pixel_x = x * feld
+        pixel_y = y * feld
+        mitte = (pixel_x + feld / 2, pixel_y + feld / 2)
+
+        if zeichen == "#":
+            wand = miniworlds.Rectangle.from_topleft((pixel_x, pixel_y), feld, feld)
+            wand.color = (80, 90, 95)
+            waende.append(wand)
+        elif zeichen == "S":
+            spieler = miniworlds.Actor(mitte)
+            spieler.size = (28, 28)
+            spieler.color = (60, 120, 220)
+        elif zeichen == "Z":
+            ziel = miniworlds.Circle(mitte, 15)
+            ziel.color = (240, 190, 70)
+
+world.run()
+```
+
+### Rasterposition aus Pixelposition berechnen
+
+Wenn du später wissen willst, auf welchem Listenfeld der Spieler steht, rechnest
+du zurück:
+
+```python
+spalte = int(spieler.x // feld)
+zeile = int(spieler.y // feld)
+```
+
+Das ist besonders nützlich für Punkte, Türen oder Anzeigen im Raster.
+
+### Bewegung mit Kollisionserkennung
+
+Beim Bewegen läuft der Spieler ein paar Pixel. Danach prüfen wir, ob er eine
+Wand berührt. Wenn ja, setzen wir ihn wieder zurück.
+
+```python
+import miniworlds
+
+level = [
+    "############",
+    "#S.........#",
+    "#..###.....#",
+    "#......Z...#",
+    "############",
+]
+
+feld = 40
+world = miniworlds.World(480, 200)
+
+world.add_background((225, 235, 245))
+
+spieler = None
+ziel = None
+waende = []
+geschwindigkeit = 5
+
+for y, zeile in enumerate(level):
+    for x, zeichen in enumerate(zeile):
+        pixel_x = x * feld
+        pixel_y = y * feld
+        mitte = (pixel_x + feld / 2, pixel_y + feld / 2)
+
+        if zeichen == "#":
+            wand = miniworlds.Rectangle.from_topleft((pixel_x, pixel_y), feld, feld)
+            wand.color = (80, 90, 95)
+            waende.append(wand)
+        elif zeichen == "S":
+            spieler = miniworlds.Actor(mitte)
+            spieler.size = (28, 28)
+            spieler.color = (60, 120, 220)
+        elif zeichen == "Z":
+            ziel = miniworlds.Circle(mitte, 15)
+            ziel.color = (240, 190, 70)
+
+def beruehrt_wand():
+    for wand in waende:
+        if spieler.detect(wand):
+            return True
+    return False
+
+def bewege_spieler(dx, dy):
+    altes_x = spieler.x
+    altes_y = spieler.y
+
+    spieler.x = spieler.x + dx
+    spieler.y = spieler.y + dy
+
+    if beruehrt_wand():
+        spieler.x = altes_x
+        spieler.y = altes_y
+
+@spieler.register
+def on_key_pressed_right(self):
+    bewege_spieler(geschwindigkeit, 0)
+
+@spieler.register
+def on_key_pressed_left(self):
+    bewege_spieler(-geschwindigkeit, 0)
+
+@spieler.register
+def on_key_pressed_up(self):
+    bewege_spieler(0, -geschwindigkeit)
+
+@spieler.register
+def on_key_pressed_down(self):
+    bewege_spieler(0, geschwindigkeit)
+
+world.run()
+```
+
+!!! note Zwei Koordinatensysteme
+Die Liste nutzt Rasterkoordinaten wie `(3, 2)`. Die normale `World` nutzt
+Pixelkoordinaten wie `(140, 100)`. Wenn du beides sauber trennst, kannst du auch
+in normalen Worlds sehr übersichtliche Level bauen.
+!!!

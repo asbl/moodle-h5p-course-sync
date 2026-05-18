@@ -1,0 +1,36 @@
+<Instructions>
+Es soll überprüft werden, ob eine Zahl negativ ist .
+
+**Eingabe**: Eine beliebige Zahl:
+
+**Ausgabe**: "Die Zahl ist negativ", wenn die Zahl kleiner als 0 ist. 
+Ansonsten soll nichts ausgegeben werden.
+</Instructions>
+
+```python editor:startingCode
+x = int(input())
+```
+
+```yaml grading
+gradingMethod: ioTestCases
+testCases:
+- inputs:
+  - '-4'
+  outputs:
+  - Die Zahl ist negativ
+  hidden: false
+- inputs:
+  - '0'
+  hidden: false
+- inputs:
+  - '1'
+  hidden: false
+- inputs:
+  - '-10'
+  outputs:
+  - Die Zahl ist negativ
+  hidden: false
+dueDateGroup:
+  enableDueDate: true
+  duedate: '2026-03-09T07:00:00.000Z'
+```

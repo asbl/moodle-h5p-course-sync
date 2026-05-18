@@ -1,0 +1,117 @@
+Texte heißen in Python **Strings**. Immer wenn dein Programm Namen,
+Nachrichten, Orte, Passwörter, Dialogzeilen oder kleine Statusmeldungen
+verarbeiten soll, arbeitest du mit Strings.
+
+Ein String ist eine **Zeichenkette**. Das kann ein einzelnes Wort sein, ein
+ganzer Satz, ein Emoji, eine Zahl als Text oder auch ein leerer Text. Python
+behandelt all diese Dinge erst einmal gleich: als Folge von Zeichen.
+
+Strings schreibst du mit Anführungszeichen:
+
+```python
+print("Fackel am Tor brennt")
+print('Archiv 7 ist verschlossen')
+print("")
+```
+
+Ob du einfache oder doppelte Anführungszeichen verwendest, ist Python egal.
+Wichtig ist nur: Am Anfang und am Ende muss die gleiche Art von
+Anführungszeichen stehen.
+
+!!! note Merke
+Alles zwischen den Anführungszeichen gehört zum String. Auch Leerzeichen,
+Satzzeichen und Zahlen werden dann als Text gespeichert.
+!!!
+
+### Text speichern
+
+Strings kannst du wie Zahlen in Variablen speichern. Dadurch kann ein Programm
+Textteile später wiederverwenden, verändern oder zu neuen Ausgaben
+zusammensetzen.
+
+```python
+figur = "Nia"
+ort = "verlassener Clubraum"
+
+print(figur)
+print(ort)
+```
+
+Eine Variable ist hier wie ein beschriftetes Fach: In `figur` liegt der Text
+`"Nia"`, in `ort` liegt der Text `"verlassener Clubraum"`.
+
+```python noeditor
+figur  -> "Nia"
+ort    -> "verlassener Clubraum"
+```
+
+### Texte verbinden
+
+Mit `+` kannst du Strings aneinanderhängen.
+
+```python
+titel = "Kartenseherin"
+name = "Mira"
+
+print(titel + name)
+print(titel + " " + name)
+```
+
+Das Leerzeichen in `" "` ist auch ein String. Ohne dieses Leerzeichen kleben
+die Wörter direkt aneinander.
+
+!!! note Typischer Stolperstein
+Python fügt beim Verbinden mit `+` keine Leerzeichen automatisch ein. Wenn du
+ein Leerzeichen sehen möchtest, musst du es selbst als String einbauen.
+!!!
+
+### Text wiederholen
+
+Mit `*` kannst du einen String wiederholen:
+
+```python
+print("klopf " * 3)
+print("-" * 20)
+```
+
+Das ist praktisch für kleine Rahmen, Trennlinien oder einfache Textmuster.
+
+### Achtung: Zahlen als Text
+
+Der Text `"3"` ist nicht die Zahl `3`.
+
+Probiere das Beispiel aus:
+
+```python
+print("3" + "4")
+print(3 + 4)
+```
+
+Beim ersten Ausdruck werden zwei Strings verbunden. Beim zweiten Ausdruck
+werden zwei Zahlen addiert.
+
+```python noeditor
+"3" + "4"  -> "34"
+ 3  +  4   -> 7
+```
+
+### Eingaben sind Strings
+
+Alles, was mit `input()` eingelesen wird, ist zunächst ein String.
+
+```python
+name = input("Gib deinen Namen ein:")
+print("Dein Platz an der Tafel ist frei, " + name + "!")
+print(type(name))
+```
+
+Wenn du mit einer Eingabe rechnen möchtest, musst du sie vorher mit `int()`
+oder `float()` umwandeln. Wenn du mit ihr Text bauen möchtest, kannst du sie
+direkt verwenden.
+
+!!! note Ist eine Eingabe ein Text oder eine Zahl?
+Generell kannst du dir bei jeder Eignabe überlegen: Soll damit gerechnet werden oder soll daraus
+Text gebaut werden? 
+* Für Text kannst du den String direkt nutzen. 
+* Für Rechnungen musst du die Daten vorher mit `int(variable)` oder `float(variable)` umwandeln.
+!!!

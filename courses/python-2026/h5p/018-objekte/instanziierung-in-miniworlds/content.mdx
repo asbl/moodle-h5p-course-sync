@@ -1,0 +1,103 @@
+Bei der Turtle brauchtest du keine Argumente: `turtle.Turtle()` erstellt
+einfach eine Schildkröte an der Standardposition. In miniworlds legen
+Argumente beim Erzeugen den Anfangszustand fest.
+
+### Argumente beim Instanziieren
+
+```python
+import miniworlds
+
+world = miniworlds.World(460, 300)
+world.add_background((225, 238, 252))
+
+kreis = miniworlds.Circle((200, 150), 40)
+
+world.run()
+```
+
+Hier werden zwei Klassen instanziiert:
+
+```python noeditor
+miniworlds.World(460, 300)
+                ───  ───
+                B    H     ← Breite und Höhe der Welt
+
+miniworlds.Circle((200, 150), 40)
+                   ─────────  ──
+                   Position  Radius
+```
+
+Die Argumente in den Klammern legen fest, wie die Instanz am Anfang aussehen
+soll. Das ist dasselbe Prinzip wie bei Funktionen: Die Werte in den Klammern
+werden übergeben.
+
+### Mehrere Instanzen
+
+Du kannst beliebig viele Instanzen derselben Klasse erzeugen. Jede bekommt
+ihre eigene Position:
+
+```python
+import miniworlds
+
+world = miniworlds.World(460, 300)
+world.add_background((228, 238, 252))
+
+k1 = miniworlds.Circle((80,  150), 30)
+k2 = miniworlds.Circle((200, 150), 30)
+k3 = miniworlds.Circle((320, 150), 30)
+
+world.run()
+```
+
+Drei Kreise – drei Instanzen der Klasse `Circle`. Jede wurde unabhängig
+mit ihrer eigenen Startposition erzeugt.
+
+!!! note Klasse und Instanz
+Die Klasse `Circle` ist die Vorlage. `k1`, `k2`, `k3` sind konkrete Instanzen.
+Das Erzeugen einer Instanz – `miniworlds.Circle(...)` – nennt man
+**Instanziierung**.
+!!!
+
+### Verschiedene miniworlds-Klassen
+
+miniworlds stellt mehrere Klassen bereit, die du instanziieren kannst:
+
+```python
+import miniworlds
+
+world = miniworlds.World(460, 300)
+world.add_background((228, 238, 252))
+
+# Kreis: runde Form; Argumente: Mittelpunkt, Radius
+kreis = miniworlds.Circle((60, 75), 35)
+
+# Ellipse: ovale Form; Argumente: Position (oben-links), Breite, Höhe
+ellipse = miniworlds.Ellipse((115, 50), 80, 50)
+
+# Rechteck: rechteckige Form; Argumente: Position (oben-links), Breite, Höhe
+rechteck = miniworlds.Rectangle((220, 50), 90, 55)
+
+# Dreieck: drei Eckpunkte als Koordinaten-Tupel
+dreieck = miniworlds.Triangle((360, 100), (330, 40), (395, 40))
+
+# Linie: Anfangs- und Endpunkt
+linie = miniworlds.Line((25, 165), (435, 165))
+
+# Actor: Spielfigur ohne eigenes Bild (zeigt Standardaussehen)
+figur = miniworlds.Actor((120, 225))
+figur.size = (50, 50)
+
+# Text: Textanzeige auf der Welt
+text = miniworlds.Text((220, 225), "Hallo!")
+text.font_size = 22
+text.color = (20, 30, 55)
+
+# Number: Zahlenanzeige
+punkte = miniworlds.Number((370, 215), 42)
+punkte.font_size = 28
+
+world.run()
+```
+
+Jede Klasse erwartet andere Argumente – aber alle folgen demselben Muster:
+Klassenname, Klammern, Argumente.

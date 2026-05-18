@@ -1,3 +1,4 @@
 invoke>=2.2,<3
+playwright>=1.45,<2
 PyYAML>=6,<7
 ruamel.yaml>=0.18,<0.19

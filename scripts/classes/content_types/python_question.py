@@ -9,6 +9,12 @@ from pathlib import Path
 from typing import Callable, ClassVar
 
 from scripts.classes.h5p_runtime_manager.runtime_ids import build_runtime_content_id
+from scripts.classes.python_runner_policy import (
+    DEFAULT_PYTHON_RUNNER,
+    contains_miniworlds_import,
+    contains_miniworlds_package,
+    ensure_miniworlds_packages,
+)
 
 from ..models import SourceFile, TestCase
 from ._helpers import (
@@ -56,9 +62,10 @@ class PythonQuestion(H5PContentType):
     h5p_metadata_path: str = ""
     h5p_content_path: str = ""
     source_package_path: str = ""
+    h5p_subdir: str = ""
 
     # Python IDE parameters
-    runner: str = "pyodide"
+    runner: str = DEFAULT_PYTHON_RUNNER
     packages: list[str] = field(default_factory=list)
     starter_code: str = ""
     solution_code: str = ""
@@ -100,7 +107,8 @@ class PythonQuestion(H5PContentType):
             h5p_metadata_path=getattr(block, "h5p_metadata_path", ""),
             h5p_content_path=getattr(block, "h5p_content_path", ""),
             source_package_path=getattr(block, "source_package_path", ""),
-            runner=getattr(block, "runner", "pyodide"),
+            h5p_subdir=getattr(block, "h5p_subdir", ""),
+            runner=getattr(block, "runner", DEFAULT_PYTHON_RUNNER),
             packages=list(getattr(block, "packages", [])),
             starter_code=getattr(block, "starter_code", ""),
             solution_code=getattr(block, "solution_code", ""),
@@ -329,6 +337,21 @@ class PythonQuestion(H5PContentType):
         grading_method = self.grading_method
         if self.test_cases and grading_method == "please_choose":
             grading_method = "ioTestCases"
+        source = "\n".join([self.starter_code, self.solution_code, self.pre_code, self.post_code])
+        packages = ensure_miniworlds_packages(
+            self.packages,
+            source=source,
+        )
+        uses_miniworlds = contains_miniworlds_package(packages) or contains_miniworlds_import(source)
+        source_files = [
+            {
+                "fileName": sf.file_name,
+                "code": sf.code,
+                "visibleToLearner": sf.visible_to_learner,
+                "learnerEditable": sf.learner_editable,
+            }
+            for sf in self.source_files
+        ]
 
         return {
             "contentType": "ide_only",
@@ -341,7 +364,7 @@ class PythonQuestion(H5PContentType):
             },
             "pyodideOptions": {
                 "pyodideCdnUrl": "",
-                "packages": [{"package": p} for p in self.packages],
+                "packages": packages,
             },
             "contents": [],
             "editorSettings": {
@@ -350,18 +373,10 @@ class PythonQuestion(H5PContentType):
                 "startingCode": self.starter_code,
                 "postCode": self.post_code,
                 "options": {
-                    "enableImageUploads": False,
+                    "enableImageUploads": uses_miniworlds,
                     "enableSoundUploads": False,
-                    "sourceFiles": [
-                        {
-                            "fileName": sf.file_name,
-                            "code": sf.code,
-                            "visibleToLearner": sf.visible_to_learner,
-                            "learnerEditable": sf.learner_editable,
-                        }
-                        for sf in self.source_files
-                    ],
-                    "allowAddingFiles": self.allow_adding_files,
+                    "sourceFiles": source_files,
+                    "allowAddingFiles": self.allow_adding_files or uses_miniworlds,
                     "editorMode": "code",
                 },
             },
@@ -437,9 +452,7 @@ class PythonQuestion(H5PContentType):
 
         defaults.setdefault("pyodideOptions", {})
         if isinstance(defaults["pyodideOptions"], dict):
-            defaults["pyodideOptions"]["packages"] = [
-                {"package": p} for p in self.packages
-            ]
+            defaults["pyodideOptions"]["packages"] = ensure_miniworlds_packages(self.packages)
 
         defaults.setdefault("editorSettings", {})
         if isinstance(defaults["editorSettings"], dict):

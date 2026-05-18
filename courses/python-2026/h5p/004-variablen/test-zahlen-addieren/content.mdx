@@ -1,0 +1,51 @@
+<Instructions>
+Das folgende Programm berechnet Preise von Artikeln.
+
+a) Berechne die Summe aus allen Artikeln
+b) Ergänze eine Variable preis_artikel4 mit dem Wert 15.0
+</Instructions>
+
+```python editor:preCode
+preis_artikel1 = 50.25
+preis_artikel2 = 45.5
+preis_artikel3 = float(input())
+```
+
+```python editor:startingCode
+
+print(preis_artikel1 +  )
+```
+
+```python editor:postCode
+print(preis_artikel4)
+```
+
+```python grading:targetCode
+preis_artikel1 = 50.25
+preis_artikel2 = 45.5
+preis_artikel3 = float(input())
+
+
+preis_artikel4 = 15.0
+print(preis_artikel1 + preis_artikel2 + preis_artikel3)
+```
+
+```yaml grading
+gradingMethod: ioTestCases
+dueDateGroup:
+  enableDueDate: true
+  duedate: '2026-02-22T23:00:00.000Z'
+testCases:
+- hidden: false
+  inputs:
+  - '15.0'
+  outputs:
+  - '110.75'
+  - '15.0'
+- hidden: true
+  inputs:
+  - '20'
+  outputs:
+  - '115.75'
+  - '15.0'
+```

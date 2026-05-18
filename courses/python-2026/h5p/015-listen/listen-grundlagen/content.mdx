@@ -1,0 +1,94 @@
+Wenn ein Programm mehrere zusammengehörige Werte speichern soll, reicht eine
+einzelne Variable oft nicht mehr. Für solche Fälle gibt es **Listen**.
+
+Eine Liste steht in eckigen Klammern. Die einzelnen Werte werden durch Kommas
+getrennt.
+
+```python
+bloecke = ["Gras", "Stein", "Holz"]
+print(bloecke)
+```
+
+So kannst du dir die Liste vorstellen:
+
+| Index | `0` | `1` | `2` |
+| --- | --- | --- | --- |
+| Wert | `"Gras"` | `"Stein"` | `"Holz"` |
+
+Die Reihenfolge ist wichtig. `"Gras"` steht vorne, `"Holz"` steht hinten.
+
+Listen passen gut zu Dingen, die in Spielen mehrfach vorkommen: Inventarplätze,
+Levelnamen, Messwerte, Dialogzeilen oder Gegner.
+
+### Einzelne Elemente lesen
+
+Jedes Listenelement hat einen Index. Python beginnt bei `0`.
+
+```python
+bloecke = ["Gras", "Stein", "Holz"]
+
+print(bloecke[0])
+print(bloecke[1])
+print(bloecke[2])
+```
+
+| Ausdruck | gelesener Wert |
+| --- | --- |
+| `bloecke[0]` | `"Gras"` |
+| `bloecke[1]` | `"Stein"` |
+| `bloecke[2]` | `"Holz"` |
+
+!!! note Indizes
+Der erste Eintrag hat den Index `0`, der zweite den Index `1`. Das ist am
+Anfang ungewohnt, aber in Python ganz normal.
+!!!
+
+### Länge einer Liste
+
+Mit `len(...)` bekommst du heraus, wie viele Elemente in einer Liste stehen.
+
+```python
+inventar = ["Axt", "Fackel", "Brot", "Karte"]
+
+anzahl = len(inventar)
+print("Einträge:", anzahl)
+```
+
+```python noeditor
+inventar = ["Axt", "Fackel", "Brot", "Karte"]
+             1       2        3       4
+
+len(inventar) ist 4
+```
+
+### Durch eine Liste laufen
+
+Besonders häufig werden Listen mit einer `for`-Schleife verwendet.
+
+```python
+inventar = ["Axt", "Fackel", "Brot"]
+
+for gegenstand in inventar:
+    print("Im Inventar:", gegenstand)
+```
+
+Die Schleife nimmt nacheinander jeden Eintrag aus der Liste und speichert ihn
+kurz in der Variablen `gegenstand`.
+
+| Runde | `gegenstand` enthält | Ausgabe |
+| --- | --- | --- |
+| 1 | `"Axt"` | `Im Inventar: Axt` |
+| 2 | `"Fackel"` | `Im Inventar: Fackel` |
+| 3 | `"Brot"` | `Im Inventar: Brot` |
+
+### Mini-Aufgabe
+
+Ändere die Liste so, dass zusätzlich `"Diamant"` und `"Eimer"` ausgegeben
+werden.
+
+```python
+inventar = ["Holz", "Stein", "Fackel"]
+
+for gegenstand in inventar:
+    print(gegenstand)
+```

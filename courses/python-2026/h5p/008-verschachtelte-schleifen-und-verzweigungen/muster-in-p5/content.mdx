@@ -1,0 +1,139 @@
+Auch in p5 kannst du Muster erstellen:
+
+```python
+import p5
+
+def setup():
+    p5.createCanvas(200, 200)
+    p5.noLoop()  # Zeichnet nur einmal
+
+def draw():
+    size = 8  # 8x8 Schachbrett
+    square_size = p5.width / size  # Größe jedes Quadrats
+    
+    for row in range(size):
+        for col in range(size):
+            if (row + col) % 2 == 0:
+                p5.fill(255)  # weiß
+            else:
+                p5.fill(0)    # schwarz
+            p5.rect(col * square_size, row * square_size, square_size, square_size)
+
+p5.run()
+```
+
+Mit Benutzereingaben, kannst du eine Figur sich auf dem Muster bewegen lassen.
+(Evtl musst du einmal ins Spielfeld klicken, damit Eingaben registriert werden)
+
+```python
+import p5
+
+# Spielfigur-Koordinaten (startet oben links)
+player_x = 0
+player_y = 0
+size = 8  # Schachbrettgröße
+square_size = 50  # Pixelgröße pro Quadrat (200 / 8 = 25)
+
+def setup():
+    global square_size
+    p5.createCanvas(400, 400)
+    p5.noLoop()  # Zeichen nur bei Update
+    square_size = p5.width / size
+
+def draw():
+    global player_x, player_y
+    p5.background(200)  # neutraler Hintergrund
+    
+    # Schachbrett zeichnen
+    for row in range(size):
+        for col in range(size):
+            if (row + col) % 2 == 0:
+                p5.fill(255)  # weiß
+            else:
+                p5.fill(0)    # schwarz
+            p5.rect(col * square_size, row * square_size, square_size, square_size)
+    
+    # Spielfigur zeichnen (Kreis)
+    p5.fill(255, 0, 0)  # rot
+    p5.ellipse(player_x * square_size + square_size / 2,
+               player_y * square_size + square_size / 2,
+               square_size * 0.8, square_size * 0.8)
+
+def keyPressed():
+    global player_x, player_y
+    
+    if p5.key == "w" and player_y > 0:
+        player_y -= 1 # gleichbedeutend mit player_y = player_y - 1
+    elif p5.key == "s" and player_y < size - 1:
+        player_y += 1
+    elif p5.key == "a" and player_x > 0:
+        player_x -= 1
+    elif p5.key == "d" and player_x < size - 1:
+        player_x += 1
+    
+    p5.redraw()  # Aktualisiert die Zeichenfläche
+
+p5.run()
+```
+
+...und wenn du noch eine Kollisionserkennung einfügst, dann bist du schon nah an einem eigenen Spiel:
+
+```python
+import p5
+
+# Spielfigur-Koordinaten (startet oben links)
+player_x = 0
+player_y = 0
+size = 8  # Schachbrettgröße
+square_size = 50  # Pixelgröße pro Quadrat (200 / 8 = 25)
+coin_collected = False
+
+def setup():
+    global square_size
+    p5.createCanvas(400, 400)
+    p5.noLoop()  # Zeichen nur bei Update
+    square_size = p5.width / size
+
+def draw():
+    global player_x, player_y, coin_collected
+    p5.background(200)  # neutraler Hintergrund
+    
+    # Schachbrett zeichnen
+    for row in range(size):
+        for col in range(size):
+            if (row + col) % 2 == 0:
+                p5.fill(255)  # weiß
+            else:
+                p5.fill(0)    # schwarz
+            p5.rect(col * square_size, row * square_size, square_size, square_size)
+    
+    # Spielfigur zeichnen (Kreis)
+    p5.fill(255, 0, 0)  # rot
+    p5.ellipse(player_x * square_size + square_size / 2,
+               player_y * square_size + square_size / 2,
+               square_size * 0.8, square_size * 0.8)
+    if not coin_collected:
+            p5.fill(255, 255, 0)  
+            p5.ellipse(3 * square_size + square_size / 2,
+               2 * square_size + square_size / 2,
+               square_size * 0.8, square_size * 0.8)
+        
+
+def keyPressed():
+    global player_x, player_y, coin_collected
+    
+    if p5.key == "w" and player_y > 0:
+        player_y -= 1
+    elif p5.key == "s" and player_y < size - 1:
+        player_y += 1
+    elif p5.key == "a" and player_x > 0:
+        player_x -= 1
+    elif p5.key == "d" and player_x < size - 1:
+        player_x += 1
+    
+    if player_x == 3 and player_y ==2:
+        coin_collected = True
+    p5.redraw()  # Aktualisiert die Zeichenfläche
+
+p5.run()
+```

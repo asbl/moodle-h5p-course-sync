@@ -1,0 +1,28 @@
+Funktionen kannst in Turtle-Grafik benutzen um einzelne 
+Teilbefehle auszulagern.
+
+z.B:
+
+```python
+import turtle
+
+def move_to(x, y):
+    turtle.penup()
+    turtle.goto(x, y)
+    turtle.pendown()
+    
+def quadrat(a):
+    for _ in range(4):
+        turtle.forward(a)
+        turtle.right(90)
+
+move_to(50,50)
+quadrat(10)
+```
+
+!!! info Was passiert hier?
+* Die Funktion **move_to** bewegt die Turtle an eine beliebige Stelle des Bildschirms
+  ohne dabei zu zeichnen.
+
+* Die Funktion **quadrat** erlaubt es, ein Quadrat von beliebiger Größe zu zeichnen.
+!!!

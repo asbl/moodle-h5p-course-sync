@@ -1,0 +1,112 @@
+Jetzt wendest du alle Konzepte an: Objekte erzeugen, Attribute setzen,
+Methoden aufrufen und `self` in Ereignisfunktionen nutzen.
+
+### Eine Szene aufbauen
+
+In miniworlds ist die Welt selbst ein Objekt. Alles, was du darin platzierst,
+ist ebenfalls ein Objekt:
+
+```python
+import miniworlds
+
+world = miniworlds.World(460, 300)
+world.add_background((220, 232, 248))
+
+sonne = miniworlds.Circle((390, 60), 38)
+sonne.color = (255, 215, 50)
+
+boden = miniworlds.Rectangle((0, 255), 460, 45)
+boden.color = (100, 175, 100)
+
+turm = miniworlds.Rectangle((180, 150), 100, 105)
+turm.color = (160, 115, 80)
+
+tor = miniworlds.Rectangle((210, 210), 40, 45)
+tor.color = (80, 60, 45)
+
+world.run()
+```
+
+Jedes Element – Sonne, Boden, Turm, Tor – ist eine eigene Instanz einer
+Klasse. Jede hat ihre eigene Position, Farbe und Größe.
+
+### Objekte mit Tasteneingaben steuern
+
+Wenn eine Figur auf Tasten reagieren soll, verwendest du `@figur.register`
+mit `self`:
+
+```python
+import miniworlds
+
+world = miniworlds.World(460, 300)
+world.add_background((225, 238, 250))
+
+figur = miniworlds.Actor((80, 150))
+figur.color = (60, 130, 220)
+figur.size = (38, 38)
+
+ziel = miniworlds.Circle((380, 150), 22)
+ziel.color = (255, 180, 40)
+
+@figur.register
+def on_key_down_right(self):
+    self.x = self.x + 15
+
+@figur.register
+def on_key_down_left(self):
+    self.x = self.x - 15
+
+@figur.register
+def on_key_down_up(self):
+    self.y = self.y - 15
+
+@figur.register
+def on_key_down_down(self):
+    self.y = self.y + 15
+
+world.run()
+```
+
+`self.x` und `self.y` sind Attribute des `figur`-Objekts. Im Handler greifst
+du über `self` darauf zu und änderst sie – das Objekt bewegt sich.
+
+### Zustand anzeigen
+
+Mit einem Text-Objekt kannst du den Zustand eines Objekts sichtbar machen:
+
+```python
+import miniworlds
+
+world = miniworlds.World(460, 300)
+world.add_background((225, 238, 252))
+
+figur = miniworlds.Actor((230, 150))
+figur.color = (60, 130, 220)
+figur.size = (36, 36)
+
+anzeige = miniworlds.Text((10, 10), "")
+anzeige.font_size = 18
+anzeige.color = (20, 30, 55)
+
+@figur.register
+def on_key_down_right(self):
+    self.x = self.x + 18
+    anzeige.text = f"x={self.x}  y={self.y}"
+
+@figur.register
+def on_key_down_left(self):
+    self.x = self.x - 18
+    anzeige.text = f"x={self.x}  y={self.y}"
+
+world.run()
+```
+
+### Aufgabe
+
+Erweitere das letzte Beispiel:
+
+- Füge Pfeil-oben und Pfeil-unten als weitere Handler hinzu
+- Ändere die Farbe der Figur, wenn `self.x` einen bestimmten Wert überschreitet
+  (zum Beispiel rot, wenn die Figur den rechten Rand erreicht)
+- Füge ein zweites Objekt hinzu, das die Figur "verfolgt" – es bewegt sich
+  immer ein kleines Stück in Richtung Figur

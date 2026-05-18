@@ -31,6 +31,7 @@ class QuestionSet(H5PContentType):
     h5p_metadata: dict[str, object] | None = None
     h5p_content: dict[str, object] | None = None
     source_package_path: str = ""
+    h5p_subdir: str = ""
     course_dir: Path | None = None
     course_slug: str = ""
 
@@ -50,6 +51,7 @@ class QuestionSet(H5PContentType):
             h5p_metadata=getattr(block, "h5p_metadata", None),
             h5p_content=getattr(block, "h5p_content", None),
             source_package_path=getattr(block, "source_package_path", ""),
+            h5p_subdir=getattr(block, "h5p_subdir", ""),
             course_dir=getattr(block, "course_dir", None),
             course_slug=getattr(block, "course_slug", ""),
         )

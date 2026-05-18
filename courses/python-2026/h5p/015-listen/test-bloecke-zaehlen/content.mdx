@@ -1,0 +1,62 @@
+<Instructions>
+In einer Liste stehen die Blöcke, die beim Graben gefunden wurden.
+
+Ergänze die Funktion `zaehle_diamanten(bloecke)`. Sie soll für jede übergebene
+Liste zurückgeben, wie oft `"Diamant"` darin vorkommt.
+
+| Block | Aktion |
+| --- | --- |
+| `"Stein"` | nicht zählen |
+| `"Diamant"` | `anzahl` um `1` erhöhen |
+| `"Erde"` | nicht zählen |
+| `"Diamant"` | `anzahl` um `1` erhöhen |
+
+Die Testfälle stehen unter der Aufgabe. Jeder Testfall übergibt eine eigene
+Blockliste.
+</Instructions>
+
+```python editor:startingCode
+def zaehle_diamanten(bloecke):
+    anzahl = 0
+    # Ergänze die Schleife.
+    return anzahl
+```
+
+```python editor:postCode
+bloecke = input().split()
+print(zaehle_diamanten(bloecke))
+```
+
+```python grading:targetCode
+def zaehle_diamanten(bloecke):
+    anzahl = 0
+    for block in bloecke:
+        if block == "Diamant":
+            anzahl = anzahl + 1
+    return anzahl
+```
+
+```yaml grading
+gradingMethod: ioTestCases
+testCases:
+- hidden: false
+  inputs:
+  - Stein Diamant Erde Diamant
+  outputs:
+  - '2'
+- hidden: false
+  inputs:
+  - Diamant Diamant Gold
+  outputs:
+  - '2'
+- hidden: false
+  inputs:
+  - Erde Stein Kohle
+  outputs:
+  - '0'
+- hidden: true
+  inputs:
+  - ''
+  outputs:
+  - '0'
+```

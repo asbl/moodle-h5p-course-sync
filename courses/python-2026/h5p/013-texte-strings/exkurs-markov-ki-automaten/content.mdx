@@ -1,65 +1,94 @@
 Strings wirken erst einmal wie einfache Texte. Wenn ein Programm aber aus
-vielen Texten Muster lernt, entsteht schon eine sehr kleine Vorform von
-Sprach-KI. Der wichtige Schritt ist: Das Programm speichert nicht nur den Text
-selbst, sondern Beziehungen zwischen Textteilen.
+vielen Texten Muster lernt, entsteht eine kleine Vorform von Sprach-KI.
+Der entscheidende Schritt: Das Programm merkt sich nicht nur den Text,
+sondern Beziehungen zwischen Textteilen.
 
-Eine einfache Idee dafür heißt **Markov-Kette**:
+Diese Idee heißt **Markov-Kette**:
 
-> Der nächste Zustand hängt nur davon ab, wo man gerade ist.
-
-Bei Texten kann ein Zustand zum Beispiel ein Wort sein. Das Programm merkt
-sich: Nach `"die"` kam oft `"tuer"`, `"karte"` oder `"laterne"`. Danach kann
-es selbst neue kurze Texte würfeln.
-
-!!! note Mini-Idee
-Eine Markov-Kette versteht die Bedeutung der Wörter nicht. Sie arbeitet mit
-Mustern: Was kam nach welchem Wort besonders häufig vor?
+!!! hint Grundidee
+ Der nächste Zustand hängt nur davon ab, wo man gerade ist.
 !!!
 
-### Endlicher Automat als Bild
+Wir bauen das Schritt für Schritt auf – von zwei Zuständen bis zu einem
+echten Wort-Generator.
 
-Ein **endlicher Automat** besteht aus Zuständen und Übergängen. Er hat nur
-endlich viele Möglichkeiten, wo er gerade sein kann. Später in der
-theoretischen Informatik wird das noch wichtig.
+### Schritt 1: Zwei Zustände – die kleinste Kette
 
-![Bild](images/endlicher-automat.png)
+Die kleinste mögliche Markov-Kette hat zwei Zustände. Wir speichern für jeden
+Zustand eine Liste mit möglichen nächsten Zuständen und wählen zufällig einen
+davon:
 
-### Markov-Kette als Automat
+```python
+from random import choice
 
-Bei einer Markov-Kette stehen an den Pfeilen Wahrscheinlichkeiten. Hier ist
-ein winziges Wettermodell:
+uebergaenge = {
+    "Sonne": ["Sonne", "Sonne", "Regen"],
+    "Regen": ["Regen", "Regen", "Sonne"],
+}
+
+zustand = "Sonne"
+reihe = [zustand]
+
+for _ in range(7):
+    zustand = choice(uebergaenge[zustand])
+    reihe.append(zustand)
+
+print(" -> ".join(reihe))
+```
+
+!!! note Wahrscheinlichkeiten ohne Mathe
+Wenn ein Zustand mehrfach in der Liste steht, wird er öfter gewählt.
+`"Sonne"` steht zweimal in der Sonne-Liste – also bleibt es meistens
+sonnig, bevor es irgendwann zu Regen wechselt.
+!!!
+
+Ändere den `seed`-Wert oder den Startzustand und schau, was sich ändert.
+
+### Schritt 2: Drei Zustände – Wetter
+
+Jetzt kommt ein dritter Zustand dazu. Regen neigt dazu, sich selbst zu
+verstärken:
+
+```python
+from random import choice, seed
+
+seed(3)
+
+uebergaenge = {
+    "Sonne":  ["Sonne", "Sonne", "Wolken"],
+    "Wolken": ["Sonne", "Wolken", "Regen"],
+    "Regen":  ["Wolken", "Regen", "Regen"],
+}
+
+zustand = "Sonne"
+reihe = [zustand]
+
+for _ in range(8):
+    zustand = choice(uebergaenge[zustand])
+    reihe.append(zustand)
+
+print(" -> ".join(reihe))
+```
+
+Das ist genau das Bild einer Markov-Kette als Automat:
 
 ![Bild](images/markov-kette.png)
 
-```python noeditor
-Zustand jetzt  -> mögliche nächste Zustände
-Sonne          -> Sonne oder Wolken
-Wolken         -> Sonne, Wolken oder Regen
-Regen          -> Sonne, Wolken oder Regen
-```
+An jedem Pfeil steht implizit eine Wahrscheinlichkeit – je öfter ein Zustand
+in der Liste steht, desto häufiger wird dieser Pfeil gewählt.
 
-### Mini-Markov-Generator
+Probiere aus: Was passiert, wenn du mit `"Regen"` startest?
 
-Der folgende Code lernt aus kurzen Trainingssätzen, welches Wort nach welchem
-Wort kommen darf. Das ist noch keine moderne KI, aber die Grundidee ist
-verwandt: Ein Modell wird aus Beispielen gebaut und erzeugt danach etwas
-Neues.
+### Schritt 3: Übergänge automatisch lernen
 
-Wir gehen dabei in zwei klaren Schritten vor:
+Statt die Übergänge selbst einzutippen, lässt du das Programm sie aus
+echten Sätzen lernen. Zuerst nur zwei Sätze – schau, was das Programm daraus
+baut:
 
-1. Aus den Beispielsätzen eine Nachfolger-Liste bauen.
-2. Beim Schreiben immer ein mögliches nächstes Wort auswählen.
-
-```python noeditor
-from random import choice, seed
-
-seed(7)
-
+```python
 saetze = [
-    "die karte zeigt den turm",
-    "die karte zeigt den hof",
-    "der schluessel oeffnet den turm",
-    "der schluessel liegt im hof",
+    "Die Karte zeigt den Turm",
+    "Die Karte zeigt den Hof",
 ]
 
 uebergaenge = {}
@@ -67,20 +96,55 @@ uebergaenge = {}
 for satz in saetze:
     woerter = satz.split()
     for i in range(len(woerter) - 1):
-        aktuelles_wort = woerter[i]
-        naechstes_wort = woerter[i + 1]
+        w = woerter[i]
+        naechstes = woerter[i + 1]
+        if w not in uebergaenge:
+            uebergaenge[w] = []
+        uebergaenge[w].append(naechstes)
 
-        if aktuelles_wort not in uebergaenge:
-            uebergaenge[aktuelles_wort] = []
+for wort, folgewort in uebergaenge.items():
+    print(f"{wort!} -> {folgewort}")
+```
 
-        uebergaenge[aktuelles_wort].append(naechstes_wort)
+Die Ausgabe zeigt das gelernte Dictionary: Nach `"zeigt"` kommt immer `"den"`,
+nach `"den"` kommen `"turm"` oder `"hof"`.
+
+Füge einen dritten Satz hinzu und beobachte, wie sich die Listen verändern.
+
+### Schritt 4: Ersten Text erzeugen
+
+Mit vier Trainingssätzen hat das Modell mehr Auswahl. Jetzt erzeugen wir
+daraus einen neuen Satz:
+
+```python
+from random import choice, seed
+
+seed(7)
+
+saetze = [
+    "Die Karte zeigt den Turm",
+    "Die Karte zeigt den Hof",
+    "Der Schlüssel öffnet den Turm",
+    "Der Schlüssel liegt im Hof",
+]
+
+uebergaenge = {}
+
+for satz in saetze:
+    woerter = satz.split()
+    for i in range(len(woerter) - 1):
+        w = woerter[i]
+        naechstes = woerter[i + 1]
+        if w not in uebergaenge:
+            uebergaenge[w] = []
+        uebergaenge[w].append(naechstes)
 
 wort = "die"
 ausgabe = [wort]
 
-for i in range(5):
+for _ in range(6):
     moeglichkeiten = uebergaenge.get(wort, [])
-    if len(moeglichkeiten) == 0:
+    if not moeglichkeiten:
         break
     wort = choice(moeglichkeiten)
     ausgabe.append(wort)
@@ -88,46 +152,63 @@ for i in range(5):
 print(" ".join(ausgabe))
 ```
 
-!!! note Was wird gelernt?
-Im Dictionary `uebergaenge` steht am Ende für jedes Wort eine Liste möglicher
-Nachfolger. Beim Erzeugen wird aus dieser Liste zufällig ein nächstes Wort
-ausgewählt.
-!!!
+Das Wort `"den"` kann zu `"turm"` oder `"hof"` führen – der Generator
+würfelt bei jeder Wiederholung anders.
 
-### Noch einfacher: Wetter ohne Matrizen
+### Schritt 5: Größere Kette, vielfältigere Texte
 
-Falls ihr noch keine Matrizen hattet, nutzt dieselbe Idee als Listen:
+Mehr Trainingssätze bedeuten mehr Abzweigungen. Mit acht Sätzen entstehen
+deutlich unterschiedlichere Ergebnisse je nach `seed`:
 
-- Der Schlüssel ist der aktuelle Zustand.
-- Die Liste enthält mögliche nächste Zustände.
-- Häufige Zustände dürfen mehrfach in der Liste stehen.
-
-```python noeditor
+```python
 from random import choice, seed
 
-seed(3)
+seed(1)
 
-uebergaenge = {
-    "Sonne": ["Sonne", "Sonne", "Wolken"],
-    "Wolken": ["Sonne", "Wolken", "Regen"],
-    "Regen": ["Wolken", "Regen", "Regen"],
-}
+saetze = [
+    "Die Karte zeigt den Turm",
+    "Die Karte zeigt den Hof",
+    "Die Laterne beleuchtet den Turm",
+    "Der Schlüssel öffnet den Turm",
+    "Der Schlüssel liegt im Hof",
+    "Der Turm bewacht den Hof",
+    "Die Wache traegt den Schlüssel",
+    "Die Wache öffnet die Karte",
+]
 
-zustand = "Sonne"
-reihe = [zustand]
+uebergaenge = {}
 
-for i in range(6):
-    zustand = choice(uebergaenge[zustand])
-    reihe.append(zustand)
+for satz in saetze:
+    woerter = satz.split()
+    for i in range(len(woerter) - 1):
+        w = woerter[i]
+        naechstes = woerter[i + 1]
+        if w not in uebergaenge:
+            uebergaenge[w] = []
+        uebergaenge[w].append(naechstes)
 
-print(" -> ".join(reihe))
+wort = "die"
+ausgabe = [wort]
+
+for _ in range(9):
+    moeglichkeiten = uebergaenge.get(wort, [])
+    if not moeglichkeiten:
+        break
+    wort = choice(moeglichkeiten)
+    ausgabe.append(wort)
+
+print(" ".join(ausgabe))
 ```
 
-So bekommt ihr das Markov-Prinzip ohne neue Mathematik:
+Ändere `seed(1)` auf `seed(2)`, `seed(3)` usw. und beobachte, welche
+verschiedenen Sätze entstehen. Oder wechsle den Startwort von `"die"` zu
+`"der"`.
 
-1. Aktuellen Zustand ansehen.
-2. Eine erlaubte Folgemöglichkeit wählen.
-3. Wiederholen.
+!!! note Was ist der Unterschied zu echter KI?
+Echte Sprachmodelle arbeiten mit Milliarden von Texten und merken sich nicht
+nur das letzte Wort, sondern viele Wörter als Kontext. Das Grundprinzip –
+Übergänge aus Beispielen lernen, dann Neues erzeugen – ist aber ähnlich.
 
-Später kann man dieselbe Idee auch mit Tabellen oder Matrizen schreiben. Für
-jetzt reicht diese Listen-Version vollkommen.
+Eine Markov-Kette versteht die Bedeutung nicht, sie würfelt nach gelernten
+Mustern.
+!!!

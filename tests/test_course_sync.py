@@ -112,10 +112,99 @@ print("quadrat")
         first_question = questions[0]
         second_question = questions[1]
         self.assertEqual(first_question.identifier, "12eck")
-        self.assertEqual(first_question.packages, ["miniworlds"])
+        self.assertEqual(first_question.packages, ["miniworlds", "sqlite3"])
         self.assertEqual(second_question.identifier, "quadrat")
         self.assertIn("[[[PYTHON_QUESTION:12eck]]]", rendered_source)
         self.assertIn("[[[PYTHON_QUESTION:quadrat]]]", rendered_source)
+
+    def test_parse_course_defaults_plain_python_questions_to_skulpt(self) -> None:
+        (self.course_dir / "index.mdx").write_text(
+            """# Python Kurs
+
+<PythonQuestion
+  identifier="text-test"
+  title="Text"
+/>
+
+```python question:text-test starter
+print("bereit")
+```
+""",
+            encoding="utf-8",
+        )
+
+        _, questions, _ = parse_course(self.course_dir)
+
+        self.assertEqual(questions[0].runner, "skulpt")
+
+    def test_parse_course_defaults_miniworlds_questions_to_pyodide(self) -> None:
+        (self.course_dir / "index.mdx").write_text(
+            """# Python Kurs
+
+<PythonQuestion
+  identifier="welt"
+  title="Welt"
+  packages="miniworlds"
+/>
+
+```python question:welt starter
+import miniworlds
+```
+""",
+            encoding="utf-8",
+        )
+
+        _, questions, _ = parse_course(self.course_dir)
+
+        self.assertEqual(questions[0].runner, "pyodide")
+
+    def test_parse_course_rejects_turtle_question_with_pyodide(self) -> None:
+        (self.course_dir / "index.mdx").write_text(
+            """# Python Kurs
+
+<PythonQuestion
+  identifier="turtle-test"
+  title="Turtle"
+  runner="pyodide"
+/>
+
+```python question:turtle-test starter
+import turtle
+turtle.forward(50)
+```
+""",
+            encoding="utf-8",
+        )
+
+        with self.assertRaisesRegex(ValueError, "pythonRunner: skulpt"):
+            parse_course(self.course_dir)
+
+    def test_parse_course_expands_chapter_files_and_sets_h5p_subdir(self) -> None:
+        chapters_dir = self.course_dir / "chapters"
+        chapters_dir.mkdir()
+        (self.course_dir / "index.mdx").write_text(
+            '# Python Kurs\n\n<Chapter src="./chapters/010-einfuehrung.mdx" title="Einführung" />\n',
+            encoding="utf-8",
+        )
+        (chapters_dir / "010-einfuehrung.mdx").write_text(
+            """## Einführung
+
+<PythonQuestion
+  identifier="intro"
+  title="Intro"
+  instructions="Los gehts."
+/>
+""",
+            encoding="utf-8",
+        )
+
+        _, questions, rendered_source = parse_course(self.course_dir)
+
+        self.assertEqual(len(questions), 1)
+        self.assertEqual(questions[0].identifier, "intro")
+        self.assertEqual(questions[0].h5p_subdir, "010-einfuehrung")
+        self.assertEqual(questions[0].package_path, self.course_dir / "build" / "h5p" / "010-einfuehrung" / "intro.h5p")
+        self.assertIn("[[[PYTHON_QUESTION:intro]]]", rendered_source)
 
     def test_parse_course_rejects_duplicate_identifiers(self) -> None:
         (self.course_dir / "index.mdx").write_text(
@@ -138,6 +227,8 @@ print("quadrat")
         self.assertEqual(payload["editorSettings"]["startingCode"].splitlines()[0], "import miniworlds")
         self.assertEqual(payload["gradingSettings"]["gradingMethod"], "ioTestCases")
         self.assertEqual(payload["gradingSettings"]["testCases"][0]["outputs"][0]["output"], "fertig")
+        self.assertEqual(payload["editorSettings"]["options"]["enableImageUploads"], True)
+        self.assertEqual(payload["editorSettings"]["options"]["allowAddingFiles"], True)
 
     def test_render_course_page_embeds_preview_link(self) -> None:
         html = render_course_page(self.course_dir)
@@ -149,11 +240,14 @@ print("quadrat")
         self.assertNotIn('PythonQuestion', html)
         self.assertNotIn('Vorschau und Bearbeitung nur auf Klick', html)
         self.assertIn('data-open-modal="true"', html)
+        self.assertIn('class="question-toolbar question-row-button"', html)
+        self.assertIn('/preview-status/python-2026/12eck', html)
         self.assertIn('id="preview-modal"', html)
-        self.assertIn('>Öffnen<', html)
+        self.assertNotIn('>Öffnen<', html)
         self.assertNotIn('>Edit<', html)
-        self.assertIn('>Split View<', html)
-        self.assertIn('>Löschen<', html)
+        self.assertNotIn('>Split View<', html)
+        self.assertNotIn('>Löschen<', html)
+        self.assertNotIn('delete-runtime', html)
         self.assertNotIn('<details', html)
 
     def test_rewrite_runtime_html_rewrites_paths_and_hides_view_chrome(self) -> None:
@@ -180,6 +274,8 @@ print("quadrat")
         self.assertIn('.menu-holder', rewritten)
         self.assertIn('#sessions', rewritten)
         self.assertIn('.submenu', rewritten)
+        self.assertIn('a[href*="/split/"]', rewritten)
+        self.assertIn('a[href*="/remove/"]', rewritten)
         self.assertIn("getElementById('sessions')", rewritten)
 
     def test_rewrite_runtime_html_hides_edit_and_split_chrome(self) -> None:
@@ -232,7 +328,7 @@ print("quadrat")
             url="https://example.invalid/mod/h5pactivity/view.php?id=135",
         )
         metadata_payload = {
-            "title": "Test: Erste Ausgabe",
+            "title": "PythonQuestion",
             "mainLibrary": "H5P.PythonQuestion",
         }
         content_payload = {
@@ -281,9 +377,9 @@ print("quadrat")
         )
 
         assert question is not None
-        self.assertEqual(question.title, "Test: Erste Ausgabe")
+        self.assertEqual(question.title, "Test: Erste Aufgabe")
         self.assertEqual(question.runner, "skulpt")
-        self.assertEqual(question.packages, ["miniworlds"])
+        self.assertEqual(question.packages, ["miniworlds", "sqlite3"])
         self.assertEqual(question.instructions, "**Aufgabe:** Gebe Informatik aus.")
         self.assertEqual(question.pre_code, "import math")
         self.assertEqual(question.starter_code, 'print("Informatik")')
@@ -687,9 +783,10 @@ print("quadrat")
         sync_course(self.course_dir)
 
         self.assertTrue((self.course_dir / "h5p" / "test-zahlen-addieren" / "images" / "instructions.png").exists())
-        self.assertTrue((self.course_dir / "h5p" / "test-zahlen-addieren" / "content.yml").exists())
+        self.assertTrue((self.course_dir / "h5p" / "test-zahlen-addieren" / "content.mdx").exists())
+        self.assertTrue((self.course_dir / "h5p" / "test-zahlen-addieren" / "settings.yml").exists())
         self.assertFalse((self.course_dir / "h5p" / "test-zahlen-addieren" / "content.json").exists())
-        with ZipFile(self.course_dir / "h5p" / "test-zahlen-addieren.h5p") as archive:
+        with ZipFile(self.course_dir / "build" / "h5p" / "test-zahlen-addieren.h5p") as archive:
             self.assertIn("content/images/instructions.png", archive.namelist())
 
     def test_render_imported_question_mdx_uses_readable_strings(self) -> None:
@@ -787,7 +884,7 @@ print("quadrat")
             downloaded[0][0],
             "https://example.invalid/pluginfile.php/165/mod_h5pactivity/package/0/quiz-division.h5p",
         )
-        self.assertEqual(package_path, self.course_dir / "h5p" / "quiz-division.h5p")
+        self.assertEqual(package_path, self.course_dir / "build" / "h5p" / "quiz-division.h5p")
         self.assertTrue(package_path.exists())
         with ZipFile(package_path) as archive:
             self.assertEqual(json.loads(archive.read("h5p.json").decode("utf-8"))["title"], "Quiz Division")
@@ -856,7 +953,7 @@ print("quadrat")
             downloaded[0][0],
             "https://example.invalid/pluginfile.php/168/mod_h5pactivity/package/0/einfuhrung-farben-891.h5p",
         )
-        self.assertEqual(package_path, self.course_dir / "h5p" / "einfuehrung-farben.h5p")
+        self.assertEqual(package_path, self.course_dir / "build" / "h5p" / "einfuehrung-farben.h5p")
         self.assertTrue(package_path.exists())
         with ZipFile(package_path) as archive:
             self.assertEqual(json.loads(archive.read("h5p.json").decode("utf-8"))["title"], "Geänderte Farben")
@@ -871,6 +968,10 @@ print("quadrat")
         original_runtime_libraries_dir = module.H5P_RUNTIME_LIBRARIES_DIR
         original_ensure_runtime = module.ensure_h5p_runtime_libraries
         try:
+            (self.course_dir / "h5p" / "12eck.h5p").write_text("legacy-package", encoding="utf-8")
+            (self.course_dir / "h5p" / ".12eck.build-hash").write_text("legacy-hash", encoding="utf-8")
+            (self.course_dir / "h5p" / "orphaned-old-package.h5p").write_text("legacy-package", encoding="utf-8")
+            (self.course_dir / "h5p" / ".orphaned-old-package.build-hash").write_text("legacy-hash", encoding="utf-8")
             module.COURSES_DIR = self.root / "courses"
             module.H5P_RUNTIME_LIBRARIES_DIR = self.root / ".h5p-runtime" / "libraries"
             module.ensure_h5p_runtime_libraries = lambda: None
@@ -1242,6 +1343,299 @@ print("quadrat")
             else:
                 os.environ["MOODLE_TOKEN"] = original_token
 
+    def test_upload_moodle_chapter_prefers_course_specific_dotenv_values(self) -> None:
+        from scripts import main as module
+
+        dotenv_path = self.root / ".env"
+        dotenv_path.write_text(
+            "\n".join(
+                [
+                    "MOODLE_COURSE_URL=https://global.example/course/view.php?id=1",
+                    "MOODLE_USERNAME=global-user",
+                    "MOODLE_PASSWORD=global-pass",
+                    "MOODLE_PYTHON_2026_COURSE_URL=https://course.example/course/view.php?id=5",
+                    "MOODLE_PYTHON_2026_USERNAME=course-user",
+                    "MOODLE_PYTHON_2026_PASSWORD=course-pass",
+                ]
+            ),
+            encoding="utf-8",
+        )
+
+        captured: dict[str, object] = {}
+
+        class FakeUploader:
+            def __init__(self, **kwargs: object) -> None:
+                captured.update(kwargs)
+
+            def upload_packages(self, packages: object) -> list[object]:
+                captured["packages"] = packages
+                return []
+
+        original_dotenv_file = module.DOTENV_FILE
+        original_sync_course = module.sync_course
+        original_collect = module.collect_h5p_upload_packages
+        original_uploader = module.MoodlePlaywrightUploader
+        original_keys = {
+            key: os.environ.pop(key, None)
+            for key in [
+                "MOODLE_COURSE_URL",
+                "MOODLE_USERNAME",
+                "MOODLE_PASSWORD",
+                "MOODLE_PYTHON_2026_COURSE_URL",
+                "MOODLE_PYTHON_2026_USERNAME",
+                "MOODLE_PYTHON_2026_PASSWORD",
+            ]
+        }
+        try:
+            module.DOTENV_FILE = dotenv_path
+            module.sync_course = lambda _course_dir: []
+            module.collect_h5p_upload_packages = lambda _course_dir, _chapter: []
+            module.MoodlePlaywrightUploader = FakeUploader
+
+            module.upload_moodle_chapter(self.course_dir, "013-texte-strings")
+
+            self.assertEqual(captured["course_url"], "https://course.example/course/view.php?id=5")
+            self.assertEqual(captured["username"], "course-user")
+            self.assertEqual(captured["password"], "course-pass")
+        finally:
+            module.DOTENV_FILE = original_dotenv_file
+            module.sync_course = original_sync_course
+            module.collect_h5p_upload_packages = original_collect
+            module.MoodlePlaywrightUploader = original_uploader
+            for key, value in original_keys.items():
+                if value is None:
+                    os.environ.pop(key, None)
+                else:
+                    os.environ[key] = value
+
+    def test_upload_moodle_chapter_prefers_named_target_dotenv_values(self) -> None:
+        from scripts import main as module
+
+        dotenv_path = self.root / ".env"
+        dotenv_path.write_text(
+            "\n".join(
+                [
+                    "MOODLE_PYTHON_2026_COURSE_URL=https://primary.example/course/view.php?id=5",
+                    "MOODLE_PYTHON_2026_USERNAME=primary-user",
+                    "MOODLE_PYTHON_2026_PASSWORD=primary-pass",
+                    "MOODLE_PYTHON_2026_SECOND_COURSE_URL=https://second.example/course/view.php?id=9",
+                    "MOODLE_PYTHON_2026_SECOND_USERNAME=second-user",
+                    "MOODLE_PYTHON_2026_SECOND_PASSWORD=second-pass",
+                ]
+            ),
+            encoding="utf-8",
+        )
+
+        captured: dict[str, object] = {}
+
+        class FakeUploader:
+            def __init__(self, **kwargs: object) -> None:
+                captured.update(kwargs)
+
+            def upload_packages(self, packages: object) -> list[object]:
+                captured["packages"] = packages
+                return []
+
+        original_dotenv_file = module.DOTENV_FILE
+        original_sync_course = module.sync_course
+        original_collect = module.collect_h5p_upload_packages
+        original_uploader = module.MoodlePlaywrightUploader
+        original_store = module._store_uploaded_activity_ids
+        store_calls: list[object] = []
+        original_keys = {
+            key: os.environ.pop(key, None)
+            for key in [
+                "MOODLE_PYTHON_2026_COURSE_URL",
+                "MOODLE_PYTHON_2026_USERNAME",
+                "MOODLE_PYTHON_2026_PASSWORD",
+                "MOODLE_PYTHON_2026_SECOND_COURSE_URL",
+                "MOODLE_PYTHON_2026_SECOND_USERNAME",
+                "MOODLE_PYTHON_2026_SECOND_PASSWORD",
+            ]
+        }
+        try:
+            module.DOTENV_FILE = dotenv_path
+            module.sync_course = lambda _course_dir: []
+            module.collect_h5p_upload_packages = lambda _course_dir, _chapter: []
+            module.MoodlePlaywrightUploader = FakeUploader
+            module._store_uploaded_activity_ids = lambda *args: store_calls.append(args)
+
+            module.upload_moodle_chapter(self.course_dir, "013-texte-strings", target="second")
+
+            self.assertEqual(captured["course_url"], "https://second.example/course/view.php?id=9")
+            self.assertEqual(captured["username"], "second-user")
+            self.assertEqual(captured["password"], "second-pass")
+            self.assertEqual(captured["storage_state"], self.course_dir / ".moodle-storage-state-second.json")
+            self.assertEqual(store_calls, [])
+        finally:
+            module.DOTENV_FILE = original_dotenv_file
+            module.sync_course = original_sync_course
+            module.collect_h5p_upload_packages = original_collect
+            module.MoodlePlaywrightUploader = original_uploader
+            module._store_uploaded_activity_ids = original_store
+            for key, value in original_keys.items():
+                if value is None:
+                    os.environ.pop(key, None)
+                else:
+                    os.environ[key] = value
+
+    def test_upload_moodle_chapter_reads_credentials_for_sso_target(self) -> None:
+        from scripts import main as module
+
+        (self.course_dir / ".moodle-target-2.yml").write_text("auth: sso\n", encoding="utf-8")
+        dotenv_path = self.root / ".env"
+        dotenv_path.write_text(
+            "\n".join(
+                [
+                    "MOODLE_PYTHON_2026_2_COURSE_URL=https://mo5235.schulportal.hessen.de/course/view.php?id=7845",
+                    "MOODLE_PYTHON_2026_2_USERNAME=sso-user",
+                    "MOODLE_PYTHON_2026_2_PASSWORD=sso-pass",
+                ]
+            ),
+            encoding="utf-8",
+        )
+
+        captured: dict[str, object] = {}
+
+        class FakeUploader:
+            def __init__(self, **kwargs: object) -> None:
+                captured.update(kwargs)
+
+            def upload_packages(self, packages: object) -> list[object]:
+                return []
+
+        original_dotenv_file = module.DOTENV_FILE
+        original_sync_course = module.sync_course
+        original_collect = module.collect_h5p_upload_packages
+        original_uploader = module.MoodlePlaywrightUploader
+        original_keys = {
+            key: os.environ.pop(key, None)
+            for key in [
+                "MOODLE_PYTHON_2026_2_COURSE_URL",
+                "MOODLE_PYTHON_2026_2_USERNAME",
+                "MOODLE_PYTHON_2026_2_PASSWORD",
+            ]
+        }
+        try:
+            module.DOTENV_FILE = dotenv_path
+            module.sync_course = lambda _course_dir: []
+            module.collect_h5p_upload_packages = lambda _course_dir, _chapter: []
+            module.MoodlePlaywrightUploader = FakeUploader
+
+            module.upload_moodle_chapter(self.course_dir, "013-texte-strings", target="2")
+
+            self.assertEqual(captured["course_url"], "https://mo5235.schulportal.hessen.de/course/view.php?id=7845")
+            self.assertEqual(captured["username"], "sso-user")
+            self.assertEqual(captured["password"], "sso-pass")
+        finally:
+            module.DOTENV_FILE = original_dotenv_file
+            module.sync_course = original_sync_course
+            module.collect_h5p_upload_packages = original_collect
+            module.MoodlePlaywrightUploader = original_uploader
+            for key, value in original_keys.items():
+                if value is None:
+                    os.environ.pop(key, None)
+                else:
+                    os.environ[key] = value
+
+    def test_upload_moodle_chapter_prefers_chapter_heading_for_section_title(self) -> None:
+        from scripts import main as module
+
+        (self.course_dir / "chapters").mkdir()
+        (self.course_dir / "chapters" / "013-texte-strings.mdx").write_text(
+            "## Texte (Strings)\n\n<PythonQuestion identifier=\"strings-grundlagen\" />\n",
+            encoding="utf-8",
+        )
+        (self.course_dir / "index.mdx").write_text(
+            '# Python Kurs\n\n<Chapter src="./chapters/013-texte-strings.mdx" title="Schleifen und Texte" />\n',
+            encoding="utf-8",
+        )
+
+        captured: dict[str, object] = {}
+
+        class FakeUploader:
+            def __init__(self, **kwargs: object) -> None:
+                captured.update(kwargs)
+
+            def upload_packages(self, packages: object) -> list[object]:
+                return []
+
+        original_sync_course = module.sync_course
+        original_collect = module.collect_h5p_upload_packages
+        original_uploader = module.MoodlePlaywrightUploader
+        try:
+            module.sync_course = lambda _course_dir: []
+            module.collect_h5p_upload_packages = lambda _course_dir, _chapter: []
+            module.MoodlePlaywrightUploader = FakeUploader
+
+            module.upload_moodle_chapter(
+                self.course_dir,
+                "013-texte-strings",
+                course_url="https://example.invalid/course/view.php?id=5",
+            )
+
+            self.assertEqual(captured["section_title"], "Texte (Strings)")
+        finally:
+            module.sync_course = original_sync_course
+            module.collect_h5p_upload_packages = original_collect
+            module.MoodlePlaywrightUploader = original_uploader
+
+    def test_load_existing_h5p_activity_ids_skips_ambiguous_titles(self) -> None:
+        from scripts import main as module
+
+        class FakeClient:
+            def list_course_h5p_activities(self, course_id: int):
+                self.course_id = course_id
+                return [
+                    type("Activity", (), {"activity_id": 197, "title": "Python Question"})(),
+                    type("Activity", (), {"activity_id": 198, "title": "Python Question"})(),
+                ]
+
+        original_resolve = module.resolve_moodle_client
+        try:
+            module.resolve_moodle_client = lambda: FakeClient()
+            packages = [
+                type("Pkg", (), {"identifier": "a", "title": "Python Question"})(),
+                type("Pkg", (), {"identifier": "b", "title": "Python Question"})(),
+            ]
+
+            result = module._load_existing_h5p_activity_ids_from_moodle(
+                self.course_dir,
+                "https://example.invalid/course/view.php?id=5",
+                packages,
+            )
+
+            self.assertEqual(result, {})
+        finally:
+            module.resolve_moodle_client = original_resolve
+
+    def test_load_existing_h5p_activity_ids_maps_unique_title(self) -> None:
+        from scripts import main as module
+
+        class FakeClient:
+            def list_course_h5p_activities(self, course_id: int):
+                self.course_id = course_id
+                return [
+                    type("Activity", (), {"activity_id": 241, "title": "Funktionen definieren"})(),
+                ]
+
+        original_resolve = module.resolve_moodle_client
+        try:
+            module.resolve_moodle_client = lambda: FakeClient()
+            packages = [
+                type("Pkg", (), {"identifier": "funktionen-definieren", "title": "Funktionen definieren"})(),
+            ]
+
+            result = module._load_existing_h5p_activity_ids_from_moodle(
+                self.course_dir,
+                "https://example.invalid/course/view.php?id=5",
+                packages,
+            )
+
+            self.assertEqual(result, {"funktionen-definieren": 241})
+        finally:
+            module.resolve_moodle_client = original_resolve
+
     def test_build_moodle_ping_report_detects_import_capability(self) -> None:
         class FakeMoodleClient:
             base_url = "https://example.invalid"
@@ -1303,7 +1697,8 @@ print("quadrat")
         shared_libraries_dir = self.root / "libraries"
         shared_libraries_dir.mkdir(parents=True, exist_ok=True)
 
-        archive_path = self.course_dir / "h5p" / "quiz-division.h5p"
+        archive_path = self.course_dir / "build" / "h5p" / "quiz-division.h5p"
+        archive_path.parent.mkdir(parents=True, exist_ok=True)
         archive_path.write_bytes(
             self._build_h5p_archive_bytes(
                 {"title": "Quiz", "mainLibrary": "H5P.MultiChoice"},
@@ -1342,6 +1737,71 @@ print("quadrat")
 
         self.assertEqual(library_dir.name, "H5P.MultiChoice-1.16")
         self.assertTrue((runtime_libraries_dir / "H5P.MultiChoice-1.16" / "library.json").exists())
+
+    def test_update_custom_libraries_from_github_downloads_latest_release_to_shared_and_runtime(self) -> None:
+        from scripts.classes import H5PLibraryManager
+
+        runtime_dir = self.root / ".h5p-runtime"
+        runtime_libraries_dir = runtime_dir / "libraries"
+        runtime_downloads_dir = runtime_dir / "downloads"
+        shared_libraries_dir = self.root / "libraries"
+        (shared_libraries_dir / "H5P.PythonQuestion-6.73").mkdir(parents=True)
+        (runtime_libraries_dir / "H5P.PythonQuestion-6.73").mkdir(parents=True)
+
+        archive_payload = self._build_h5p_archive_bytes(
+            {"title": "Question", "mainLibrary": "H5P.PythonQuestion"},
+            {},
+            libraries={
+                "H5P.PythonQuestion-6.74": {
+                    "machineName": "H5P.PythonQuestion",
+                    "majorVersion": 6,
+                    "minorVersion": 74,
+                    "title": "Python Question",
+                }
+            },
+        )
+        downloads = {"https://example.invalid/H5P.PythonQuestion-6.74.h5p": archive_payload}
+        fetched_urls: list[str] = []
+
+        manager = H5PLibraryManager(
+            workspace_lock=threading.RLock(),
+            runtime_dir=runtime_dir,
+            runtime_content_dir=runtime_dir / "content",
+            runtime_libraries_dir=runtime_libraries_dir,
+            runtime_downloads_dir=runtime_downloads_dir,
+            shared_libraries_dir=shared_libraries_dir,
+            courses_dir=self.root / "courses",
+            release_repo="owner/repo",
+            release_tag="old-tag",
+            asset_prefixes={"H5P.PythonQuestion": "H5P.PythonQuestion-6.73_"},
+            custom_short_names={"H5P.PythonQuestion": "h5p-python-question"},
+            ensure_directory=lambda path: path.mkdir(parents=True, exist_ok=True),
+            read_json=lambda path: json.loads(path.read_text(encoding="utf-8")),
+            read_json_or_default=lambda path, default: default if not path.exists() else json.loads(path.read_text(encoding="utf-8")),
+            write_json=lambda path, payload: path.write_text(json.dumps(payload), encoding="utf-8"),
+            fetch_json=lambda url: fetched_urls.append(url)
+            or {
+                "tag_name": "v6.74.0",
+                "assets": [
+                    {
+                        "name": "H5P.PythonQuestion-6.74_20260511.h5p",
+                        "browser_download_url": "https://example.invalid/H5P.PythonQuestion-6.74.h5p",
+                    }
+                ],
+            },
+            download_file=lambda url, destination: destination.write_bytes(downloads[url]),
+        )
+
+        updated = manager.update_custom_libraries_from_github()
+
+        self.assertEqual(fetched_urls, ["https://api.github.com/repos/owner/repo/releases/latest"])
+        self.assertEqual(updated[0]["asset"], "H5P.PythonQuestion-6.74_20260511.h5p")
+        self.assertFalse((shared_libraries_dir / "H5P.PythonQuestion-6.73").exists())
+        self.assertFalse((runtime_libraries_dir / "H5P.PythonQuestion-6.73").exists())
+        self.assertTrue((shared_libraries_dir / "H5P.PythonQuestion-6.74" / "library.json").exists())
+        self.assertTrue((runtime_libraries_dir / "H5P.PythonQuestion-6.74" / "library.json").exists())
+        registry = json.loads((runtime_dir / "libraryRegistry.json").read_text(encoding="utf-8"))
+        self.assertEqual(registry["H5P.PythonQuestion"]["shortName"], "h5p-python-question")
 
     def test_moodle_api_client_list_course_h5p_activities_filters_and_maps_fields(self) -> None:
         class StubMoodleApiClient(MoodleApiClient):
@@ -1391,6 +1851,52 @@ print("quadrat")
         self.assertEqual(activities[0].activity_id, 10)
         self.assertEqual(activities[0].instance_id, 20)
         self.assertEqual(activities[0].intro, "Intro")
+
+    def test_moodle_api_client_places_subsection_activities_at_parent_module_position(self) -> None:
+        class StubMoodleApiClient(MoodleApiClient):
+            def call(self, function_name: str, **params: object) -> object:
+                return [
+                    {
+                        "name": "Grundlagen",
+                        "section": 1,
+                        "modules": [
+                            {"modname": "h5pactivity", "id": 10, "instance": 20, "name": "Vorher"},
+                            {"modname": "subsection", "id": 11, "instance": 30, "name": "Erste Aufgaben"},
+                            {"modname": "h5pactivity", "id": 12, "instance": 22, "name": "Nachher"},
+                        ],
+                    },
+                    {
+                        "name": "Erste Aufgaben",
+                        "section": 8,
+                        "component": "mod_subsection",
+                        "itemid": 30,
+                        "modules": [
+                            {"modname": "h5pactivity", "id": 13, "instance": 23, "name": "Aufgabe 1"},
+                            {"modname": "h5pactivity", "id": 14, "instance": 24, "name": "Aufgabe 2"},
+                        ],
+                    },
+                ]
+
+        client = StubMoodleApiClient(
+            "https://example.invalid",
+            "token",
+            make_stable_identifier=lambda title, used: make_stable_identifier(title, used),
+            strip_html=lambda text: text,
+            fetch_text=lambda url: "",
+            extract_h5p_package_url_from_activity_html=lambda page_html: "",
+            download_file=lambda url, destination: None,
+            extract_h5p_package_from_course_backup=lambda base, activity, archive_path: False,
+            build_imported_question_from_h5p_package=lambda course_slug, activity, metadata, content: None,
+            write_source_package_sidecar=lambda question, archive_path: "",
+        )
+
+        activities = client.list_course_h5p_activities(5)
+
+        self.assertEqual([activity.title for activity in activities], ["Vorher", "Aufgabe 1", "Aufgabe 2", "Nachher"])
+        self.assertEqual(activities[1].section_title, "Grundlagen")
+        self.assertEqual(activities[1].subsection_title, "Erste Aufgaben")
+        self.assertEqual(activities[1].module_index, 1)
+        self.assertEqual(activities[1].submodule_index, 0)
 
     def test_moodle_api_client_get_site_info_rejects_non_object_payload(self) -> None:
         class StubMoodleApiClient(MoodleApiClient):
@@ -1463,11 +1969,13 @@ print("quadrat")
             module.COURSES_DIR = original_courses_dir
 
         mdx = (target_course_dir / "index.mdx").read_text(encoding="utf-8")
+        chapter_mdx = (target_course_dir / "chapters" / "001-grundlagen.mdx").read_text(encoding="utf-8")
         metadata = load_sync_metadata(target_course_dir)
 
-        self.assertIn('identifier="test-quadrat"', mdx)
-        self.assertIn('title="Test Quadrat"', mdx)
-        self.assertNotIn("previewUrl", mdx)
+        self.assertIn('<Chapter src="./chapters/001-grundlagen.mdx" title="Grundlagen" />', mdx)
+        self.assertIn('identifier="test-quadrat"', chapter_mdx)
+        self.assertIn('title="Test Quadrat"', chapter_mdx)
+        self.assertNotIn("previewUrl", chapter_mdx)
         self.assertIsNotNone(metadata)
         assert metadata is not None
         self.assertEqual(metadata.remote_course_id, 5)
@@ -1543,11 +2051,78 @@ print("quadrat")
         finally:
             module.COURSES_DIR = original_courses_dir
 
-        mdx = (target_course_dir / "index.mdx").read_text(encoding="utf-8")
+        index_mdx = (target_course_dir / "index.mdx").read_text(encoding="utf-8")
+        first_chapter_mdx = (target_course_dir / "chapters" / "001-sektion-1.mdx").read_text(encoding="utf-8")
+        second_chapter_mdx = (target_course_dir / "chapters" / "002-sektion-2.mdx").read_text(encoding="utf-8")
 
-        self.assertLess(mdx.index("## Sektion 1"), mdx.index("## Sektion 2"))
-        self.assertLess(mdx.index('identifier="s1-a"'), mdx.index('identifier="s2-a"'))
-        self.assertLess(mdx.index('identifier="s2-a"'), mdx.index('identifier="s2-b"'))
+        self.assertLess(index_mdx.index("001-sektion-1"), index_mdx.index("002-sektion-2"))
+        self.assertIn('identifier="s1-a"', first_chapter_mdx)
+        self.assertLess(second_chapter_mdx.index('identifier="s2-a"'), second_chapter_mdx.index('identifier="s2-b"'))
+
+    def test_import_moodle_course_renders_subsection_headings_in_remote_position(self) -> None:
+        class FakeMoodleClient:
+            base_url = "https://example.invalid"
+
+            def list_course_h5p_activities(self, course_id: int):
+                return [
+                    MoodleH5PActivity(
+                        identifier="after",
+                        title="Nachher",
+                        course_id=course_id,
+                        activity_id=12,
+                        instance_id=22,
+                        section_title="Grundlagen",
+                        section_index=1,
+                        module_index=2,
+                        intro="",
+                        url="https://example.invalid/mod/h5pactivity/view.php?id=12",
+                    ),
+                    MoodleH5PActivity(
+                        identifier="task-one",
+                        title="Aufgabe 1",
+                        course_id=course_id,
+                        activity_id=13,
+                        instance_id=23,
+                        section_title="Grundlagen",
+                        subsection_title="Erste Aufgaben",
+                        section_index=1,
+                        module_index=1,
+                        subsection_index=8,
+                        submodule_index=0,
+                        intro="",
+                        url="https://example.invalid/mod/h5pactivity/view.php?id=13",
+                    ),
+                    MoodleH5PActivity(
+                        identifier="before",
+                        title="Vorher",
+                        course_id=course_id,
+                        activity_id=10,
+                        instance_id=20,
+                        section_title="Grundlagen",
+                        section_index=1,
+                        module_index=0,
+                        intro="",
+                        url="https://example.invalid/mod/h5pactivity/view.php?id=10",
+                    ),
+                ]
+
+            def download_activity_question(self, course_slug: str, activity: object):
+                return None
+
+        from scripts import main as module
+
+        original_courses_dir = module.COURSES_DIR
+        try:
+            module.COURSES_DIR = self.root / "courses"
+            target_course_dir = import_moodle_course("imported-subsection-order", 5, FakeMoodleClient())
+        finally:
+            module.COURSES_DIR = original_courses_dir
+
+        mdx = (target_course_dir / "chapters" / "001-grundlagen.mdx").read_text(encoding="utf-8")
+
+        self.assertLess(mdx.index('identifier="before"'), mdx.index("### Erste Aufgaben"))
+        self.assertLess(mdx.index("### Erste Aufgaben"), mdx.index('identifier="task-one"'))
+        self.assertLess(mdx.index('identifier="task-one"'), mdx.index('identifier="after"'))
 
     def test_download_activity_question_persists_source_archive_for_public_packages(self) -> None:
         package_path = self.root / "public-package.h5p"
@@ -1696,12 +2271,20 @@ print("quadrat")
             module.ensure_h5p_runtime_libraries = original_ensure_runtime
 
         self.assertEqual([question.identifier for question in questions], ["12eck", "quadrat"])
-        archive = self.course_dir / "h5p" / "12eck.h5p"
-        content_yaml = self.course_dir / "h5p" / "12eck" / "content.yml"
-        second_archive = self.course_dir / "h5p" / "quadrat.h5p"
+        archive = self.course_dir / "build" / "h5p" / "12eck.h5p"
+        content_mdx = self.course_dir / "h5p" / "12eck" / "content.mdx"
+        build_hash = self.course_dir / "build" / "hashes" / "12eck.build-hash"
+        second_archive = self.course_dir / "build" / "h5p" / "quadrat.h5p"
         shared_libraries_dir = self.root / "libraries"
         self.assertTrue(archive.exists())
-        self.assertTrue(content_yaml.exists())
+        self.assertTrue(content_mdx.exists())
+        self.assertTrue(build_hash.exists())
+        self.assertFalse((self.course_dir / "h5p" / "12eck.h5p").exists())
+        self.assertFalse((self.course_dir / "h5p" / ".12eck.build-hash").exists())
+        self.assertFalse((self.course_dir / "h5p" / "orphaned-old-package.h5p").exists())
+        self.assertFalse((self.course_dir / "h5p" / ".orphaned-old-package.build-hash").exists())
+        self.assertFalse((self.course_dir / "h5p" / "12eck" / "12eck.h5p").exists())
+        self.assertFalse((self.course_dir / "h5p" / "12eck" / ".build-hash").exists())
         self.assertFalse((self.course_dir / "h5p" / "12eck" / "content.json").exists())
         self.assertTrue(second_archive.exists())
         self.assertTrue((shared_libraries_dir / "H5P.PythonQuestion-6.73").exists())
@@ -1711,7 +2294,8 @@ print("quadrat")
         self.assertFalse((self.course_dir / "h5p" / "libraries").exists())
         self.assertFalse((self.course_dir / "h5p" / "12eck" / "H5P.PythonQuestion-6.73").exists())
 
-        payload = yaml.safe_load(content_yaml.read_text(encoding="utf-8"))
+        settings_yaml = self.course_dir / "h5p" / "12eck" / "settings.yml"
+        payload = yaml.safe_load(settings_yaml.read_text(encoding="utf-8"))
         self.assertEqual(payload["pythonRunner"], "pyodide")
 
         metadata = json.loads((self.course_dir / "h5p" / "12eck" / "h5p.json").read_text(encoding="utf-8"))
@@ -1719,6 +2303,7 @@ print("quadrat")
 
         with ZipFile(archive) as package:
             package_names = set(package.namelist())
+        self.assertNotIn("12eck.h5p", package_names)
         self.assertIn("H5P.PythonQuestion-6.73/library.json", package_names)
         self.assertIn("H5P.CodeQuestion-6.73/library.json", package_names)
         self.assertIn("H5P.LibCodeTools-6.73/library.json", package_names)
@@ -1762,7 +2347,7 @@ print("quadrat")
             module.H5P_RUNTIME_LIBRARIES_DIR = original_runtime_libraries_dir
             module.ensure_h5p_runtime_libraries = original_ensure_runtime
 
-        archive = self.course_dir / "h5p" / "12eck.h5p"
+        archive = self.course_dir / "build" / "h5p" / "12eck.h5p"
         with ZipFile(archive) as package:
             package_names = package.namelist()
 

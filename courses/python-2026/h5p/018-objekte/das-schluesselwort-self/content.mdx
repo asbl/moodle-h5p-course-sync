@@ -1,0 +1,79 @@
+Wenn du eine Methode auf einem Objekt aufrufst, muss Python wissen: Welches
+Objekt ist gemeint? Mit dem Schlüsselwort **`self`** löst Python dieses Problem.
+
+Schau dir diesen Aufruf an:
+
+```python
+import turtle
+
+t1 = turtle.Turtle()
+t2 = turtle.Turtle()
+
+t1.forward(100)   # welche Schildkröte soll sich bewegen?
+```
+
+Python übersetzt `t1.forward(100)` intern so:
+
+```python noeditor
+t1.forward(100)
+│
+└── wird zu: Turtle.forward(t1, 100)
+                             ──
+                             t1 wird als "self" übergeben
+```
+
+Das Objekt links vom Punkt – hier `t1` – wird automatisch als erster
+Parameter `self` an die Methode weitergegeben. Deshalb bewegt sich `t1`
+und nicht `t2`: Weil `t1` als `self` übergeben wird.
+
+**`self` ist immer: das Objekt selbst, auf dem die Methode aufgerufen wird.**
+
+### self macht den Unterschied
+
+Zwei Schildkröten, zwei unabhängige Zustände – `self` sorgt dafür, dass
+jede Methode das richtige Objekt verändert:
+
+```python
+import turtle
+
+t1 = turtle.Turtle()
+t1.color("navy")
+
+t2 = turtle.Turtle()
+t2.color("firebrick")
+
+t1.forward(80)    # self = t1, bewegt nur t1
+t2.right(90)      # self = t2, dreht nur t2
+t2.forward(80)    # self = t2, bewegt nur t2
+
+print(t1.pencolor())   # "navy"
+print(t2.pencolor())   # "firebrick"
+```
+
+Obwohl `forward()` und `right()` dieselben Methoden der Klasse `Turtle` sind,
+wirken sie auf unterschiedliche Objekte – weil `self` beim Aufruf jeweils
+auf das aufgerufene Objekt zeigt.
+
+### self beim Attributzugriff
+
+Auch beim Lesen und Schreiben von Attributen steckt `self` dahinter:
+
+```python noeditor
+t1.pensize = 3
+│
+└── setzt das Attribut "pensize" von t1 (self = t1)
+
+t2.pensize
+│
+└── liest das Attribut "pensize" von t2 (self = t2)
+```
+
+Du musst `self` beim normalen Benutzen von Objekten nie selbst schreiben –
+Python übergibt es automatisch. Aber du wirst `self` bald als Parameter in
+Funktionen sehen, die zu Objekten gehören. Dann weißt du: `self` ist das
+Objekt, zu dem diese Funktion gehört.
+
+!!! note Merke
+`self` = das Objekt selbst, auf dem etwas aufgerufen wird. Python übergibt
+`self` automatisch – du siehst es beim normalen Benutzen nicht.
+!!!

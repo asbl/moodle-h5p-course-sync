@@ -1,0 +1,97 @@
+Man kann einer Variable einen Wert mit Hilfe des = Zeichens zuweisen.
+
+### Beispiel:
+
+```python
+a = 3
+```
+
+Dieser Code bedeutet: Weise der Variablen a den Wert 3 zu. 
+Du kannst dir das vorstellen wie eine Truhe oder Box, 
+in der genau ein Wert gespeichert werden kann (nicht mehr).
+
+Anschließend kannst du die Variable wie eine Zahl verwenden, z.B. so:
+
+```python
+a = 3
+print(a)
+```
+
+## Variablen benennen
+
+Du kannst Variablen (fast) beliebig  benennen. 
+Hier wurde der Variable der Name a gegeben, 
+b, c, d, x, y oder auch ganze Nahmen wie 
+z.B. meine_variable, ergebnis, ... sind erlaubt.
+
+In der Regel verwendet man in der Informatik
+(englische), sprechende Variablennamen, 
+damit der Code möglichst gut lesbar bleibt.
+
+!!! caution Achtung
+Nicht erlaubt sind **reservierte** Begriffe. 
+Du darfst deine Variable z.B. nicht **print** nennen.
+!!!
+
+!!! info Coding-Standards
+Jede Programmiersprache bringt außerdem ihre eigenen Coding-Standards mit. 
+
+In Python:
+  * Man schreibt Variablen klein 
+  * Wenn eine Variable aus mehreren Worten besteht, trennt man diese mit einem Unterstrich, z.B. neuer_wert, alter_wert. 
+  (man nennt dies Snake Case)
+
+## Was passiert beim Zuweisen von Variablen?
+
+Wenn du mit der Anweisung
+
+```python
+
+```
+
+python
+wird im Computer Speicherplatz für die Variable reserviert. 
+
+Bildlich gesprochen: Es wird ein Container geschaffen, 
+in den der Wert "hineinapasst". 
+
+Damit man diesen Container später "wiederfindet", 
+benötigt man den **Namen**. 
+
+Man kann also sagen: Beim Zuweisen von Variablen wird ein Speicherplatz im Computer 
+mit einem Namen vernknüpft.
+
+## Was bedeutet das = Zeichen?
+
+Variablen verwendet man beim Programmieren etwas anderes 
+als in der Mathematik. 
+
+Betrachte dazu das folgende Programm:
+
+```python
+
+python
+c = 3
+a = 1
+b = 5
+c = a + b
+print(c)
+```
+
+Die Zeile c = a + b bezeichnet keine Gleichung im mathematischen Sinne, man kann
+diese "nicht nach x umstellen" - sondern es handelt sich um eine **Zuweisung**. 
+
+Der Wert a + b wird in dem Variablencontainer c gespeichert. 
+
+
+
+Zuerst wird das Ergebnis aus a und b berechnet, anschließend wird das Ergebnis 
+wieder in a gespeichert.
+
+Beachte, dass im Beispiel oben der alte Wert 3 der Variablen c unwiderruflich verloren geht. 
+
+!!! caution Achtung!
+Jede Variable kann immer nur einen Wert speichern. Wird der Wert geändert, dann ist der alte Wert verloren, 
+wenn du ihn nicht an anderer Stelle gespeichert hast. Die entsprechenden Bits im Speicher wurden überschrieben 
+und der letzte Zustand kann nicht mehr rekonstruiert werden.
+!!!

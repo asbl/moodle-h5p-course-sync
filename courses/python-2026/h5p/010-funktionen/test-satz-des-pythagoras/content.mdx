@@ -1,0 +1,40 @@
+<Instructions>
+Folgendes Programm soll entwickelt werden:
+
+**Eingabe**: Die Längen der Seiten a und b eines rechtwinkligen Dreiecks. 
+
+**Ausgabe**: Die Länge der Seite c.
+
+
+Verwende folgende Funktionen:
+
+* `math.sqrt(x)` - Berechnet die Quadratwurzel der Zahl x.
+* `math.pow(x, y)` - Rechnet den Wert x hoch y. 
+*   Mit ```math.pow(a,2)``` kannst du z.B. das Quadrat der Zahl a berechnen.
+</Instructions>
+
+```python editor:startingCode
+a = float(input())
+b = float(input())
+# Gebe das Ergebnis mit print aus.
+```
+
+```yaml grading
+gradingMethod: ioTestCases
+testCases:
+- inputs:
+  - '3.0'
+  - '4.0'
+  outputs:
+  - '5.0'
+  hidden: false
+- inputs:
+  - '5.0'
+  - '12.0'
+  outputs:
+  - '13.0'
+  hidden: false
+dueDateGroup:
+  enableDueDate: true
+  duedate: '2026-05-05T21:59:00.000Z'
+```

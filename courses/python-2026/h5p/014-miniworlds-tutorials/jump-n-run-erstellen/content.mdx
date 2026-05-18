@@ -1,0 +1,188 @@
+# Ein Jump'n'Run erstellen
+
+Ein Jump'n'Run besteht aus drei Grundideen:
+
+* Der Spieler kann nach links und rechts laufen.
+* Die Schwerkraft zieht ihn nach unten.
+* Er darf nur springen, wenn er auf dem Boden steht.
+
+Wir bauen das Schritt für Schritt in einer normalen `World`.
+
+### Spieler und Boden
+
+```python
+import miniworlds
+
+world = miniworlds.World(640, 360)
+world.add_background((185, 220, 245))
+
+spieler = miniworlds.Actor((90, 250))
+spieler.size = (30, 40)
+spieler.color = (60, 120, 220)
+
+boden = miniworlds.Rectangle.from_topleft((0, 320), 640, 40)
+boden.color = (90, 150, 105)
+
+world.run()
+```
+
+### Plattformen als Liste
+
+Für Kollisionen ist es praktisch, alle Plattformen in einer Liste zu speichern.
+
+```python
+import miniworlds
+
+world = miniworlds.World(640, 360)
+world.add_background((185, 220, 245))
+
+spieler = miniworlds.Actor((90, 250))
+spieler.size = (30, 40)
+spieler.color = (60, 120, 220)
+
+plattformen = []
+
+def neue_plattform(x, y, breite, hoehe):
+    plattform = miniworlds.Rectangle.from_topleft((x, y), breite, hoehe)
+    plattform.color = (90, 150, 105)
+    plattformen.append(plattform)
+
+neue_plattform(0, 320, 640, 40)
+neue_plattform(220, 250, 120, 18)
+neue_plattform(420, 195, 120, 18)
+
+world.run()
+```
+
+### Kollisionen mit detect
+
+Miniworlds kann Actors erkennen. Mit `self.detect(...)` prüfst du, ob ein Actor
+einen anderen Actor berührt:
+
+```python
+if self.detect(plattform):
+    print("Plattform berührt")
+```
+
+Das nutzen wir gleich für den Boden und die Plattformen.
+
+### Fallen und landen
+
+Wir speichern die vertikale Geschwindigkeit in `spieler.vy`. Positive Werte
+bewegen den Spieler nach unten, negative Werte nach oben.
+
+```python
+import miniworlds
+
+world = miniworlds.World(640, 360)
+world.add_background((185, 220, 245))
+
+spieler = miniworlds.Actor((90, 250))
+spieler.size = (30, 40)
+spieler.color = (60, 120, 220)
+spieler.vy = 0
+spieler.am_boden = False
+
+plattformen = []
+
+def neue_plattform(x, y, breite, hoehe):
+    plattform = miniworlds.Rectangle.from_topleft((x, y), breite, hoehe)
+    plattform.color = (90, 150, 105)
+    plattformen.append(plattform)
+
+neue_plattform(0, 320, 640, 40)
+neue_plattform(220, 250, 120, 18)
+neue_plattform(420, 195, 120, 18)
+
+@spieler.register
+def act(self):
+    self.vy = self.vy + 1
+    self.y = self.y + self.vy
+    self.am_boden = False
+
+    for plattform in plattformen:
+        if self.detect(plattform) and self.vy >= 0:
+            self.y = plattform.y - self.height
+            self.vy = 0
+            self.am_boden = True
+
+world.run()
+```
+
+Der Spieler fällt nach unten. Sobald er eine Plattform von oben berührt, wird er
+auf die Plattform gesetzt.
+
+### Laufen und springen
+
+Jetzt kommen die Tasten dazu. Beim Sprung setzen wir `vy` auf einen negativen
+Wert. Das geht nur, wenn `am_boden` wahr ist.
+
+```python
+import miniworlds
+
+world = miniworlds.World(640, 360)
+world.add_background((185, 220, 245))
+
+spieler = miniworlds.Actor((90, 250))
+spieler.size = (30, 40)
+spieler.color = (60, 120, 220)
+spieler.vy = 0
+spieler.am_boden = False
+
+plattformen = []
+
+def neue_plattform(x, y, breite, hoehe):
+    plattform = miniworlds.Rectangle.from_topleft((x, y), breite, hoehe)
+    plattform.color = (90, 150, 105)
+    plattformen.append(plattform)
+
+neue_plattform(0, 320, 640, 40)
+neue_plattform(220, 250, 120, 18)
+neue_plattform(420, 195, 120, 18)
+
+ziel = miniworlds.Circle((505, 165), 15)
+ziel.color = (240, 190, 70)
+
+meldung = miniworlds.Text((20, 20), "Sammle den Stern!")
+meldung.font_size = 22
+meldung.color = (40, 45, 55)
+
+@spieler.register
+def act(self):
+    self.vy = self.vy + 1
+    if self.vy > 12:
+        self.vy = 12
+
+    self.y = self.y + self.vy
+    self.am_boden = False
+
+    for plattform in plattformen:
+        if self.detect(plattform) and self.vy >= 0:
+            self.y = plattform.y - self.height
+            self.vy = 0
+            self.am_boden = True
+
+    if self.detect(ziel):
+        meldung.text = "Geschafft!"
+
+@spieler.register
+def on_key_pressedright(self):
+    self.x = self.x + 6
+
+@spieler.register
+def on_key_pressed_left(self):
+    self.x = self.x - 6
+
+@spieler.register
+def on_key_down_space(self):
+    if self.am_boden:
+        self.vy = -15
+
+world.run()
+```
+
+!!! note Das Spielgefühl entsteht aus Zahlen
+`+1` ist die Stärke der Schwerkraft, `-15` ist die Sprungkraft und `6` ist die
+Laufgeschwindigkeit. Kleine Änderungen an diesen Zahlen verändern sofort, wie
+sich dein Jump'n'Run anfühlt.
+!!!

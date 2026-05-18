@@ -1,0 +1,32 @@
+Beim Vergleichen von Code geht es nicht nur darum, ob zwei Programme zufällig
+für ein Beispiel dasselbe ausgeben.
+
+```python
+def genug_holz_a(anzahl):
+    return anzahl >= 4
+
+
+def genug_holz_b(anzahl):
+    if anzahl > 4:
+        return True
+    else:
+        return False
+```
+
+Für `anzahl = 5` liefern beide Funktionen `True`. Für `anzahl = 4` unterscheiden
+sie sich.
+
+### Übung
+
+Vergleiche die beiden Funktionen für die Werte `0`, `1`, `2`, `3`.
+
+```python
+def darf_bauen_a(stein, holz):
+    return stein >= 2 and holz >= 1
+
+
+def darf_bauen_b(stein, holz):
+    return stein + holz >= 3
+```
+
+Formuliere danach in einem Satz, worin der Unterschied liegt.

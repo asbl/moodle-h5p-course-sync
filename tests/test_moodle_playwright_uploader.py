@@ -72,6 +72,78 @@ class MoodlePlaywrightUploaderTests(unittest.TestCase):
 
         self.assertEqual(points, 2)
 
+    def test_set_completion_tracking_sets_hidden_gradepass_without_fill_timeout(self) -> None:
+        class FakeLocator:
+            def __init__(self, *, visible: bool = True, checked: bool = False) -> None:
+                self.first = self
+                self.visible = visible
+                self.checked = checked
+                self.filled_values: list[str] = []
+                self.evaluated_values: list[str | None] = []
+                self.selected_values: list[str] = []
+
+            def count(self) -> int:
+                return 1
+
+            def is_visible(self) -> bool:
+                return self.visible
+
+            def fill(self, value: str) -> None:
+                if not self.visible:
+                    raise AssertionError("hidden locator must not be filled through Playwright")
+                self.filled_values.append(value)
+
+            def evaluate(self, script: str, value: str | None = None) -> None:
+                self.evaluated_values.append(value)
+
+            def select_option(self, *, value: str) -> None:
+                self.selected_values.append(value)
+
+            def is_checked(self) -> bool:
+                return self.checked
+
+            def check(self) -> None:
+                self.checked = True
+
+        class EmptyLocator:
+            first = None
+
+            def count(self) -> int:
+                return 0
+
+        class FakePage:
+            def __init__(self) -> None:
+                self.gradepass = FakeLocator(visible=False)
+                self.completion = FakeLocator()
+                self.grade_condition = FakeLocator(checked=False)
+                self.passgrade_condition = FakeLocator(visible=False, checked=False)
+                self.waits: list[int] = []
+
+            def locator(self, selector: str):  # type: ignore[no-untyped-def]
+                if "gradepass" in selector:
+                    return self.gradepass
+                if "completionusegrade" in selector:
+                    return self.grade_condition
+                if "completionpassgrade" in selector:
+                    return self.passgrade_condition
+                if 'select[name="completion"]' in selector:
+                    return self.completion
+                return EmptyLocator()
+
+            def wait_for_timeout(self, timeout: int) -> None:
+                self.waits.append(timeout)
+
+        page = FakePage()
+        uploader = MoodlePlaywrightUploader(course_url="https://example.invalid/course/view.php?id=7845")
+
+        uploader._set_completion_tracking(page, gradepass=1)
+
+        self.assertEqual(page.gradepass.filled_values, [])
+        self.assertEqual(page.gradepass.evaluated_values, ["1"])
+        self.assertEqual(page.completion.selected_values, ["2"])
+        self.assertTrue(page.grade_condition.checked)
+        self.assertEqual(page.passgrade_condition.evaluated_values, [None])
+
     def test_collect_h5p_upload_packages_uses_chapter_question_order(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:
             course_dir = Path(tmp_dir) / "python-2026"
@@ -140,6 +212,393 @@ class MoodlePlaywrightUploaderTests(unittest.TestCase):
             order = read_chapter_question_order(course_dir, "013-texte-strings")
 
         self.assertEqual(order, ["strings-grundlagen", "test-namensschild"])
+
+    def test_headless_login_if_needed_reports_external_sso_redirect(self) -> None:
+        class EmptyLocator:
+            def count(self) -> int:
+                return 0
+
+        class FakePage:
+            url = "https://login.schulportal.hessen.de/saml/singleSignOn?SAMLRequest=test"
+
+            def locator(self, selector: str):  # type: ignore[no-untyped-def]
+                return EmptyLocator()
+
+        uploader = MoodlePlaywrightUploader(
+            course_url="https://mo5235.schulportal.hessen.de/course/view.php?id=7845",
+            section_title="Listen",
+            headless=True,
+        )
+
+        with self.assertRaisesRegex(RuntimeError, "abgelaufener SSO-Storage-State.*singleSignOn"):
+            uploader._login_if_needed(FakePage())
+
+    def test_login_with_credentials_submits_schulportal_hessen_sso(self) -> None:
+        class FakeLocator:
+            def __init__(
+                self,
+                page,
+                name: str,
+                present: bool = True,
+                visible: bool = True,
+                enabled: bool = True,
+            ) -> None:  # type: ignore[no-untyped-def]
+                self.page = page
+                self.name = name
+                self.present = present
+                self.visible = visible
+                self.enabled = enabled
+                self.first = self
+
+            def count(self) -> int:
+                return 1 if self.present else 0
+
+            def nth(self, index: int):  # type: ignore[no-untyped-def]
+                return self
+
+            def is_visible(self) -> bool:
+                return self.visible
+
+            def is_enabled(self) -> bool:
+                return self.enabled
+
+            def fill(self, value: str) -> None:
+                self.page.filled[self.name] = value
+
+            def click(self) -> None:
+                self.page.clicks.append(self.name)
+                if self.name == "submit":
+                    self.page.url = self.page.course_url
+
+        class EmptyLocator:
+            first = None
+
+            def count(self) -> int:
+                return 0
+
+        class FakePage:
+            def __init__(self) -> None:
+                self.course_url = "https://mo5235.schulportal.hessen.de/course/view.php?id=7845"
+                self.url = "https://login.schulportal.hessen.de/saml/singleSignOn?SAMLRequest=test"
+                self.logged_in = False
+                self.filled: dict[str, str] = {}
+                self.clicks: list[str] = []
+                self.gotos: list[str] = []
+
+            def locator(self, selector: str):  # type: ignore[no-untyped-def]
+                if selector == 'input[name="username"]':
+                    return FakeLocator(self, "username", not self.logged_in)
+                if selector == 'input[name="password"]':
+                    return FakeLocator(self, "password", not self.logged_in)
+                if selector == 'button[type="submit"]':
+                    return FakeLocator(self, "submit", not self.logged_in)
+                if selector in (
+                    ".logininfo a[href*='login/index.php'], a[href*='login/index.php']",
+                    ".usermenu, [data-region='usermenu'], a[href*='login/logout.php'], .logininfo a[href*='login/logout.php']",
+                ):
+                    return EmptyLocator()
+                return EmptyLocator()
+
+            def goto(self, url: str, **kwargs: object) -> None:
+                self.gotos.append(url)
+                self.url = url
+                if url == "https://login.schulportal.hessen.de/?i=5235":
+                    return
+                if url == self.course_url:
+                    self.logged_in = True
+
+            def wait_for_load_state(self, state: str) -> None:
+                return None
+
+        page = FakePage()
+        uploader = MoodlePlaywrightUploader(
+            course_url=page.course_url,
+            section_title="Listen",
+            username="alice",
+            password="secret",
+            headless=True,
+        )
+
+        uploader._login_with_credentials_if_needed(page)
+
+        self.assertEqual(page.filled, {"username": "alice", "password": "secret"})
+        self.assertEqual(page.clicks, ["submit"])
+        self.assertEqual(page.gotos, ["https://login.schulportal.hessen.de/?i=5235", page.course_url])
+        self.assertEqual(page.url, page.course_url)
+
+    def test_schulportal_hessen_login_skips_hidden_user_input(self) -> None:
+        class FakeLocator:
+            def __init__(self, page, items: list[dict[str, object]], index: int = 0) -> None:  # type: ignore[no-untyped-def]
+                self.page = page
+                self.items = items
+                self.index = index
+                self.first = self if index == 0 else self.nth(0)
+
+            def count(self) -> int:
+                return len(self.items)
+
+            def nth(self, index: int):  # type: ignore[no-untyped-def]
+                return FakeLocator(self.page, self.items, index)
+
+            def is_visible(self) -> bool:
+                return bool(self.items[self.index].get("visible", True))
+
+            def is_enabled(self) -> bool:
+                return bool(self.items[self.index].get("enabled", True))
+
+            def fill(self, value: str) -> None:
+                self.page.filled[str(self.items[self.index]["name"])] = value
+
+            def click(self) -> None:
+                self.page.clicks.append(str(self.items[self.index]["name"]))
+                if self.items[self.index]["name"] == "submit":
+                    self.page.url = self.page.course_url
+
+        class EmptyLocator:
+            first = None
+
+            def count(self) -> int:
+                return 0
+
+        class FakePage:
+            def __init__(self) -> None:
+                self.course_url = "https://mo5235.schulportal.hessen.de/course/view.php?id=7845"
+                self.url = "https://login.schulportal.hessen.de/saml/singleSignOn?SAMLRequest=test"
+                self.logged_in = False
+                self.filled: dict[str, str] = {}
+                self.clicks: list[str] = []
+                self.gotos: list[str] = []
+
+            def locator(self, selector: str):  # type: ignore[no-untyped-def]
+                if selector == 'input[name="user"]':
+                    return FakeLocator(self, [{"name": "hidden-user", "visible": False}])
+                if selector == 'input[type="text"]':
+                    return FakeLocator(self, [{"name": "visible-user"}])
+                if selector == 'input[name="password"]':
+                    return FakeLocator(self, [{"name": "password"}])
+                if selector == 'button[type="submit"]':
+                    return FakeLocator(self, [{"name": "submit"}])
+                return EmptyLocator()
+
+            def goto(self, url: str, **kwargs: object) -> None:
+                self.gotos.append(url)
+                self.url = url
+                if url == self.course_url:
+                    self.logged_in = True
+
+            def wait_for_load_state(self, state: str) -> None:
+                return None
+
+        page = FakePage()
+        uploader = MoodlePlaywrightUploader(
+            course_url=page.course_url,
+            section_title="Listen",
+            username="alice",
+            password="secret",
+            headless=True,
+        )
+
+        uploader._login_with_credentials_if_needed(page)
+
+        self.assertEqual(page.filled, {"visible-user": "alice", "password": "secret"})
+        self.assertEqual(page.gotos, ["https://login.schulportal.hessen.de/?i=5235", page.course_url])
+
+    def test_schulportal_hessen_login_keeps_existing_instance_login_url(self) -> None:
+        class FakeLocator:
+            def __init__(self, page, name: str) -> None:  # type: ignore[no-untyped-def]
+                self.page = page
+                self.name = name
+                self.first = self
+
+            def count(self) -> int:
+                return 1
+
+            def nth(self, index: int):  # type: ignore[no-untyped-def]
+                return self
+
+            def is_visible(self) -> bool:
+                return True
+
+            def is_enabled(self) -> bool:
+                return True
+
+            def fill(self, value: str) -> None:
+                self.page.filled[self.name] = value
+
+            def click(self) -> None:
+                self.page.clicks.append(self.name)
+                if self.name == "submit":
+                    self.page.url = self.page.course_url
+
+        class EmptyLocator:
+            first = None
+
+            def count(self) -> int:
+                return 0
+
+        class FakePage:
+            def __init__(self) -> None:
+                self.course_url = "https://mo5235.schulportal.hessen.de/course/view.php?id=7845"
+                self.url = "https://login.schulportal.hessen.de/?i=5235"
+                self.filled: dict[str, str] = {}
+                self.clicks: list[str] = []
+                self.gotos: list[str] = []
+
+            def locator(self, selector: str):  # type: ignore[no-untyped-def]
+                if selector == 'input[name="username"]':
+                    return FakeLocator(self, "username")
+                if selector == 'input[name="password"]':
+                    return FakeLocator(self, "password")
+                if selector == 'button[type="submit"]':
+                    return FakeLocator(self, "submit")
+                return EmptyLocator()
+
+            def goto(self, url: str, **kwargs: object) -> None:
+                self.gotos.append(url)
+                self.url = url
+
+            def wait_for_load_state(self, state: str) -> None:
+                return None
+
+        page = FakePage()
+        uploader = MoodlePlaywrightUploader(
+            course_url=page.course_url,
+            section_title="Listen",
+            username="alice",
+            password="secret",
+            headless=True,
+        )
+
+        uploader._login_with_schulportal_hessen_credentials(page)
+
+        self.assertEqual(page.gotos, [])
+        self.assertEqual(page.filled, {"username": "alice", "password": "secret"})
+
+    def test_login_with_credentials_keeps_real_moodle_form_login(self) -> None:
+        class FakeLocator:
+            def __init__(self, page, name: str, present: bool = True) -> None:  # type: ignore[no-untyped-def]
+                self.page = page
+                self.name = name
+                self.present = present
+                self.first = self
+
+            def count(self) -> int:
+                return 1 if self.present else 0
+
+            def fill(self, value: str) -> None:
+                self.page.filled[self.name] = value
+
+            def click(self) -> None:
+                self.page.clicks.append(self.name)
+                self.page.logged_in = True
+
+        class EmptyLocator:
+            first = None
+
+            def count(self) -> int:
+                return 0
+
+        class FakePage:
+            def __init__(self) -> None:
+                self.course_url = "https://moodle.example/course/view.php?id=5"
+                self.url = self.course_url
+                self.logged_in = False
+                self.filled: dict[str, str] = {}
+                self.clicks: list[str] = []
+                self.gotos: list[str] = []
+
+            def locator(self, selector: str):  # type: ignore[no-untyped-def]
+                if selector == 'input[name="username"]':
+                    return FakeLocator(self, "username", not self.logged_in)
+                if selector == 'input[name="password"]':
+                    return FakeLocator(self, "password", not self.logged_in)
+                if selector == ".logininfo a[href*='login/index.php'], a[href*='login/index.php']":
+                    return EmptyLocator()
+                if selector == (
+                    ".usermenu, [data-region='usermenu'], a[href*='login/logout.php'], "
+                    ".logininfo a[href*='login/logout.php']"
+                ):
+                    return FakeLocator(self, "logout", self.logged_in)
+                return EmptyLocator()
+
+            def get_by_role(self, role: str, name):  # type: ignore[no-untyped-def]
+                if role == "button":
+                    return FakeLocator(self, "login-button")
+                return EmptyLocator()
+
+            def get_by_text(self, text):  # type: ignore[no-untyped-def]
+                return EmptyLocator()
+
+            def goto(self, url: str, **kwargs: object) -> None:
+                self.gotos.append(url)
+                self.url = url
+
+            def wait_for_load_state(self, state: str) -> None:
+                return None
+
+        page = FakePage()
+        uploader = MoodlePlaywrightUploader(
+            course_url=page.course_url,
+            section_title="Listen",
+            username="alice",
+            password="secret",
+            headless=True,
+        )
+
+        uploader._login_with_credentials_if_needed(page)
+
+        self.assertEqual(page.filled, {"username": "alice", "password": "secret"})
+        self.assertEqual(page.clicks, ["login-button"])
+        self.assertEqual(page.gotos, [page.course_url])
+
+    def test_turn_editing_on_reports_external_sso_redirect_as_login(self) -> None:
+        class EmptyLocator:
+            first = None
+
+            def count(self) -> int:
+                return 0
+
+            def get_attribute(self, name: str) -> str | None:
+                return None
+
+        class FakePage:
+            url = "https://login.schulportal.hessen.de/saml/singleSignOn?SAMLRequest=test"
+
+            def locator(self, selector: str):  # type: ignore[no-untyped-def]
+                return EmptyLocator()
+
+            def get_by_role(self, role: str, name):  # type: ignore[no-untyped-def]
+                return EmptyLocator()
+
+            def goto(self, url: str, **kwargs: object) -> None:
+                self.url = "https://login.schulportal.hessen.de/saml/singleSignOn?SAMLRequest=test"
+
+        uploader = MoodlePlaywrightUploader(
+            course_url="https://mo5235.schulportal.hessen.de/course/view.php?id=7845",
+            section_title="Listen",
+            headless=True,
+        )
+
+        with self.assertRaisesRegex(RuntimeError, "Seite im Login.*singleSignOn"):
+            uploader._turn_editing_on(FakePage())
+
+    def test_external_login_page_detection_ignores_same_host_course_page(self) -> None:
+        class EmptyLocator:
+            def count(self) -> int:
+                return 0
+
+        class FakePage:
+            url = "https://mo5235.schulportal.hessen.de/course/view.php?id=7845"
+
+            def locator(self, selector: str):  # type: ignore[no-untyped-def]
+                return EmptyLocator()
+
+        uploader = MoodlePlaywrightUploader(
+            course_url="https://mo5235.schulportal.hessen.de/course/view.php?id=7845",
+            section_title="Listen",
+        )
+
+        self.assertFalse(uploader._login_is_required(FakePage()))
 
     def test_find_or_create_section_aborts_when_rename_form_is_missing(self) -> None:
         class UploaderWithMissingRenameForm(MoodlePlaywrightUploader):

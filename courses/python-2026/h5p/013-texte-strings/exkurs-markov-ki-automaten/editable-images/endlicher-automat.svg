@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 190" width="560" height="190" role="img" aria-label="Endlicher Automat mit drei Zuständen: Start, Wort und Ende">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#4f46e5"/>
+    </marker>
+  </defs>
+  <rect x="1" y="1" width="558" height="188" rx="14" fill="#f8fafc" stroke="#cbd5e1"/>
+  <circle cx="100" cy="95" r="42" fill="#dbeafe" stroke="#2563eb" stroke-width="3"/>
+  <circle cx="280" cy="95" r="42" fill="#dcfce7" stroke="#16a34a" stroke-width="3"/>
+  <circle cx="460" cy="95" r="42" fill="#fee2e2" stroke="#dc2626" stroke-width="3"/>
+  <text x="100" y="91" text-anchor="middle" font-size="17" font-family="Arial" fill="#0f172a">Start</text>
+  <text x="100" y="111" text-anchor="middle" font-size="13" font-family="Arial" fill="#334155">kein Wort</text>
+  <text x="280" y="91" text-anchor="middle" font-size="17" font-family="Arial" fill="#0f172a">Wort</text>
+  <text x="280" y="111" text-anchor="middle" font-size="13" font-family="Arial" fill="#334155">liest Text</text>
+  <text x="460" y="91" text-anchor="middle" font-size="17" font-family="Arial" fill="#0f172a">Ende</text>
+  <text x="460" y="111" text-anchor="middle" font-size="13" font-family="Arial" fill="#334155">fertig</text>
+  <line x1="142" y1="95" x2="238" y2="95" stroke="#4f46e5" stroke-width="3" marker-end="url(#arrow)"/>
+  <line x1="322" y1="95" x2="418" y2="95" stroke="#4f46e5" stroke-width="3" marker-end="url(#arrow)"/>
+  <path d="M 250 57 C 250 20, 310 20, 310 57" fill="none" stroke="#4f46e5" stroke-width="3" marker-end="url(#arrow)"/>
+  <text x="190" y="82" text-anchor="middle" font-size="13" font-family="Arial" fill="#334155">erstes Wort</text>
+  <text x="370" y="82" text-anchor="middle" font-size="13" font-family="Arial" fill="#334155">Satzende</text>
+  <text x="280" y="28" text-anchor="middle" font-size="13" font-family="Arial" fill="#334155">naechstes Wort</text>
+</svg>

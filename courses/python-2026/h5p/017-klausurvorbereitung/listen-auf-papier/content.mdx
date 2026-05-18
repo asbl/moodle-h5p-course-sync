@@ -1,0 +1,32 @@
+Listenaufgaben lassen sich gut auf Papier lösen, wenn du die Liste nach jeder
+Änderung neu notierst.
+
+```python
+items = ["Holz", "Stein"]
+items.append("Fackel")
+items[0] = "Brett"
+print(items[1])
+print(len(items))
+```
+
+Schreibe die Liste nach jeder Zeile auf:
+
+```python noeditor
+Start:      ["Holz", "Stein"]
+append:     ...
+ersetzen:   ...
+```
+
+### Übung
+
+Bestimme zuerst ohne Ausführen die Ausgabe.
+
+```python
+weg = ["Start", "Wald", "Mine"]
+weg.append("See")
+weg[1] = "Dorf"
+
+for ort in weg:
+    if len(ort) <= 4:
+        print(ort)
+```

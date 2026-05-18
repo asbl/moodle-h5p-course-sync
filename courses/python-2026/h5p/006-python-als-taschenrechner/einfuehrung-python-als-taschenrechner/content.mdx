@@ -1,0 +1,125 @@
+Python kann dir auf vielfältige Weise dabei helfen, 
+Berechnungen durchzuführen. 
+
+In diesem Kapitel lernst du, 
+welche Rechenoperationen Python durchführen kann, 
+welche Bedeutung Datentypen dabei spielen und wie du mit 
+Bibliotheken und Funktionen arbeitest.
+
+```python
+print(671+273+321)
+```
+
+### Operatoren
+
+Mit den Operatoren `+, - , * , /` kannst du die Grundrechenarten verwenden.
+
+Es gilt die übliche Reihenfolge der Operatoren (z.B. Punkt vor Strich) 
+und du kannst auch Klammern setzen.
+
+```python
+print(6 * 3 +(1 + 1))
+print((3 * 5) / (2 + 3))
+```
+
+### Potenzen
+
+Potenzen verwendest du mit dem Operator `**`:
+
+```python
+print(2 ** 8)
+print(3 ** 4)
+```
+
+### Division
+
+Bei der Division gibt es Unterschiede, welches Ergebnis zurückgegeben werdens soll,
+wenn die Division nicht "aufgeht" und der Quotient keine ganze Zahl ist.
+
+In Python gibt es dazu verschiedene Operatoren:
+
+  * Die übliche Division ```/`` liefert als Ergebnis eine Fließkommazahl zurück.
+  * Der Operator ```//`` liefert das ganzzahlige Ergebnis der Operation zurück.
+  * Der Modulo-Operator
+
+```python
+
+```
+
+python
+    z.B.
+
+```python
+
+9 : 2 = 4 REST 1
+```
+
+, daher ist
+
+```python
+
+```
+
+python
+  * Mit
+
+```python
+
+round()
+```
+
+python
+
+```python
+
+python
+print(11 / 3)
+print(11 // 3)
+print(11 % 3) # 11 geteilt durch 3 ergibt: 3 Rest 2
+print(round(11 / 3))
+```
+
+python
+
+Vor allem der Modulo-Operator ist sehr oft wichtig, 
+da man damit z.B. überprüfen kann,
+ob eine Zahl gerade ist, 
+weil man bei einem Spiel eine Operation bei jedem 
+n-ten
+Frame durchführen kann usw. 
+
+Deshalb ist diesem später nochmal ein 
+eigenes Kapitel gewidmet.
+
+### Ein Hinweis zur Schreibweise:
+
+Üblicherweise setzt man vor und nach einem 
+Operator ein Leerzeichen zur besseren Lesbarkeit,
+also z.B.
+
+```python
+
+python
+print(3 + 4)
+```
+
+python
+
+anstatt
+
+```python
+
+python
+print(3+4)
+```
+
+Dies hat keine Auswirkungen auf die Programmlogik, dein Programm
+wird in beiden Fällen ausgeführt, es sorgt aber dafür, dass
+dein Programm besser lesbar wird.
+
+!!! hint PEP8-Styleguide
+In dem Dokument **PEP 8** wurde definiert, auf welche Standards man sich geeinigt hat,
+damit Python-Code einheitlich aussieht.
+
+https://peps.python.org/pep-0008/
+!!!

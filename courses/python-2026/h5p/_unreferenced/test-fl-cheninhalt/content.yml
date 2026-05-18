@@ -1,0 +1,23 @@
+contentType: ide_only
+pythonRunner: skulpt
+pyodideOptions:
+  packages: []
+contents: []
+editorSettings:
+  instructions: 'Importiert aus Moodle: Test: Flächeninhalt'
+  preCode: |-
+    ``
+  startingCode: |-
+    ``
+  postCode: |-
+    ``
+  options:
+    sourceFiles: []
+gradingSettings:
+  gradingMethod: please_choose
+  dueDateGroup:
+    enableDueDate: false
+    duedate: 01.01.1970
+  testCases: []
+  targetCode: |-
+    ``

@@ -1,0 +1,42 @@
+Python hat unzählige Funktionsbibliotheken, die du entweder direkt verwenden, oder importieren kannst.
+
+Beispiel: 
+
+Die Dokumentation der `math`-Bibliothek findest du hier:
+
+https://docs.python.org/3/library/math.html
+
+Wir betrachten exemplarisch die `pow`-Funktion:
+
+### Die pow-Funktion
+
+!!! info Die pow() Funktion
+
+Die Funktion hat einen Namen, zwei Paramter und einen Rückgabewert
+
+* Der Name der Funktion ist pow (bzw. math.pow, da die Funktion in der Bibliothek math liegt).
+* Die Funktion hat zwei Parameter, d.h. sie nimmt zwei Argumente an.
+* Die Funktion gibt den Wert x hoch y zurück.
+* Weiterhin findest du Angaben über Randfälle, z.B. wenn x keine Zahl ist.
+!!!
+
+### Aufruf der Funktion
+
+Du kannst die Funktion folgendermaßen in deinem Python-Programm verwenden:
+
+```python
+import math
+print(math.pow(4, 3))
+```
+
+Die Funktion wurde mit zwei Argumenten aufgerufen und der Rückgabewert wurde 
+mit print ausgegeben.
+
+Du kannst das Ergebnis der Funktion auch in eine Variable speichern:
+
+```python
+import math
+a = math.pow(2,3)
+b = math.pow(2,2)
+print(a * b)
+```
