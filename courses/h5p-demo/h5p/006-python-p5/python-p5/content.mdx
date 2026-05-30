@@ -1,0 +1,40 @@
+<Instructions>
+Zeichne mit p5 einen roten Kreis und ein blaues Rechteck auf einem weißen Hintergrund.
+</Instructions>
+
+```python editor:startingCode
+import p5
+
+def setup():
+    p5.createCanvas(400, 300)
+    p5.background(255)
+
+    # Zeichne hier einen roten Kreis und ein blaues Rechteck
+
+p5.run()
+```
+
+```python grading:targetCode
+import p5
+
+def setup():
+    p5.createCanvas(400, 300)
+    p5.background(255)
+
+    p5.fill(255, 0, 0)
+    p5.noStroke()
+    p5.circle(100, 150, 80)
+
+    p5.fill(0, 0, 255)
+    p5.rect(220, 110, 120, 80)
+
+p5.run()
+```
+
+```yaml grading
+gradingMethod: bySolution
+dueDateGroup:
+  enableDueDate: false
+  duedate: 01.01.1970
+testCases: []
+```

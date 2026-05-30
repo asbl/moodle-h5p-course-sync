@@ -1,0 +1,39 @@
+contentType: ide_only
+contents: []
+editorSettings:
+  instructions: |-
+    `Schreibe die Funktion `kann_fackel_bauen(inventar)`.
+
+    Sie soll `True` zurückgeben, wenn in der Liste mindestens einmal `"Stock"` und
+    mindestens einmal `"Kohle"` vorkommen. Sonst soll sie `False` zurückgeben.`
+  startingCode: |-
+    `public class Main {
+        public static void main(String[] args) {
+            public static void kann_fackel_bauen(int inventar) {
+                // pass
+
+
+            }
+            System.out.println(kann_fackel_bauen(["Stock", "Kohle", "Stein"]));
+        }
+    }
+    `
+gradingSettings:
+  targetCode: |-
+    `public class Main {
+        public static void main(String[] args) {
+            public static void kann_fackel_bauen(int inventar) {
+                return "Stock" in inventar and "Kohle" in inventar;
+
+
+            }
+            System.out.println(kann_fackel_bauen(["Stock", "Kohle", "Stein"]));
+        }
+    }
+    `
+  gradingMethod: ioTestCases
+  testCases:
+  - hidden: false
+    inputs: []
+    outputs:
+    - 'True'

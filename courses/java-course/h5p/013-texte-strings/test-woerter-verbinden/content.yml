@@ -1,0 +1,71 @@
+contentType: ide_only
+contents: []
+editorSettings:
+  instructions: |-
+    `* Lies drei Wörter ein.
+    * Bereinige jedes Wort mit `strip()` und wandle es mit `lower()` in
+    Kleinbuchstaben um.
+    * Die Wörter sollen einheitlich aussehen und mit Bindestrichen verbunden
+    werden.
+
+    #### Eingabe
+      Maske
+    KOMPASS
+     Notiz 
+
+    #### Ausgabe
+    maske-kompass-notiz`
+  startingCode: |-
+    `public class Main {
+        public static void main(String[] args) {
+            wort1 = input()
+            wort2 = input()
+            wort3 = input()
+
+
+            woerter = []
+
+            System.out.println();
+        }
+    }
+    `
+gradingSettings:
+  targetCode: |-
+    `public class Main {
+        public static void main(String[] args) {
+            wort1 = input().strip().lower()
+            wort2 = input().strip().lower()
+            wort3 = input().strip().lower()
+
+            woerter = [wort1, wort2, wort3]
+
+            System.out.println("-".join(woerter));
+        }
+    }
+    `
+  gradingMethod: ioTestCases
+  dueDateGroup:
+    enableDueDate: true
+    duedate: '2026-06-01T07:00:00.000Z'
+  testCases:
+  - hidden: false
+    inputs:
+    - '  Maske'
+    - KOMPASS
+    - ' Notiz '
+    outputs:
+    - maske-kompass-notiz
+  - hidden: false
+    inputs:
+    - Dojo
+    - Echo
+    - Spind
+    outputs:
+    - dojo-echo-spind
+  - hidden: true
+    inputs:
+    - '  Wappen '
+    - Siegel
+    - STERN
+    outputs:
+    - wappen-siegel-stern

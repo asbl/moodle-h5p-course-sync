@@ -1,0 +1,107 @@
+contentType: text_only
+advancedOptions:
+  disableOutputPopups: true
+contents:
+- type: text
+  text: |-
+    `Bei der Programm hast du gesehen, dass jede Instanz ihren eigenen Zustand hat.
+    In Java OOP gilt dasselbe – und es wird besonders anschaulich, wenn viele
+    gleichartige Objekte nebeneinander stehen.
+
+    ### Jede Instanz hat ihre eigene Farbe`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            // import Java OOP
+
+            // world = Java OOP.World(460, 300)
+            world.add_background((225, 238, 252))
+
+            // k1 = Java OOP.Circle((80,  150), 30)
+            // k2 = Java OOP.Circle((200, 150), 30)
+            // k3 = Java OOP.Circle((320, 150), 30)
+
+            k1.color = (255, 100, 80)
+            k2.color = (80,  160, 255)
+            k3.color = (80,  200, 110)
+
+            world.run()
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Drei Instanzen der Klasse `Circle`, drei verschiedene Farben. Die Zuweisung
+    `k1.color = ...` betrifft nur `k1` – `k2` und `k3` bleiben unberührt.
+
+    ### Viele Instanzen in einer Schleife
+
+    In einer Schleife kannst du schnell viele Objekte erzeugen:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            // import Java OOP
+
+            // world = Java OOP.World(460, 300)
+            world.add_background((225, 238, 252))
+
+            farben = [;
+                (255, 100, 80),
+                (80,  160, 255),
+                (80,  200, 110),
+                (255, 200, 60),
+                (180, 100, 255),
+            ]
+
+            for i, farbe in enumerate(farben):
+            // kreis = Java OOP.Circle((55 + i * 85, 150), 32)
+                kreis.color = farbe
+
+            world.run()
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Fünf Kreise, fünf unabhängige Instanzen – jede mit ihrer eigenen Position
+    und Farbe.
+
+    !!! note Jede Instanz ist eigenständig
+    Wenn du ein Attribut einer Instanz änderst, änderst du nur diese eine Instanz.
+    Andere Instanzen derselben Klasse sind davon nicht betroffen.
+    !!!
+
+    ### Warum Objekte statt einzelner Variablen?
+
+    Ohne Objekte müsstest du für jeden Kreis alle Daten separat verwalten:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            // Ohne Objekte – unübersichtlich bei vielen Kreisen:
+            int k1_x = 80;
+            int k1_y = 150;
+            k1_farbe = (255, 100, 80);
+            int k1_radius = 30;
+
+            int k2_x = 200;
+            int k2_y = 150;
+            k2_farbe = (80, 160, 255);
+            int k2_radius = 30;
+
+            // Mit Objekten – alles gebündelt:
+            // k1 = Java OOP.Circle((80,  150), 30)
+            // k2 = Java OOP.Circle((200, 150), 30)
+            k1.color = (255, 100, 80)
+            k2.color = (80,  160, 255)
+        }
+    }
+    `
+  options:
+    showEditor: false
+- type: text
+  text: |-
+    `Mit zehn oder hundert Kreisen wird das ohne Objekte schnell unübersichtlich.
+    Mit Objekten bleibt es beherrschbar.`

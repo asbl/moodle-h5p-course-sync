@@ -1,0 +1,59 @@
+contentType: text_only
+contents:
+- type: text
+  text: |-
+    `Eine wichtige Lektion ganz am Anfang:
+
+    Wenn du das Programmieren lernst, wirst du Fehler machen. 
+
+    Vermutlich wirst du sogar sehr viele Fehler 
+    machen bis du gelernt hast, gut zu programmieren. 
+    Und selbst dann gehören
+    Fehler zum Alltag von ProgrammiererInnen
+
+    Es gibt verschiedene Arten von Fehlern:
+
+      * **Lexikalische** Fehler sind im Prinzip **Rechtschreibfehler**.
+      * **Syntaktische** und **semantische** Fehler sind im Prinzip **Gramatikfehler**
+      * **Logische** Fehler sind oft schwierig zu erkennen und treten oft erst zur Laufzeit des Programmes auf.
+
+    ## Lexikalische Fehler
+      
+      Ein lexikalischer Fehler ist z.B der folgende:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            prin("hello World")
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Du erhälst einen Fehler:  Der **Name** prin ist nicht bekannt, 
+    da er bisher nicht definiert wurde.
+
+
+    ## Syntaktische Fehler
+
+    Ein Syntax-Fehler ist z.B. der folgende:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            System.out.println "Hello World"
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Es ist definiert, dass nach einer System.out.println-Anweisung eine Klammer folgen muss - 
+    Da diese fehlt, wird ein Fehler geworfen.
+
+    ## Wie geht man mit Fehlern um?
+
+      * Achte auf die **Zeile**, die Java bei der Fehlermeldung ausgibt.
+        (Manchmal funktioniert dies nicht optimal und der Fehler kann sich auch
+        in der vorangehenden Zeile befinden)
+      * Versuche die Fehlermeldung zu verstehen, die Java ausgibt.
+        Oft sind die Fehlermeldung ein guter Hinweis darauf, was schiefgegangen sein könnte.`

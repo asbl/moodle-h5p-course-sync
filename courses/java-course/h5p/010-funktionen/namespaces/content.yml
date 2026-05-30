@@ -1,0 +1,109 @@
+contentType: text_only
+contents:
+- type: text
+  text: |-
+    `## Namespaces
+
+    Gegeben ist wieder dieser Code:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void quadrat(int x) {
+        return x * x;
+        System.out.println(quadrat(3));
+        int x = 4;
+        System.out.println(quadrat(4));
+        }
+
+        public static void main(String[] args) {
+    }
+    `
+- type: text
+  text: |-
+    `Beachte die Zeile `x=4`.
+
+    Die Zeile sieht harmlos aus, aber die Variable x wird auch in der Funktion
+    Quadrat verwendet - Es besteht dadurch die Gefahr, dass es zu 
+    Nebeneffekten kommen kann, vor allem wenn im Team gearbeitet wird:
+
+    Wenn mehrere Entwickler Funktionen schreiben, dann ist die Chance hoch, dass sie
+    die gleichen Variablennamen verwenden.
+
+    Zum Glück gibt es dafür eine Lösung: **Namespaces**
+
+    Die Variable x in der Funktion **quadrat** ist **nicht** die
+    gleiche Variable wie in deinem Hauptprogramm.
+
+    Deutlich wird das in folgendem Programm:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void do_something(int x) {
+        x = x + 1;
+        int x = 3;
+        System.out.println(x);
+        do_something(x)
+        System.out.println(x);
+        }
+
+        public static void main(String[] args) {
+    }
+    `
+- type: text
+  text: |-
+    `x ist **innerhalb** einer Funktion **nicht** das gleiche 
+    wie x **außerhalb** dieser Funktion - Beide verweisen auf unterschiedliche Stellen im Speicher. 
+
+    Auf diese Weise können Funktionen vollkommen unabhängig vom Hauptprogramm 
+    geschrieben werden. Man muss nicht befürchten, dass man versehentlich eine 
+    Variable aus dem Hauptprogramm ändert.
+
+    Wenn du Variablen aus dem Hauptprogramm ändern willst, dann geht dies 
+    z.B. über Rückgabewerte:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void do_something(int x) {
+        x = x + 1;
+        return x;
+        int x = 3;
+        System.out.println(x);
+        x = do_something(x);
+        System.out.println(x);
+        }
+
+        public static void main(String[] args) {
+    }
+    `
+- type: text
+  text: |-
+    `Hier gibt die Funktion den veränderten Wert x zurück
+    und dieser wird in der Variablen x des Hauptprogrammes gespeichert.
+
+    ### Global
+
+    Will man auf eine Variable zugreifen, die außerhalb der Funktion definiert wurde, dann
+    verwendet man das Schlüsselwort **global**, um explizit auf diese Variable zuzugreifen.
+
+    Dies wird besonders in Java Grafik Programmen oft benötigt:`
+- type: code
+  code: |-
+    `import Java Grafik
+
+    import math
+
+    t = 0 # Diese Variable ist global definiert
+
+    def setup():
+        Java Grafik.createCanvas(200, 200)
+
+    def draw():
+        global t # Hier wird definiert, dass innerhalb von draw die globale Variable t verwendet wird.
+        Java Grafik.clear()
+        x = 100 + 50 * math.cos(t)
+        y = 100 + 50 * math.sin(t)
+        Java Grafik.circle(x, y, 20)
+        t += 0.1
+
+    Java Grafik.run()
+    `

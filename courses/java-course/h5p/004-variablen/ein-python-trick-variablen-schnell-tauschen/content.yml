@@ -1,0 +1,18 @@
+contentType: text_only
+contents:
+- type: text
+  text: |-
+    `In Java (aber nicht in allen Programmiersprachen) geht das tauschen von Variablen noch einfacher. 
+
+    Man kann schreiben:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            int a = 3;
+            int b = 4;
+            a, b = b, a
+            System.out.println(a, b);
+        }
+    }
+    `

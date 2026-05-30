@@ -1,0 +1,19 @@
+## Python-Question mit Pyodide (ML-Beispiel)
+<PythonQuestion
+  identifier="python-pyodide"
+  title="Pyodide: NumPy-Statistik"
+  instructions="Dieses Beispiel zeigt Python mit Pyodide und NumPy – wissenschaftliches Rechnen direkt im Browser."
+  runner="pyodide"
+  packages="numpy"
+/>
+
+```python question:python-pyodide starter
+import numpy as np
+
+messwerte = np.array([12.5, 14.2, 11.8, 15.0, 13.7, 12.1, 14.8, 11.5, 13.9, 14.4])
+
+print(f"Mittelwert: {np.mean(messwerte):.2f}")
+print(f"Median:     {np.median(messwerte):.2f}")
+print(f"Std-Abw.:   {np.std(messwerte):.2f}")
+print(f"Min/Max:    {messwerte.min():.1f} / {messwerte.max():.1f}")
+```

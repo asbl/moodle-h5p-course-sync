@@ -1,0 +1,65 @@
+contentType: ide_only
+contents: []
+editorSettings:
+  instructions: |-
+    `Schreibe die Funktion `filtere_kurze_namen(namen)`.
+
+    Sie bekommt eine Liste mit Namen und soll eine neue Liste zurückgeben. In der
+    neuen Liste sollen nur Namen mit höchstens fünf Buchstaben stehen.
+
+    | `namen` | Rückgabe |
+    | --- | --- |
+    | `["Alex", "Steve", "Enderman", "Zoe", "Creeper", "Kim"]` | `["Alex", "Steve", "Zoe", "Kim"]` |
+    | `["Ada", "Grace", "Katherine"]` | `["Ada", "Grace"]` |`
+  startingCode: |-
+    `public class Main {
+        public static void main(String[] args) {
+            public static void filtere_kurze_namen(int namen) {
+                kurze_namen = []
+                // Ergänze hier die Schleife.
+                return kurze_namen;
+            }
+        }
+    }
+    `
+  postCode: |-
+    `public class Main {
+        public static void main(String[] args) {
+            namen = input().split()
+            System.out.println(filtere_kurze_namen(namen));
+        }
+    }
+    `
+gradingSettings:
+  targetCode: |-
+    `public class Main {
+        public static void main(String[] args) {
+            public static void filtere_kurze_namen(int namen) {
+                kurze_namen = []
+                for (var name : namen) {
+                    if (len(name) <= 5) {
+                        kurze_namen.append(name)
+                    }
+                }
+                return kurze_namen;
+            }
+        }
+    }
+    `
+  gradingMethod: ioTestCases
+  testCases:
+  - hidden: false
+    inputs:
+    - Alex Steve Enderman Zoe Creeper Kim
+    outputs:
+    - "['Alex', 'Steve', 'Zoe', 'Kim']"
+  - hidden: false
+    inputs:
+    - Ada Grace Katherine
+    outputs:
+    - "['Ada', 'Grace']"
+  - hidden: true
+    inputs:
+    - Max Alexandra Bo Li
+    outputs:
+    - "['Max', 'Bo', 'Li']"

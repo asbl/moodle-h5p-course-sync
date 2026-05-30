@@ -1,0 +1,53 @@
+contentType: text_only
+contents:
+- type: text
+  text: |-
+    `Funktionen sind eine Möglichkeit deinen Programmcode übersichtlicher zu machen. 
+    Eine Funktion kannst du dir als ein Unterprogramm vorstellen, dass abhängig 
+    von bestimmten Parametern ein Ergebnis berechnet und dieses an das Hauptprogramm 
+    zurückgibt
+
+    Beispiel:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void quadrat(int x) {
+        return x * x;
+        }
+
+        public static void main(String[] args) {
+    }
+    `
+- type: text
+  text: |-
+    `Die Funktion quadrat hat einen Parameter x 
+    und gibt das Ergebnis von x*x an das Hauptprogramm 
+    zurück.
+
+    Eine Funktion ist aus mehreren Teilen aufgebaut:
+
+      * Die **Signatur** ist die erste Zeile die mit `def` beginnt.
+        Diese Zeile enthält alles, was man braucht um die Funktion aufzurufen,
+        nämlich den **Funktionsnamen** und **Parameter**, die an die Funktion übergeben 
+        werden sollen.
+
+      * Die Funktion hat einen Funktionskörper, der den eigentlichen Code
+        der Funktion enthält. Dieser besteht hier nur aus einer Zeile.
+        Der Funktionskörper endet oft mit einer `return` Anweisung, die einen **Rückgabewert** an
+        das Hauptprogramm zurückgibt.
+
+    Du kannst die Funktion in dein Hauptprogramm wie folgt verwenden:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void quadrat(int x) {
+        return x * x;
+        System.out.println(quadrat(3));
+        System.out.println(quadrat(quadrat(3)));
+        int x = 4;
+        System.out.println(quadrat(4));
+        }
+
+        public static void main(String[] args) {
+    }
+    `

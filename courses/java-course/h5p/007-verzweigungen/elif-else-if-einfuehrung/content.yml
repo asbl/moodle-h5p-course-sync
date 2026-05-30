@@ -1,0 +1,213 @@
+contentType: text_only
+contents:
+- type: text
+  text: '### elif'
+- type: code
+  code: |-
+    `
+    `
+- type: text
+  text: Java
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            Java
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Java
+
+    Java
+
+    #### Beispiel:
+
+    Anstelle von`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            Java
+
+            Java
+            x = int(input());
+
+            if (x == 1) {
+                System.out.println("x = 1");
+            else :
+                if (x == 2) {
+                  System.out.println("x = 2");
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Java
+
+    Java
+
+    kann man auch schreiben:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            Java
+
+            Java
+            x = int(input());
+            if (x == 1) {
+                System.out.println("x = 1");
+            } else if (x == 2) {
+                System.out.println("x = 2");
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Java
+
+    Java
+
+    ### Zusammenfassung:
+
+    Du kannst anstelle von`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            Java
+
+            elif
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Java
+
+    immer einen **verschachtelten* **`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            Java
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Java
+
+    Java
+    ersten Variante verwenden. 
+
+    Diese beiden Codes sind gleichbedeutend:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            Java
+
+            Java
+            else :
+                if (x == 2) {
+                  System.out.println("x = 2");
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Java
+
+    Java`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            Java
+
+            Java
+            } else if (x == 2) {
+                System.out.println("x = 2");
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Java
+
+    Java
+
+    Meistens macht es dein Programm aber leichter lesbar, 
+    wenn du **elif** verwendest.
+
+    !!! info Allgemeine Syntax
+
+    Dies ist die allgemeine Syntax für einen`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            Java
+
+            if-Block
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Java
+
+    Java
+
+    Nach einem if-Block können beliebig viele`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            Java
+
+            elif
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Java
+
+    folgen und am Ende maximal ein`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            Java
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Java
+
+    Java`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            Java
+
+            Java
+            if (bedingung) {
+                anweisungsblock
+            } else if (bedingung) {
+                anweisungsblock 
+            } else if (bedingung) {
+                anweisungsblock
+            } else {
+                anweisungsblock
+        }
+    }
+    `
+- type: text
+  text: '!!!'

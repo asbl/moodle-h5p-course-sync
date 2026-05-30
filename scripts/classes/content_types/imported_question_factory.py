@@ -93,6 +93,45 @@ class ImportedQuestionFactory:
                 course_dir=self._courses_dir / course_slug,
             )
 
+        if main_library in ("H5P.JavaQuestion", "H5P.SQLQuestion", "H5P.AutomataQuestion"):
+            editor_settings = content_payload.get("editorSettings", {})
+            grading_settings = content_payload.get("gradingSettings", {})
+            advanced_options = content_payload.get("advancedOptions", {})
+            if not isinstance(editor_settings, dict):
+                editor_settings = {}
+            if not isinstance(grading_settings, dict):
+                grading_settings = {}
+            if not isinstance(advanced_options, dict):
+                advanced_options = {}
+
+            if main_library == "H5P.AutomataQuestion":
+                solution_key = "solutionAutomaton"
+                default_show_console = False
+            else:
+                solution_key = "solution"
+                default_show_console = True
+
+            return PythonQuestionBlock(
+                identifier=activity.identifier,
+                title=title,
+                instructions=self._normalize_whitespace(
+                    self._strip_html(str(editor_settings.get("instructions") or activity.intro or f"Importiert aus Moodle: {activity.title}"))
+                ).strip() or f"Importiert aus Moodle: {activity.title}",
+                preview_url=activity.url,
+                main_library=main_library,
+                package_url=getattr(activity, "package_url", ""),
+                h5p_metadata=metadata_copy,
+                h5p_content=content_copy,
+                h5p_subdir=getattr(activity, "h5p_subdir", ""),
+                runner=DEFAULT_PYTHON_RUNNER,
+                starter_code=self._normalize_whitespace(html.unescape(str(editor_settings.get("startingCode") or ""))),
+                solution_code=self._normalize_whitespace(html.unescape(str(grading_settings.get(solution_key) or ""))),
+                grading_method=str(grading_settings.get("gradingMethod") or "please_choose"),
+                show_console=bool(advanced_options.get("showConsole", default_show_console)),
+                course_slug=course_slug,
+                course_dir=self._courses_dir / course_slug,
+            )
+
         if main_library != self._python_question_machine_name:
             return PythonQuestionBlock(
                 identifier=activity.identifier,

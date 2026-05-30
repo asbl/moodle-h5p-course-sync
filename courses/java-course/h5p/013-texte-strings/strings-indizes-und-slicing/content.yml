@@ -1,0 +1,183 @@
+contentType: text_only
+contents:
+- type: text
+  text: |-
+    `Ein String sieht oft wie ein zusammenhängender Text aus. Für Java besteht er
+    aber aus einzelnen Zeichen, die in einer festen Reihenfolge nebeneinander
+    liegen.
+
+    Java nummeriert diese Zeichen von links nach rechts. Die Nummer heißt
+    **Index**.
+
+    Wichtig: Java beginnt bei `0`.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            String wort = "Kompass";
+
+            System.out.println(wort[0]);
+            System.out.println(wort[1]);
+            System.out.println(wort[6]);
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Bei `"Kompass"` ist `K` also an Position `0`, `o` an Position `1` und `s` an
+    Position `6`.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            Zeichen: K o m p a s s
+            Index:   0 1 2 3 4 5 6
+        }
+    }
+    `
+  options:
+    showEditor: false
+- type: text
+  text: |-
+    `!!! note Warum beginnt Java bei 0?
+    Viele Programmiersprachen zählen Positionen ab `0`. Das wirkt am Anfang
+    ungewohnt, passt aber gut dazu, wie Computer Speicherplätze und Abstände
+    denken.
+    !!!
+
+    ### Negative Indizes
+
+    Du kannst auch von hinten zählen. Das ist besonders praktisch, wenn du das
+    letzte Zeichen brauchst, ohne vorher die Länge auszurechnen.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            String wort = "Amulett";
+
+            System.out.println(wort[-1]);
+            System.out.println(wort[-2]);
+        }
+    }
+    `
+- type: text
+  text: '`-1` ist das letzte Zeichen.'
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            Zeichen:     A  m  u  l  e  t  t
+            Index:       0  1  2  3  4  5  6
+            von hinten: -7 -6 -5 -4 -3 -2 -1
+        }
+    }
+    `
+  options:
+    showEditor: false
+- type: text
+  text: |-
+    `### Länge eines Strings
+
+    Mit `len()` bekommst du die Anzahl der Zeichen:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            String satz = "Brief im Spind";
+
+            System.out.println(len(satz));
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Das Leerzeichen wird mitgezählt.
+
+    !!! note Merke
+    `len(text)` zählt **Zeichen, nicht Wörter**. 
+    Leerzeichen und Satzzeichen werden daher mitgezählt.
+    !!!
+
+    ### Teilstrings
+
+    Mit **Slicing** kannst du einen Teil aus einem String ausschneiden. Du gibst
+    dabei an, wo Java anfangen soll und vor welcher Position Java wieder
+    aufhören soll.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            String wort = "WaukeensRast";
+
+            System.out.println(wort[0:7]);
+            System.out.println(wort[8:12]);
+        }
+    }
+    `
+- type: text
+  text: |-
+    ``wort[0:7]` bedeutet:
+
+    - Beginne bei Index `0`.
+    - Höre vor Index `8` auf.
+
+    Der zweite Index wird also nicht mehr mitgenommen.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            W a u k e e n s R a s  t
+            0 1 2 3 4 5 6 7 8 9 10 11
+            [0:7]  -> Waukeen
+            [8:12]   -> Rast
+        }
+    }
+    `
+  options:
+    showEditor: false
+- type: text
+  text: |-
+    `!!! note Halb offenes Intervall
+    Ein Slice `text[start:ende]` nimmt `start` mit, aber `ende` nicht mehr. Das
+    nennt man ein halb offenes Intervall.
+    !!!
+
+    ### Anfang und Ende weglassen
+
+    Man kann beim Slicing Anfang und Ende auch weglassen, dann geht der ausgeschnittene
+    Text vom Anfang (bzw. bis zum Ende)`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            String wort = "WaukeensRast";
+
+            System.out.println(wort[:7]) #);
+            System.out.println(wort[8:]);
+        }
+    }
+    `
+- type: text
+  text: |-
+    `### Teste dich selbst!
+
+    Überlege zuerst, was ausgegeben wird. 
+    Führe erst danach den Code danach aus und vergleiche
+    deine Vermutung mit der tatsächlichen Ausgabe.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            String text = "Drachenkarte";
+
+            System.out.println(text[0]);
+            System.out.println(text[-1]);
+            System.out.println(text[:5]);
+            System.out.println(text[5:]);
+            System.out.println(len(text));
+        }
+    }
+    `
+- type: text
+  text: Wenn du Schwierigkeiten hast, schreibe wie in den Beispielen die Indizes
+    über die Buchstaben.

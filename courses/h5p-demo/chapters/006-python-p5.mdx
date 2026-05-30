@@ -1,0 +1,25 @@
+## PythonQuestion mit p5
+<PythonQuestion
+  identifier="python-p5"
+  title="p5: Landschaft ergänzen"
+  instructions="Der Starter-Code zeichnet bereits Himmel und eine Sonne. Ergänze Hügel, ein Haus und was du möchtest."
+/>
+
+```python question:python-p5 starter
+import p5
+
+def setup():
+    p5.createCanvas(400, 300)
+
+    # Himmel
+    p5.background(100, 160, 220)
+
+    # Sonne
+    p5.fill(255, 230, 0)
+    p5.noStroke()
+    p5.circle(330, 60, 80)
+
+    # Hier weitermachen ...
+
+p5.run()
+```

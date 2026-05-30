@@ -1,0 +1,95 @@
+contentType: text_only
+contents:
+- type: text
+  text: |-
+    `Eine Liste kann auch wieder Listen enthalten. Das nennt man eine
+    **verschachtelte Liste**.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            spielfeld = [;
+                ["Gras", "Gras", "Wasser"],
+                ["Stein", "Diamant", "Gras"],
+                ["Wasser", "Stein", "Gold"],
+            ]
+        }
+    }
+    `
+- type: text
+  text: |-
+    `So eine Liste passt gut zu einem Spielfeld mit Zeilen und Spalten.
+
+    | Zeile | Spalte `0` | Spalte `1` | Spalte `2` |
+    | --- | --- | --- | --- |
+    | `0` | `"Gras"` | `"Gras"` | `"Wasser"` |
+    | `1` | `"Stein"` | `"Diamant"` | `"Gras"` |
+    | `2` | `"Wasser"` | `"Stein"` | `"Gold"` |
+
+    ### Einzelne Felder lesen
+
+    Bei verschachtelten Listen brauchst du zwei Indizes:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            spielfeld = [;
+                ["Gras", "Gras", "Wasser"],
+                ["Stein", "Diamant", "Gras"],
+                ["Wasser", "Stein", "Gold"],
+            ]
+
+            System.out.println(spielfeld[1][1]);
+            System.out.println(spielfeld[2][2]);
+        }
+    }
+    `
+- type: text
+  text: |-
+    `| Ausdruck | Bedeutung | Wert |
+    | --- | --- | --- |
+    | `spielfeld[1]` | zweite Zeile | `["Stein", "Diamant", "Gras"]` |
+    | `spielfeld[1][1]` | zweite Zeile, zweite Spalte | `"Diamant"` |
+    | `spielfeld[2][2]` | dritte Zeile, dritte Spalte | `"Gold"` |
+
+    !!! note Reihenfolge
+    Bei `spielfeld[1][2]` wird zuerst die Zeile ausgewählt und danach ein Feld in
+    dieser Zeile.
+    !!!
+
+    ### Durch alle Felder laufen
+
+    Mit zwei Schleifen kannst du jedes Feld eines Spielfelds ansehen.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            spielfeld = [;
+                ["Gras", "Gras", "Wasser"],
+                ["Stein", "Diamant", "Gras"],
+                ["Wasser", "Stein", "Gold"],
+            ]
+
+            for (var zeile : spielfeld) {
+                for (var block : zeile) {
+                    System.out.println(block);
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Die äußere Schleife nimmt eine ganze Zeile. Die innere Schleife geht dann durch
+    die einzelnen Blöcke in dieser Zeile.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            spielfeld
+              zeile 0 -> Gras, Gras, Wasser
+              zeile 1 -> Stein, Diamant, Gras
+              zeile 2 -> Wasser, Stein, Gold
+        }
+    }
+    `
+  options:
+    showEditor: false

@@ -1,0 +1,30 @@
+contentType: ide_only
+contents: []
+editorSettings:
+  instructions: Zeichne ein Quadrat mit den Seitenlängen 100. Die Programm soll 
+    sich immer nach rechts drehen.
+  startingCode: |-
+    `public class Main {
+        public static void main(String[] args) {
+            // import turtle
+        }
+    }
+    `
+gradingSettings:
+  targetCode: |-
+    `public class Main {
+        public static void main(String[] args) {
+            // import turtle
+            for (int i = 0; i < 4; i++) {
+                // // turtle.forward(100) → in Java: Ausgabe/Zeichnung
+                // // turtle.right(90) → in Java: Richtungsänderung
+            }
+        }
+    }
+    `
+  gradingMethod: byOutputMatch
+  testCases:
+  - hidden: false
+  dueDateGroup:
+    enableDueDate: true
+    duedate: '2026-02-22T23:00:00.000Z'

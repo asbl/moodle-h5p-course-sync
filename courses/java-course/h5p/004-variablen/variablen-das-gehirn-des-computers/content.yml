@@ -1,0 +1,43 @@
+contentType: text_only
+contents:
+- type: text
+  text: |-
+    `Variablen sind das **"Gehirn des Computers"**.
+
+    In Variablen kann man Werte speichern und später wieder verwenden. 
+    Dies klingt nicht nach viel, ist aber eines der wichtigsten Konzept 
+    bei der Programmierung.
+
+    Eine erste Variablenzuweisung in Java kann so aussehen:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            int age = 18;
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Diese Zuweisung besteht aus zwei Teilen. 
+
+    Links steht ein **Name**, rechts ein **Wert**
+
+    Die Zahl 18 wird irgendwo an einer Adresse im Computer gespeichert.  
+    Damit sie später wiedergefunden werden kann, bekommt sie den **Namen** `age`.
+
+    ### Beispiel`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            int a = 3;
+            int b = 4;
+            System.out.println(a + b);
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Hier wurden die Zahlen 3 und 4 an den Speicherorten a und b gespeichert.
+    Die Print-Anweisung kann anschließend auf die beiden Werte zugreifen.`

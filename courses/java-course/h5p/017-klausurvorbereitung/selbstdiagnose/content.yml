@@ -1,0 +1,269 @@
+contentType: text_only
+contents:
+- type: text
+  text: |-
+    `## Bin ich klausurbereit?
+
+    Lies jede Aussage durch. Wenn du dir sicher bist, hake sie ab – wenn nicht,
+    wiederhole das entsprechende Kapitel noch einmal.
+
+    ### Variablen und Ausdrücke
+
+    - [ ] Ich kann den Wert einer Variable nach jeder Zuweisung bestimmen.
+    - [ ] Ich kenne den Unterschied zwischen `=` (Zuweisung) und `==` (Vergleich).
+    - [ ] Ich kann `//` (ganzzahlige Division) und `%` (Modulo) berechnen.
+
+    ### Schleifen
+
+    - [ ] Ich kann eine `for`-Schleife mit `range()` Schritt für Schritt
+          durchführen und alle Werte als Tabelle aufschreiben.
+    - [ ] Ich kann eine `while`-Schleife als Tabelle verfolgen und erkennen,
+          wann sie endet.
+    - [ ] Ich verstehe, wie eine `for`-Schleife über eine Liste iteriert.
+
+    ### Verzweigungen
+
+    - [ ] Ich kann `if`, `elif` und `else` an einem Beispiel erklären.
+    - [ ] Ich kann einen booleschen Ausdruck mit `and` oder `or` auswerten.
+
+    ### Listen
+
+    - [ ] Ich kann `append`, `len` und den Indexzugriff (`liste[i]`) erklären
+          und anwenden.
+    - [ ] Ich kann eine Liste nach jeder Änderung aufschreiben.
+    - [ ] Ich kann mit einer `for`-Schleife und einer Bedingung Elemente aus
+          einer Liste filtern oder zählen.
+
+    ### Funktionen
+
+    - [ ] Ich kann eine Funktion mit Parameter und `return` schreiben.
+    - [ ] Ich kann erklären, was ein Rückgabewert ist und wie er sich von
+          `System.out.println` unterscheidet.
+    - [ ] Ich kann zwei Funktionen für verschiedene Eingaben vergleichen und
+          den Unterschied in einem Satz beschreiben.
+
+    ### Java OOP
+
+    - [ ] Ich erkenne Welt, Actor und Ereignis-Registrierung im Code.
+    - [ ] Ich kann eine Bewegung in x- oder y-Richtung implementieren.
+    - [ ] Ich kann erklären, was beim Tastendruck in einem Java OOP-Programm
+          passiert.
+
+    ---
+
+    ## Abschluss-Aufgaben
+
+    Löse diese Aufgaben zunächst auf Papier – dann überprüfe am Rechner.
+
+    ### Aufgabe 1 – Code lesen und Tabelle erstellen`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            int a = 4;
+            int b = 3;
+            for (int i = 0; i < 3; i++) {
+                a = a + b;
+                b = a - b;
+                System.out.println(a, b);
+        }
+    }
+    `
+- type: text
+  text: 'a) Fülle die Tabelle aus:'
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            i | a (nach a = a + b) | b (nach b = a - b) | Ausgabe
+            0 | ?                  | ?                  | ?
+            1 | ?                  | ?                  | ?
+            2 | ?                  | ?                  | ?
+        }
+    }
+    `
+  options:
+    showEditor: false
+- type: text
+  text: |-
+    `b) Welche drei Zeilen gibt das Programm insgesamt aus?
+
+    ### Aufgabe 2 – Funktion implementieren
+
+    Gegeben: `noten = [2, 5, 1, 4, 3, 1]`
+
+    a) Schreibe eine Funktion `anzahl_einsen(noten)`, die zählt, wie viele
+       Einsen in der Liste stehen.
+    b) Schreibe eine Funktion `bestanden(noten)`, die `True` zurückgibt, wenn
+       mindestens die Hälfte aller Noten `<= 3` ist.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void anzahl_einsen(int noten) {
+        // Dein Code hier
+        pass
+
+        public static void bestanden(int noten) {
+        // Dein Code hier
+        pass
+
+        System.out.println(anzahl_einsen([2, 5, 1, 4, 3, 1]))  # 2);
+        System.out.println(bestanden([2, 5, 1, 4, 3, 1]))       # True);
+        }
+        }
+
+        public static void main(String[] args) {
+    `
+- type: text
+  text: '### Aufgabe 3 – Funktionen vergleichen und beurteilen'
+- type: code
+  code: |-
+    `public class Main {
+        public static void berechne_a(int punkte) {
+        return punkte * 2;
+
+        public static void berechne_b(int punkte) {
+        if (punkte >= 5) {
+        return punkte * 3;
+        return punkte;
+        }
+        }
+
+        public static void main(String[] args) {
+    `
+- type: text
+  text: |-
+    `a) Berechne für `punkte = 3` und `punkte = 5` jeweils beide Rückgabewerte.
+    b) Beschreibe in einem Satz, worin sich die beiden Funktionen unterscheiden.
+    c) Ein Spieler hat 6 Punkte. Welche Funktion liefert den höheren Wert?
+       Begründe.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void berechne_a(int punkte) {
+        return punkte * 2;
+
+        public static void berechne_b(int punkte) {
+        if (punkte >= 5) {
+        return punkte * 3;
+        return punkte;
+
+        System.out.println(berechne_a(3), berechne_b(3));
+        System.out.println(berechne_a(5), berechne_b(5));
+        System.out.println(berechne_a(6), berechne_b(6));
+        }
+        }
+
+        public static void main(String[] args) {
+    `
+- type: text
+  text: |-
+    `---
+
+    ## Niveau 2 – Anspruchsvollere Aufgaben
+
+    ### Aufgabe 4 – while-Schleife analysieren`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            int n = 64;
+            int schritte = 0;
+            while (n > 1) {
+                n = n // 2;
+                schritte = schritte + 1;
+            System.out.println(schritte);
+        }
+    }
+    `
+- type: text
+  text: 'a) Fülle die Tabelle aus und bestimme die Ausgabe:'
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            Schritt | n  | schritte | Bedingung n > 1
+            Start   | 64 | 0        | –
+            1       | ?  | ?        | wahr
+            2       | ?  | ?        | ?
+            3       | ?  | ?        | ?
+            ...     | ?  | ?        | ?
+            Ende    | ?  | ?        | falsch → Ende
+        }
+    }
+    `
+  options:
+    showEditor: false
+- type: text
+  text: |-
+    `b) Was berechnet die Schleife allgemein für eine beliebige Zahl `n`?
+    c) Was wäre die Ausgabe für `n = 128`?
+
+    ### Aufgabe 5 – Funktion mit Liste
+
+    Schreibe eine Funktion `nur_positive(zahlen)`, die eine neue Liste
+    zurückgibt mit nur den positiven Zahlen (> 0) aus `zahlen`.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void nur_positive(int zahlen) {
+        // Dein Code
+        pass
+
+        System.out.println(nur_positive([3, -1, 7, 0, -4, 2]))  # [3, 7, 2]);
+        System.out.println(nur_positive([-1, -2]))              # []);
+        }
+
+        public static void main(String[] args) {
+    }
+    `
+- type: text
+  text: |-
+    `---
+
+    ## Niveau 3 – Anspruchsvolle Aufgaben
+
+    ### Aufgabe 6 – Funktion beurteilen und absichern`
+- type: code
+  code: |-
+    `public class Main {
+        public static void maximum(int liste) {
+        groesster = liste[0];
+        for (var x : liste) {
+        if (x > groesster) {
+        groesster = x;
+        return groesster;
+        }
+        }
+
+        public static void main(String[] args) {
+    `
+- type: text
+  text: |-
+    `a) Was gibt `maximum([5, 3, 8, 1])` zurück?
+    b) Was passiert bei `maximum([])`? Erkläre das Verhalten.
+    c) Schreibe eine verbesserte Version, die mit einer leeren Liste umgehen kann.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void maximum(int liste) {
+        // Verbesserte Version
+        pass
+
+        System.out.println(maximum([5, 3, 8, 1]))  # 8);
+        System.out.println(maximum([]))             # None (oder sinnvoller Wert);
+        }
+
+        public static void main(String[] args) {
+    }
+    `
+- type: text
+  text: |-
+    `### Aufgabe 7 – Entwurf beschreiben
+
+    Beschreibe in Stichworten (kein fertiger Code), wie eine Funktion
+    `rangfolge(punkte)` vorgehen würde: Sie erhält eine Liste von Punktzahlen
+    und soll eine sortierte Liste von Tupeln `(rang, punkte)` zurückgeben,
+    wobei Rang 1 die höchste Punktzahl bekommt.
+
+    Welche Schritte braucht die Funktion? Welche Schwierigkeit siehst du?`

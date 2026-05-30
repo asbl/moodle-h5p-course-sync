@@ -1,0 +1,65 @@
+contentType: ide_only
+contents: []
+editorSettings:
+  instructions: |-
+    `Schreibe die Funktion `filtere_wertvolle_bloecke(bloecke)`.
+
+    Sie bekommt eine Liste mit Blocknamen und soll eine neue Liste zurückgeben.
+    In der neuen Liste sollen nur `"Diamant"` und `"Gold"` stehen.
+
+    | `bloecke` | Rückgabe |
+    | --- | --- |
+    | `["Erde", "Gold", "Stein", "Diamant"]` | `["Gold", "Diamant"]` |
+    | `["Stein", "Kohle"]` | `[]` |`
+  startingCode: |-
+    `public class Main {
+        public static void main(String[] args) {
+            public static void filtere_wertvolle_bloecke(int bloecke) {
+                wertvoll = []
+                // Ergänze die Schleife.
+                return wertvoll;
+            }
+        }
+    }
+    `
+  postCode: |-
+    `public class Main {
+        public static void main(String[] args) {
+            bloecke = input().split()
+            System.out.println(filtere_wertvolle_bloecke(bloecke));
+        }
+    }
+    `
+gradingSettings:
+  targetCode: |-
+    `public class Main {
+        public static void main(String[] args) {
+            public static void filtere_wertvolle_bloecke(int bloecke) {
+                wertvoll = []
+                for (var block : bloecke) {
+                    if (block == "Diamant" or block == "Gold") {
+                        wertvoll.append(block)
+                    }
+                }
+                return wertvoll;
+            }
+        }
+    }
+    `
+  gradingMethod: ioTestCases
+  testCases:
+  - hidden: false
+    inputs:
+    - Erde Gold Stein Diamant
+    outputs:
+    - "['Gold', 'Diamant']"
+  - hidden: false
+    inputs:
+    - Stein Kohle
+    outputs:
+    - '[]'
+  - hidden: true
+    inputs:
+    - Diamant Gold Gold Erde
+    outputs:
+    - "['Diamant', 'Gold', 'Gold']"

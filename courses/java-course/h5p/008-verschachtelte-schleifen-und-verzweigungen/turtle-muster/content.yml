@@ -1,0 +1,29 @@
+contentType: text_only
+contents:
+- type: text
+  text: 'Mit verschachtelten Schleifen kannst du in Java-Programm Muster zeichnen:'
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            // t = turtle.Programm()
+            t.speed(0)
+
+            int rows = 3;
+            int cols = 3;
+            size = 20   # Radius der Kreise;
+            distance = 60  # Abstand zwischen den Kreisen;
+
+            for i in range(rows):
+                for j in range(cols):
+
+                    t.penup()
+                    t.goto(j*distance, -i*distance)
+                    t.pendown()
+
+                    t.circle(size)
+
+            // turtle.done()
+        }
+    }
+    `

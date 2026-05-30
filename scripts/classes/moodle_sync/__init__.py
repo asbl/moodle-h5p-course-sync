@@ -1,6 +1,7 @@
 from .moodle_syncer import MoodleImportClient, MoodlePingClient, MoodleSyncer
 from .api_client import MoodleApiClient
 from .backup_extractor import MoodleBackupExtractor
+from .backup_importer import MoodleBackupImporter
 from .client_resolver import MoodleClientResolver
 
 __all__ = [
@@ -9,5 +10,6 @@ __all__ = [
 	"MoodlePingClient",
 	"MoodleApiClient",
 	"MoodleBackupExtractor",
+	"MoodleBackupImporter",
 	"MoodleClientResolver",
 ]

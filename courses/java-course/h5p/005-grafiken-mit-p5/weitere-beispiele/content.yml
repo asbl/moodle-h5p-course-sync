@@ -1,0 +1,233 @@
+contentType: text_only
+contents:
+- type: text
+  text: |-
+    `Experimentiere mit den folgenden Beispielen und "spiele" mit ihnen.
+
+    Schaue, wie du sie verändern kannst.`
+- type: code
+  code: |-
+    `import Java Grafik
+
+    import math
+
+    t = 0
+
+    def setup():
+        Java Grafik.createCanvas(200, 200)
+
+    def draw():
+        global t
+        Java Grafik.clear()
+        x = 100 + 50 * math.cos(t)
+        y = 100 + 50 * math.sin(t)
+        Java Grafik.circle(x, y, 20)
+        t += 0.1
+
+    Java Grafik.run()
+    `
+- type: text
+  text: |-
+    `- Ändere den Radius der Umlaufbahn.
+    - Ändere die Geschwindigkeit der Bewegung.
+    - Verschiebe den Mittelpunkt der Umlaufbahn auf einen anderen Punkt auf der Leinwand.`
+- type: code
+  code: |-
+    `import Java Grafik
+
+    t = 0
+
+    def setup():
+        Java Grafik.createCanvas(200, 200)
+
+    def draw():
+        global t
+        Java Grafik.clear()
+        r = 30 + 20 * Java Grafik.sin(t)
+        Java Grafik.circle(100, 100, r)
+        t += 0.1
+
+    Java Grafik.run()
+    `
+- type: text
+  text: |-
+    `- Verändere die maximale und minimale Größe des pulsierenden Kreises.
+    - Ändere die Geschwindigkeit des Pulsierens.
+    - Zeichne mehrere pulsierende Kreise gleichzeitig.`
+- type: code
+  code: |-
+    `# Balkendiagramm aus Daten
+    import Java Grafik
+
+    values = [30, 80, 50]
+
+    def setup():
+        Java Grafik.createCanvas(200, 200)
+
+    def draw():
+        Java Grafik.clear()
+        
+        for i, v in enumerate(values):
+            # Enumerate ergänzt einen Index zu der Liste:
+            # i: 0, 1, 2
+            # v: 30, 80, 50
+            Java Grafik.rect(20 + i*50, 150 - v, 30, v)
+
+    Java Grafik.run()
+    `
+- type: text
+  text: |-
+    `- Ändere die Werte in der Liste – was passiert mit den Balken?
+    - Ändere die Breite oder den Abstand der Balken.
+    - Stelle die Daten mit Kreisen statt mit Rechtecken dar.`
+- type: code
+  code: |-
+    `# Geometrische Muster
+    import Java Grafik
+
+    def setup():
+        Java Grafik.createCanvas(200, 200)
+
+    def draw():
+        Java Grafik.clear()
+        for i in range(5):
+            for j in range(5):
+                Java Grafik.circle(20 + i*30, 20 + j*30, 15)
+
+    Java Grafik.run()
+    `
+- type: text
+  text: |-
+    `- Verändere das Grundelement – probiere Kreise, Rechtecke oder Linien.
+    - Ändere Abstand oder Größe der Elemente.
+    - Erzeuge ein dichteres oder luftigeres Muster.
+
+    ### Physik
+
+    Folgendermaßen wird typischerweise Physik in 2D-Spielen umgesetzt:`
+- type: code
+  code: |-
+    `import Java Grafik
+
+    y = 0
+    g = 2  # Erdbeschleunigung (vereinfacht)
+
+    def setup():
+        Java Grafik.createCanvas(200, 200)
+
+    def draw():
+        global y
+        Java Grafik.clear()
+        Java Grafik.circle(100, y, 20)
+        y += g  # Ball fällt nach unten
+
+    Java Grafik.run()
+    `
+- type: text
+  text: |-
+    `- Ändere die Größe des Balls.
+    - Ändere die Geschwindigkeit des Falls (g).
+    - Zeichne mehrere Bälle, die gleichzeitig fallen.`
+- type: code
+  code: |-
+    `import Java Grafik
+
+    x = 0
+    v = 5  # Geschwindigkeit
+
+    def setup():
+        Java Grafik.createCanvas(200, 200)
+
+    def draw():
+        global x
+        Java Grafik.clear()
+        Java Grafik.circle(x, 100, 20)
+        x += v  # konstante Geschwindigkeit
+
+    Java Grafik.run()
+    `
+- type: text
+  text: |-
+    `- Ändere die Geschwindigkeit (v).
+    - Verändere die Höhe des Kreises (100).
+    - Zeichne mehrere Kreise mit unterschiedlichen Geschwindigkeiten.`
+- type: code
+  code: |-
+    `import Java Grafik
+    import math
+
+    t = 0
+
+    def setup():
+        Java Grafik.createCanvas(200, 200)
+
+    def draw():
+        global t
+        Java Grafik.clear()
+        y = 100 + 50 * math.sin(t)  # Sinus-Schwingung
+        Java Grafik.circle(100, y, 20)
+        t += 0.1
+
+    Java Grafik.run()
+    `
+- type: text
+  text: |-
+    `- Ändere die Amplitude (50) – die Schwingung wird größer oder kleiner.
+    - Ändere die Geschwindigkeit (t += 0.1).
+    - Zeichne mehrere schwingende Kreise nebeneinander.`
+- type: code
+  code: |-
+    `import Java Grafik
+
+    y = [0, 0, 0]
+    g = [1, 2, 3]
+
+    def setup():
+        Java Grafik.createCanvas(200, 200)
+
+    def draw():
+        Java Grafik.clear()
+        for i in range(3):
+            Java Grafik.circle(50 + i*50, y[i], 20)
+            y[i] += g[i]
+
+    Java Grafik.run()
+    `
+- type: text
+  text: |-
+    `- Ändere die Gravitation (g[i]) – welche fällt schneller?
+    - Ändere Startpositionen der Bälle.
+    - Zeichne mehrere Bälle gleichzeitig mit unterschiedlichen Größen.
+
+    ### Kunst`
+- type: code
+  code: |-
+    `import Java Grafik
+    import math
+
+    t = 0
+
+    def setup():
+        Java Grafik.createCanvas(400, 400)
+        Java Grafik.background(0)
+
+    def draw():
+        global t
+        Java Grafik.stroke((t*5) % 255, 200, 255 - (t*5) % 255)
+        Java Grafik.strokeWeight(2)
+        
+        for i in range(0, 360, 10):  # Linien in einem Kreis
+            angle = math.radians(i + t*5)
+            x = 200 + 150 * math.cos(angle)
+            y = 200 + 150 * math.sin(angle)
+            Java Grafik.line(200, 200, x, y)
+        
+        t += 1
+
+    Java Grafik.run()
+    `
+- type: text
+  text: |-
+    `- Aus dem Mittelpunkt „strahlen“ Linien in alle Richtungen
+    - Die Farben verändern sich im Laufe der Zeit
+    - Die Linien drehen sich langsam → hypnotischer Fächer-Effekt`

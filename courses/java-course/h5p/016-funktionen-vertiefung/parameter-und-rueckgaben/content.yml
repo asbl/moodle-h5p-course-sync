@@ -1,0 +1,79 @@
+contentType: text_only
+contents:
+- type: text
+  text: |-
+    `Eine Funktion kann etwas **ausgeben** oder einen Wert **zurückgeben**. Das ist
+    nicht dasselbe.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void zeige_block(int block) {
+        System.out.println("Block:", block);
+
+
+        zeige_block("Gras")
+        }
+
+        public static void main(String[] args) {
+    }
+    `
+- type: text
+  text: |-
+    `Diese Funktion gibt Text auf der Konsole aus. Der Aufruf selbst liefert keinen
+    nützlichen Wert zurück.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void block_text(int block) {
+        return "Block: " + block;
+
+
+        text = block_text("Gras");
+        System.out.println(text);
+        }
+
+        public static void main(String[] args) {
+    }
+    `
+- type: text
+  text: |-
+    `Hier wird ein String zurückgegeben. Er kann gespeichert, verglichen oder später
+    ausgegeben werden.
+
+    ### Faustregel
+
+    Nutze `return`, wenn das Ergebnis weiterverwendet werden soll.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void ist_wertvoll(int block) {
+        return block == "Diamant" or block == "Gold";
+
+
+        if (ist_wertvoll("Diamant")) {
+        System.out.println("Einpacken!");
+        }
+        }
+
+        public static void main(String[] args) {
+    `
+- type: text
+  text: |-
+    `### Aufgabe
+
+    Schreibe die Funktion so um, dass sie nicht direkt druckt, sondern einen String
+    zurückgibt.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void beschreibe_fund(int block, int anzahl) {
+        System.out.println(str(anzahl) + "x " + block);
+
+
+        fund = beschreibe_fund("Stein", 12);
+        System.out.println("Gefunden:", fund);
+        }
+
+        public static void main(String[] args) {
+    }
+    `

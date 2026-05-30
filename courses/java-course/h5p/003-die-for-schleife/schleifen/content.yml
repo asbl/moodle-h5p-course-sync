@@ -1,0 +1,73 @@
+contentType: text_only
+contents:
+- type: text
+  text: |-
+    `Einer der **Grundkonzepte** der Programmierung ist es, 
+    Abläufe zu **automatisieren**.
+
+    Dies hilft dir außerdem, deine Programme übersichtlicher zu gestalten,
+    da du Code-Zeilen nicht wiederholen musst.
+
+    Betrachte das Quadrat aus dem letzten Kapitel:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            // // turtle.forward(100) → in Java: Ausgabe/Zeichnung
+            // // turtle.right(90) → in Java: Richtungsänderung
+
+            // // turtle.forward(100) → in Java: Ausgabe/Zeichnung
+            // // turtle.right(90) → in Java: Richtungsänderung
+
+            // // turtle.forward(100) → in Java: Ausgabe/Zeichnung
+            // // turtle.right(90) → in Java: Richtungsänderung
+
+            // // turtle.forward(100) → in Java: Ausgabe/Zeichnung
+        }
+    }
+    `
+- type: text
+  text: 'Mit einer Schleife geht dies effizienter:'
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            for (int i = 0; i < 4; i++) {
+            // // turtle.forward(100) → in Java: Ausgabe/Zeichnung
+            // // turtle.right(90) → in Java: Richtungsänderung
+        }
+    }
+    `
+- type: text
+  text: 'Eine Schleife besteht aus mehreren Teilen:'
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            for (int i = 0; i < 4; i++) {
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Diese Zeil bedeutet: 
+    Wiederhole 4x den folgenden eingerückt Code.
+
+    Die Zeile endet mit einem **öffnenden Einrückung** - In Java bedeutet das 
+    immer, dass sich diese Zeile auf den kompletten Code der nächsten Zeilen bezieht, der eingerückt ist.
+
+    Du siehst den Unterschied, wenn du dein Programm anders einrückst:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            for (int i = 0; i < 4; i++) {
+            // // turtle.forward(100) → in Java: Ausgabe/Zeichnung
+            // // turtle.right(90) → in Java: Richtungsänderung
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Es wird 4x die Zeile ```// turtle.forward(100) → in Java: Ausgabe/Zeichnung``` ausgeführt. 
+    Erst danach dreht sich die Programm um 90°`

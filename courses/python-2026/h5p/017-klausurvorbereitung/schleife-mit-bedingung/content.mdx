@@ -1,0 +1,128 @@
+Wenn eine `for`-Schleife eine Bedingung enthält, prüfst du für jedes Element,
+ob die Bedingung gilt – und notierst, was sich ändert.
+
+```python noeditor
+zahlen = [3, 7, 2, 8, 1]
+summe = 0
+for z in zahlen:
+    if z > 4:
+        summe = summe + z
+print(summe)  # nur 7 und 8 zählen: 15
+```
+
+### Übung 1
+
+Bestimme die Ausgabe. Schreibe eine Tabelle mit den Spalten
+`w`, `w % 2 == 0`, `summe`.
+
+```python
+werte = [4, 9, 1, 6, 3, 8]
+summe = 0
+for w in werte:
+    if w % 2 == 0:
+        summe = summe + w
+print(summe)
+```
+
+```python noeditor
+w | w % 2 == 0 | summe
+4 | ?          | ?
+9 | ?          | ?
+1 | ?          | ?
+6 | ?          | ?
+3 | ?          | ?
+8 | ?          | ?
+```
+
+### Übung 2
+
+Welche Wörter landen in der Liste `kurze`? Bestimme die Ausgabe zuerst
+auf Papier.
+
+```python
+woerter = ["Hund", "Katze", "Aal", "Esel", "Uhu"]
+kurze = []
+for wort in woerter:
+    if len(wort) <= 3:
+        kurze.append(wort)
+print(kurze)
+```
+
+```python noeditor
+wort      | len(wort) | len(wort) <= 3 | in kurze?
+"Hund"    | 4         | nein           | –
+"Katze"   | ?         | ?              | ?
+"Aal"     | ?         | ?              | ?
+"Esel"    | ?         | ?              | ?
+"Uhu"     | ?         | ?              | ?
+```
+
+---
+
+## Niveau 2
+
+### Übung 3
+
+Diesmal gibt es zwei Zählkategorien. Lege eine Tabelle mit den Spalten
+`p`, `p >= 6`, `p >= 4`, `hoch`, `mittel` an.
+
+```python
+punkte = [3, 7, 5, 2, 8, 4, 6]
+hoch = 0
+mittel = 0
+for p in punkte:
+    if p >= 6:
+        hoch = hoch + 1
+    elif p >= 4:
+        mittel = mittel + 1
+print(hoch, mittel)
+```
+
+```python noeditor
+p | p >= 6 | p >= 4 | hoch | mittel
+3 | nein   | nein   | 0    | 0
+7 | ?      | ?      | ?    | ?
+5 | ?      | ?      | ?    | ?
+2 | ?      | ?      | ?    | ?
+8 | ?      | ?      | ?    | ?
+4 | ?      | ?      | ?    | ?
+6 | ?      | ?      | ?    | ?
+```
+
+---
+
+## Niveau 3
+
+### Übung 4 – Funktion implementieren
+
+Schreibe eine Funktion `zaehle_treffer(zahlen, grenze)`, die zählt, wie viele
+Zahlen in der Liste **größer als** `grenze` sind.
+
+```python
+def zaehle_treffer(zahlen, grenze):
+    # Dein Code
+    pass
+
+print(zaehle_treffer([3, 7, 5, 2, 8, 4, 6], 5))  # 3
+print(zaehle_treffer([1, 2, 3], 10))               # 0
+```
+
+### Übung 5 – Beurteilen
+
+Beide Funktionen sollen prüfen, ob **alle** Zahlen in der Liste positiv sind.
+Welche ist besser geeignet? Begründe.
+
+```python
+def alle_positiv_a(zahlen):
+    for z in zahlen:
+        if z <= 0:
+            return False
+    return True
+
+def alle_positiv_b(zahlen):
+    positiv = 0
+    for z in zahlen:
+        if z > 0:
+            positiv = positiv + 1
+    return positiv == len(zahlen)
+```

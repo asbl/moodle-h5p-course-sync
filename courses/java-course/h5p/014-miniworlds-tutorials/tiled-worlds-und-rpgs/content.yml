@@ -1,0 +1,188 @@
+contentType: text_only
+advancedOptions:
+  disableOutputPopups: true
+contents:
+- type: text
+  text: |-
+    `# Tiled Worlds und einfache RPGs
+
+    Eine normale `World` arbeitet mit Pixeln: Ein Actor kann zum Beispiel bei
+    `(137, 82)` stehen. Eine `TiledWorld` arbeitet dagegen mit Feldern. Die Position
+    `(3, 2)` bedeutet: vierte Spalte, dritte Zeile.
+
+    Das passt sehr gut zu RPGs, Brettspielen und Labyrinthen.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            // import Java OOP
+
+            // world = Java OOP.TiledWorld(10, 7)
+            world.add_background((220, 235, 215))
+
+            // spieler = Java OOP.Actor((1, 1))
+            spieler.color = (60, 120, 220)
+
+            // ziel = Java OOP.Actor((8, 5))
+            ziel.color = (240, 190, 70)
+
+            world.run()
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Der Spieler steht auf Feld `(1, 1)`, das Ziel auf Feld `(8, 5)`. Du denkst also
+    nicht mehr in Pixeln, sondern in Spielfeld-Koordinaten.
+
+    ### Feldweise bewegen
+
+    In einer `TiledWorld` bewegt sich ein Actor standardmäßig feldweise. Mit
+    `direction` legst du die Richtung fest:
+
+    * `0` bedeutet nach rechts
+    * `90` bedeutet nach unten
+    * `180` bedeutet nach links
+    * `270` bedeutet nach oben`
+- type: code
+  code: |-
+    `public class Main {
+        public static void on_key_down_w(int self) {
+        self.y = self.y  + 1
+
+        // @spieler.register
+        public static void on_key_down_s(int self) {
+        self.y = self.y - 1
+
+        // @spieler.register
+        public static void on_key_down_a(int self) {
+        self.x = self.x - 1
+
+        // @spieler.register
+        public static void on_key_down_d(int self) {
+        self.x = self.x + 1
+
+        world.run()
+        }
+        }
+
+        public static void main(String[] args) {
+            // import Java OOP
+
+            // world = Java OOP.TiledWorld(10, 7)
+            world.add_background((220, 235, 215))
+
+            // spieler = Java OOP.Actor((1, 1))
+            spieler.color = (60, 120, 220)
+
+            // @spieler.register
+    `
+- type: text
+  text: |-
+    `### Wände ergänzen
+
+    Für ein RPG braucht man Hindernisse. Ein Actor kann eine Wand sein, wenn
+    `is_blocking = True` gesetzt wird. Der Spieler muss zusätzlich
+    `is_blockable = True` bekommen. Dann kann er nicht durch blockierende Actors
+    hindurchlaufen.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void on_key_down_w(int self) {
+        self.y = self.y  + 1
+
+        // @spieler.register
+        public static void on_key_down_s(int self) {
+        self.y = self.y - 1
+
+        // @spieler.register
+        public static void on_key_down_a(int self) {
+        self.x = self.x - 1
+
+        // @spieler.register
+        public static void on_key_down_d(int self) {
+        self.x = self.x + 1
+
+        world.run()
+        }
+        }
+
+        public static void main(String[] args) {
+            // import Java OOP
+
+            // world = Java OOP.TiledWorld(10, 7)
+            world.add_background((220, 235, 215))
+
+            // spieler = Java OOP.Actor((1, 1))
+            spieler.color = (60, 120, 220)
+            spieler.is_blockable = True
+
+            for position in [(3, 1), (3, 2), (3, 3), (5, 4), (6, 4), (7, 4)]:
+            // wand = Java OOP.Actor(position)
+                wand.color = (80, 90, 95)
+                wand.is_blocking = True
+
+            // @spieler.register
+    `
+- type: text
+  text: |-
+    `### Ein Ziel und eine Nachricht
+
+    Jetzt wird daraus ein kleines RPG: Der Spieler läuft durch die Welt, sammelt
+    einen Schatz ein und bekommt eine Nachricht.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void act(int self) {
+        if (self.detect(schatz) and not self.hat_gewonnen) {
+        System.out.println("Geschafft! Du hast den Schatz gefunden.");
+        self.hat_gewonnen = True
+
+        // @spieler.register
+        public static void on_key_down_w(int self) {
+        self.y = self.y  + 1
+
+        // @spieler.register
+        public static void on_key_down_s(int self) {
+        self.y = self.y - 1
+
+        // @spieler.register
+        public static void on_key_down_a(int self) {
+        self.x = self.x - 1
+
+        // @spieler.register
+        public static void on_key_down_d(int self) {
+        self.x = self.x + 1
+
+        world.run()
+        }
+        }
+
+        public static void main(String[] args) {
+            // import Java OOP
+
+            // world = Java OOP.TiledWorld(10, 7)
+            world.add_background((220, 235, 215))
+
+            // spieler = Java OOP.Actor((1, 1))
+            spieler.color = (60, 120, 220)
+            spieler.is_blockable = True
+            spieler.hat_gewonnen = False
+
+            // schatz = Java OOP.Actor((8, 5))
+            schatz.color = (240, 190, 70)
+
+            for position in [(3, 1), (3, 2), (3, 3), (5, 4), (6, 4), (7, 4)]:
+            // wand = Java OOP.Actor(position)
+                wand.color = (80, 90, 95)
+                wand.is_blocking = True
+
+            // @spieler.register
+    `
+- type: text
+  text: |-
+    `!!! note Warum TiledWorld?
+    Für RPGs ist eine TiledWorld angenehm, weil deine Spiellogik einfach wird:
+    `(1, 1)` ist ein Feld, `(3, 2)` ist eine Wand, `(8, 5)` ist ein Schatz. Dadurch
+    kannst du Level später sehr gut mit Listen oder Strings beschreiben.
+    !!!`

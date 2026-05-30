@@ -1,0 +1,86 @@
+Jede Funktion kann einen Wert zurückgeben. Überlege zuerst: Was soll die
+Funktion **berechnen oder prüfen**? Dann wähle die passende Rechnung oder
+Bedingung.
+
+```python
+def verdoppeln(zahl):
+    return zahl * 2
+
+print(verdoppeln(5))   # 10
+print(verdoppeln(3))   # 6
+```
+
+### Übung 1
+
+Schreibe eine Funktion `ist_gerade(zahl)`, die `True` zurückgibt, wenn
+`zahl` gerade ist, und `False` sonst. Hinweis: Modulo `%`.
+
+```python
+def ist_gerade(zahl):
+    # Dein Code hier
+    pass
+
+print(ist_gerade(4))    # True
+print(ist_gerade(7))    # False
+print(ist_gerade(0))    # True
+```
+
+### Übung 2
+
+Schreibe eine Funktion `kuerzer_als(wort, laenge)`, die `True` zurückgibt,
+wenn die Länge des Wortes kleiner als `laenge` ist.
+
+```python
+def kuerzer_als(wort, laenge):
+    # Dein Code hier
+    pass
+
+print(kuerzer_als("Hallo", 6))       # True
+print(kuerzer_als("Informatik", 5))  # False
+print(kuerzer_als("See", 3))         # False
+```
+
+---
+
+## Niveau 2
+
+### Übung 3
+
+Schreibe eine Funktion `kategorie(punkte)`, die abhängig vom Punktwert einen
+Text zurückgibt: `"sehr gut"` für ≥ 45, `"gut"` für ≥ 30, `"ausreichend"`
+für ≥ 20 und `"nicht bestanden"` für alles darunter.
+
+```python
+def kategorie(punkte):
+    # Dein Code hier
+    pass
+
+print(kategorie(48))   # sehr gut
+print(kategorie(33))   # gut
+print(kategorie(21))   # ausreichend
+print(kategorie(15))   # nicht bestanden
+```
+
+---
+
+## Niveau 3
+
+### Übung 4 – Implementierungen vergleichen und beurteilen
+
+Beide Funktionen sollen `True` zurückgeben, wenn `zahl` eine einstellige
+positive Zahl ist (1–9).
+
+```python
+def einstellig_a(zahl):
+    return 1 <= zahl <= 9
+
+def einstellig_b(zahl):
+    if zahl >= 1:
+        if zahl <= 9:
+            return True
+    return False
+```
+
+a) Teste beide für `zahl = 0`, `1`, `9`, `10`. Sind beide korrekt?
+b) Welche Version würdest du bevorzugen? Begründe.
+c) Was gibt `einstellig_b(-5)` zurück? Erkläre den Ablauf Schritt für Schritt.

@@ -45,6 +45,8 @@ class H5PFileService:
         base_dir = Path("h5p")
         if question.h5p_subdir:
             base_dir /= question.h5p_subdir
+        if question.raw_package:
+            return (base_dir / f"{question.identifier}.h5p").as_posix()
         return (base_dir / question.identifier).as_posix()
 
     def write_h5p_sidecar_files(self, question: PythonQuestionBlock) -> tuple[str, str]:
@@ -70,6 +72,11 @@ class H5PFileService:
                 shutil.rmtree(target_path)
             else:
                 target_path.unlink()
+
+        if question.raw_package:
+            self._ensure_directory(target_path.parent)
+            shutil.copy2(source_archive, target_path)
+            return relative_path
 
         with ZipFile(source_archive) as archive:
             metadata_payload = json.loads(archive.read("h5p.json").decode("utf-8"))

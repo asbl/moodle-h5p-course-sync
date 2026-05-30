@@ -1,0 +1,138 @@
+contentType: text_only
+contents:
+- type: text
+  text: |-
+    `Mit `+` kannst du zwei Strings verbinden. Wenn du aber mehrere Textteile
+    zusammensetzen möchtest, wird das schnell unübersichtlich. 
+
+    Für solche Fälle gibt es `join()`.
+
+    Beispiel:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            woerter = ["laterne", "kompass", "notiz"];
+
+            System.out.println(", ".join(woerter)) # Die Wörter werden mit , verbunden);
+            System.out.println(" - ".join(woerter)) # ...oder mit Bindestrich);
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Der String vor `.join()` ist der Trenner. Er wird zwischen die einzelnen
+    Elemente gesetzt.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            ", ".join(["laterne", "kompass", "notiz"])
+
+            laterne + ", " + kompass + ", " + notiz
+        }
+    }
+    `
+  options:
+    showEditor: false
+- type: text
+  text: |-
+    `!!! note Wichtig
+    `join()` erwartet eine Liste von **Strings**. Wenn in der Liste Zahlen liegen,
+    musst du sie vorher in Strings umwandeln.
+    !!!
+
+    ### Warum ist die join() Funktion hilfreich?
+
+    Stell dir vor, du möchtest eine Liste von Gegenständen ausgeben:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            inventar = ["Schlüssel", "Funkgerät", "Pausenbrot"];
+
+            text = "Inventar: " + ", ".join(inventar);
+            System.out.println(text);
+        }
+    }
+    `
+  options:
+    showEditor: false
+- type: text
+  text: 'Das ist besser als:'
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            System.out.println(inventar[0] + ", " + inventar[1] + ", " + inventar[2]);
+        }
+    }
+    `
+  options:
+    showEditor: false
+- type: text
+  text: |-
+    `Die zweite Variante funktioniert nur für genau drei Einträge. `join()` passt
+    viel besser zu Listen.
+
+    ### Exkurs: split() und join()
+
+    `split()` und `join()` sind Gegenstücke. 
+
+    * `split()` macht aus einem String eine Liste. 
+    * `join()` macht aus einer Liste wieder einen String.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            String satz = "Runen leuchten leise";
+            woerter = satz.split();
+
+            System.out.println(woerter);
+            System.out.println("|".join(woerter)) # Gibt wieder den ursprünglichen Satz aus.);
+        }
+    }
+    `
+- type: text
+  text: 'Aus `"Runen leuchten leise"` wird zuerst:'
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            ["Runen", "leuchten", "leise"]
+        }
+    }
+    `
+- type: text
+  text: Danach verbindet `"|" .join(...)` die Wörter mit einem senkrechten 
+    Strich.
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            "Runen leuchten leise"
+                    split()
+            ["Runen", "leuchten", "leise"]
+                    "|".join(...)
+            "Runen|leuchten|leise"
+        }
+    }
+    `
+  options:
+    showEditor: false
+- type: text
+  text: |-
+    `### Kombination mit f-Strings
+
+    `join()` und f-Strings passen gut zusammen:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            String name = "Taro";
+            hinweise = ["Spind 13", "blauer Würfel", "leerer Korridor"];
+
+            System.out.println(f"{name} notiert: {', '.join(hinweise)}");
+        }
+    }
+    `

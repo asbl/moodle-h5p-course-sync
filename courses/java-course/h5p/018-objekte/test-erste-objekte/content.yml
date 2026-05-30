@@ -1,0 +1,42 @@
+contentType: ide_only
+contents: []
+editorSettings:
+  instructions: |-
+    `Erstelle ein Programm-Objekt und zeichne damit ein gleichseitiges Dreieck.
+
+    - Erstelle ein Programm-Objekt mit `t = turtle.Programm()`
+    - Setze die Farbe auf `"darkgreen"` mit `t.color("darkgreen")`
+    - Zeichne ein gleichseitiges Dreieck mit Seitenlänge `100`
+      - Vorwärts `100` Schritte, dann `120°` nach rechts drehen
+      - Das ganze dreimal`
+  startingCode: |-
+    `public class Main {
+        public static void main(String[] args) {
+            // import turtle
+
+            // t = turtle.Turtle()
+        }
+    }
+    `
+gradingSettings:
+  targetCode: |-
+    `public class Main {
+        public static void main(String[] args) {
+            // import turtle
+
+            // t = turtle.Turtle()
+            t.color("darkgreen")
+
+            for (int i = 0; i < 3; i++) {
+                t.forward(100)
+                t.right(120)
+            }
+        }
+    }
+    `
+  gradingMethod: byOutputMatch
+  testCases:
+  - hidden: false
+  dueDateGroup:
+    enableDueDate: true
+    duedate: '2026-09-01T07:00:00.000Z'

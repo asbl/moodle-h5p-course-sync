@@ -1,0 +1,79 @@
+contentType: ide_only
+contents: []
+editorSettings:
+  instructions: |-
+    `Baue ein Namensschild aus einer Charakterklasse und einem Namen.
+
+    Die Eingaben werden vom Test vorgegeben. In deinem sichtbaren Code sollst du
+    daraus den String `namensschild` zusammensetzen.
+
+    Die Variable `character_class` enthält die Charakterklasse. Die Variable
+    `name` enthält den Namen.
+
+    Achte besonders auf die Leerzeichen und Klammern.
+
+    Das fertige Namensschild soll genau diese Form haben:
+
+    #### Eingabe
+    Magierin
+    Iva
+
+    #### Ausgabe
+    Iva (Magierin)`
+  preCode: |-
+    `public class Main {
+        public static void main(String[] args) {
+            character_class = input()
+            name = input()
+        }
+    }
+    `
+  startingCode: |-
+    `public class Main {
+        public static void main(String[] args) {
+            namensschild =
+        }
+    }
+    `
+  postCode: |-
+    `public class Main {
+        public static void main(String[] args) {
+            System.out.println(namensschild);
+        }
+    }
+    `
+gradingSettings:
+  targetCode: |-
+    `public class Main {
+        public static void main(String[] args) {
+            character_class = input()
+            name = input()
+
+            namensschild = name + " (" + character_class + ")"
+            System.out.println(namensschild);
+        }
+    }
+    `
+  dueDateGroup:
+    enableDueDate: true
+    duedate: '2026-06-01T07:00:00.000Z'
+  gradingMethod: ioTestCases
+  testCases:
+  - hidden: false
+    inputs:
+    - Magierin
+    - Iva
+    outputs:
+    - Iva (Magierin)
+  - hidden: false
+    inputs:
+    - Waldläufer
+    - Theo
+    outputs:
+    - Theo (Waldläufer)
+  - hidden: true
+    inputs:
+    - Schurkin
+    - Yara
+    outputs:
+    - Yara (Schurkin)

@@ -1,0 +1,70 @@
+contentType: ide_only
+contents: []
+editorSettings:
+  instructions: |-
+    `Von der Kommandozeile werden 3 Zahlen a, b und c eingelesen.
+
+    Gib aus, wie viele der 3 Zahlen identisch sind.`
+  preCode: |-
+    `public class Main {
+        public static void main(String[] args) {
+            a = int(input())
+            b = int(input())
+            c = int(input())
+        }
+    }
+    `
+  startingCode: |-
+    `public class Main {
+        public static void main(String[] args) {
+            int equal_numbers = 0;
+
+            if ((a == b)) {
+                ...
+
+            }
+            System.out.println(equal_numbers);
+        }
+    }
+    `
+gradingSettings:
+  gradingMethod: ioTestCases
+  testCases:
+  - hidden: false
+    inputs:
+    - '1'
+    - '2'
+    - '1'
+    outputs:
+    - '2'
+  - hidden: false
+    inputs:
+    - '2'
+    - '2'
+    - '2'
+    outputs:
+    - '3'
+  - hidden: false
+    inputs:
+    - '1'
+    - '2'
+    - '3'
+    outputs:
+    - '0'
+  - hidden: false
+    inputs:
+    - '0'
+    - '4'
+    - '4'
+    outputs:
+    - '2'
+  - hidden: true
+    inputs:
+    - '3'
+    - '1'
+    - '3'
+    outputs:
+    - '2'
+  dueDateGroup:
+    enableDueDate: true
+    duedate: '2026-03-09T07:00:00.000Z'

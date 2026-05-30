@@ -1,0 +1,50 @@
+contentType: text_only
+contents:
+- type: text
+  text: |-
+    `Listen werden besonders stark, wenn du sie mit Bedingungen und Schleifen
+    kombinierst.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            bloecke = ["Erde", "Stein", "Diamant", "Stein", "Gold"];
+
+            wertvoll = [];
+            for (var block : bloecke) {
+                if (block == "Diamant" or block == "Gold") {
+                    wertvoll.append(block)
+
+            System.out.println(wertvoll);
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Hier entsteht eine neue Liste. Sie enthält nur die Blöcke, die zur Bedingung
+    passen.
+
+    | `block` | Bedingung erfüllt? | `wertvoll` danach |
+    | --- | --- | --- |
+    | `"Erde"` | nein | `[]` |
+    | `"Stein"` | nein | `[]` |
+    | `"Diamant"` | ja | `["Diamant"]` |
+    | `"Stein"` | nein | `["Diamant"]` |
+    | `"Gold"` | ja | `["Diamant", "Gold"]` |
+
+    ### Muster: filtern
+
+    Dieses Muster heißt **filtern**:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            neue_liste = [];
+            for (var element : alte_liste) {
+                if (bedingung) {
+                    neue_liste.append(element)
+        }
+    }
+    `
+  options:
+    showEditor: false

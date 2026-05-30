@@ -389,8 +389,8 @@ class PythonQuestion(H5PContentType):
                 "testCases": [
                     {
                         "hidden": tc.hidden,
-                        "inputs": [{"input": v} for v in tc.inputs],
-                        "outputs": [{"output": v} for v in tc.outputs],
+                        "inputs": list(tc.inputs),
+                        "outputs": list(tc.outputs),
                     }
                     for tc in self.test_cases
                 ],

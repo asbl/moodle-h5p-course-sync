@@ -1,0 +1,149 @@
+contentType: text_only
+contents:
+- type: text
+  text: |-
+    `In der Klausur wirst du auch Fehler in Code suchen und erklären.
+    Unterscheide:
+
+    * **Syntaxfehler** – Java kann den Code gar nicht starten (Meldung erscheint
+      sofort).
+    * **Logikfehler** – Der Code läuft, liefert aber ein falsches Ergebnis.
+
+    Lese jeden Block zuerst ohne Ausführen.
+
+    ### Block A
+
+    Was ist hier der Fehler? Erkläre ihn in einem Satz, dann schreibe
+    die korrigierte Version in den Editor und führe sie aus.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            for i in range(5)
+                System.out.println(i);
+        }
+    }
+    `
+  options:
+    showEditor: false
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            // Korrigierter Code:
+        }
+    }
+    `
+- type: text
+  text: |-
+    `### Block B
+
+    Das Programm soll `0 + 1 + 2 + 3 = 6` ausgeben, gibt aber `0` aus.
+    Warum? Korrigiere den Fehler.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            int summe = 0;
+            for (int runde = 0; runde < 4; runde++) {
+                summe + runde
+            System.out.println(summe);
+        }
+    }
+    `
+- type: text
+  text: |-
+    `### Block C
+
+    Die Funktion soll `True` zurückgeben, wenn `anzahl` **mindestens** 3 ist.
+    Für `anzahl = 3` gibt sie aber `False` zurück. Was ist falsch?`
+- type: code
+  code: |-
+    `public class Main {
+        public static void mindestens_drei(int anzahl) {
+        return anzahl > 3;
+
+        System.out.println(mindestens_drei(3))   # soll True ergeben);
+        System.out.println(mindestens_drei(5))   # True);
+        }
+
+        public static void main(String[] args) {
+    }
+    `
+- type: text
+  text: |-
+    `---
+
+    ## Niveau 2
+
+    ### Block D – Zuweisungsfehler in Schleife
+
+    Das Programm soll die größte Zahl der Liste ausgeben. Es gibt aber immer
+    denselben Wert aus. Erkläre den Fehler und korrigiere ihn.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            zahlen = [3, 7, 2, 9, 1];
+            groesste = zahlen[0];
+            for (var z : zahlen) {
+                if (z > groesste) {
+                    z = groesste  # Fehler hier;
+            System.out.println(groesste);
+        }
+    }
+    `
+- type: text
+  text: |-
+    `### Block E – Funktion ohne Wirkung
+
+    Die Funktion soll die Summe aller Listenelemente berechnen, gibt aber
+    immer `0` zurück. Was ist falsch?`
+- type: code
+  code: |-
+    `public class Main {
+        public static void summe(int liste) {
+        int gesamt = 0;
+        for (var z : liste) {
+        gesamt + z
+        return gesamt;
+
+        System.out.println(summe([1, 2, 3, 4]))  # soll 10 ergeben);
+        }
+        }
+
+        public static void main(String[] args) {
+    `
+- type: text
+  text: |-
+    `---
+
+    ## Niveau 3
+
+    ### Code-Review
+
+    Beurteile den folgenden Code. Was funktioniert nicht wie erwartet? Erkläre
+    das Problem und schreibe eine korrigierte Version.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void alle_positiv(int liste) {
+        ergebnis = False;
+        for (var element : liste) {
+        if (element > 0) {
+        ergebnis = True;
+        } else {
+        ergebnis = False;
+        return ergebnis;
+
+        System.out.println(alle_positiv([1, 2, 3]))    # soll True sein);
+        System.out.println(alle_positiv([-1, 2, 3]))   # soll False sein);
+        }
+        }
+
+        public static void main(String[] args) {
+    `
+- type: text
+  text: |-
+    `Teste beide Aufrufe, erkläre dann: Wann gibt die Funktion ein falsches
+    Ergebnis, und warum?`

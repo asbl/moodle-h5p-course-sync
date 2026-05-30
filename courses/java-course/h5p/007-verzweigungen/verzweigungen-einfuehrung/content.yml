@@ -1,0 +1,106 @@
+contentType: text_only
+contents:
+- type: text
+  text: |-
+    `Oft gibt es Situationen, in denen Entscheidungen abhängig von einer Bedingung 
+    getroffen werden müssen. 
+
+    In einem Flussdiagramm können solche Entscheidungen so aussehen:
+
+    ### Grundlagen: Verzweigungen:
+
+    In Java kann man dies mit einer If-Anweisung umsetzen:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            if (Bedingung) {
+              Anweisung 1
+              Anweisung 2
+        }
+    }
+    `
+- type: text
+  text: |-
+    `### Bedingungen
+
+    Bei einer **IF-Verzweigung** wird Code abhängig von einer **Bedingung** ausgeführt:
+
+    * Mit `==` kannst du überprüfen, ob zwei Zahlen den gleichen Wert haben.
+    * Genauso kannst du mit `!=` überprüfen, ob zwei Zahlen **nicht** den gleichen Wert haben.
+    * Mit `>`, `<`, `>=` und `<=` kannst du zwei Zahlen vergleichen.
+
+    #### Beispiel:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            System.out.println(3 == 4) # False);
+            System.out.println(3 == 3) # True);
+            System.out.println(3 != 1) # True);
+        }
+    }
+    `
+- type: text
+  text: 'Damit kannst du nun die **IF-Verzweigung** bauen:'
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            // import random
+
+            x = random.randint(0, 3);
+            // x ist eine zufällige Zahl zwischen 0 und 3
+
+            if (x == 3) {
+                System.out.println("Die Zahl ist 3") # Dies wird ausgegeben, wenn x = 3 ist.);
+            if (x != 3) {
+                System.out.println("Die Zahl ist NICHT 3, sondern", x) # Dies wird ausgegeben, wenn x nicht = 3 ist.);
+        }
+    }
+    `
+- type: text
+  text: 'Die allgemeine Syntax für die IF-Anweisung lautet wie folgt:'
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            if (bedingung) {
+                codeblock
+        }
+    }
+    `
+- type: text
+  text: |-
+    `!!! info  Hinweis
+    Auch hier gilt. Man rückt Code-Blöcke üblicherweise mit 4 Leerzeichen ein.
+    !!!
+
+    #### Beispiel:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            alter = int(input());
+            if (alter >= 18) {
+                System.out.println("Du bist volljährig!");
+            if (alter < 18) {
+                System.out.println("Du bist noch nicht volljährig");
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Wie bei der **for-Anweisung** kannst du auch bei der **IF-Anweisung** 
+    durch Einrückung mehrere Zeilen gleichzeitig abhängig von der Bedingung ausführen:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            alter = int(input());
+            if (alter => 18) {
+                System.out.println("Herzlichen Glückwunsch!");
+                System.out.println("Du bist volljährig!");
+        }
+    }
+    `

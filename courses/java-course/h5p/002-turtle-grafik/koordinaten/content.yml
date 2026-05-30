@@ -1,0 +1,75 @@
+contentType: text_and_ide
+editorSettings:
+  preCode: |-
+    ``
+  startingCode: |-
+    `import turtle 
+    turtle.goto(0,0) 
+    turtle.forward(300) 
+    turtle.goto(10,10) 
+    turtle.setheading(90) 
+    turtle.forward(100) 
+    turtle.goto(0,0) 
+    turtle.setheading(180) 
+    turtle.forward(100) 
+    turtle.goto(0,0) 
+    turtle.setheading(270) 
+    turtle.forward(100)
+    `
+  postCode: |-
+    ``
+  instructions: |-
+    `Du bist dran: Verändere das folgende Programm und 
+    spiele mit den Koordinaten.
+    `
+gradingSettings:
+  gradingMethod: please_choose
+  dueDateGroup:
+    enableDueDate: true
+    duedate: '1969-12-31T23:00:00.000Z'
+contents:
+- type: text
+  text: |-
+    `Java-Programm verwendet ein Zeichenfenster und strukturiert dieses
+    mit Hilfe eines Koordinatensystems
+
+
+    Du kannst auf dieses Koordinatensystem direkt zugreifen mit
+    folgendem Befehl:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            // turtle.goto(x, y) # (Setze für x und y Zahlen ein)
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Die Position (0,0) bezeichnet dabei den Ursprung. 
+
+    Die erste Koordinate bezeichnet immer die x-Achse, die zweite Koordinate
+    die y-Achse. Beide Koordinaten können auch negative Werte haben.
+
+    Außerdem kann man die Programm auch direkt in eine bestimmte Richtung drehen. 
+    Man verwendet dafür den folgenden Befehl:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            setheading([winkel])
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Man setzt für `[Winkel]` einen Winkel als Zahl ein, z.B. `setheading(120)` 
+    oder als Dezimalzahl `setheading(120.0)` (Beachte, dass man hier
+    wie in der englischen Sprache ein . statt eines Kommas verwendet).)
+
+    Zur Orientierung: Den Winkeln kann man folgende Richtungen zuordnen:
+
+      * 0: Osten 
+      * 90 Norden 
+      * 180: Westen 
+      * 270: Osten`

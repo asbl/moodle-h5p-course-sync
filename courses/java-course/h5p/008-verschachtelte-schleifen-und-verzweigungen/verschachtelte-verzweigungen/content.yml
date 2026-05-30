@@ -1,0 +1,57 @@
+contentType: text_only
+contents:
+- type: text
+  text: Eine verschachtelte Bedingung prüft mehrere Regeln hintereinander.
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            pokemon = input("Welchen Typ hat dein Pokémon? (Feuer/Wasser/Pflanze): ").lower();
+            gegner = input("Welchen Typ hat dein Gegner? (Feuer/Wasser/Pflanze): ").lower();
+            //text.lower() wandelt einen String in Kleinbuchstaben um - Dies vermeidet Fehler bei Vergleichen
+
+            if (pokemon == "feuer") {
+                if (gegner == "pflanze") {
+                    System.out.println("Dein Feuer-Pokémon ist stark gegen Pflanze!");
+                if (gegner == "feuer") {
+                    System.out.println("Dein Pokemon ist neutral gegen Feuer");
+                if (gegner == "wasser") {
+                    System.out.println("Dein Pokemon ist schwach gegen Wasser");
+            } else if (pokemon == "wasser") {
+                if (gegner == "feuer") {
+                    System.out.println("Dein Wasser-Pokémon ist stark gegen Feuer!");
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Wie du siehst wird für diese Abfragen einfach weiter eingerückt.
+
+    Man nennt so ein `If` innerhalb eines `If`s eine **verschachtelte Verzweigung** (oder auchh verschachtelte Bedingung).
+
+    Oft kann man Verschachtelungen auch vermeiden, so kann man z.B. diesen Code:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            if (pokemon == "feuer") {
+                if (gegner == "pflanze") {
+                    System.out.println("Dein Feuer-Pokémon ist stark gegen Pflanze!");
+        }
+    }
+    `
+- type: text
+  text: 'mit Hilfe der Verknüpfung `and` auch schreiben als:'
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            if (pokemon == "feuer" and gegner == "pflanze") {
+                    System.out.println("Dein Feuer-Pokémon ist stark gegen Pflanze!");
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Vor allem in komplexeren Programmen versucht man tief verschachtelte Verzweigungen möglichst zu vermeiden, 
+    da diese schwerer zu lesen und zu verstehen sind.`

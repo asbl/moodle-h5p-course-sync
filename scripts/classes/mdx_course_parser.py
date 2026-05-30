@@ -341,9 +341,17 @@ class MdxCourseParser:
         questions: dict[str, PythonQuestionBlock] = {}
         rendered_source = parse_source
         sorted_chapter_keys = sorted(chapter_subdirs)
+        _TAG_TO_LIBRARY = {
+            "JavaQuestion": "H5P.JavaQuestion",
+            "SQLQuestion": "H5P.SQLQuestion",
+            "AutomataQuestion": "H5P.AutomataQuestion",
+        }
 
         for match in self._tag_re.finditer(parse_source):
             attrs = self.parse_tag_attributes(match.group("attrs"))
+            tag_name = match.group("tag") if "tag" in self._tag_re.groupindex else ""
+            if tag_name in _TAG_TO_LIBRARY and "h5pLibrary" not in attrs and "h5p-library" not in attrs:
+                attrs = {**attrs, "h5pLibrary": _TAG_TO_LIBRARY[tag_name]}
             question = self.build_question_from_attrs(
                 course_dir,
                 attrs,

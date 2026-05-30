@@ -1,0 +1,106 @@
+In der Klausur wirst du auch Fehler in Code suchen und erklären.
+Unterscheide:
+
+* **Syntaxfehler** – Python kann den Code gar nicht starten (Meldung erscheint
+  sofort).
+* **Logikfehler** – Der Code läuft, liefert aber ein falsches Ergebnis.
+
+Lese jeden Block zuerst ohne Ausführen.
+
+### Block A
+
+Was ist hier der Fehler? Erkläre ihn in einem Satz, dann schreibe
+die korrigierte Version in den Editor und führe sie aus.
+
+```python noeditor
+for i in range(5)
+    print(i)
+```
+
+```python
+# Korrigierter Code:
+```
+
+### Block B
+
+Das Programm soll `0 + 1 + 2 + 3 = 6` ausgeben, gibt aber `0` aus.
+Warum? Korrigiere den Fehler.
+
+```python
+summe = 0
+for runde in range(4):
+    summe + runde
+print(summe)
+```
+
+### Block C
+
+Die Funktion soll `True` zurückgeben, wenn `anzahl` **mindestens** 3 ist.
+Für `anzahl = 3` gibt sie aber `False` zurück. Was ist falsch?
+
+```python
+def mindestens_drei(anzahl):
+    return anzahl > 3
+
+print(mindestens_drei(3))   # soll True ergeben
+print(mindestens_drei(5))   # True
+```
+
+---
+
+## Niveau 2
+
+### Block D – Zuweisungsfehler in Schleife
+
+Das Programm soll die größte Zahl der Liste ausgeben. Es gibt aber immer
+denselben Wert aus. Erkläre den Fehler und korrigiere ihn.
+
+```python
+zahlen = [3, 7, 2, 9, 1]
+groesste = zahlen[0]
+for z in zahlen:
+    if z > groesste:
+        z = groesste  # Fehler hier
+print(groesste)
+```
+
+### Block E – Funktion ohne Wirkung
+
+Die Funktion soll die Summe aller Listenelemente berechnen, gibt aber
+immer `0` zurück. Was ist falsch?
+
+```python
+def summe(liste):
+    gesamt = 0
+    for z in liste:
+        gesamt + z
+    return gesamt
+
+print(summe([1, 2, 3, 4]))  # soll 10 ergeben
+```
+
+---
+
+## Niveau 3
+
+### Code-Review
+
+Beurteile den folgenden Code. Was funktioniert nicht wie erwartet? Erkläre
+das Problem und schreibe eine korrigierte Version.
+
+```python
+def alle_positiv(liste):
+    ergebnis = False
+    for element in liste:
+        if element > 0:
+            ergebnis = True
+        else:
+            ergebnis = False
+    return ergebnis
+
+print(alle_positiv([1, 2, 3]))    # soll True sein
+print(alle_positiv([-1, 2, 3]))   # soll False sein
+```
+
+Teste beide Aufrufe, erkläre dann: Wann gibt die Funktion ein falsches
+Ergebnis, und warum?

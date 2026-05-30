@@ -1,0 +1,23 @@
+## PythonQuestion mit Turtle
+<PythonQuestion
+  identifier="python-turtle"
+  title="Turtle: Haus"
+  instructions="Dieses Beispiel zeigt Turtle-Grafik – ein einfaches Haus aus geometrischen Formen."
+/>
+
+```python question:python-turtle starter
+import turtle
+
+turtle.speed(3)
+
+# Wände
+for _ in range(4):
+    turtle.forward(120)
+    turtle.right(90)
+
+# Dach
+turtle.left(30)
+for _ in range(3):
+    turtle.forward(120)
+    turtle.left(120)
+```

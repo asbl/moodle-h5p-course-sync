@@ -46,6 +46,7 @@ def run_cli_command(
     ]
     | None = None,
     update_h5p_libraries_from_github: Callable[[str | None], list[dict[str, str]]] | None = None,
+    import_moodle_from_mbz: Callable[[str, Path, int, str], Path] | None = None,
 ) -> None:
     try:
         if args.command == "sync":
@@ -89,6 +90,22 @@ def run_cli_command(
         if args.command == "import-moodle":
             client = resolve_moodle_client(args.base_url, args.token)
             course_dir = import_moodle_course(args.course, args.remote_course_id, client)
+            print(course_dir.relative_to(root_dir))
+            print(sync_metadata_path(course_dir).relative_to(root_dir))
+            return
+
+        if args.command == "import-mbz":
+            if import_moodle_from_mbz is None:
+                raise RuntimeError("import-mbz ist nicht konfiguriert.")
+            mbz_path = Path(args.mbz_path).expanduser()
+            if not mbz_path.exists():
+                raise FileNotFoundError(f"MBZ-Datei nicht gefunden: {mbz_path}")
+            course_dir = import_moodle_from_mbz(
+                args.course,
+                mbz_path,
+                args.remote_course_id,
+                args.base_url,
+            )
             print(course_dir.relative_to(root_dir))
             print(sync_metadata_path(course_dir).relative_to(root_dir))
             return

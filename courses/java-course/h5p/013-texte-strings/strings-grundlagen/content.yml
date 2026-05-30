@@ -1,0 +1,165 @@
+contentType: text_only
+contents:
+- type: text
+  text: |-
+    `Texte heißen in Java **Strings**. Immer wenn dein Programm Namen,
+    Nachrichten, Orte, Passwörter, Dialogzeilen oder kleine Statusmeldungen
+    verarbeiten soll, arbeitest du mit Strings.
+
+    Ein String ist eine **Zeichenkette**. Das kann ein einzelnes Wort sein, ein
+    ganzer Satz, ein Emoji, eine Zahl als Text oder auch ein leerer Text. Java
+    behandelt all diese Dinge erst einmal gleich: als Folge von Zeichen.
+
+    Strings schreibst du mit Anführungszeichen:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            System.out.println("Fackel am Tor brennt");
+            System.out.println('Archiv 7 ist verschlossen');
+            System.out.println("");
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Ob du einfache oder doppelte Anführungszeichen verwendest, ist Java egal.
+    Wichtig ist nur: Am Anfang und am Ende muss die gleiche Art von
+    Anführungszeichen stehen.
+
+    !!! note Merke
+    Alles zwischen den Anführungszeichen gehört zum String. Auch Leerzeichen,
+    Satzzeichen und Zahlen werden dann als Text gespeichert.
+    !!!
+
+    ### Text speichern
+
+    Strings kannst du wie Zahlen in Variablen speichern. Dadurch kann ein Programm
+    Textteile später wiederverwenden, verändern oder zu neuen Ausgaben
+    zusammensetzen.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            String figur = "Nia";
+            String ort = "verlassener Clubraum";
+
+            System.out.println(figur);
+            System.out.println(ort);
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Eine Variable ist hier wie ein beschriftetes Fach: In `figur` liegt der Text
+    `"Nia"`, in `ort` liegt der Text `"verlassener Clubraum"`.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            figur  -> "Nia"
+            ort    -> "verlassener Clubraum"
+        }
+    }
+    `
+  options:
+    showEditor: false
+- type: text
+  text: |-
+    `### Texte verbinden
+
+    Mit `+` kannst du Strings aneinanderhängen.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            String titel = "Kartenseherin";
+            String name = "Mira";
+
+            System.out.println(titel + name);
+            System.out.println(titel + " " + name);
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Das Leerzeichen in `" "` ist auch ein String. Ohne dieses Leerzeichen kleben
+    die Wörter direkt aneinander.
+
+    !!! note Typischer Stolperstein
+    Java fügt beim Verbinden mit `+` keine Leerzeichen automatisch ein. Wenn du
+    ein Leerzeichen sehen möchtest, musst du es selbst als String einbauen.
+    !!!
+
+    ### Text wiederholen
+
+    Mit `*` kannst du einen String wiederholen:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            System.out.println("klopf " * 3);
+            System.out.println("-" * 20);
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Das ist praktisch für kleine Rahmen, Trennlinien oder einfache Textmuster.
+
+    ### Achtung: Zahlen als Text
+
+    Der Text `"3"` ist nicht die Zahl `3`.
+
+    Probiere das Beispiel aus:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            System.out.println("3" + "4");
+            System.out.println(3 + 4);
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Beim ersten Ausdruck werden zwei Strings verbunden. Beim zweiten Ausdruck
+    werden zwei Zahlen addiert.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            "3" + "4"  -> "34"
+             3  +  4   -> 7
+        }
+    }
+    `
+  options:
+    showEditor: false
+- type: text
+  text: |-
+    `### Eingaben sind Strings
+
+    Alles, was mit `input()` eingelesen wird, ist zunächst ein String.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            name = input("Gib deinen Namen ein:");
+            System.out.println("Dein Platz an der Tafel ist frei, " + name + "!");
+            System.out.println(type(name));
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Wenn du mit einer Eingabe rechnen möchtest, musst du sie vorher mit `int()`
+    oder `float()` umwandeln. Wenn du mit ihr Text bauen möchtest, kannst du sie
+    direkt verwenden.
+
+    !!! note Ist eine Eingabe ein Text oder eine Zahl?
+    Generell kannst du dir bei jeder Eignabe überlegen: Soll damit gerechnet werden oder soll daraus
+    Text gebaut werden? 
+    * Für Text kannst du den String direkt nutzen. 
+    * Für Rechnungen musst du die Daten vorher mit `int(variable)` oder `float(variable)` umwandeln.
+    !!!`

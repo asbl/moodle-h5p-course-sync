@@ -1,0 +1,15 @@
+contentType: text_only
+contents:
+- type: text
+  text: Experimentiere mit dem folgenden Programm. Versuche es so abzuändern, 
+    dass es die folgenden Bilder darstellen kann
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            for (int i = 0; i < 4; i++) {
+            // // turtle.forward(100) → in Java: Ausgabe/Zeichnung
+            // // turtle.right(90) → in Java: Richtungsänderung
+        }
+    }
+    `

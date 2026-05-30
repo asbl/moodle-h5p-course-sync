@@ -30,3 +30,45 @@ def darf_bauen_b(stein, holz):
 ```
 
 Formuliere danach in einem Satz, worin der Unterschied liegt.
+
+---
+
+## Niveau 2
+
+### Übung 2
+
+Finde selbst **zwei Eingaben**, für die sich `darf_bauen_a` und
+`darf_bauen_b` unterschiedlich verhalten. Erkläre, warum sie dort
+abweichen.
+
+```python
+def darf_bauen_a(stein, holz):
+    return stein >= 2 and holz >= 1
+
+
+def darf_bauen_b(stein, holz):
+    return stein + holz >= 3
+```
+
+---
+
+## Niveau 3
+
+### Übung 3 – Beurteilen und erweitern
+
+Die Regel lautet: „Man braucht mindestens 2 Steine **und** mindestens 1 Holz."
+
+a) Welche der beiden Funktionen setzt diese Regel korrekt um? Nenne ein
+   konkretes Gegenbeispiel, das zeigt, dass die andere Funktion versagt.
+b) Schreibe eine Funktion `darf_bauen_c(stein, holz, seil)`, die zusätzlich
+   mindestens 1 Seil erfordert.
+
+```python
+def darf_bauen_c(stein, holz, seil):
+    # Dein Code
+    pass
+
+print(darf_bauen_c(2, 1, 1))  # True
+print(darf_bauen_c(2, 1, 0))  # False
+print(darf_bauen_c(3, 0, 1))  # False
+```

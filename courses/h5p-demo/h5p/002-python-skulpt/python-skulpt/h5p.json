@@ -1,0 +1,29 @@
+{
+  "title": "Skulpt-Runner: Primzahlen bis 50",
+  "language": "de",
+  "defaultLanguage": "de",
+  "mainLibrary": "H5P.PythonQuestion",
+  "embedTypes": [
+    "div"
+  ],
+  "license": "U",
+  "preloadedDependencies": [
+    {
+      "machineName": "H5P.PythonQuestion",
+      "majorVersion": 6,
+      "minorVersion": 88
+    },
+    {
+      "machineName": "H5P.CodeQuestion",
+      "majorVersion": 6,
+      "minorVersion": 88
+    },
+    {
+      "machineName": "H5P.LibCodeTools",
+      "majorVersion": 6,
+      "minorVersion": 88
+    }
+  ],
+  "majorVersion": 6,
+  "minorVersion": 88
+}

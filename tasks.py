@@ -26,6 +26,13 @@ def _run_python(ctx, *args: str, pty: bool = False) -> None:
     subprocess.run([PYTHON, *command_args], check=True, cwd=ROOT_DIR)
 
 
+def _invoke_binary(project_dir: Path) -> str:
+    local_invoke = project_dir / ".venv" / "bin" / "invoke"
+    if local_invoke.exists():
+        return str(local_invoke)
+    return shutil.which("invoke") or shutil.which("inv") or "invoke"
+
+
 def _remove_path(path: Path) -> None:
     if path.is_dir():
         shutil.rmtree(path)
@@ -118,6 +125,17 @@ def import_moodle(ctx, course: str, remote_course_id: int, base_url: str = "", t
     _run_python(ctx, *args)
 
 
+@task(name="import-mbz", optional=["remote_course_id", "base_url"])
+def import_mbz(ctx, course: str, mbz_path: str, remote_course_id: int = 0, base_url: str = "") -> None:
+    """Import a Moodle course from a local .mbz backup file (no API credentials needed)."""
+    args = [str(COURSE_SYNC), "import-mbz", course, mbz_path]
+    if remote_course_id:
+        args.extend(["--remote-course-id", str(remote_course_id)])
+    if base_url:
+        args.extend(["--base-url", base_url])
+    _run_python(ctx, *args)
+
+
 @task(name="moodle-ping", optional=["base_url", "token"])
 def moodle_ping(ctx, base_url: str = "", token: str = "") -> None:
     """Verify that the configured Moodle webservice connection works."""
@@ -167,3 +185,45 @@ def smoke(ctx, course: str = "python-2026") -> None:
     """Run a quick local verification of tests and sync."""
     test(ctx)
     sync(ctx, course=course)
+
+
+@task(
+    name="release-questions-workflow",
+    optional=["h5p_dev_dir", "course", "tag", "release_target"],
+)
+def release_questions_workflow(
+    ctx,
+    h5p_dev_dir: str = "../h5p-dev",
+    course: str = "h5p-demo",
+    tag: str = "",
+    release_target: str = "all",
+    dry_run: bool = False,
+    skip_release: bool = False,
+) -> None:
+    """Run the Questions release/update/demo verification workflow."""
+    del ctx
+    h5p_dev_path = (ROOT_DIR / h5p_dev_dir).resolve()
+    if not h5p_dev_path.exists():
+        raise FileNotFoundError(f"h5p-dev directory not found: {h5p_dev_path}")
+
+    h5p_invoke = _invoke_binary(h5p_dev_path)
+
+    subprocess.run([h5p_invoke, "pack-all"], check=True, cwd=h5p_dev_path)
+
+    if not skip_release:
+        release_args = [h5p_invoke, "deploy.release"]
+        if release_target == "all":
+            release_args.append("--all")
+        elif release_target:
+            release_args.extend(["--target", release_target])
+        if dry_run:
+            release_args.append("--dry-run")
+        subprocess.run(release_args, check=True, cwd=h5p_dev_path)
+
+    update_args = [PYTHON, "-m", "scripts.main", "update-h5p-libraries"]
+    if tag:
+        update_args.extend(["--tag", tag])
+    subprocess.run(update_args, check=True, cwd=ROOT_DIR)
+
+    subprocess.run([PYTHON, "-m", "unittest", "discover", "-s", "tests", "-p", "test_*.py"], check=True, cwd=ROOT_DIR)
+    subprocess.run([PYTHON, "-m", "scripts.main", "build", course], check=True, cwd=ROOT_DIR)

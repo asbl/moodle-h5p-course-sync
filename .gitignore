@@ -22,6 +22,7 @@ courses/*/.moodle-storage-state.json
 courses/*/.moodle-storage-state-*.json
 
 # Klausuren und Prüfungsaufgaben – privat halten
+exams/
 courses/*/exams/
 
 # H5P-Libraries werden über `inv update-h5p-libraries` bezogen, nicht im Repo gepflegt

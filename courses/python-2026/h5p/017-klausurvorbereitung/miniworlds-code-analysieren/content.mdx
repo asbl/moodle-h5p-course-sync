@@ -28,3 +28,69 @@ world.run()
 
 Beschreibe in eigenen Worten, was beim Drücken der rechten Pfeiltaste passiert.
 Ergänze danach eine linke Bewegung.
+
+---
+
+## Niveau 2
+
+### Übung 2
+
+Ergänze das Programm um:
+
+* eine Aufwärtsbewegung (`on_key_down_up`): `self.y` um 20 verringern
+* eine Randbegrenzung in `on_key_down_right`: Bewegung nur ausführen,
+  wenn `self.x < 480`
+
+```python
+import miniworlds
+
+world = miniworlds.World(520, 260)
+world.add_background((230, 238, 245))
+
+spieler = miniworlds.Actor((80, 180))
+spieler.size = (35, 35)
+spieler.color = (70, 120, 220)
+
+@spieler.register
+def on_key_down_right(self):
+    if self.x < 480:
+        self.x = self.x + 20
+
+# Ergänze on_key_down_left und on_key_down_up:
+
+world.run()
+```
+
+---
+
+## Niveau 3
+
+### Übung 3 – Spielmechanik entwerfen und implementieren
+
+Erweitere das vollständige Programm mit einer Kollisionsmechanik:
+
+* Im `act`-Ereignis des Spielers soll geprüft werden, ob der Spieler nah
+  am Ziel ist (`abs(self.x - ziel.x) < 30 and abs(self.y - ziel.y) < 30`).
+* Wenn ja, soll die Farbe des Ziels auf Grün `(50, 200, 50)` wechseln.
+
+```python
+import miniworlds
+
+world = miniworlds.World(520, 260)
+world.add_background((230, 238, 245))
+
+spieler = miniworlds.Actor((80, 180))
+spieler.size = (35, 35)
+spieler.color = (70, 120, 220)
+
+ziel = miniworlds.Circle((420, 180), 25)
+ziel.color = (230, 180, 60)
+
+@spieler.register
+def on_key_down_right(self):
+    self.x = self.x + 20
+
+# Ergänze act-Ereignis mit Kollisionsprüfung:
+
+world.run()
+```

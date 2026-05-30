@@ -1,0 +1,38 @@
+contentType: text_only
+contents:
+- type: text
+  text: |-
+    `### Funktionen mit Parametern verwenden
+
+    In Java Grafik **verwendest** du Funktionen, wenn du Objekte zeichnen möchtest
+
+    **Beispiel:**`
+- type: code
+  code: |-
+    `
+    `
+- type: text
+  text: |-
+    `Java
+
+    Dies zeichnet eine Linie von den Koordinaten (20 | 40) zu den Koordinaten (30 | 10).
+
+    (Achtung: Der Ursprung liegt immer in der oberen linken Ecke!)
+
+    Die Werte 20, 40, 30, 10 sind die **Parameter**, die der Funktion übergeben werden.
+
+    ### Funktionen definieren
+
+    Außerdem habt ihr bereits eine eigene Funktion definiert`
+- type: code
+  code: |-
+    `
+    def setup():
+        Java Grafik.createCanvas(100, 100)
+    `
+- type: text
+  text: |-
+    `Diese Funktion wird von Java/Java Grafik zu Beginn des Programms aufgerufen. 
+    Alle eingerückt Befehle werden somit ausgeführt, sobald das Programm startet.
+
+    Diese Funktion erwartet keine Parameter (erkennbar daran, dass die Klammer oben leer ist).`

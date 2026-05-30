@@ -1,0 +1,46 @@
+contentType: ide_only
+contents: []
+editorSettings:
+  instructions: |-
+    `Gebe den Flächeninhalt des Rechtecks mit den Seitenlängen
+    a und b aus.
+
+    Verwende dafür die Funktionen `System.out.println` und `area`.`
+  preCode: |-
+    `public class Main {
+        public static void main(String[] args) {
+            public static void area(int x, int y) {
+                return x * y;
+
+            }
+            a = int(input())
+            b = int(input())
+
+            // Jetzt kommt dein Code:
+        }
+    }
+    `
+gradingSettings:
+  gradingMethod: ioTestCases
+  testCases:
+  - hidden: false
+    inputs:
+    - '1'
+    - '1'
+    outputs:
+    - '1'
+  - hidden: false
+    inputs:
+    - '2'
+    - '3'
+    outputs:
+    - '6'
+  - hidden: false
+    inputs:
+    - '3'
+    - '4'
+    outputs:
+    - '12'
+  dueDateGroup:
+    enableDueDate: true
+    duedate: '2026-05-05T21:59:00.000Z'

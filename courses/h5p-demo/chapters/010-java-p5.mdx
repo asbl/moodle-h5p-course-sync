@@ -1,0 +1,26 @@
+## JavaQuestion mit p5
+<JavaQuestion
+  identifier="java-p5"
+  title="Java p5-Grafik: Stadtsilhouette"
+  instructions="Der Starter-Code zeigt bereits einen Nachthimmel mit Mond. Ergänze Gebäude und Fenster für eine Stadtsilhouette."
+/>
+
+```java question:java-p5 starter
+public class Main {
+    public static void main(String[] args) {
+        H5P5.createCanvas(400, 300);
+
+        // Nachthimmel
+        H5P5.background(15, 15, 40);
+
+        // Mond
+        H5P5.fill(255, 250, 200);
+        H5P5.noStroke();
+        H5P5.circle(340, 50, 60);
+
+        // Gebäude ergänzen ...
+
+        H5P5.noLoop();
+    }
+}
+```

@@ -1,0 +1,119 @@
+contentType: text_only
+contents:
+- type: text
+  text: |-
+    `Du hast gelernt, dass Schildkröten und Kreise in Java OOP Objekte sind.
+    Aber Java geht noch weiter: **Fast alles in Java ist ein Objekt** – auch
+    Strings, Zahlen und Listen.
+
+    Wenn du `text.upper()` schreibst, rufst du eine **Methode auf einem
+    String-Objekt** auf. Das ist kein Zufall.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            String text = "schattenarchiv";
+
+            System.out.println(text.upper())          # Methode: Großbuchstaben);
+            System.out.println(text.capitalize())     # Methode: Erster Buchstabe groß);
+            System.out.println(text.replace("a", "@")) # Methode: ersetzen);
+            System.out.println(len(text))             # Funktion, kein Methodenaufruf);
+        }
+    }
+    `
+- type: text
+  text: 'Und genauso wie bei Programm gibt es einen Klassenname hinter jedem Wert:'
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            String text = "Leuchtturm";
+            int zahl = 42;
+            liste = [3, 1, 4, 1, 5];
+
+            System.out.println(type(text))    # <class 'str'>);
+            System.out.println(type(zahl))    # <class 'int'>);
+            System.out.println(type(liste))   # <class 'list'>);
+        }
+    }
+    `
+- type: text
+  text: |-
+    ``type()` zeigt dir die Klasse eines Objekts. `"Leuchtturm"` ist eine Instanz
+    der Klasse `str`, `42` ist eine Instanz der Klasse `int`.
+
+    ### Methoden auf verschiedenen Typen
+
+    Jede Klasse hat ihre eigenen Methoden:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            // str-Methoden:
+            String wort = "signalfeuer";
+            System.out.println(wort.upper());
+            System.out.println(wort.count("e"));
+            System.out.println(wort.startswith("sig"));
+
+            // list-Methoden:
+            punkte = [8, 3, 5, 9, 2];
+            punkte.sort()
+            System.out.println(punkte);
+            punkte.append(7)
+            System.out.println(punkte);
+
+            // int hat weniger Methoden, aber welche gibt es:
+            int zahl = 255;
+            System.out.println(zahl.bit_length())   # wie viele Bits braucht diese Zahl?);
+        }
+    }
+    `
+- type: text
+  text: '### Alles zusammen'
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            Klasse  │  Beispielinstanz  │  Beispielmethode
+                      ─────────┼───────────────────┼──────────────────
+                      str     │  "Hallo"          │  .upper()
+                      int     │  42               │  .bit_length()
+                      list    │  [1, 2, 3]        │  .sort()
+            // Programm  │  turtle.Programm()  │  .forward()
+                      Circle  │  Java OOP.Circle│  .move_right()
+        }
+    }
+    `
+  options:
+    showEditor: false
+- type: text
+  text: |-
+    `Alle folgen demselben Muster: Klasse → Instanz → Methoden und Attribute.
+
+    !!! note Alles ist ein Objekt
+    In Java sind fast alle Werte Objekte. Du hast die ganze Zeit mit Objekten
+    gearbeitet, wenn du `text.upper()` oder `liste.append(x)` geschrieben hast.
+    Der Unterschied zu Programm und Java OOP: Bei Strings musst du keine Instanz
+    selbst erzeugen – `"Hallo"` ist automatisch eine `str`-Instanz.
+    !!!
+
+    ### Ausprobieren: Methoden entdecken
+
+    Mit `dir()` kannst du alle Methoden und Attribute eines Objekts auflisten:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            String text = "Archiv";
+            alle = dir(text);
+
+            for (var name : alle) {
+                if (not name.startswith("_")) {
+                    System.out.println(name);
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Das sind alle Methoden, die ein String kennt. Such dir eine aus, die du noch
+    nicht kennst, und probiere sie aus!`

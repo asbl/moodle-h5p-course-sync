@@ -29,3 +29,66 @@ for schritt in range(1, 5):
         punkte = punkte - 3
     print(schritt, punkte)
 ```
+
+```python noeditor
+schritt | punkte * 2 | punkte > 10? | punkte final | Ausgabe
+1       | ?          | ?            | ?            | ?
+2       | ?          | ?            | ?            | ?
+3       | ?          | ?            | ?            | ?
+4       | ?          | ?            | ?            | ?
+```
+
+---
+
+## Niveau 2
+
+### Übung 2
+
+Jetzt verändern sich zwei Variablen gemeinsam. Lege eine Tabelle mit den
+Spalten `schritt`, `a`, `b` und `Ausgabe` an.
+
+```python
+a = 1
+b = 10
+for schritt in range(4):
+    a = a + schritt
+    b = b - a
+    print(schritt, a, b)
+```
+
+```python noeditor
+schritt | a  | b  | Ausgabe
+0       | ?  | ?  | ?
+1       | ?  | ?  | ?
+2       | ?  | ?  | ?
+3       | ?  | ?  | ?
+```
+
+---
+
+## Niveau 3
+
+### Übung 3 – Ausgabe verstehen und Code anpassen
+
+```python
+ergebnis = 0
+for n in range(1, 6):
+    if n % 2 != 0:
+        ergebnis = ergebnis + n
+print(ergebnis)
+```
+
+a) Fülle die Tabelle aus:
+
+```python noeditor
+n | n % 2 != 0 | ergebnis
+1 | ?          | ?
+2 | ?          | ?
+3 | ?          | ?
+4 | ?          | ?
+5 | ?          | ?
+```
+
+b) Beschreibe in einem Satz, was das Programm insgesamt berechnet.
+c) Ändere den Code so, dass er die Summe aller **geraden** Zahlen von
+   2 bis 10 berechnet.

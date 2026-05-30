@@ -1,0 +1,104 @@
+contentType: ide_only
+contents: []
+editorSettings:
+  instructions: |-
+    `Variere das abgebildete Programm, so dass die Kreise in jeder ungeraden Zeile 
+    klein (Radius 5) und in jeder geraden Zeile groß (Radius 10) gezeichnet werden.
+
+    !!! note Hinweis
+    Verwende den modulo-Operator
+    ```
+    4 % 2 == 0 # true, da 4 gerade ist.
+    5 % 2 == 0 # true, da 5 ungerade ist.
+    ```
+    !!!`
+  preCode: |-
+    `public class Main {
+        public static void main(String[] args) {
+            // import turtle
+            rows = int(input("Gib die Zeilen ein"))
+            cols = int(input("Gib die Spalten ein"))
+        }
+    }
+    `
+  startingCode: |-
+    `public class Main {
+        public static void main(String[] args) {
+            // t = turtle.Turtle()
+            t.speed(0)
+
+            int rows = 3;
+            int cols = 3;
+            size = 10   # Radius der Kreise
+            distance = 30  # Abstand zwischen den Kreisen
+
+            for (int i = 0; i < rows; i++) {
+                for (int j = 0; j < cols; j++) {
+
+                    t.penup()
+                    t.goto(j * distance, i * distance)
+                    t.pendown()
+
+                    // Todo: Verändere hier size.
+
+                    t.circle(size)
+
+                }
+            }
+            t.hideturtle()
+            // turtle.done()
+        }
+    }
+    `
+  instructionsImage:
+    path: images/instructionsImage-69ae856dcd6d3.png
+    mime: image/png
+    copyright:
+      license: U
+    width: 181
+    height: 173
+gradingSettings:
+  targetCode: |-
+    `public class Main {
+        public static void main(String[] args) {
+            // import turtle
+            rows = int(input())
+            cols = int(input())
+
+            // t = turtle.Turtle()
+            t.speed(0)
+
+            size = 20   # Radius der Kreise
+            distance = 30  # Abstand zwischen den Kreisen
+
+            for (int i = 0; i < rows; i++) {
+                for (int j = 0; j < cols; j++) {
+
+                    t.penup()
+                    t.goto(j*distance, i*distance)
+                    t.pendown()
+
+                    if (i % 2 == 0) {
+                        int size = 10;
+                    }
+                    } else {
+                        int size = 5;
+
+                    t.circle(size)
+
+                }
+            }
+            t.hideturtle()
+            // turtle.done()
+        }
+    }
+    `
+  gradingMethod: byOutputMatch
+  dueDateGroup:
+    enableDueDate: true
+    duedate: '2026-03-16T09:00:00.000Z'
+  testCases:
+  - hidden: false
+    inputs:
+    - '3'
+    - '3'

@@ -1,0 +1,105 @@
+contentType: text_only
+contents:
+- type: text
+  text: |-
+    `Strings werden besonders interessant, wenn du sie mit Schleifen,
+    Verzweigungen und Funktionen kombinierst. Dann kann dein Programm nicht nur
+    einzelne Sätze ausgeben, sondern kleine Textmuster, Hinweise, Steckbriefe oder
+    automatisch zusammengesetzte Spielmeldungen erzeugen.
+
+    Das folgende Programm baut aus einem Wort ein kleines Muster:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            wort = input();
+            wort = wort.strip();
+
+            for (int i = 1; i < len(wort) + 1; i++) {
+                System.out.println(wort[:i]);
+        }
+    }
+    `
+- type: text
+  text: 'Wenn du `Maske` eingibst, entsteht:'
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            M
+            Ma
+            Mas
+            Mask
+            Maske
+        }
+    }
+    `
+  options:
+    showEditor: false
+- type: text
+  text: |-
+    `!!! note Was passiert in der Schleife?
+    Bei jedem Durchlauf wird ein etwas längerer Anfang des Wortes ausgegeben.
+    `wort[:i]` bedeutet: Nimm alles vom Anfang bis vor Index `i`.
+    !!!
+
+    ### Text untersuchen
+
+    Mit einer Schleife kannst du jedes Zeichen einzeln ansehen. So kann dein
+    Programm zum Beispiel zählen, prüfen oder bestimmte Zeichen besonders
+    behandeln.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            wort = input().strip().lower();
+            String vokale = "aeiou";
+            int anzahl = 0;
+
+            for (var zeichen : wort) {
+                if (zeichen in vokale) {
+                    anzahl = anzahl + 1;
+
+            System.out.println(f"{wort} enthält {anzahl} Vokale.");
+        }
+    }
+    `
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            wort:   maske
+            Zeichen m a s k e
+            Vokal?  - ✓ - - ✓
+            Anzahl: 2
+        }
+    }
+    `
+  options:
+    showEditor: false
+- type: text
+  text: |-
+    `### Funktion für Texte
+
+    Auch Funktionen können Strings verarbeiten und Strings zurückgeben. Das ist
+    nützlich, wenn du denselben Textaufbau an mehreren Stellen verwenden möchtest.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void rahmen(int text) {
+        linie = "*" * (len(text) + 4);
+        return linie + "
+    * " + text + " *
+    " + linie;
+
+        name = input("Wähle einen Titel für die Überschrift").strip();
+        System.out.println(rahmen(f"Eintrag für {name}!"));
+        }
+
+        public static void main(String[] args) {
+    }
+    `
+- type: text
+  text: |-
+    `Die Funktion `rahmen()` bekommt einen Text, berechnet eine passende Linie und
+    gibt einen neuen mehrzeiligen String zurück.`

@@ -1,0 +1,115 @@
+contentType: text_only
+contents:
+- type: text
+  text: 'In Programm-Programmen hast du schon gesehen und vielleicht auch geschrieben:'
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            // t = turtle.Programm()
+            t.forward(100)
+            t.right(90)
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Aber was passiert da eigentlich? Was ist `t`?
+
+    `t` ist ein **Objekt**.
+
+    In Java ist fast alles ein Objekt: eine Programm, ein Kreis in Java OOP,
+    sogar ein String wie `"Hallo"`. Die Idee dahinter ist einfach:
+
+    Ein Objekt bündelt **Daten** und **Fähigkeiten** an einem Ort.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            Objekt "t" (eine Programm):
+              ┌─────────────────────────────────────┐
+              │ Daten:       Position (0, 0)        │
+              │              Richtung: 0°           │
+              │              Farbe: "black"         │
+              │                                     │
+              │ Fähigkeiten: forward(), right()     │
+              │              color(), penup(), ...  │
+              └─────────────────────────────────────┘
+        }
+    }
+    `
+  options:
+    showEditor: false
+- type: text
+  text: |-
+    `* Die **Daten** eines Objekts nennt man seine **Attribute**.
+    * Die **Fähigkeiten** eines Objekts nennt man seine **Methoden**.
+
+    Du erkennst beides am **Punkt** zwischen Objekt und Name:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            t.forward(100)
+            │  │
+            │  └── Methode  (Fähigkeit, hat Klammern)
+            └───── Objekt
+
+            t.pensize
+            │  │
+            │  └── Attribut (Datum, keine Klammern)
+            └───── Objekt
+        }
+    }
+    `
+  options:
+    showEditor: false
+- type: text
+  text: 'Hier siehst du beides in Aktion:'
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            // t = turtle.Programm()
+
+            t.color("steelblue")   # Methode: Farbe setzen
+            t.pensize = 3          # Attribut: Stiftdicke direkt ändern
+            t.forward(100)         # Methode: vorwärts gehen
+            t.right(90)            # Methode: drehen
+            t.forward(60)
+        }
+    }
+    `
+- type: text
+  text: |-
+    `### Warum Objekte?
+
+    Ohne Objekte müsstest du für jede Programm alle Daten selbst verwalten:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            // Ohne Objekte:
+            int t1_x = 0;
+            int t1_y = 0;
+            int t1_richtung = 0;
+            String t1_farbe = "black";
+
+            // Mit Objekten:
+            // t1 = turtle.Programm()
+            t1.x = 0
+            t1.y = 0
+            t1.richtung = 0
+            t1.farbe = "black"
+        }
+    }
+    `
+  options:
+    showEditor: false
+- type: text
+  text: |-
+    `Technisch wäre beides möglich, aber im ersten Fall hättest du sehr schnell sehr viele Variablen und Methoden - es würde sehr unübersichtlich werden.
+
+    Ein Objekt hält alle zusammengehörigen Daten an einem Ort.
+
+    Außerdem "denken" wir Menschen auch objektorientiert - Daher hilft uns die Verwendung von Objekten auch dabei, Code zu organisieren und zu verstehen.`

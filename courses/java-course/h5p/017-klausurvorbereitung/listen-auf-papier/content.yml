@@ -1,0 +1,161 @@
+contentType: text_only
+contents:
+- type: text
+  text: |-
+    `Listenaufgaben lassen sich gut auf Papier lösen, wenn du die Liste nach jeder
+    Änderung neu notierst.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            items = ["Holz", "Stein"];
+            items.append("Fackel")
+            items[0] = "Brett"
+            System.out.println(items[1]);
+            System.out.println(len(items));
+        }
+    }
+    `
+- type: text
+  text: 'Schreibe die Liste nach jeder Zeile auf:'
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            Start:      ["Holz", "Stein"]
+            append:     ...
+            ersetzen:   ...
+        }
+    }
+    `
+  options:
+    showEditor: false
+- type: text
+  text: |-
+    `### Übung
+
+    Bestimme zuerst ohne Ausführen die Ausgabe.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            weg = ["Start", "Wald", "Mine"];
+            weg.append("See")
+            weg[1] = "Dorf"
+
+            for (var ort : weg) {
+                if (len(ort) <= 4) {
+                    System.out.println(ort);
+        }
+    }
+    `
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            Schritt              | weg
+            Start                | ["Start", "Wald", "Mine"]
+            weg.append("See")    | ?
+            weg[1] = "Dorf"      | ?
+        }
+    }
+    `
+  options:
+    showEditor: false
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            ort      | len(ort) | len(ort) <= 4 | Ausgabe
+            "Start"  | 5        | nein          | –
+            "Dorf"   | ?        | ?             | ?
+            "Mine"   | ?        | ?             | ?
+            "See"    | ?        | ?             | ?
+        }
+    }
+    `
+  options:
+    showEditor: false
+- type: text
+  text: |-
+    `---
+
+    ## Niveau 2
+
+    ### Übung 2
+
+    Jetzt kommen `insert` und `pop` dazu. Schreibe die Liste nach jeder Zeile auf.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            stapel = ["A", "B", "C", "D"];
+            stapel.pop()
+            stapel.insert(1, "X")
+            stapel[0] = stapel[-1]
+            System.out.println(stapel);
+            System.out.println(len(stapel));
+        }
+    }
+    `
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            Schritt                | stapel
+            Start                  | ["A", "B", "C", "D"]
+            stapel.pop()           | ?
+            stapel.insert(1, "X")  | ?
+            stapel[0] = stapel[-1] | ?
+        }
+    }
+    `
+  options:
+    showEditor: false
+- type: text
+  text: |-
+    `---
+
+    ## Niveau 3
+
+    ### Übung 3 – Funktion schreiben
+
+    Schreibe eine Funktion `letztes_entfernen(liste)`, die das letzte Element
+    entfernt und zurückgibt. Bei einer leeren Liste soll `None` zurückgegeben
+    werden.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void letztes_entfernen(int liste) {
+        // Dein Code
+        pass
+
+        meine_liste = ["Stein", "Holz", "Erz"];
+        wert = letztes_entfernen(meine_liste);
+        System.out.println(wert)          # Erz);
+        System.out.println(meine_liste)   # ['Stein', 'Holz']);
+
+        System.out.println(letztes_entfernen([]))  # None);
+        }
+
+        public static void main(String[] args) {
+    }
+    `
+- type: text
+  text: '### Übung 4 – Beobachtung erklären'
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            liste_a = ["X"];
+            liste_b = liste_a;
+            liste_b.append("Y")
+            System.out.println(liste_a)  # Was wird ausgegeben?);
+        }
+    }
+    `
+  options:
+    showEditor: false
+- type: text
+  text: Was gibt `System.out.println(liste_a)` aus? Erkläre in einem Satz, warum
+    das so ist.

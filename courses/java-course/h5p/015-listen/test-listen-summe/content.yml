@@ -1,0 +1,71 @@
+contentType: ide_only
+contents: []
+editorSettings:
+  instructions: |-
+    `Schreibe die Funktion `summe_liste(zahlen)`.
+
+    Sie bekommt eine Liste mit Zahlen und soll die Summe aller Zahlen zurückgeben.
+
+    | `zahlen` | Ergebnis |
+    | --- | --- |
+    | `[3, 5, 2]` | `10` |
+    | `[10, -4, 6]` | `12` |`
+  startingCode: |-
+    `public class Main {
+        public static void main(String[] args) {
+            public static void summe_liste(int zahlen) {
+                int summe = 0;
+                // Ergänze die Schleife.
+                return summe;
+            }
+        }
+    }
+    `
+  postCode: |-
+    `public class Main {
+        public static void main(String[] args) {
+            zahlen = []
+            for (var wert : input().split()) {
+                zahlen.append(int(wert))
+
+            }
+            System.out.println(summe_liste(zahlen));
+        }
+    }
+    `
+gradingSettings:
+  targetCode: |-
+    `public class Main {
+        public static void main(String[] args) {
+            public static void summe_liste(int zahlen) {
+                int summe = 0;
+                for (var zahl : zahlen) {
+                    summe = summe + zahl
+                }
+                return summe;
+            }
+        }
+    }
+    `
+  gradingMethod: ioTestCases
+  testCases:
+  - hidden: false
+    inputs:
+    - 3 5 2
+    outputs:
+    - '10'
+  - hidden: false
+    inputs:
+    - 10 -4 6
+    outputs:
+    - '12'
+  - hidden: true
+    inputs:
+    - '7'
+    outputs:
+    - '7'
+  - hidden: true
+    inputs:
+    - ''
+    outputs:
+    - '0'

@@ -1,0 +1,47 @@
+contentType: text_only
+contents:
+- type: text
+  text: |-
+    `Hier siehst du dein erstes Java-Programm.
+
+    Ein Java-Programm besteht immer aus mindestens einer **Klasse** und einer **main-Methode**.
+    Die `main`-Methode ist der **Einstiegspunkt** – hier beginnt die Ausführung des Programms.
+
+    So sieht ein einfaches Java-Programm aus:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            System.out.println("Hallo Welt!");
+            System.out.println("Ich lerne Java!");
+        }
+    }
+    `
+- type: text
+  text: |-
+    `## Wie ist das Programm aufgebaut?
+
+    - `public class Main` – Definiert eine Klasse namens „Main"
+    - `public static void main(String[] args)` – Die main-Methode: hier beginnt das Programm
+    - `System.out.println("...")` – Gibt einen Text in der Konsole aus
+    - Jede Anweisung endet mit einem **Semikolon** (`;`)
+
+    ### Jetzt bist du dran:
+
+    Verändere das Programm!
+    Ändere die Texte zwischen den Anführungszeichen oder füge weitere `System.out.println`-Zeilen hinzu.
+
+    Versuche zum Beispiel, folgende Ausgabe zu erzeugen:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            System.out.println("****");
+            System.out.println("*  *");
+            System.out.println("*  *");
+            System.out.println("****");
+        }
+    }
+    `
+- type: text
+  text: Das Programm gibt ein einfaches Muster aus Sternchen aus.

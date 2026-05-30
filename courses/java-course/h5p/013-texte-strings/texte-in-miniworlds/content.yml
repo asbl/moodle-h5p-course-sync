@@ -1,0 +1,250 @@
+contentType: text_only
+contents:
+- type: text
+  text: |-
+    `In Java OOP sind Strings nicht nur Konsolenausgaben. Du kannst sie direkt
+    in einer Spielwelt anzeigen: als Titel, Schild, Statusanzeige, Hinweis oder
+    Dialogzeile.
+
+    Der einfachste Schritt ist ein Text-Objekt in der Welt:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            // import Java OOP
+
+            // world = Java OOP.World(520, 280)
+            world.add_background((232, 238, 245))
+
+            String ort = "verlassene Bibliothek";
+            // hinweis = Java OOP.Text((30, 30), f"Ort: {ort.title()}")
+            hinweis.font_size = 26
+            hinweis.color = (30, 36, 52)
+
+            world.run()
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Hier wird aus dem String `ort` ein sichtbarer Text. Das ist viel näher an
+    einem Spiel als ein reines `System.out.println()`: Die Information steht direkt in der
+    Szene.
+
+    !!! note Text sichtbar machen
+    `Java OOP.Text((x, y), text)` erzeugt einen Text-Actor. Standardmäßig ist
+    die Textfarbe weiß. Die Position `(x, y)` beschreibt die obere linke Ecke des
+    Textes. Auf hellen Hintergründen solltest du daher oft eine dunkle
+    Textfarbe setzen.
+    !!!
+
+    ### Text als Statusanzeige
+
+    In Spielen zeigen Strings oft einen Zustand an: Lebenspunkte, Auftrag,
+    Inventar, Raumname oder Warnungen.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            // import Java OOP
+
+            // world = Java OOP.World(520, 280)
+            world.add_background((238, 244, 236))
+
+            String name = "Nia";
+            String raum = "Westflügel";
+            int schluessel = 2;
+
+            // status = Java OOP.Text((25, 25), "")
+            status.font_size = 22
+            status.color = (25, 30, 45)
+            status.text = f"{name} | {raum} | Schlüssel: {schluessel}"
+
+            world.run()
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Der Text wird zuerst leer erzeugt und danach über `status.text` gesetzt. Das
+    ist ein typisches Muster: Im Spiel ändert sich etwas, und die Anzeige wird
+    neu zusammengesetzt.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            Spielzustand -> String bauen -> Anzeige aktualisieren
+        }
+    }
+    `
+  options:
+    showEditor: false
+- type: text
+  text: |-
+    `### Text entscheidet über die Szene
+
+    Strings können auch Regeln steuern. Ein Statuswort kann zum Beispiel
+    entscheiden, welche Farbe ein Signal bekommt.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            // import Java OOP
+
+            // world = Java OOP.World(520, 280)
+            world.add_background((245, 241, 232))
+
+            status = "alarm".strip().lower();
+            // meldung = Java OOP.Text((25, 25), f"Status: {status.upper()}")
+            meldung.font_size = 24
+            meldung.color = (28, 32, 48)
+
+            // signal = Java OOP.Circle((260, 150), 45)
+
+            if (status == "alarm") {
+                signal.color = (210, 65, 65)
+            } else if (status == "bereit") {
+                signal.color = (70, 170, 95)
+            } else {
+                signal.color = (210, 170, 70)
+
+            world.run()
+        }
+    }
+    `
+- type: text
+  text: |-
+    `So entstehen aus einfachen Textvergleichen erste Spielregeln. Genau dieselbe
+    Idee kannst du später für Türen, Dialogoptionen oder Quest-Zustände nutzen.
+
+    !!! note Verbindung zu Strings
+    Hier werden mehrere String-Ideen kombiniert: `strip()` bereinigt den Text,
+    `lower()` macht Vergleiche robuster und `upper()` formatiert die Anzeige.
+    !!!
+
+    ### Typisches Spielbeispiel: Dialog
+
+    Viele Spiele bestehen aus kurzen Dialogen. Ein Programm kann die passende
+    Dialogzeile aus einer Liste holen und in der Welt anzeigen.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            // import Java OOP
+
+            // world = Java OOP.World(560, 320)
+            world.add_background((230, 232, 240))
+
+            String sprecher = "Archivarin";
+            dialog = [;
+                "Der Schlüssel passt nicht zu dieser Tür.",
+                "Aber die Rune am Griff leuchtet kurz auf.",
+                "Vielleicht fehlt noch ein zweites Zeichen.",
+            ]
+
+            int schritt = 1;
+            zeile = dialog[schritt];
+
+            // name_text = Java OOP.Text((35, 35), sprecher.upper())
+            name_text.font_size = 22
+            name_text.color = (24, 30, 44)
+
+            // box = Java OOP.Text((35, 80), f"{sprecher}: {zeile}")
+            box.font_size = 20
+            box.max_width = 480
+            box.color = (24, 30, 44)
+
+            world.run()
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Die Liste `dialog` enthält mehrere mögliche Sätze. Mit `dialog[schritt]`
+    wird eine Zeile ausgewählt. In einem echten Spiel könnte `schritt` durch eine
+    Taste, eine Entscheidung oder eine Bedingung verändert werden.
+
+    ### Dialog mit Antwort
+
+    Jetzt wird es spieltypischer: Eine Antwort verändert, welche Meldung angezeigt
+    wird.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            // import Java OOP
+
+            // world = Java OOP.World(560, 320)
+            world.add_background((238, 235, 226))
+
+            antwort = "links".strip().lower();
+
+            if (antwort == "links") {
+                String text = "Du folgst dem kalten Luftzug zur alten Treppe.";
+            } else if (antwort == "rechts") {
+                String text = "Du findest eine Karte mit drei eingerissenen Ecken.";
+            } else {
+                String text = "Du bleibst stehen und lauschst in den Flur.";
+
+            // ueberschrift = Java OOP.Text((35, 35), "Entscheidung")
+            ueberschrift.font_size = 26
+            ueberschrift.color = (26, 32, 46)
+
+            // meldung = Java OOP.Text((35, 90), text)
+            meldung.font_size = 21
+            meldung.max_width = 490
+            meldung.color = (26, 32, 46)
+
+            world.run()
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Das ist die Grundidee von Dialogen und Textadventures: Ein String wird
+    bereinigt, verglichen und in eine passende Reaktion übersetzt.
+
+    ### Aufgabe zum Ausprobieren
+
+    Baue eine kleine Dialogszene.
+
+    Ändere das Beispiel so, dass:
+
+    - eine Variable `figur` einen Namen enthält
+    - eine Variable `ort` einen Raum oder Ort enthält
+    - eine Variable `antwort` eine Entscheidung wie `"fragen"` oder `"gehen"` enthält
+    - aus diesen Variablen ein sichtbarer Dialogtext gebaut wird
+    - bei zwei verschiedenen Antworten unterschiedliche Texte erscheinen
+
+    Beispiel:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            // import Java OOP
+
+            // world = Java OOP.World(560, 320)
+            world.add_background((232, 240, 238))
+
+            String figur = "Taro";
+            String ort = "Uhrenturm";
+            String antwort = "fragen";
+
+            if (antwort == "fragen") {
+                dialog = f"{figur} fragt nach dem Weg zum {ort}.";
+            } else {
+                dialog = f"{figur} verlässt den {ort} ohne ein Wort.";
+
+            // titel = Java OOP.Text((35, 35), f"Szene: {ort}")
+            titel.font_size = 26
+            titel.color = (24, 30, 42)
+
+            // text = Java OOP.Text((35, 90), dialog)
+            text.font_size = 21
+            text.max_width = 490
+            text.color = (24, 30, 42)
+
+            world.run()
+        }
+    }
+    `

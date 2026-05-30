@@ -1,0 +1,78 @@
+contentType: ide_only
+contents: []
+editorSettings:
+  instructions: |-
+    `In Programm-Zeichnungen verhindern Funktionen, dass derselbe Code immer wieder
+    kopiert wird.
+
+    Ergänze die Funktion `quadrat(seite, farbe)` und nutze sie dreimal, sodass ein
+    kleiner Stapel aus drei farbigen Blöcken entsteht.`
+  startingCode: |-
+    `public class Main {
+        public static void main(String[] args) {
+            // import turtle
+
+            // turtle.speed(0)
+
+            public static void quadrat(int seite, int farbe) {
+                // turtle.color("black", farbe)
+                // turtle.begin_fill()
+                // Ergänze das Quadrat.
+                // turtle.end_fill()
+
+
+            }
+            // turtle.penup()
+            // turtle.goto(-120, -40)
+            // turtle.pendown()
+
+            quadrat(70, "sienna")
+            // turtle.penup()
+            // // turtle.forward(80) → in Java: Ausgabe/Zeichnung
+            // turtle.pendown()
+            quadrat(70, "gray")
+            // turtle.penup()
+            // // turtle.forward(80) → in Java: Ausgabe/Zeichnung
+            // turtle.pendown()
+            quadrat(70, "gold")
+        }
+    }
+    `
+gradingSettings:
+  targetCode: |-
+    `public class Main {
+        public static void main(String[] args) {
+            // import turtle
+
+            // turtle.speed(0)
+
+            public static void quadrat(int seite, int farbe) {
+                // turtle.color("black", farbe)
+                // turtle.begin_fill()
+                for (int i = 0; i < 4; i++) {
+                    // turtle.forward(seite)
+                    // turtle.left(90)
+                }
+                // turtle.end_fill()
+
+
+            }
+            // turtle.penup()
+            // turtle.goto(-120, -40)
+            // turtle.pendown()
+
+            quadrat(70, "sienna")
+            // turtle.penup()
+            // // turtle.forward(80) → in Java: Ausgabe/Zeichnung
+            // turtle.pendown()
+            quadrat(70, "gray")
+            // turtle.penup()
+            // // turtle.forward(80) → in Java: Ausgabe/Zeichnung
+            // turtle.pendown()
+            quadrat(70, "gold")
+        }
+    }
+    `
+  gradingMethod: byOutputMatch
+  testCases:
+  - hidden: false

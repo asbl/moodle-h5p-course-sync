@@ -1,0 +1,50 @@
+contentType: ide_only
+contents: []
+editorSettings:
+  instructions: |-
+    `Zeichne mit Programm ein kleines Signalzeichen.
+
+    Ändere den Code so, dass:
+
+    - der Text `SIGNAL` geschrieben wird
+    - der Text in `royal blue` geschrieben wird
+    - darunter ein gelber Punkt mit Durchmesser `30` gezeichnet wird`
+  startingCode: |-
+    `public class Main {
+        public static void main(String[] args) {
+            // import turtle
+
+            // turtle.penup()
+            // turtle.goto(-70, 20)
+            // turtle.color("black")
+            // turtle.write("ZEICHEN", font=("Arial", 24, "bold"))
+
+            // turtle.goto(0, -20)
+            // turtle.color("red")
+            // turtle.dot(20)
+        }
+    }
+    `
+gradingSettings:
+  targetCode: |-
+    `public class Main {
+        public static void main(String[] args) {
+            // import turtle
+
+            // turtle.penup()
+            // turtle.goto(-70, 20)
+            // turtle.color("royal blue")
+            // turtle.write("SIGNAL", font=("Arial", 24, "bold"))
+
+            // turtle.goto(0, -20)
+            // turtle.color("yellow")
+            // turtle.dot(30)
+        }
+    }
+    `
+  dueDateGroup:
+    enableDueDate: true
+    duedate: '2026-06-01T07:00:00.000Z'
+  gradingMethod: byOutputMatch
+  testCases:
+  - hidden: false

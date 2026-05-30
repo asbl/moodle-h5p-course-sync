@@ -1,0 +1,237 @@
+contentType: text_only
+advancedOptions:
+  disableOutputPopups: true
+contents:
+- type: text
+  text: |-
+    `# Normale Worlds aus Listen erstellen
+
+    Auch in einer normalen `World` kannst du ein Level mit einer Liste planen. Der
+    Unterschied zur `TiledWorld`: Die Liste beschreibt nur den Bauplan. Die echten
+    Positionen müssen anschließend in Pixel umgerechnet werden.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            level = [;
+                "############",
+                "#S.........#",
+                "#..###.....#",
+                "#......Z...#",
+                "############",
+            ]
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Wir wählen eine Feldgröße von 40 Pixeln. Dann wird aus `(x, y)` die
+    Pixelposition `(x * 40, y * 40)`.
+
+    ### Felder als Rechtecke zeichnen`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            // import Java OOP
+
+            level = [;
+                "############",
+                "#S.........#",
+                "#..###.....#",
+                "#......Z...#",
+                "############",
+            ]
+
+            int feld = 40;
+            // world = Java OOP.World(480, 200)
+
+            world.add_background((225, 235, 245))
+
+            for y, zeile in enumerate(level):
+                for x, zeichen in enumerate(zeile):
+                    pixel_x = x * feld;
+                    pixel_y = y * feld;
+
+                    if (zeichen == "#") {
+            // wand = Java OOP.Rectangle.from_topleft((pixel_x, pixel_y), feld, feld)
+                        wand.color = (80, 90, 95)
+
+            world.run()
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Die Liste hat weiterhin Felder. Die `World` zeigt aber Pixel. Darum rechnen wir
+    vor dem Erstellen jedes Rechtecks um.
+
+    ### Mittelpunkt berechnen
+
+    Actors werden meistens über ihren Mittelpunkt positioniert. Für ein Feld
+    brauchst du also:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            mitte_x = x * feld + feld / 2;
+            mitte_y = y * feld + feld / 2;
+        }
+    }
+    `
+- type: text
+  text: Damit können Spieler und Ziel sauber in der Feldmitte stehen.
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            // import Java OOP
+
+            level = [;
+                "############",
+                "#S.........#",
+                "#..###.....#",
+                "#......Z...#",
+                "############",
+            ]
+
+            int feld = 40;
+            // world = Java OOP.World(480, 200)
+            world.add_background((225, 235, 245))
+
+            spieler = None;
+            ziel = None;
+            waende = [];
+
+            for y, zeile in enumerate(level):
+                for x, zeichen in enumerate(zeile):
+                    pixel_x = x * feld;
+                    pixel_y = y * feld;
+                    mitte = (pixel_x + feld / 2, pixel_y + feld / 2);
+
+                    if (zeichen == "#") {
+            // wand = Java OOP.Rectangle.from_topleft((pixel_x, pixel_y), feld, feld)
+                        wand.color = (80, 90, 95)
+                        waende.append(wand)
+                    } else if (zeichen == "S") {
+            // spieler = Java OOP.Actor(mitte)
+                        spieler.size = (28, 28)
+                        spieler.color = (60, 120, 220)
+                    } else if (zeichen == "Z") {
+            // ziel = Java OOP.Circle(mitte, 15)
+                        ziel.color = (240, 190, 70)
+
+            world.run()
+        }
+    }
+    `
+- type: text
+  text: |-
+    `### Rasterposition aus Pixelposition berechnen
+
+    Wenn du später wissen willst, auf welchem Listenfeld der Spieler steht, rechnest
+    du zurück:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            spalte = int(spieler.x // feld);
+            zeile = int(spieler.y // feld);
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Das ist besonders nützlich für Punkte, Türen oder Anzeigen im Raster.
+
+    ### Bewegung mit Kollisionserkennung
+
+    Beim Bewegen läuft der Spieler ein paar Pixel. Danach prüfen wir, ob er eine
+    Wand berührt. Wenn ja, setzen wir ihn wieder zurück.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void beruehrt_wand() {
+        for (var wand : waende) {
+        if (spieler.detect(wand)) {
+        return True;
+        return False;
+
+        public static void bewege_spieler(int dx, int dy) {
+        altes_x = spieler.x;
+        altes_y = spieler.y;
+
+        spieler.x = spieler.x + dx
+        spieler.y = spieler.y + dy
+
+        if (beruehrt_wand()) {
+        spieler.x = altes_x
+        spieler.y = altes_y
+
+        // @spieler.register
+        public static void on_key_pressed_right(int self) {
+        bewege_spieler(geschwindigkeit, 0)
+
+        // @spieler.register
+        public static void on_key_pressed_left(int self) {
+        bewege_spieler(-geschwindigkeit, 0)
+
+        // @spieler.register
+        public static void on_key_pressed_up(int self) {
+        bewege_spieler(0, -geschwindigkeit)
+
+        // @spieler.register
+        public static void on_key_pressed_down(int self) {
+        bewege_spieler(0, geschwindigkeit)
+
+        world.run()
+        }
+        }
+
+        public static void main(String[] args) {
+            // import Java OOP
+
+            level = [;
+                "############",
+                "#S.........#",
+                "#..###.....#",
+                "#......Z...#",
+                "############",
+            ]
+
+            int feld = 40;
+            // world = Java OOP.World(480, 200)
+
+            world.add_background((225, 235, 245))
+
+            spieler = None;
+            ziel = None;
+            waende = [];
+            int geschwindigkeit = 5;
+
+            for y, zeile in enumerate(level):
+                for x, zeichen in enumerate(zeile):
+                    pixel_x = x * feld;
+                    pixel_y = y * feld;
+                    mitte = (pixel_x + feld / 2, pixel_y + feld / 2);
+
+                    if (zeichen == "#") {
+            // wand = Java OOP.Rectangle.from_topleft((pixel_x, pixel_y), feld, feld)
+                        wand.color = (80, 90, 95)
+                        waende.append(wand)
+                    } else if (zeichen == "S") {
+            // spieler = Java OOP.Actor(mitte)
+                        spieler.size = (28, 28)
+                        spieler.color = (60, 120, 220)
+                    } else if (zeichen == "Z") {
+            // ziel = Java OOP.Circle(mitte, 15)
+                        ziel.color = (240, 190, 70)
+
+    `
+- type: text
+  text: |-
+    `!!! note Zwei Koordinatensysteme
+    Die Liste nutzt Rasterkoordinaten wie `(3, 2)`. Die normale `World` nutzt
+    Pixelkoordinaten wie `(140, 100)`. Wenn du beides sauber trennst, kannst du auch
+    in normalen Worlds sehr übersichtliche Level bauen.
+    !!!`

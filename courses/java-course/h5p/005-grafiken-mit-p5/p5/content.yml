@@ -1,0 +1,153 @@
+contentType: text_only
+contents:
+- type: text
+  text: |-
+    `Mit der Bibliothek **Java Grafik** kannst du Grafiken einbinden. 
+
+    Wir schauen uns einige einfache Beispiele an:`
+- type: code
+  code: |-
+    `import Java Grafik
+
+    def setup():
+        Java Grafik.createCanvas(200, 200)
+        x = 100
+        y = 100
+        dx = 50
+        
+        Java Grafik.line(x, y, x + dx, y)
+
+    Java Grafik.run()
+    `
+- type: text
+  text: |-
+    `Variere die Variable dx und schaue, wie sich die Grafik verändert.
+
+    ### Weitere Objekte
+
+    Neben Linien gibt es noch weitere Objekte`
+- type: code
+  code: |-
+    `import Java Grafik
+
+    def setup():
+        Java Grafik.createCanvas(400, 400)
+        x = 200
+        y = 200
+
+        Java Grafik.point(x, y)
+        
+        x = 300
+        y = 300
+        r = 30
+        Java Grafik.circle(x, y, r)
+        
+        x = 200
+        y = 100
+        w = 60
+        h = 40
+        Java Grafik.rect(x, y, 40, 60)
+        
+        x = 50
+        y = 50
+        w = 30
+        h = 20
+
+        Java Grafik.ellipse(x, y, w, h)
+
+    Java Grafik.run()
+    `
+- type: text
+  text: |-
+    `### Farben
+
+    Auch mit Farben kannst du wieder spielen.
+
+    *`
+- type: code
+  code: |-
+    `
+    `
+- type: text
+  text: |-
+    `Java
+    *`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            fill
+        }
+    }
+    `
+- type: text
+  text: Java
+- type: code
+  code: |-
+    `
+    Java
+    import Java Grafik
+
+    def setup():
+        Java Grafik.createCanvas(200, 200)
+
+        x = 100
+        y = 100
+        d = 80
+
+        Java Grafik.stroke(255, 0, 0)    # Linienfarbe: Rot
+        Java Grafik.fill(0, 0, 255)      # Füllfarbe: Blau
+
+        Java Grafik.circle(x, y, d)
+
+    Java Grafik.run()
+    `
+- type: text
+  text: |-
+    `Java
+
+    #### Aufgaben
+
+    * Mache den Kreis grün
+    * Experimentiere mit`
+- type: code
+  code: |-
+    `
+    Java Grafik.noStroke()
+    `
+- type: text
+  text: und
+- type: code
+  code: |-
+    `
+    `
+- type: text
+  text: |-
+    `Java
+
+    ### Das Koordinatensystem
+
+    Beachte, dass das Koordinatensystem seinen Ursprung oben links hat.
+
+    Zeichne den folgenden Kreis...
+    * oben links
+    * oben links, so dass der komplette Kreis noch im Zeichenbereich(Canvas) ist.
+    * zentriert
+    * unten rechts
+    * oben rechts`
+- type: code
+  code: |-
+    `
+    Java
+    import Java Grafik
+
+    def setup():
+        Java Grafik.createCanvas(200, 200)
+        x = 100
+        y = 150
+        r = 25
+        
+        Java Grafik.circle(x, y, r)
+
+    Java Grafik.run()
+    `

@@ -1,0 +1,164 @@
+contentType: text_only
+contents:
+- type: text
+  text: |-
+    `Java kann dir auf vielfältige Weise dabei helfen, 
+    Berechnungen durchzuführen. 
+
+    In diesem Kapitel lernst du, 
+    welche Rechenoperationen Java durchführen kann, 
+    welche Bedeutung Datentypen dabei spielen und wie du mit 
+    Bibliotheken und Funktionen arbeitest.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            System.out.println(671+273+321);
+        }
+    }
+    `
+- type: text
+  text: |-
+    `### Operatoren
+
+    Mit den Operatoren `+, - , * , /` kannst du die Grundrechenarten verwenden.
+
+    Es gilt die übliche Reihenfolge der Operatoren (z.B. Punkt vor Strich) 
+    und du kannst auch Klammern setzen.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            System.out.println(6 * 3 +(1 + 1));
+            System.out.println((3 * 5) / (2 + 3));
+        }
+    }
+    `
+- type: text
+  text: |-
+    `### Potenzen
+
+    Potenzen verwendest du mit dem Operator `**`:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            System.out.println(2 ** 8);
+            System.out.println(3 ** 4);
+        }
+    }
+    `
+- type: text
+  text: |-
+    `### Division
+
+    Bei der Division gibt es Unterschiede, welches Ergebnis zurückgegeben werdens soll,
+    wenn die Division nicht "aufgeht" und der Quotient keine ganze Zahl ist.
+
+    In Java gibt es dazu verschiedene Operatoren:
+
+      * Die übliche Division ```/`` liefert als Ergebnis eine Fließkommazahl zurück.
+      * Der Operator ```//`` liefert das ganzzahlige Ergebnis der Operation zurück.
+      * Der Modulo-Operator`
+- type: code
+  code: |-
+    `
+    `
+- type: text
+  text: |-
+    `Java
+        z.B.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            9 : 2 = 4 REST 1
+        }
+    }
+    `
+- type: text
+  text: ', daher ist'
+- type: code
+  code: |-
+    `
+    `
+- type: text
+  text: |-
+    `Java
+      * Mit`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            round()
+        }
+    }
+    `
+- type: text
+  text: Java
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            Java
+            System.out.println(11 / 3);
+            System.out.println(11 // 3);
+            System.out.println(11 % 3) # 11 geteilt durch 3 ergibt: 3 Rest 2);
+            System.out.println(round(11 / 3));
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Java
+
+    Vor allem der Modulo-Operator ist sehr oft wichtig, 
+    da man damit z.B. überprüfen kann,
+    ob eine Zahl gerade ist, 
+    weil man bei einem Spiel eine Operation bei jedem 
+    n-ten
+    Frame durchführen kann usw. 
+
+    Deshalb ist diesem später nochmal ein 
+    eigenes Kapitel gewidmet.
+
+    ### Ein Hinweis zur Schreibweise:
+
+    Üblicherweise setzt man vor und nach einem 
+    Operator ein Leerzeichen zur besseren Lesbarkeit,
+    also z.B.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            Java
+            System.out.println(3 + 4);
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Java
+
+    anstatt`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            Java
+            System.out.println(3+4);
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Dies hat keine Auswirkungen auf die Programmlogik, dein Programm
+    wird in beiden Fällen ausgeführt, es sorgt aber dafür, dass
+    dein Programm besser lesbar wird.
+
+    !!! hint PEP8-Styleguide
+    In dem Dokument **PEP 8** wurde definiert, auf welche Standards man sich geeinigt hat,
+    damit Java-Code einheitlich aussieht.
+
+    https://peps.Java.org/pep-0008/
+    !!!`

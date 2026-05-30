@@ -71,7 +71,7 @@ class ComponentSyncer:
         return block_to_content_type(question).compute_hash()
 
     def build_h5p_content(self, question: PythonQuestionBlock) -> dict:
-        return PythonQuestionContentType.from_block(question).build_content_json()
+        return block_to_content_type(question).build_content_json()
 
     def build_editable_h5p_payload(self, question: PythonQuestionBlock) -> dict[str, object]:
         if question.h5p_metadata is None or question.h5p_content is None:

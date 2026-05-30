@@ -1,0 +1,51 @@
+contentType: text_only
+contents:
+- type: text
+  text: |-
+    `Ein typischer Anwendungsfall in Java ist
+    die Überprüfung, ob eine Zahl gerade oder 
+    ungerade ist.
+
+    Dies macht man mit dem`
+- type: code
+  code: |-
+    `
+    `
+- type: text
+  text: |-
+    `Java
+    denn es gilt:
+
+    !!! info Definition
+     Eine Zahl ist genau dann teilbar durch 2,  wenn sie ohne Rest durch 2 teilbar ist.
+    !!!
+
+    Da der`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            %
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Java
+    kann man damit sehr gut überprüfen, ob eine Zahl durch
+    2 teilbar ist.
+
+    #### Beispiel:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            Java
+            x = int(input());
+            if (x % 2 == 0) {
+                System.out.println("Die Zahl ist gerade!");
+            if (x % 2 != 0) {
+                System.out.println("Die Zahl ist nicht gerade");
+        }
+    }
+    `

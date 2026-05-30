@@ -30,3 +30,77 @@ for ort in weg:
     if len(ort) <= 4:
         print(ort)
 ```
+
+```python noeditor
+Schritt              | weg
+Start                | ["Start", "Wald", "Mine"]
+weg.append("See")    | ?
+weg[1] = "Dorf"      | ?
+```
+
+```python noeditor
+ort      | len(ort) | len(ort) <= 4 | Ausgabe
+"Start"  | 5        | nein          | –
+"Dorf"   | ?        | ?             | ?
+"Mine"   | ?        | ?             | ?
+"See"    | ?        | ?             | ?
+```
+
+---
+
+## Niveau 2
+
+### Übung 2
+
+Jetzt kommen `insert` und `pop` dazu. Schreibe die Liste nach jeder Zeile auf.
+
+```python
+stapel = ["A", "B", "C", "D"]
+stapel.pop()
+stapel.insert(1, "X")
+stapel[0] = stapel[-1]
+print(stapel)
+print(len(stapel))
+```
+
+```python noeditor
+Schritt                | stapel
+Start                  | ["A", "B", "C", "D"]
+stapel.pop()           | ?
+stapel.insert(1, "X")  | ?
+stapel[0] = stapel[-1] | ?
+```
+
+---
+
+## Niveau 3
+
+### Übung 3 – Funktion schreiben
+
+Schreibe eine Funktion `letztes_entfernen(liste)`, die das letzte Element
+entfernt und zurückgibt. Bei einer leeren Liste soll `None` zurückgegeben
+werden.
+
+```python
+def letztes_entfernen(liste):
+    # Dein Code
+    pass
+
+meine_liste = ["Stein", "Holz", "Erz"]
+wert = letztes_entfernen(meine_liste)
+print(wert)          # Erz
+print(meine_liste)   # ['Stein', 'Holz']
+
+print(letztes_entfernen([]))  # None
+```
+
+### Übung 4 – Beobachtung erklären
+
+```python noeditor
+liste_a = ["X"]
+liste_b = liste_a
+liste_b.append("Y")
+print(liste_a)  # Was wird ausgegeben?
+```
+
+Was gibt `print(liste_a)` aus? Erkläre in einem Satz, warum das so ist.

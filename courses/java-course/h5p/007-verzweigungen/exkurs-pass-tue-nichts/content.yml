@@ -1,0 +1,42 @@
+contentType: text_only
+contents:
+- type: text
+  text: |-
+    `In Java ist es nicht möglich leere Blöcke zu schreiben, wenn nichts getan werden soll.
+    Beispiel:
+
+    Es soll nichts getan werden, wenn x>0 ist. Ansonsten soll x ausgegeben werden.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            if (x > 0) {
+            } else {
+                System.out.println(x);
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Das Programm führt zu einem Fehler, da Java nach der Zeile 1 einen eingerückt Block erwartet. Ein Java Programm ist nämlich so aufgebaut, dass nach einem if-statement **immer* ein eingerücktr Block folgt.
+    Die pass-Anweisung
+
+    Wenn in einem Block nichts getan werden soll, dann verwende die pass-Anweisung. Diese bedeutet so viel wie "tue nichts":
+    Beispiel`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            x = int(input());
+
+            if (x > 0) {
+               pass
+            } else {
+                System.out.println(x);
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Jetzt ist der Block nach ```if``` korrekt eingerückt: 
+    Java wirft keinen Fehler mehr.`

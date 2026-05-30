@@ -413,11 +413,10 @@ class ContentStore:
         )
 
     def _is_python_question_payload(self, payload: dict[str, object]) -> bool:
+        # A payload is a Python question when it has an explicit pythonRunner field.
+        # contentType alone is not sufficient since JavaQuestion also uses ide_only/text_only.
         runner = payload.get("pythonRunner")
-        if isinstance(runner, str) and runner.strip():
-            return True
-        content_type = payload.get("contentType")
-        return isinstance(content_type, str) and content_type in {"ide_only", "text_only"}
+        return isinstance(runner, str) and bool(runner.strip())
 
     def _extract_pyodide_packages(self, payload: dict[str, object]) -> list[str]:
         pyodide_options = payload.get("pyodideOptions")

@@ -1,0 +1,127 @@
+Vor der Klausur: Übe, Variablen Schritt für Schritt mitzuverfolgen. Nach
+jeder Zeile solltest du wissen, welchen Wert jede Variable hat.
+
+```python noeditor
+x = 5       # x = 5
+y = x + 2   # y = 7
+x = y - 1   # x = 6
+print(x, y) # Ausgabe: 6 7
+```
+
+Schreibe dir die Werte nach jeder Zeile als kleine Tabelle auf.
+
+### Übung 1
+
+Bestimme ohne Ausführen die Ausgabe. Notiere die Werte von `a`, `b` und `c`
+nach jeder Zuweisung.
+
+```python
+a = 10
+b = 4
+c = a - b
+a = c + 1
+b = a * 2
+print(a, b, c)
+```
+
+```python noeditor
+Zuweisung   | a  | b | c
+a = 10      | 10 | – | –
+b = 4       | 10 | 4 | –
+c = a - b   | ?  | ? | ?
+a = c + 1   | ?  | ? | ?
+b = a * 2   | ?  | ? | ?
+Ausgabe:    | ?  | ? | ?
+```
+
+### Übung 2
+
+```python
+punkte = 20
+bonus = 5
+punkte = punkte + bonus
+bonus = punkte // 4
+print(punkte, bonus)
+```
+
+```python noeditor
+Zuweisung              | punkte | bonus
+punkte = 20            | 20     | –
+bonus = 5              | 20     | 5
+punkte = punkte + bonus | ?     | ?
+bonus = punkte // 4    | ?      | ?
+Ausgabe:               | ?      | ?
+```
+
+---
+
+## Niveau 2
+
+### Übung 3
+
+Verfolge die Variablen. Die Ausdrücke bauen aufeinander auf.
+
+```python
+x = 3
+y = x * x
+x = y - x
+y = x + y
+print(x, y)
+```
+
+```python noeditor
+Zuweisung | x | y
+x = 3     | 3 | –
+y = x * x | 3 | ?
+x = y - x | ? | ?
+y = x + y | ? | ?
+Ausgabe:  | ? | ?
+```
+
+### Übung 4
+
+Auch Zeichenketten haben eine Länge. Was gibt das Programm aus?
+
+```python
+wort = "Info"
+laenge = len(wort)
+wort = wort + "rmatik"
+print(laenge, len(wort))
+```
+
+```python noeditor
+Zuweisung              | wort         | laenge
+wort = "Info"          | "Info"       | –
+laenge = len(wort)     | "Info"       | 4
+wort = wort + "rmatik" | ?            | ?
+Ausgabe:               | (len = ?)    | ?
+```
+
+---
+
+## Niveau 3
+
+### Übung 5 – Rückwärts denken
+
+Das Programm soll `8 5` ausgeben. Welchen Anfangswert muss `a` haben?
+Begründe schriftlich, bevor du es ausprobierst.
+
+```python
+b = 3
+a = 0  # Suche den richtigen Anfangswert
+a = a + b
+b = a - b
+print(a, b)  # soll: 8 5
+```
+
+### Übung 6 – Behauptung beurteilen
+
+Ein Schüler behauptet: „Nach dem Code haben `x` und `y` denselben Wert."
+Hat er Recht? Erkläre Schritt für Schritt, warum oder warum nicht.
+
+```python
+x = 5
+y = x
+x = x + 1
+print(x == y)
+```

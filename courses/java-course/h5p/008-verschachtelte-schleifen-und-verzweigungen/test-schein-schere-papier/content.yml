@@ -1,0 +1,52 @@
+contentType: ide_only
+contents: []
+editorSettings:
+  instructions: |-
+    `Im folgenden werden zwei Eingaben eingelesen, erlaubte Eingaben sind "Stein", "Schere", "Papier".
+
+    Zwei Spieler geben so ihre Eingabe an. Es gilt nun: 
+
+    * "Stein" schlägt "Schere."
+    * "Schere" schlägt "Papier"
+    * "Papier" schlägt "Schere"
+
+    Gib aus "Spieler 1 gewinnt", wenn Spieler 1 gewinnt, ansonsten "Spieler 2 gewinnt". Gib "Unentschieden"
+    aus, wenn kein Spieler gewinnt.`
+  preCode: |-
+    `public class Main {
+        public static void main(String[] args) {
+            spieler1 = input("[Spieler1] Wähle [Stein/Schere/Papier")
+            spieler2 = input("[Spieler2] Wähle [Stein/Schere/Papier")
+        }
+    }
+    `
+gradingSettings:
+  gradingMethod: ioTestCases
+  dueDateGroup:
+    enableDueDate: true
+    duedate: '2026-03-16T09:00:00.000Z'
+  testCases:
+  - hidden: false
+    inputs:
+    - Stein
+    - Papier
+    outputs:
+    - Spieler 2 gewinnt
+  - hidden: false
+    inputs:
+    - Stein
+    - Schere
+    outputs:
+    - Spieler 1 gewinnt
+  - hidden: false
+    inputs:
+    - Papier
+    - Stein
+    outputs:
+    - Spieler 1 gewinnt
+  - hidden: false
+    inputs:
+    - Schere
+    - Stein
+    outputs:
+    - Spieler 2 gewinnt

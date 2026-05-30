@@ -1,0 +1,507 @@
+## Was ist miniworlds?
+
+Miniworlds ist eine 2D-Spiele-Engine, die speziell für den Unterricht entwickelt wurde.
+
+In diesem Tutorial erlernst du Schritt für Schritt die wichtigsten Konzepte von miniworlds und baust dabei ein kleines spielbares Beispiel auf.
+
+Das Ziel: Mit wenig Code schnell sichtbare Ergebnisse erzielen.
+
+```python
+import miniworlds
+
+world = miniworlds.World()
+
+world.run()
+```
+
+Das passiert hier:
+
+* `import miniworlds` lädt die Bibliothek.
+* `miniworlds.World()` erzeugt eine neue Welt (Standard: 400 × 400 Pixel).
+* `world.run()` startet die Spielschleife - diese Zeile steht immer am Ende deines Programs.
+
+### Größe und Hintergrund der Welt
+
+Du kannst der Welt eine eigene Größe mitgeben:
+
+* `world = miniworlds.World(400, 300)`  →  Die Welt ist 400 Pixel breit, 300 Pixel hoch
+
+Mit `add_background()` fügst du einen Hintergrund hinzu – als RGB-Farbe oder als Bilddatei:
+
+* `world.add_background((100, 180, 100))`   →  Hintergrundfarbe als RGB-Wert (Rot, Grün, Blau)
+* `world.add_background("images/bg.png")`   →  Bilddatei als Hintergrund (mehr dazu später...)
+
+Im folgenden Beispiel wird eine Welt mit grünem Hintergrund erstellt.
+
+```python
+import miniworlds
+
+# Welt mit 400 x 300 Pixeln erstellen
+world = miniworlds.World(400, 300)
+
+# Hintergrundfarbe als (Rot, Grün, Blau)
+world.add_background((100, 180, 100))
+
+world.run()
+```
+
+### Actors
+
+Das zweite zentrale Konzept in miniworlds sind **Actors**.
+Actors sind Figuren oder Objekte, die mit der Welt
+und mit anderen Actors interagieren können.
+
+Einen Actor erstellst du so:
+
+```python
+my_actor = miniworlds.Actor((20,30))
+```
+
+### Das Koordinatensystem
+
+* Der Ursprung (0, 0) liegt oben links.
+* x wächst nach rechts, y wächst nach unten.
+* Die Position bezieht sich immer auf den **Mittelpunkt** des Actors.
+
+Ohne Kostüm erscheint ein Actor zunächst als lilafarbenes Rechteck – das ist ganz normal!
+
+```python
+import miniworlds
+
+world = miniworlds.World(400, 300)
+world.add_background((100, 180, 100))
+
+# Actor an Position x=280, y=80
+actor = miniworlds.Actor((280, 80))
+
+world.run()
+```
+
+## Kostüme
+
+Jeder Actor kann ein Kostüm bekommen, welches sein Aussehen definiert:
+
+```python
+actor.add_costume("images/char.png")
+```
+
+Das Bild muss im Ordner images/ des Projekts liegen.
+
+!!! note Tipp: Ausrichtung der Bilder
+Bilder sollten standardmäßig nach rechts zeigen – das ist die Standardausrichtung in miniworlds. 
+Falls dein Bild in die falsche Richtung schaut, kannst du es drehen:
+
+```python
+actor.costume.orientation = -90   →  dreht das Kostüm um -90 Grad
+```
+
+!!!
+
+Wenn sich das Kostüm nicht mit dem Actor mitdrehen soll, kannst du dies auch einstellen:
+
+```python
+actor.costume.is_rotatable = False
+```
+
+```python
+import miniworlds
+
+world = miniworlds.World(400, 300)
+world.add_background((100, 180, 100))
+
+actor = miniworlds.Actor((280, 80))
+actor.add_costume("images/char.png")
+
+world.run()
+```
+
+## Bewegung
+
+Damit sich ein Actor bewegt, verwendest du die Methode
+
+```python
+
+```
+
+python
+Sie wird in jedem Frame des Spiels einmal aufgerufen und läuft solange das Programm läuft.
+
+* Der Decorator
+
+```python
+
+@actor.register
+```
+
+python
+* Das Schlüsselwort ``self
+
+```python
+
+bezieht sich dabei immer auf den Actor selbst.
+
+Im folgenden Beispiel wird
+```
+
+self.x`` in jedem Frame um 1 erhöht 
+- der Actor bewegt sich Pixel für Pixel nach rechts.
+
+```python
+import miniworlds
+
+world = miniworlds.World(400, 300)
+world.add_background((100, 180, 100))
+
+actor = miniworlds.Actor((20, 150))
+actor.add_costume("images/char.png")
+
+@actor.register
+def act(self):
+  self.x = self.x + 1  # jeden Frame 1 Pixel nach rechts
+
+world.run()
+```
+
+## Bewegungsmethoden
+
+Neben der direkten Änderung von `self.x` und `self.y` bietet miniworlds folgende Bewegungsmethoden:
+
+* `self.move()`             → Bewegt den Actor in seine aktuelle Blickrichtung
+* `self.turn_left(grad)`    → Dreht den Actor um grad Grad nach links
+* `self.turn_right(grad)`   → Dreht den Actor um grad Grad nach rechts
+* `self.move_towards(ziel)` → Bewegt den Actor auf ein anderes Objekt zu
+
+Die Blickrichtung wird durch das Attribut `direction` bestimmt:
+
+* `direction = 0`    →  nach oben
+* `direction = 90`   →  nach rechts (Standard)
+* `direction = -90'  →  nach links
+* `direction = 180`  →  nach unten
+
+Im folgenden Beispiel bewegt sich der Spieler geradeaus und kann 
+mit der Taste `a` nach links drehen und mit `d` nach rechts drehen.
+
+```python
+import miniworlds
+
+world = miniworlds.World(400, 300)
+world.add_background((100, 180, 100))
+
+player = miniworlds.Actor((200, 150))
+player.add_costume("images/char.png")
+
+@player.register
+def act(self):
+  self.move()  # bewegt sich in die aktuelle Blickrichtung
+
+@player.register
+def on_key_down_a(self):
+  self.turn_left(15)  # 15 Grad nach links drehen
+
+@player.register
+def on_key_down_d(self):
+  self.turn_right(15)  # 15 Grad nach rechts drehen
+
+world.run()
+```
+
+## Animationen: Mehrere Bilder in einem Kostüm
+
+Kostüme sind Objekte, denen du mehrere Bilder hinzufügen kannst – wie ein Daumenkino.
+
+Dazu erstellst du ein Costume-Objekt, fügst Bilder mit `add_image()` hinzu und startest die Animation mit `animate(loop=True)`.
+
+```python
+import miniworlds
+
+world = miniworlds.World(400, 300)
+world.add_background((100, 180, 100))
+
+alien = miniworlds.Actor((20, 150))
+costume = miniworlds.Costume()
+
+costume.add_image("images/walk1.png")
+costume.add_image("images/walk2.png")
+
+alien.add_costume(costume)
+costume.animate(loop=True)
+
+@alien.register
+def act(self):
+  self.x = self.x + 1
+
+world.run()
+```
+
+## Ereignisse: Tastatur
+
+Du kannst auf Tastatureingaben reagieren, indem du Ereignis-Methoden registrierst.
+miniworlds ruft diese Methoden automatisch auf, wenn die jeweilige Taste gedrückt wird.
+
+**Unterschied zwischen on_key_down und on_key_pressed:**
+
+* `on_key_down_a`    – wird einmal ausgelöst, wenn Taste a gedrückt wird
+* `on_key_pressed_a` – wird wiederholt ausgelöst, solange Taste a gehalten wird
+
+Für flüssige Bewegungen (z. B. beim Steuern einer Figur) eignet sich `on_key_pressed` besser.
+Im folgenden Beispiel steuert `on_key_pressed_w` die Figur nach oben.
+
+Ergänze Methoden für A, S und D, damit die Figur sich in alle vier Richtungen bewegen kann.
+
+```python
+import miniworlds
+
+world = miniworlds.World(400, 300)
+world.add_background((100, 180, 100))
+
+alien = miniworlds.Actor((200, 150))
+alien.add_costume("images/char.png")
+
+@alien.register
+def on_key_pressed_w(self):
+  self.y = self.y - 2
+
+world.run()
+```
+
+Statt vieler einzelner Methoden kannst du auch eine einzige Methode on_key_pressed(self, keys) verwenden.
+Darin bekommst du alle aktuell gedrückten Tasten als Liste und prüfst sie mit if-Abfragen.
+
+Nützliche Tastennamen: "UP", "DOWN", "LEFT", "RIGHT", "w", "a", "s", "d", "SPACE"
+
+### Alternative: on_key_pressed(self, keys)
+
+Ergänze die fehlenden if-Abfragen für DOWN und RIGHT, damit die Figur sich in alle vier Richtungen bewegen kann.
+
+```python
+import miniworlds
+
+world = miniworlds.World(400, 300)
+world.add_background((100, 180, 100))
+
+alien = miniworlds.Actor((200, 150))
+alien.add_costume("images/char.png")
+
+@alien.register
+def on_key_pressed(self, keys):
+  if "UP" in keys:
+    self.y = self.y - 2
+  if "DOWN" in keys:
+    self.y = self.y + 2
+  if "LEFT" in keys:
+    self.x = self.x - 2
+  if "RIGHT" in keys:
+    self.x = self.x + 2
+
+world.run()
+```
+
+## Ereignisse: Maus
+
+Mausereignisse werden in dieser miniworlds-Version bei **Actors** verarbeitet.
+Du registrierst sie wie die Tastaturereignisse mit `@actor.register`:
+
+* `on_clicked_left(self, position)`
+* `on_clicked_right(self, position)`
+* `on_mouse_left_down(self, position)`
+* `on_mouse_left_released(self, position)`
+* `on_mouse_motion(self, position)`
+
+Der Parameter `position` enthält die Mausposition als Tupel `(x, y)`.
+
+Im folgenden Beispiel ändert ein Kreis seine Farbe, wenn er angeklickt wird:
+
+```python
+import miniworlds
+
+world = miniworlds.World(400, 300)
+world.add_background((50, 100, 200))
+
+# ein Actor als Kreis (Position, Radius)
+ball = miniworlds.Circle((200, 150), 40)
+ball.color = (255, 200, 0)  # gelb
+
+@ball.register
+def on_clicked_left(self, position):
+    print("Geklickt auf Actor:", position)
+    self.color = (255, 0, 0)  # wird rot
+
+world.run()
+```
+
+Im nächsten Beispiel wird mit einem Mauslistener der Folgemodus umgeschaltet:
+
+* Linksklick auf den Kreis startet/stoppt das Folgen
+* Solange der Modus aktiv ist, folgt der Kreis der aktuellen Mausposition (`world.mouse.get_position()`)
+
+```python
+import miniworlds
+
+world = miniworlds.World(400, 300)
+world.add_background((30, 30, 30))
+
+follower = miniworlds.Circle((200, 150), 20)
+follower.color = (0, 220, 255)
+follower.is_following = False
+
+@follower.register
+def on_mouse_left_down(self, position):
+    self.is_following = not self.is_following
+    print("Folgemodus:", self.is_following)
+
+@follower.register
+def act(self):
+    if self.is_following:
+        mouse_pos = world.mouse.get_position()
+        if mouse_pos:
+            self.move_towards(mouse_pos)
+
+world.run()
+```
+
+## Kollisionen
+
+Actors haben Sensoren, mit denen sie andere Actors erkennen können.
+Es gibt zwei Möglichkeiten der Kollisionserkennung:
+
+### Aktive Kollisionserkennung mit self.detect()
+
+Mit self.detect() kannst du z.B. innerhalb der `act()` Methode aktiv nach Kollisionen suchen:
+
+```python
+  @frog.register
+  def act(self):
+      if self.detect(alien):
+          print("Treffer!")
+```
+
+### Ereignisbasiere Kollisionserkennung mit on_detecting()
+
+Alternativ kannst du analog zu den Tastatur- und Mausereignissen auch auf 
+Ereignisse reagieren:
+
+```python
+  @player.register
+  def on_detecting(self, other):
+      if other == enemy:
+          print("Feind erwischt!")
+```
+
+Der Vorteil von `on_detecting`: miniworlds ruft die Methode automatisch auf, sobald ein Sensor etwas erkennt.
+
+```python
+import miniworlds
+
+world = miniworlds.World(400, 300)
+world.add_background((100, 180, 100))
+
+alien = miniworlds.Actor((50, 150))
+alien.add_costume("images/char.png")
+
+frog = miniworlds.Actor((320, 150))
+frog.add_costume("images/frog.png")
+
+@alien.register
+def on_key_pressed(self, keys):
+  if "UP" in keys:
+    self.y = self.y - 2
+  if "DOWN" in keys:
+    self.y = self.y + 2
+  if "LEFT" in keys:
+    self.x = self.x - 2
+  if "RIGHT" in keys:
+    self.x = self.x + 2
+
+@frog.register
+def act(self):
+  self.move_towards(alien)  # Frosch folgt dem Alien
+  if self.detect(alien):
+    print("Erwischt!")
+
+world.run()
+```
+
+Im folgenden Beispiel springt das Zielobjekt bei Berührung 
+an eine neue zufällige Position:
+
+```python
+import miniworlds
+import random
+
+world = miniworlds.World(400, 300)
+world.add_background((100, 180, 100))
+
+player = miniworlds.Actor((50, 150))
+player.add_costume("images/char.png")
+
+target = miniworlds.Actor((300, 150))
+target.add_costume("images/frog.png")
+
+@player.register
+def on_key_pressed(self, keys):
+  if "UP" in keys:
+    self.y = self.y - 2
+  if "DOWN" in keys:
+    self.y = self.y + 2
+  if "LEFT" in keys:
+    self.x = self.x - 2
+  if "RIGHT" in keys:
+    self.x = self.x + 2
+
+@player.register
+def on_detecting(self, other):
+  if other == target:
+    print("Ziel erreicht!")
+    # Ziel springt an eine neue zufällige Position
+    target.x = random.randint(30, 380)
+    target.y = random.randint(30, 270)
+
+world.run()
+```
+
+## Sammelspiel mit Punktezähler
+
+Jetzt kombinierst du das bisher Gelernte zu einem vollständigen kleinen Spiel:
+
+* Steuere eine Figur mit den Pfeiltasten.
+* Berühre das Zielobjekt, um einen Punkt zu sammeln.
+* Bei jeder Kollision springt das Ziel an eine neue zufällige Position.
+* Die aktuelle Punktzahl wird in der Konsole ausgegeben.
+
+```python
+import miniworlds
+import random
+
+world = miniworlds.World(400, 300)
+world.add_background((100, 180, 100))
+
+player = miniworlds.Actor((50, 150))
+player.add_costume("images/char.png")
+
+target = miniworlds.Actor((300, 150))
+target.add_costume("images/frog.png")
+
+value = 0 
+
+@player.register
+def on_key_pressed(self, keys):
+  if "UP" in keys:
+    self.y = self.y - 2
+  if "DOWN" in keys:
+    self.y = self.y + 2
+  if "LEFT" in keys:
+    self.x = self.x - 2
+  if "RIGHT" in keys:
+    self.x = self.x + 2
+
+@target.register
+def act(self):
+  global value
+  if self.detect(player):
+    value = value + 1
+    print("Punkte:", value)
+    self.x = random.randint(30, 370)
+    self.y = random.randint(30, 270)
+
+world.run()
+```

@@ -1,0 +1,31 @@
+## Java-Question
+<JavaQuestion
+  identifier="java-demo"
+  title="Java: Collatz-Folge"
+  instructions="Dieses Beispiel zeigt Java in der H5P-Umgebung – die Collatz-Folge für eine Startzahl."
+/>
+
+```java question:java-demo starter
+public class Main {
+    public static void main(String[] args) {
+        int n = 27;
+        int schritte = 0;
+
+        System.out.print("Collatz-Folge für " + n + ": ");
+        System.out.print(n);
+
+        while (n != 1) {
+            if (n % 2 == 0) {
+                n = n / 2;
+            } else {
+                n = 3 * n + 1;
+            }
+            System.out.print(" → " + n);
+            schritte++;
+        }
+
+        System.out.println();
+        System.out.println("Schritte: " + schritte);
+    }
+}
+```

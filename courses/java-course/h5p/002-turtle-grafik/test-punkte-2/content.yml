@@ -1,0 +1,81 @@
+contentType: ide_only
+contents: []
+editorSettings:
+  instructions: Baue das folgende Bild mit deiner Programm nach
+  startingCode: |-
+    `public class Main {
+        public static void main(String[] args) {
+            // import turtle
+
+            // // turtle.forward(50) → in Java: Ausgabe/Zeichnung
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            // turtle.hideturtle()
+        }
+    }
+    `
+  instructionsImage:
+    path: images/instructionsImage-69666f383a8e5.png
+    mime: image/png
+    copyright:
+      license: U
+    width: 102
+    height: 60
+gradingSettings:
+  targetCode: |-
+    `public class Main {
+        public static void main(String[] args) {
+            // import turtle
+
+            // // turtle.forward(50) → in Java: Ausgabe/Zeichnung
+            // turtle.dot(20)
+            // turtle.back(50)
+
+            // turtle.left(45)
+            // // turtle.forward(50) → in Java: Ausgabe/Zeichnung
+            // turtle.dot(20)
+            // turtle.back(50)
+
+            // turtle.left(45)
+            // // turtle.forward(50) → in Java: Ausgabe/Zeichnung
+            // turtle.dot(20)
+            // turtle.back(50)
+
+            // turtle.left(45)
+            // // turtle.forward(50) → in Java: Ausgabe/Zeichnung
+            // turtle.dot(20)
+            // turtle.back(50)
+
+            // turtle.left(45)
+            // // turtle.forward(50) → in Java: Ausgabe/Zeichnung
+            // turtle.dot(20)
+            // turtle.back(50)
+
+            // turtle.hideturtle()
+        }
+    }
+    `
+  gradingMethod: byOutputMatch
+  dueDateGroup:
+    enableDueDate: true
+    duedate: '2026-02-22T23:00:00.000Z'
+  testCases:
+  - hidden: false

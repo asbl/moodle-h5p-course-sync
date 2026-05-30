@@ -1,0 +1,415 @@
+contentType: text_only
+advancedOptions:
+  disableOutputPopups: true
+contents:
+- type: text
+  text: |-
+    `# Actors zueinander
+
+    Actors können miteinander interagieren: einer verfolgt einen anderen, zwei
+    Actors stoßen zusammen, ein Feind greift an, wenn er nahe genug ist. Dafür
+    braucht man Abstandsberechnungen und Kollisionserkennung. Dieses Tutorial
+    zeigt beide Wege: zuerst mit eigenen Berechnungen, dann mit der API.
+
+    ## Abstand messen
+
+    ### Ohne API: Pythagoras
+
+    Den Abstand zwischen zwei Punkten berechnet man mit dem Satz des Pythagoras.
+    Die Positionen der Actors sind ihre Mittelpunkte.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void act(int self) {
+        dx = ziel.x - spieler.x;
+        dy = ziel.y - spieler.y;
+        abstand = math.sqrt(dx * dx + dy * dy);
+        anzeige.text = f"Abstand: {abstand:.0f}"
+
+        world.run()
+        }
+
+        public static void main(String[] args) {
+            // import Java OOP
+            // import math
+
+            // world = Java OOP.World(460, 300)
+            world.add_background((230, 238, 248))
+
+            // spieler = Java OOP.Circle((80, 150), 20)
+            spieler.color = (60, 120, 220)
+
+            // ziel = Java OOP.Circle((360, 150), 20)
+            ziel.color = (230, 170, 60)
+
+            // anzeige = Java OOP.Text((10, 10), "")
+            anzeige.color = (30, 35, 50)
+            anzeige.font_size = 18
+
+            // @world.register
+    }
+    `
+- type: text
+  text: |-
+    ``dx` und `dy` sind die Differenzen in x- und y-Richtung. Pythagoras ergibt
+    daraus die gerade Linie zwischen den Mittelpunkten.
+
+    ### Mit API: get_distance_to()
+
+    `get_distance_to()` liefert denselben Wert ohne eigene Rechnung.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void act(int self) {
+        abstand = spieler.get_distance_to(ziel);
+        anzeige.text = f"Abstand: {abstand:.0f}"
+
+        world.run()
+        }
+
+        public static void main(String[] args) {
+            // import Java OOP
+
+            // world = Java OOP.World(460, 300)
+            world.add_background((230, 238, 248))
+
+            // spieler = Java OOP.Circle((80, 150), 20)
+            spieler.color = (60, 120, 220)
+
+            // ziel = Java OOP.Circle((360, 150), 20)
+            ziel.color = (230, 170, 60)
+
+            // anzeige = Java OOP.Text((10, 10), "")
+            anzeige.color = (30, 35, 50)
+            anzeige.font_size = 18
+
+            // @world.register
+    }
+    `
+- type: text
+  text: |-
+    ``get_distance_to()` akzeptiert auch eine feste Position als Tupel:
+    `spieler.get_distance_to((200, 150))`.
+
+    ## Berührung erkennen
+
+    ### Ohne API: Abstand mit Radien vergleichen
+
+    Zwei Kreise berühren sich, wenn ihr Abstand kleiner ist als die Summe ihrer
+    Radien.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void act(int self) {
+        self.x = self.x + self.vx
+        dx = ziel.x - self.x;
+        dy = ziel.y - self.y;
+        abstand = math.sqrt(dx * dx + dy * dy);
+        if (abstand < 20 + 25) {
+        ziel.color = (220, 80, 80)
+
+        world.run()
+        }
+        }
+
+        public static void main(String[] args) {
+            // import Java OOP
+            // import math
+
+            // world = Java OOP.World(460, 300)
+            world.add_background((230, 238, 248))
+
+            // ball = Java OOP.Circle((80, 150), 20)
+            ball.color = (60, 120, 220)
+            ball.vx = 3
+            ball.vy = 0
+
+            // ziel = Java OOP.Circle((360, 150), 25)
+            ziel.color = (230, 170, 60)
+
+            // @ball.register
+    `
+- type: text
+  text: |-
+    `Für Actors, die keine Kreise sind, funktioniert die Radienprüfung nur
+    näherungsweise. Dort müsste man stattdessen die Rechtecke vergleichen.
+
+    ### Mit API: detect()
+
+    `detect()` prüft, ob ein Actor einen anderen berührt. Es arbeitet mit den
+    tatsächlichen Umrissen des Actors und ist für alle Formen korrekt.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void act(int self) {
+        self.move()
+        if (self.detect(ziel)) {
+        ziel.color = (220, 80, 80)
+
+        world.run()
+        }
+        }
+
+        public static void main(String[] args) {
+            // import Java OOP
+
+            // world = Java OOP.World(460, 300)
+            world.add_background((230, 238, 248))
+
+            // ball = Java OOP.Circle((80, 150), 20)
+            ball.color = (60, 120, 220)
+            ball.direction = 90
+            ball.speed = 3
+
+            // ziel = Java OOP.Circle((360, 150), 25)
+            ziel.color = (230, 170, 60)
+
+            // @ball.register
+    `
+- type: text
+  text: |-
+    `### Ereignis-Ansatz: on_detecting_actor
+
+    Wenn du auf jede Berührung reagieren willst, ohne jeden Frame aktiv zu prüfen,
+    registriere `on_detecting_actor`. Java OOP ruft es auf, sobald sich zwei
+    Actors überschneiden.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void act(int self) {
+        self.move()
+
+        // @ball.register
+        public static void on_detecting_actor(int self, int actor) {
+        if (actor == ziel) {
+        ziel.color = (220, 80, 80)
+        self.direction = -self.direction    # umkehren
+
+        world.run()
+        }
+        }
+
+        public static void main(String[] args) {
+            // import Java OOP
+
+            // world = Java OOP.World(460, 300)
+            world.add_background((230, 238, 248))
+
+            // ball = Java OOP.Circle((80, 150), 20)
+            ball.color = (60, 120, 220)
+            ball.direction = 90
+            ball.speed = 3
+
+            // ziel = Java OOP.Circle((360, 150), 25)
+            ziel.color = (230, 170, 60)
+
+            // @ball.register
+    `
+- type: text
+  text: |-
+    `Der Parameter `actor` enthält den Actor, der gerade berührt wird. Du kannst
+    mit `if actor == ziel:` prüfen, welcher Actor es konkret ist.
+
+    ## Auf einen Actor zuhalten
+
+    ### Ohne API: Richtung berechnen
+
+    Um einen Actor in Richtung eines anderen zu bewegen, berechnet man `dx`/`dy`
+    und normiert den Vektor auf die gewünschte Schrittweite.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void on_key_down_right(int self) {
+        beute.x = beute.x + 20
+
+        // @world.register
+        public static void on_key_down_left(int self) {
+        beute.x = beute.x - 20
+
+        // @world.register
+        public static void on_key_down_up(int self) {
+        beute.y = beute.y - 20
+
+        // @world.register
+        public static void on_key_down_down(int self) {
+        beute.y = beute.y + 20
+
+        // @jaeger.register
+        public static void act(int self) {
+        dx = beute.x - self.x;
+        dy = beute.y - self.y;
+        laenge = math.sqrt(dx * dx + dy * dy);
+        if (laenge > 0) {
+        self.x = self.x + dx / laenge * 2
+        self.y = self.y + dy / laenge * 2
+
+        world.run()
+        }
+        }
+
+        public static void main(String[] args) {
+            // import Java OOP
+            // import math
+
+            // world = Java OOP.World(460, 300)
+            world.add_background((230, 238, 248))
+
+            // jaeger = Java OOP.Circle((80, 150), 18)
+            jaeger.color = (220, 80, 80)
+
+            // beute = Java OOP.Circle((360, 150), 18)
+            beute.color = (60, 120, 220)
+
+            // @world.register
+    `
+- type: text
+  text: |-
+    `Das Normieren (`/ laenge`) sorgt dafür, dass der Jäger immer gleich schnell
+    ist – unabhängig davon, wie weit entfernt die Beute ist.
+
+    ### Mit API: move_towards()
+
+    `move_towards()` übernimmt die Vektorrechnung. Der zweite Parameter legt die
+    Schrittweite pro Frame fest.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void on_key_down_right(int self) {
+        beute.x = beute.x + 20
+
+        // @world.register
+        public static void on_key_down_left(int self) {
+        beute.x = beute.x - 20
+
+        // @world.register
+        public static void on_key_down_up(int self) {
+        beute.y = beute.y - 20
+
+        // @world.register
+        public static void on_key_down_down(int self) {
+        beute.y = beute.y + 20
+
+        // @jaeger.register
+        public static void act(int self) {
+        self.move_towards(beute, 2)
+
+        world.run()
+        }
+        }
+
+        public static void main(String[] args) {
+            // import Java OOP
+
+            // world = Java OOP.World(460, 300)
+            world.add_background((230, 238, 248))
+
+            // jaeger = Java OOP.Circle((80, 150), 18)
+            jaeger.color = (220, 80, 80)
+
+            // beute = Java OOP.Circle((360, 150), 18)
+            beute.color = (60, 120, 220)
+
+            // @world.register
+    `
+- type: text
+  text: |-
+    `Alternativ: `point_towards_actor()` richtet den Actor aus, danach bewegt
+    `move()` ihn in diese Richtung.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void act(int self) {
+        self.point_towards_actor(beute)
+        self.move(2)
+        }
+
+        public static void main(String[] args) {
+            @jaeger.register
+    }
+    `
+  options:
+    showEditor: false
+- type: text
+  text: |-
+    `## Actors abprallen lassen
+
+    Wenn zwei Actors aufeinandertreffen und beide mit `direction`/`move()` bewegt
+    werden, kann `bounce_from_actor()` die Richtungen automatisch korrigieren.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void act(int self) {
+        self.move()
+        if (self.detect(b)) {
+        self.bounce_from_actor(b)
+
+        // @b.register
+        public static void act(int self) {
+        self.move()
+        if (self.detect(a)) {
+        self.bounce_from_actor(a)
+
+        world.run()
+        }
+        }
+
+        public static void main(String[] args) {
+            // import Java OOP
+
+            // world = Java OOP.World(460, 300)
+            world.add_background((230, 238, 248))
+
+            // a = Java OOP.Circle((100, 150), 22)
+            a.color = (60, 120, 220)
+            a.direction = 90
+            a.speed = 3
+
+            // b = Java OOP.Circle((360, 150), 22)
+            b.color = (230, 170, 60)
+            b.direction = 270
+            b.speed = 3
+
+            // @a.register
+    `
+- type: text
+  text: |-
+    `Beide Actors erkennen die Kollision und passen ihre Richtung an. Das Ergebnis
+    ist eine einfache physikalische Reflexion.
+
+    ## Zusammenfassung`
+- type: code
+  code: |-
+    `public class Main {
+        public static void on_detecting_actor(int self, int actor) {
+        pass                                  # wird aufgerufen wenn a und actor sich berühren
+
+        // Auf Actor zuhalten
+        a.move_towards(b, 2)                     # 2 Pixel pro Frame
+        a.point_towards_actor(b)                 # nur ausrichten, nicht bewegen
+
+        // Abprallen
+        a.bounce_from_actor(b)                   # Richtung nach Kollision korrigieren
+        }
+
+        public static void main(String[] args) {
+            // Abstand messen
+            abstand = a.get_distance_to(b)           # in Pixeln, von Mittelpunkt zu Mittelpunkt;
+
+            // Berührung prüfen (aktiv)
+            if (a.detect(b)) {
+                pass                                  # a und b überschneiden sich
+
+            // Berührung als Ereignis
+            @a.register
+    }
+    `
+  options:
+    showEditor: false
+- type: text
+  text: |-
+    `| Aufgabe | Ohne API | Mit API |
+    |---|---|---|
+    | Abstand | `math.sqrt(dx² + dy²)` | `get_distance_to(b)` |
+    | Berührung | Abstand < Summe der Radien | `detect(b)` |
+    | Hinbewegen | Vektor normieren, x/y addieren | `move_towards(b, 2)` |
+    | Abprallen | vx/vy manuell tauschen | `bounce_from_actor(b)` |`

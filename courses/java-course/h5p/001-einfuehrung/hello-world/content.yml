@@ -1,0 +1,21 @@
+contentType: text_only
+contents:
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            System.out.println("hello World");
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Wenn du den Text zwischen den Anführungszeichen änderst, 
+    siehst du, dass das Programm eine unterschiedliche Ausgabe gibt.
+
+    Was du siehst ist ein Programm mit einer **Anweisung**:
+
+    Es wird die Funktion **System.out.println** aufgerufen und der Funktion wird als
+    Parameter eine **Zeichenkette** (Engl: 'string') übergeben.
+
+    Die Funktion gibt dann diese Zeichenkette auf der Konsole aus.`

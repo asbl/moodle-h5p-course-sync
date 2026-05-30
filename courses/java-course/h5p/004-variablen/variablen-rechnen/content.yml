@@ -1,0 +1,49 @@
+contentType: text_only
+contents:
+- type: text
+  text: 'Man kann mit Variablen genauso wie mit Zahlen rechnen:'
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            int a = 3;
+            int b = 4;
+            a = a + b;
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Auch hier spielt das **Benennen von Variablen** eine besondere Bedeutung. 
+    Betrachte z.B. die folgenden beiden Codes:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            int a = 8;
+            double b = 10.45;
+            System.out.println(a * b);
+        }
+    }
+    `
+- type: text
+  text: und
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            int stunden = 8;
+            double lohn_pro_stunde = 10.45;
+            System.out.println(stunden * lohn_pro_stunde);
+        }
+    }
+    `
+- type: text
+  text: |-
+    `**Semantisch** unterscheiden sich die beiden Programme nicht. 
+    Es wird dasselbe Ergebnis ausgegeben. Das zweite Programm ist aber besser lesbar.
+
+    !!! quote 
+    “Programs are meant to be read by humans and only incidentally for computers to execute.”
+    !!!
+    *von Donald Knuth , Erfinder der Sprache LaTeX. LaTeX wird verwendet um im wissenschaftlichen Kontext Dokumente zu formatieren.*`

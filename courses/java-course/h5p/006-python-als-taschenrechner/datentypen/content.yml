@@ -1,0 +1,185 @@
+contentType: text_only
+contents:
+- type: text
+  text: |-
+    `Ein **Datentyp** bezeichnet bestimmte Wertebereiche, auf denen bestimmte
+    Operationen definiert sind.
+
+    Java unterscheidet verschiedene Datentypen:
+
+      * **int**: Positive und negative ganze Zahlen.
+      * **float**: Dezimalzahlen (Man spricht auch von `Fließkommazahlen`)
+      * **str** (string) : Zeichenkette.
+      * **bool** (boolean): Wahrheitswert: `True` oder `False`
+
+    Später wirst du noch weitere Datentypen kennenlernen.
+
+    Operationen haben in diesem Fall unterschiedliche Bedeutug.
+    Betrachte z.B. das Beispiel:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            System.out.println("3" + "4");
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Als Ergebnis liefert Java das Ergebnis `"34"`,
+    da Java erkennt, dass es sich um Zeichenketten handelt
+    und der + Operator in Java bei Zeichenketten als
+    *Konkatenation* (d.h. Aneinanderhängung) der
+    beiden Zeichenketten definiert ist.
+
+    ### Type
+
+    Den Typ von konkreten Werten kannst du mit der 
+    Funktion `type` erfragen:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            System.out.println(type(4));
+            System.out.println(type(4.0));
+            System.out.println(type("test"));
+            System.out.println(type(True));
+            System.out.println(type(4 * 2));
+            System.out.println(type(4 / 2));
+        }
+    }
+    `
+- type: text
+  text: |-
+    `### Typumwandlungen
+
+    Man kann in bestimmten Fällen Datentypen ineinander umwandeln.
+    Wenn du z.B. Werte mit `input` einliest sind dies immer zunächst
+    strings.
+
+    Gib in dem Folgendem Programm die Zahlen **3** und **4** an:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            x = input();
+            y = input();
+            System.out.println(x + y);
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Hier besteht wieder das selbe Problem wie vorher:
+
+    Dadurch, dass zwei Strings mit dem`
+- type: code
+  code: |-
+    `
+    `
+- type: text
+  text: |-
+    `Java
+    wird nicht die Summe berechnet, sondern die Strings werden
+    aneinandergehängt.
+
+    ### Strings in Zahlen umwandeln
+
+    Wenn du die Strings als Zahlen verarbeiten möchtest, musst du
+    sie vorher explizit in eine Zahl umwandeln:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            Java
+            x = int("3");
+            y = float("4.5");
+
+            System.out.println(x + y);
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Java
+
+    x wird in die ganze Zahl 3 umgewandelt, y in die Dezimalzahl 4,5.
+
+    !!! warning Achtung
+    Beachte, dass dies in manchen Fällen zu Problemen führt.
+    Das Programm bricht mit einem Fehler ab, wenn keine ganze Zahl eingibst`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            int("x")
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Java
+    !!!
+
+    ### Eingaben umwandeln
+
+    So kann ein Programm aussehen, wenn du die Benutzereingabe direkt in eine Zahl umwandeln kannst.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            Java
+            x = float(input());
+            y = float(input());
+
+            System.out.println(x + y);
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Java
+
+    ### Zahlen in Texte umwandeln
+
+    Umgekehrt kannst du auch Zahlen in Strings umwandeln.
+
+    Das folgende Programm führt zu einem Fehler:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            Java
+            x = int(input());
+            y = int(input());
+            System.out.println("Das Ergebnis von " + x + "+" y + " ist " + (x + y));
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Java
+
+    #### Problem:
+
+    Das Problem hier ist, dass x und y zahlen sind, hier aber Texte erwartet werden,
+    damit die Operation + Sinn ergibt.
+
+    ### str()
+
+    Mit der Funktion str() kann man die Zahlen
+    in Strings umwandeln, so dass man diese mit den
+    anderen Zeichenketten konkatenieren kann.
+
+    So sieht eine korrigierte Version des Programms aus:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            Java
+            x = int(input());
+            y = int(input());
+            System.out.println("Das Ergebnis von " + str(x) + "+" + str(y) + " ist " + str((x + y)));
+        }
+    }
+    `

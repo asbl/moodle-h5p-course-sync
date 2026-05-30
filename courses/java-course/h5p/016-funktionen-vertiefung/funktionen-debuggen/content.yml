@@ -1,0 +1,61 @@
+contentType: text_only
+contents:
+- type: text
+  text: |-
+    `Bei Funktionen passieren typische Fehler. Viele davon lassen sich finden, wenn
+    du Aufruf, Parameter und Rückgabe getrennt prüfst.
+
+    ### Fehler 1: Rückgabe vergessen`
+- type: code
+  code: |-
+    `public class Main {
+        public static void verdoppeln(int zahl) {
+        ergebnis = zahl * 2;
+
+
+        System.out.println(verdoppeln(5));
+        }
+
+        public static void main(String[] args) {
+    }
+    `
+- type: text
+  text: |-
+    `Die Funktion berechnet zwar etwas, gibt es aber nicht zurück. Deshalb wird
+    `None` ausgegeben.
+
+    ### Fehler 2: Funktion nicht aufrufen`
+- type: code
+  code: |-
+    `public class Main {
+        public static void gib_brot() {
+        return "Brot";
+
+
+        System.out.println(gib_brot);
+        }
+
+        public static void main(String[] args) {
+    }
+    `
+- type: text
+  text: |-
+    `Hier fehlt die Klammer. Es muss `gib_brot()` heißen.
+
+    ### Aufgabe
+
+    Korrigiere die zwei Fehler im Code.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void baue_schild(int text) {
+        String schild = "[" + text + "]";
+
+
+        nachricht = baue_schild;
+        System.out.println(nachricht("Mine"));
+        }
+
+        public static void main(String[] args) {
+    }
+    `

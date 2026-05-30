@@ -1,0 +1,49 @@
+contentType: ide_only
+advancedOptions:
+  showConsole: true
+  enableSaveLoadButtons: true
+  externalLibraryUrls: ''
+editorSettings:
+  mainClassName: Main
+  startingCode: |-
+    `public class Main {
+        public static void main(String[] args) {
+            for (int i = 1; i <= 20; i++) {
+                // Ergänze die FizzBuzz-Logik
+                System.out.println(i);
+            }
+        }
+    }`
+  preCode: |-
+    ``
+  postCode: |-
+    ``
+  stdin: ''
+  instructions: |-
+    `Gib für alle Zahlen von 1 bis 20 aus: 'Fizz' wenn durch 3 teilbar, 'Buzz' wenn durch 5 teilbar, 'FizzBuzz' wenn durch beides teilbar, sonst die Zahl selbst.`
+gradingSettings:
+  gradingMethod: bySolution
+  expectedOutput: "public class Main {\n    public static void main(String[] args)
+    {\n        for (int i = 1; i <= 20; i++) {\n            if (i % 15 == 0) {\n \
+    \               System.out.println(\"FizzBuzz\");\n            } else if (i %
+    3 == 0) {\n                System.out.println(\"Fizz\");\n            } else if
+    (i % 5 == 0) {\n                System.out.println(\"Buzz\");\n            } else
+    {\n                System.out.println(i);\n            }\n        }\n    }\n}"
+  trimOutput: true
+  solution: "public class Main {\n    public static void main(String[] args) {\n \
+    \       for (int i = 1; i <= 20; i++) {\n            if (i % 15 == 0) {\n    \
+    \            System.out.println(\"FizzBuzz\");\n            } else if (i % 3 ==
+    0) {\n                System.out.println(\"Fizz\");\n            } else if (i
+    % 5 == 0) {\n                System.out.println(\"Buzz\");\n            } else
+    {\n                System.out.println(i);\n            }\n        }\n    }\n}"
+l10n:
+  checkAnswer: Überprüfen
+  run: Ausführen
+  stop: Stopp
+  failedText: Noch nicht korrekt
+  successText: Korrekt!
+  testCase: Testfall
+  hidden: '[versteckt]'
+contents:
+- type: text
+  showEditor: false

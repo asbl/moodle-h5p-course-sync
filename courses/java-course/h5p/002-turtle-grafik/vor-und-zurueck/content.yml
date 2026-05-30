@@ -1,0 +1,14 @@
+contentType: text_only
+contents:
+- type: text
+  text: |-
+    `Die Programm kann Vor- und zurückfahren... Schaue dir dazu den folgenden Code an und versuche die untenstehende Abbildung zu zeichnen`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            // // turtle.forward(50) → in Java: Ausgabe/Zeichnung
+            // turtle.back(50)
+        }
+    }
+    `

@@ -1,0 +1,122 @@
+contentType: text_only
+contents:
+- type: text
+  text: |-
+    `Eine der zentralen Ideen der Programmierung ist das **Lösen von Problemen**. 
+    In der Informatik sind viele dieser Probleme besonders **komplex**.
+
+    Um auch umfangreichen Code gemeinsam im Team entwickeln zu können, braucht man geeignete **Strategien**.
+
+    Eine wichtige Möglichkeit dafür sind **Funktionen**.
+
+    Funktionen reduzieren die Komplexität: So musst du zum Beispiel nicht im Detail verstehen, 
+    wie die `System.out.println`-Funktion eine Ausgabe auf der Konsole erzeugt oder welcher Algorithmus 
+    hinter dem Befehl `turtle.circle(100)` steckt, um einen Kreis zu zeichnen.
+
+    Indem du Funktionen einfach aufrufst, 
+    wird die zugrunde liegende Komplexität 
+    für dich reduziert und der Code insgesamt besser lesbar. Außerdem ermöglicht dir eine Funktion, den Code **wiederzuverwenden**.
+
+    In diesem Kapitel lernst du, wie du Funktionen **aufrufst** und wie du selbst
+    Funktionen **definierst**, die dann verwendet werden können.
+
+    ## Aufgbau einer Funktion
+
+    Eine Funktion besteht aus einem Namen gefolgt von mehreren Parametern in Klammern.
+
+    Hinweis: Man nennt die Variablen mit denen die Funktion aufgerufen wird **Parameter* - Die
+    konkreten Werte die übergeben werden nennt man **Argumente**.
+
+    ### Beispiel: Die System.out.println-Funktion
+
+    Die Funktion System.out.println() nimmt auch mehrere mit einem Komma getrennte Werte an. 
+    Sie gibt die einzelnen Ausgaben dann nacheinander, mit einer Leertaste getrennt, aus.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            System.out.println("abc", "cde");
+        }
+    }
+    `
+- type: text
+  text: Im Code-Beispiel wird `System.out.println` mit den **Argumenten**
+- type: code
+  code: |-
+    `
+    `
+- type: text
+  text: Java
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            Java
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Java
+
+    Java
+
+    ## Rückgabewerte
+
+    Manche Funktionen haben darüber hinaus einen Rückgabewert. Diesen kann man 
+    entweder mit System.out.println() ausgeben oder in einer Variable speichern. 
+
+    ### Beispiel: Die maximum-Funktion
+
+    Schau dir folgenden Code an:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            Java
+
+            Java
+            maximum = max(3.0, 34, 5, 8, 100);
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Java
+
+    Java
+
+    Die Funktion `max()` nimmt mehrere Argumente an und berechnet 
+    das Maximum dieser Argumente. 
+    Das Maximum wird anschließend zurückgegeben und in diesem Fall der Variable 
+    `maximum` zugewiesen. 
+
+    Die Variable `maximum` hat nach der Zeile den Wert 100.
+
+    ## Funktionen ineinander verschachteln
+
+    Man kann Funktionen mit Rückgabewerten auch beliebig miteinander verketten:
+
+    Die Anweisung`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            Java
+
+            Java
+            System.out.println(max(3.0, 34, 5, 8, 100));
+        }
+    }
+    `
+- type: text
+  text: |-
+    `gibt z..B. das vorher berechnete maximum aus.
+
+    !!! info Verschachtelte Funktionen
+    Wenn mehrere Funktionen ineinander geschachtelt sind, 
+    dann werden diese von **innen nach außen** ausgewertet. 
+
+    Der Rückgabewert der inneren Funktion dient als Argument 
+    für die äußere Funktion.
+    !!!`

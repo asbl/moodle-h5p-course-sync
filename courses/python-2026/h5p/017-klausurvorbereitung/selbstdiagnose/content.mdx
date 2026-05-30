@@ -1,0 +1,208 @@
+## Bin ich klausurbereit?
+
+Lies jede Aussage durch. Wenn du dir sicher bist, hake sie ab – wenn nicht,
+wiederhole das entsprechende Kapitel noch einmal.
+
+### Variablen und Ausdrücke
+
+- [ ] Ich kann den Wert einer Variable nach jeder Zuweisung bestimmen.
+- [ ] Ich kenne den Unterschied zwischen `=` (Zuweisung) und `==` (Vergleich).
+- [ ] Ich kann `//` (ganzzahlige Division) und `%` (Modulo) berechnen.
+
+### Schleifen
+
+- [ ] Ich kann eine `for`-Schleife mit `range()` Schritt für Schritt
+      durchführen und alle Werte als Tabelle aufschreiben.
+- [ ] Ich kann eine `while`-Schleife als Tabelle verfolgen und erkennen,
+      wann sie endet.
+- [ ] Ich verstehe, wie eine `for`-Schleife über eine Liste iteriert.
+
+### Verzweigungen
+
+- [ ] Ich kann `if`, `elif` und `else` an einem Beispiel erklären.
+- [ ] Ich kann einen booleschen Ausdruck mit `and` oder `or` auswerten.
+
+### Listen
+
+- [ ] Ich kann `append`, `len` und den Indexzugriff (`liste[i]`) erklären
+      und anwenden.
+- [ ] Ich kann eine Liste nach jeder Änderung aufschreiben.
+- [ ] Ich kann mit einer `for`-Schleife und einer Bedingung Elemente aus
+      einer Liste filtern oder zählen.
+
+### Funktionen
+
+- [ ] Ich kann eine Funktion mit Parameter und `return` schreiben.
+- [ ] Ich kann erklären, was ein Rückgabewert ist und wie er sich von
+      `print` unterscheidet.
+- [ ] Ich kann zwei Funktionen für verschiedene Eingaben vergleichen und
+      den Unterschied in einem Satz beschreiben.
+
+### miniworlds
+
+- [ ] Ich erkenne Welt, Actor und Ereignis-Registrierung im Code.
+- [ ] Ich kann eine Bewegung in x- oder y-Richtung implementieren.
+- [ ] Ich kann erklären, was beim Tastendruck in einem miniworlds-Programm
+      passiert.
+
+---
+
+## Abschluss-Aufgaben
+
+Löse diese Aufgaben zunächst auf Papier – dann überprüfe am Rechner.
+
+### Aufgabe 1 – Code lesen und Tabelle erstellen
+
+```python
+a = 4
+b = 3
+for i in range(3):
+    a = a + b
+    b = a - b
+    print(a, b)
+```
+
+a) Fülle die Tabelle aus:
+
+```python noeditor
+i | a (nach a = a + b) | b (nach b = a - b) | Ausgabe
+0 | ?                  | ?                  | ?
+1 | ?                  | ?                  | ?
+2 | ?                  | ?                  | ?
+```
+
+b) Welche drei Zeilen gibt das Programm insgesamt aus?
+
+### Aufgabe 2 – Funktion implementieren
+
+Gegeben: `noten = [2, 5, 1, 4, 3, 1]`
+
+a) Schreibe eine Funktion `anzahl_einsen(noten)`, die zählt, wie viele
+   Einsen in der Liste stehen.
+b) Schreibe eine Funktion `bestanden(noten)`, die `True` zurückgibt, wenn
+   mindestens die Hälfte aller Noten `<= 3` ist.
+
+```python
+def anzahl_einsen(noten):
+    # Dein Code hier
+    pass
+
+def bestanden(noten):
+    # Dein Code hier
+    pass
+
+print(anzahl_einsen([2, 5, 1, 4, 3, 1]))  # 2
+print(bestanden([2, 5, 1, 4, 3, 1]))       # True
+```
+
+### Aufgabe 3 – Funktionen vergleichen und beurteilen
+
+```python
+def berechne_a(punkte):
+    return punkte * 2
+
+def berechne_b(punkte):
+    if punkte >= 5:
+        return punkte * 3
+    return punkte
+```
+
+a) Berechne für `punkte = 3` und `punkte = 5` jeweils beide Rückgabewerte.
+b) Beschreibe in einem Satz, worin sich die beiden Funktionen unterscheiden.
+c) Ein Spieler hat 6 Punkte. Welche Funktion liefert den höheren Wert?
+   Begründe.
+
+```python
+def berechne_a(punkte):
+    return punkte * 2
+
+def berechne_b(punkte):
+    if punkte >= 5:
+        return punkte * 3
+    return punkte
+
+print(berechne_a(3), berechne_b(3))
+print(berechne_a(5), berechne_b(5))
+print(berechne_a(6), berechne_b(6))
+```
+
+---
+
+## Niveau 2 – Anspruchsvollere Aufgaben
+
+### Aufgabe 4 – while-Schleife analysieren
+
+```python
+n = 64
+schritte = 0
+while n > 1:
+    n = n // 2
+    schritte = schritte + 1
+print(schritte)
+```
+
+a) Fülle die Tabelle aus und bestimme die Ausgabe:
+
+```python noeditor
+Schritt | n  | schritte | Bedingung n > 1
+Start   | 64 | 0        | –
+1       | ?  | ?        | wahr
+2       | ?  | ?        | ?
+3       | ?  | ?        | ?
+...     | ?  | ?        | ?
+Ende    | ?  | ?        | falsch → Ende
+```
+
+b) Was berechnet die Schleife allgemein für eine beliebige Zahl `n`?
+c) Was wäre die Ausgabe für `n = 128`?
+
+### Aufgabe 5 – Funktion mit Liste
+
+Schreibe eine Funktion `nur_positive(zahlen)`, die eine neue Liste
+zurückgibt mit nur den positiven Zahlen (> 0) aus `zahlen`.
+
+```python
+def nur_positive(zahlen):
+    # Dein Code
+    pass
+
+print(nur_positive([3, -1, 7, 0, -4, 2]))  # [3, 7, 2]
+print(nur_positive([-1, -2]))              # []
+```
+
+---
+
+## Niveau 3 – Anspruchsvolle Aufgaben
+
+### Aufgabe 6 – Funktion beurteilen und absichern
+
+```python
+def maximum(liste):
+    groesster = liste[0]
+    for x in liste:
+        if x > groesster:
+            groesster = x
+    return groesster
+```
+
+a) Was gibt `maximum([5, 3, 8, 1])` zurück?
+b) Was passiert bei `maximum([])`? Erkläre das Verhalten.
+c) Schreibe eine verbesserte Version, die mit einer leeren Liste umgehen kann.
+
+```python
+def maximum(liste):
+    # Verbesserte Version
+    pass
+
+print(maximum([5, 3, 8, 1]))  # 8
+print(maximum([]))             # None (oder sinnvoller Wert)
+```
+
+### Aufgabe 7 – Entwurf beschreiben
+
+Beschreibe in Stichworten (kein fertiger Code), wie eine Funktion
+`rangfolge(punkte)` vorgehen würde: Sie erhält eine Liste von Punktzahlen
+und soll eine sortierte Liste von Tupeln `(rang, punkte)` zurückgeben,
+wobei Rang 1 die höchste Punktzahl bekommt.
+
+Welche Schritte braucht die Funktion? Welche Schwierigkeit siehst du?

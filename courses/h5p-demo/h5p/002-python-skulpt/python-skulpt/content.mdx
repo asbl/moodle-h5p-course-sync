@@ -1,0 +1,28 @@
+<Instructions>
+Berechne die Summe aller geraden Zahlen von 1 bis 100 und gib das Ergebnis aus.
+</Instructions>
+
+```python editor:startingCode
+summe = 0
+for zahl in range(1, 101):
+    pass  # Ergänze hier die Bedingung
+
+print(summe)
+```
+
+```python grading:targetCode
+summe = 0
+for zahl in range(1, 101):
+    if zahl % 2 == 0:
+        summe += zahl
+
+print(summe)
+```
+
+```yaml grading
+gradingMethod: bySolution
+dueDateGroup:
+  enableDueDate: false
+  duedate: 01.01.1970
+testCases: []
+```

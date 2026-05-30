@@ -1,0 +1,23 @@
+contentType: text_only
+advancedOptions:
+  enableSaveLoadButtons: false
+contents:
+- type: text
+  text: |-
+    `Achtung: Mit while-Schleifen ist es möglich,
+    **Endlosschleifen** zu produzieren. Manchmal ist dies gewollt,
+    aber manchmal führt dies auch dazu, dass dein Programm Ewigkeiten an einer Stelle hängt.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            x = int(input());
+
+            while(x < 10):
+                x = x - 1;
+
+            // Dieser Code wird niemals erreicht.
+            System.out.println(x);
+        }
+    }
+    `

@@ -1,0 +1,27 @@
+<Instructions>
+Zeichne mit Turtle-Grafik ein regelmäßiges Sechseck. Jede Seite soll 80 Pixel lang sein.
+</Instructions>
+
+```python editor:startingCode
+import turtle
+
+for i in range(6):
+    turtle.forward(80)
+    turtle.right(0)  # Welcher Winkel?
+```
+
+```python grading:targetCode
+import turtle
+
+for i in range(6):
+    turtle.forward(80)
+    turtle.right(60)
+```
+
+```yaml grading
+gradingMethod: bySolution
+dueDateGroup:
+  enableDueDate: false
+  duedate: 01.01.1970
+testCases: []
+```

@@ -1,0 +1,38 @@
+contentType: text_and_ide
+databaseSettings:
+  select_db: from_defaults
+  selectDatabase: world23
+contents:
+- type: text
+  showEditor: false
+  text: |-
+    `Der Code gibt alle Länder zurück, die mit einem beliebigen Buchstaben beginnen und deren zweiter Buchstabe ein n ist.
+
+    `
+- type: code
+  showEditor: false
+  code: |-
+    `SELECT name FROM world
+     WHERE name LIKE '_n%'
+    `
+editorSettings:
+  startingCode: |-
+    `SELECT name FROM world
+     WHERE name LIKE '_n%'
+    `
+  instructions: |-
+    `Ändere die Abfrage so ab, dass alle Länder mit einem **t** als 
+    zweitem Buchstaben ausgegeben werden.
+    `
+  editorMode: code
+gradingSettings:
+  gradingMethod: bySolution
+  solution: "SELECT name FROM world\n WHERE name LIKE &#039;_t%&#039;\n"
+advancedOptions:
+  blocklyCdnUrl: ''
+  codeMirrorCdnUrl: ''
+  markdownCdnUrl: ''
+  fontAwesomeCdnUrl: ''
+  sweetAlertCdnUrl: ''
+  jsZipCdnUrl: ''
+  sqlJsUrl: ''

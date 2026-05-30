@@ -1,0 +1,39 @@
+<Instructions>
+Berechne Mittelwert, Median und Standardabweichung der gegebenen Messwerte mit NumPy.
+</Instructions>
+
+```python editor:startingCode
+import numpy as np
+
+messwerte = np.array([12.5, 14.2, 11.8, 15.0, 13.7, 12.1, 14.8, 11.5, 13.9, 14.4])
+
+mittelwert = 0  # Ergänzen
+median = 0      # Ergänzen
+std = 0         # Ergänzen
+
+print(f"Mittelwert: {mittelwert:.2f}")
+print(f"Median:     {median:.2f}")
+print(f"Std-Abw.:   {std:.2f}")
+```
+
+```python grading:targetCode
+import numpy as np
+
+messwerte = np.array([12.5, 14.2, 11.8, 15.0, 13.7, 12.1, 14.8, 11.5, 13.9, 14.4])
+
+mittelwert = np.mean(messwerte)
+median = np.median(messwerte)
+std = np.std(messwerte)
+
+print(f"Mittelwert: {mittelwert:.2f}")
+print(f"Median:     {median:.2f}")
+print(f"Std-Abw.:   {std:.2f}")
+```
+
+```yaml grading
+gradingMethod: bySolution
+dueDateGroup:
+  enableDueDate: false
+  duedate: 01.01.1970
+testCases: []
+```

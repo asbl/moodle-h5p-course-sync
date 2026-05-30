@@ -1,0 +1,43 @@
+contentType: ide_only
+contents: []
+editorSettings:
+  instructions: |-
+    `Es werden 3 Werte a, b und c ausgelesen. 
+
+    Gib mit Hilfe der max()-Funktion den größten der 3 Werte aus.`
+  preCode: |-
+    `public class Main {
+        public static void main(String[] args) {
+            a = float(input())
+            b = float(input())
+            c = float(input())
+        }
+    }
+    `
+gradingSettings:
+  gradingMethod: ioTestCases
+  testCases:
+  - inputs:
+    - '2'
+    - '1'
+    - '4'
+    outputs:
+    - '4.0'
+    hidden: false
+  - inputs:
+    - '5'
+    - '3'
+    - '1'
+    outputs:
+    - '5.0'
+    hidden: false
+  - inputs:
+    - '0'
+    - '6'
+    - '2'
+    outputs:
+    - '6.0'
+    hidden: false
+  dueDateGroup:
+    enableDueDate: true
+    duedate: '2026-04-19T21:59:00.000Z'

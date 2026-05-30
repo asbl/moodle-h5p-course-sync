@@ -1,0 +1,99 @@
+contentType: text_only
+contents:
+- type: text
+  text: |-
+    `Beim Definieren und Verwenden von Funktionen werden oft einige typische Fehler 
+    gemacht. Es ist gut diese Fehler und ihre Fehlermeldungen zu kennen.
+
+    #### Es wird kein Rückgabewert zurückgegeben
+
+    Betrachte folgende Funktion`
+- type: code
+  code: |-
+    `public class Main {
+        public static void square(int x) {
+        x * x
+        System.out.println(square(7));
+        }
+
+        public static void main(String[] args) {
+    }
+    `
+- type: text
+  text: |-
+    `Die Funktion besitzt **keinen return Befehl**.
+    Sie gibt daher den Wert `None` zurück. Dies kann zu Problemen führen und zwar immer dann, wenn du mit dem Rückgabewert 
+    im Hauptprogramm weiterarbeiten möchtest.
+
+    Hier soll z.B. der Rückgabewert von 
+    `square(z)`, d.h. die Zahl 49 ausgegeben werden. 
+    Da die Funktion aber nicht 49, sondern `None` zurückgibt, wird stattdessen None ausgegeben.
+
+    #### Es wurde falsch eingerückt
+
+    Den Fehler kennst du vermutlich bereits von if oder for-Blöcken:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void square(int x) {
+        y = x * x;
+        return y;
+        System.out.println(square(10));
+        }
+
+        public static void main(String[] args) {
+    }
+    `
+- type: text
+  text: |-
+    `Immer wenn du die Fehlermeldung **IndentationError** 
+    bekommst, solltest du überprüfen, 
+    ob du deinen Code richtig eingerückt hast.
+
+
+    #### Es wurden zu wenig/zu viele Parameter übergeben
+
+    Du musst exakt so viele Parameter angeben, wie die Funktion anbietet. 
+    Wenn du zu viele oder zu wenige Parameter angibst, wird ein Fehler gemeldet:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void square(int x) {
+        return x*x;
+
+        System.out.println(square(7, 11));
+        }
+
+        public static void main(String[] args) {
+    }
+    `
+- type: text
+  text: |-
+    `Im Beispiel kommt es zu einem Programmfehler, 
+    da die Funktion `square` nur einen Parameter erwartet, 
+    aber zwei Zahlen an die Funktion übergeben werden. 
+
+    In diesem Fall wird ein **TypeError** geworfen.
+
+    #### Die Funktion ist noch nicht bekannt
+
+    Die Funktion muss erst definiert werden, 
+    damit der Name der Funktion im restlichen Programm 
+    bekannt ist.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void square(int x) {
+        return x * x;
+        }
+
+        public static void main(String[] args) {
+            System.out.println(square(15));
+
+    }
+    `
+- type: text
+  text: |-
+    `In diesem Fall wird ein **NameError** 
+    geworfen, da der Name der Funktion 
+    zum Zeitpunkt des Aufrufes noch nicht bekannt ist.`

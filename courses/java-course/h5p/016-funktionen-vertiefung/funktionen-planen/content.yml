@@ -1,0 +1,61 @@
+contentType: text_only
+contents:
+- type: text
+  text: |-
+    `Eine gute Funktion löst eine klar benannte Teilaufgabe. Der Name sollte
+    verraten, was die Funktion macht.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void begruessung(int name) {
+        System.out.println("Hallo", name);
+
+
+        begruessung("Alex")
+        begruessung("Sam")
+        }
+
+        public static void main(String[] args) {
+    }
+    `
+- type: text
+  text: |-
+    `Die Funktion `begruessung` kann mit verschiedenen Namen aufgerufen werden.
+    Der Code wird nicht kopiert, sondern wiederverwendet.
+
+    ### Funktionen planen
+
+    Vor dem Programmieren hilft eine kurze Planung:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            Name:        baue_statuszeile
+            Parameter:   name, leben, brot
+            Rückgabe:    ein fertiger Text
+            Beispiel:    baue_statuszeile("Alex", 8, 3)
+                         -> "Alex | Leben: 8 | Brot: 3"
+        }
+    }
+    `
+  options:
+    showEditor: false
+- type: text
+  text: |-
+    `### Aufgabe
+
+    Lies die Planung und ergänze die Funktion.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void baue_statuszeile(int name, int leben, int brot) {
+        // Ergänze die Rückgabe.
+        return "";
+
+
+        System.out.println(baue_statuszeile("Alex", 8, 3));
+        }
+
+        public static void main(String[] args) {
+    }
+    `

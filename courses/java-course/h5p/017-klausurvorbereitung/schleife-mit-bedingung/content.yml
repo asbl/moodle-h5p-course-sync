@@ -1,0 +1,183 @@
+contentType: text_only
+contents:
+- type: text
+  text: |-
+    `Wenn eine `for`-Schleife eine Bedingung enthält, prüfst du für jedes Element,
+    ob die Bedingung gilt – und notierst, was sich ändert.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            zahlen = [3, 7, 2, 8, 1];
+            int summe = 0;
+            for (var z : zahlen) {
+                if (z > 4) {
+                    summe = summe + z;
+            System.out.println(summe)  # nur 7 und 8 zählen: 15);
+        }
+    }
+    `
+  options:
+    showEditor: false
+- type: text
+  text: |-
+    `### Übung 1
+
+    Bestimme die Ausgabe. Schreibe eine Tabelle mit den Spalten
+    `w`, `w % 2 == 0`, `summe`.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            werte = [4, 9, 1, 6, 3, 8];
+            int summe = 0;
+            for (var w : werte) {
+                if (w % 2 == 0) {
+                    summe = summe + w;
+            System.out.println(summe);
+        }
+    }
+    `
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            w | w % 2 == 0 | summe
+            4 | ?          | ?
+            9 | ?          | ?
+            1 | ?          | ?
+            6 | ?          | ?
+            3 | ?          | ?
+            8 | ?          | ?
+        }
+    }
+    `
+  options:
+    showEditor: false
+- type: text
+  text: |-
+    `### Übung 2
+
+    Welche Wörter landen in der Liste `kurze`? Bestimme die Ausgabe zuerst
+    auf Papier.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            woerter = ["Hund", "Katze", "Aal", "Esel", "Uhu"];
+            kurze = [];
+            for (var wort : woerter) {
+                if (len(wort) <= 3) {
+                    kurze.append(wort)
+            System.out.println(kurze);
+        }
+    }
+    `
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            wort      | len(wort) | len(wort) <= 3 | in kurze?
+            "Hund"    | 4         | nein           | –
+            "Katze"   | ?         | ?              | ?
+            "Aal"     | ?         | ?              | ?
+            "Esel"    | ?         | ?              | ?
+            "Uhu"     | ?         | ?              | ?
+        }
+    }
+    `
+  options:
+    showEditor: false
+- type: text
+  text: |-
+    `---
+
+    ## Niveau 2
+
+    ### Übung 3
+
+    Diesmal gibt es zwei Zählkategorien. Lege eine Tabelle mit den Spalten
+    `p`, `p >= 6`, `p >= 4`, `hoch`, `mittel` an.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            punkte = [3, 7, 5, 2, 8, 4, 6];
+            int hoch = 0;
+            int mittel = 0;
+            for (var p : punkte) {
+                if (p >= 6) {
+                    hoch = hoch + 1;
+                } else if (p >= 4) {
+                    mittel = mittel + 1;
+            System.out.println(hoch, mittel);
+        }
+    }
+    `
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            p | p >= 6 | p >= 4 | hoch | mittel
+            3 | nein   | nein   | 0    | 0
+            7 | ?      | ?      | ?    | ?
+            5 | ?      | ?      | ?    | ?
+            2 | ?      | ?      | ?    | ?
+            8 | ?      | ?      | ?    | ?
+            4 | ?      | ?      | ?    | ?
+            6 | ?      | ?      | ?    | ?
+        }
+    }
+    `
+  options:
+    showEditor: false
+- type: text
+  text: |-
+    `---
+
+    ## Niveau 3
+
+    ### Übung 4 – Funktion implementieren
+
+    Schreibe eine Funktion `zaehle_treffer(zahlen, grenze)`, die zählt, wie viele
+    Zahlen in der Liste **größer als** `grenze` sind.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void zaehle_treffer(int zahlen, int grenze) {
+        // Dein Code
+        pass
+
+        System.out.println(zaehle_treffer([3, 7, 5, 2, 8, 4, 6], 5))  # 3);
+        System.out.println(zaehle_treffer([1, 2, 3], 10))               # 0);
+        }
+
+        public static void main(String[] args) {
+    }
+    `
+- type: text
+  text: |-
+    `### Übung 5 – Beurteilen
+
+    Beide Funktionen sollen prüfen, ob **alle** Zahlen in der Liste positiv sind.
+    Welche ist besser geeignet? Begründe.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void alle_positiv_a(int zahlen) {
+        for (var z : zahlen) {
+        if (z <= 0) {
+        return False;
+        return True;
+
+        public static void alle_positiv_b(int zahlen) {
+        int positiv = 0;
+        for (var z : zahlen) {
+        if (z > 0) {
+        positiv = positiv + 1;
+        return positiv == len(zahlen);
+        }
+        }
+
+        public static void main(String[] args) {
+    `

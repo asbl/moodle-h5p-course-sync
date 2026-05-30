@@ -1,0 +1,19 @@
+contentType: ide_only
+editorSettings:
+  instructions: |-
+    `Baue einen DFA über dem Alphabet {a, b}, der genau die Wörter akzeptiert,
+    die eine **gerade Anzahl** von **a**s enthalten.
+
+    Beispiele:
+    * ε (leeres Wort) → akzeptiert (0 a's = gerade)
+    * b → akzeptiert (0 a's)
+    * a → abgelehnt (1 a)
+    * aa → akzeptiert (2 a's)
+    * aba → abgelehnt (2 a's... nein: 2 a's, also akzeptiert! Überprüfe deinen Automaten.)
+    * ab → abgelehnt (1 a)`
+  automatonType: dfa
+  startingCode: |-
+    `{"type":"dfa","alphabet":["a","b"],"states":[{"id":"q0","label":"q0","initial":true,"accepting":false,"x":120,"y":130}],"transitions":[]}`
+gradingSettings:
+  gradingMethod: bySolution
+  solutionAutomaton: '{"type":"dfa","alphabet":["a","b"],"states":[{"id":"q0","label":"q0","initial":true,"accepting":true,"x":120,"y":130},{"id":"q1","label":"q1","initial":false,"accepting":false,"x":320,"y":130}],"transitions":[{"id":"t0","from":"q0","to":"q1","symbols":["a"]},{"id":"t1","from":"q1","to":"q0","symbols":["a"]},{"id":"t2","from":"q0","to":"q0","symbols":["b"]},{"id":"t3","from":"q1","to":"q1","symbols":["b"]}]}'

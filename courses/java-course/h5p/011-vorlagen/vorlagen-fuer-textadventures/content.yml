@@ -1,0 +1,264 @@
+contentType: text_only
+contents:
+- type: text
+  text: '### Vorlage - Basis'
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            // Diese Variablen werden innerhalb der Schleife verändert.
+            String zustand = "starterwahl";
+            spiel_laeuft = True;
+
+
+            while (spiel_laeuft) {
+                // 1. Beschreibe den aktuellen Zustand
+                if (zustand == "starterwahl") {
+                    System.out.println(""");
+            Wähle dein Starter-Pokémon:
+
+            a: Feuer-Pokémon
+            b: Wasser-Pokémon
+            c: Pflanzen-Pokémon
+            x: Spiel beenden
+            """)
+
+                if (zustand == "feuer_event") {
+                    System.out.println(""");
+            Du hast das Feuer-Pokémon gewählt.
+
+            Es will sofort trainieren!
+
+            a: Trainieren
+            b: Pause machen
+            """)
+
+                if (zustand == "ende") {
+                    System.out.println("Das Abenteuer ist vorbei.");
+                    spiel_laeuft = False;
+                    continue
+
+
+                // Mache eine Eingabe
+                eingabe = input("> ");
+
+
+                //3 . Bestimme den Folgezustand abhängig von deiner Beschreibung.
+
+                // Starterwahl
+                if (zustand == "starterwahl" and eingabe == "a") {
+                    String zustand = "feuer_event";
+
+                if (zustand == "starterwahl" and eingabe == "b") {
+                    System.out.println("Du wählst das Wasser-Pokémon.");
+                    String zustand = "ende";
+
+                if (zustand == "starterwahl" and eingabe == "c") {
+                    System.out.println("Du wählst das Pflanzen-Pokémon.");
+                    String zustand = "ende";
+
+                if (zustand == "starterwahl" and eingabe == "x") {
+                    spiel_laeuft = False;
+
+
+                // Zusatzentscheidung nur für Feuer-Pokémon
+                if (zustand == "feuer_event" and eingabe == "a") {
+                    System.out.println("Ihr trainiert hart!");
+                    String zustand = "ende";
+
+                if (zustand == "feuer_event" and eingabe == "b") {
+                    System.out.println("Ihr macht eine Pause.");
+                    String zustand = "ende";
+
+
+            System.out.println("Spiel beendet.");
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Zur Übersicht kann es helfen, sich das Programm aufzuzeichnen. 
+
+    Dazu kannst du einen Automat zeichnen (Mit Automaten werden wir uns in der Q3 intensiver beschäftigen)
+
+    ### Für Fortgeschrittene: Variante mit Funktionen
+
+    Die folgende Variante ist etwas komplizierter, da sie Funktionen nutzt. Dafür wird dein Programm übersichtlicher, 
+    selbst dann wenn es etwas größer wird:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void starterwahl() {
+        System.out.println(""");
+        Wähle dein Starter-Pokémon:
+
+        a: Feuer-Pokémon
+        b: Wasser-Pokémon
+        c: Pflanzen-Pokémon
+        x: Spiel beenden
+        """)
+
+        eingabe = input("> ");
+
+        if (eingabe == "a") {
+        return "feuer_event";
+        if (eingabe == "b") {
+        System.out.println("Du wählst das Wasser-Pokémon.");
+        return "ende";
+        if (eingabe == "c") {
+        System.out.println("Du wählst das Pflanzen-Pokémon.");
+        return "ende";
+        if (eingabe == "x") {
+        return "ende";
+
+        System.out.println("Ungültige Eingabe.");
+        return "starterwahl";
+
+
+        public static void feuer_event() {
+        System.out.println(""");
+        Du hast das Feuer-Pokémon gewählt.
+
+        Es will sofort trainieren!
+
+        a: Trainieren
+        b: Pause machen
+        """)
+        eingabe = input("> ");
+
+        if (eingabe == "a") {
+        System.out.println("Ihr trainiert hart!");
+        return "ende";
+        if (eingabe == "b") {
+        System.out.println("Ihr macht eine Pause.");
+        return "ende";
+
+        System.out.println("Ungültige Eingabe.");
+        return "feuer_event";
+
+
+        public static void ende() {
+        System.out.println("Das Abenteuer ist vorbei.");
+        return "ende";
+
+
+        // ===== HAUPTSCHLEIFE =====
+
+        String zustand = "starterwahl";
+
+        while (zustand != "ende") {
+        if (zustand == "starterwahl") {
+        zustand = starterwahl();
+        } else if (zustand == "feuer_event") {
+        zustand = feuer_event();
+
+        // Ende
+        ende()
+        System.out.println("Spiel beendet.");
+        }
+        }
+
+        public static void main(String[] args) {
+    `
+- type: text
+  text: |-
+    `### Vorlage 3: Textadventure mit Gegenständen
+
+    Dies ist Variante 1 ergänzt um die Möglichkeiten Gegenstände zu haben.
+
+    Dies ist eine Ergänzung zu Variante 1. 
+
+    Es gibt hier eine Liste Namens `pokemonliste`.
+
+    * Mit `pokemonliste.append("element")` kann man einen Text namens elemnt in die Liste einfügen.
+    * Mit `System.out.println(pokemonliste)` kann man die Liste ausgeben
+    * Mit `pokemonliste.pop(3)` kann man das 4. Element aus der Liste entfernen (man beginnt von 0 an zu zählen
+    * Mit `pokemonliste.remove("Glurak")` kann man Glurak aus der Liste entfernen. Wenn Glurak mehrfach in der Liste ist, benötigt man:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            while ("Glurak" in pokemon) {
+                pokemon.remove("Glurak")
+        }
+    }
+    `
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            // Diese Variablen werden innerhalb der Schleife verändert.
+            String zustand = "starterwahl";
+            spiel_laeuft = True;
+            pokemonliste = [];
+
+
+            while (spiel_laeuft) {
+                // 1. Beschreibe den aktuellen Zustand
+                if (zustand == "starterwahl") {
+                    System.out.println(""");
+            Wähle dein Starter-Pokémon:
+
+            a: Feuer-Pokémon
+            b: Wasser-Pokémon
+            c: Pflanzen-Pokémon
+            x: Spiel beenden
+            """)
+
+                if (zustand == "feuer_event") {
+                    System.out.println(""");
+            Du hast das Feuer-Pokémon gewählt.
+
+            Es will sofort trainieren!
+
+            a: Trainieren
+            b: Pause machen
+            """)
+
+                if (zustand == "ende") {
+                    System.out.println("Das Abenteuer ist vorbei.");
+                    spiel_laeuft = False;
+                    continue
+
+
+                // Mache eine Eingabe
+                eingabe = input("> ");
+
+
+                //3 . Bestimme den Folgezustand abhängig von deiner Beschreibung.
+
+                // Starterwahl
+                if (zustand == "starterwahl" and eingabe == "a") {
+                    pokemonliste.append("Glurak")
+                    String zustand = "feuer_event";
+
+                if (zustand == "starterwahl" and eingabe == "b") {
+                    System.out.println("Du wählst das Wasser-Pokémon.");
+                    pokemonliste.append("Blastoise")
+                    String zustand = "ende";
+
+                if (zustand == "starterwahl" and eingabe == "c") {
+                    System.out.println("Du wählst das Pflanzen-Pokémon.");
+                    pokemonliste.append("Tangela")
+                    String zustand = "ende";
+
+                if (zustand == "starterwahl" and eingabe == "x") {
+                    spiel_laeuft = False;
+
+
+                // Zusatzentscheidung nur für Feuer-Pokémon
+                if (zustand == "feuer_event" and eingabe == "a") {
+                    System.out.println("Ihr trainiert hart!");
+                    String zustand = "ende";
+
+                if (zustand == "feuer_event" and eingabe == "b") {
+                    System.out.println("Ihr macht eine Pause.");
+                    String zustand = "ende";
+
+
+            if ("Glurak" in pokemonliste) {
+                System.out.println("Glurak legt sich schlafen");
+            System.out.println("Spiel beendet.");
+        }
+    }
+    `

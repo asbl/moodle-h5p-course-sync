@@ -1,0 +1,21 @@
+## Python-Question mit Skulpt
+<PythonQuestion
+  identifier="python-skulpt"
+  title="Skulpt-Runner: Primzahlen bis 50"
+  instructions="Dieses Beispiel zeigt Python mit dem Skulpt-Runner (läuft direkt im Browser ohne Server)."
+/>
+
+```python question:python-skulpt starter
+def ist_primzahl(n):
+    if n < 2:
+        return False
+    for i in range(2, int(n**0.5) + 1):
+        if n % i == 0:
+            return False
+    return True
+
+primzahlen = [n for n in range(2, 51) if ist_primzahl(n)]
+print("Primzahlen bis 50:")
+print(primzahlen)
+print(f"Anzahl: {len(primzahlen)}")
+```

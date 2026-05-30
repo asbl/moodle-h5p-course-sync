@@ -22,3 +22,47 @@ print(bewerte_inventar(["Stein", "Diamant", "Gold", "Erde"]))
 
 Bevor du programmierst: Erstelle zuerst eine Tabelle mit den Spalten
 `gegenstand`, `punkte_fuer_gegenstand` und `punkte_insgesamt`.
+
+---
+
+## Niveau 2
+
+### Übung 2
+
+Das Inventar-System wird erweitert: Diamant = 5 Punkte, Gold = 3 Punkte,
+Silber = 2 Punkte, alles andere = 1 Punkt. Zusätzlich gibt es einen Bonus
+von 10 Punkten, wenn das Inventar **mindestens 5 Gegenstände** enthält.
+
+```python
+def bewerte_inventar_v2(inventar):
+    punkte = 0
+    # Ergänze Schleife und Bonus-Bedingung.
+    return punkte
+
+
+print(bewerte_inventar_v2(["Stein", "Diamant", "Gold", "Silber", "Erde"]))
+# erwartet: 1 + 5 + 3 + 2 + 1 + 10 = 22
+```
+
+---
+
+## Niveau 3
+
+### Übung 3 – Entwurf und Begründung
+
+Schreibe eine Funktion `top_gegenstand(inventar)`, die den Namen des
+**wertvollsten** Gegenstands zurückgibt. Punktevergabe wie oben
+(Diamant = 5, Gold = 3, alles andere = 1).
+
+```python
+def top_gegenstand(inventar):
+    # Erstelle zuerst eine Tabelle auf Papier.
+    pass
+
+
+print(top_gegenstand(["Stein", "Diamant", "Gold"]))  # Diamant
+print(top_gegenstand(["Erde", "Stein"]))             # Erde (oder Stein)
+```
+
+Beantworte danach schriftlich: Was gibt deine Funktion zurück, wenn mehrere
+Gegenstände denselben Höchstwert haben? Ist das sinnvoll?

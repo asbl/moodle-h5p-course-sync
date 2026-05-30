@@ -1,0 +1,208 @@
+contentType: text_only
+contents:
+- type: text
+  text: |-
+    `Strings besitzen viele nützliche **Methoden**. Methoden sind kleine Werkzeuge,
+    die direkt zu einem Wert gehören. Bei Strings helfen sie dir zum Beispiel
+    dabei, Eingaben aufzuräumen, Texte einheitlich zu schreiben oder nach
+    bestimmten Wörtern zu suchen.
+
+    Eine Methode ist eine Funktion, die zu einem Wert gehört.
+
+    Bei Strings schreibst du zuerst den **String**, dann einen **Punkt** und dann Namen der **Methode**, z.B.
+    `"Hallo Welt".upper()``
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            text.upper()
+            │    │
+            │    └─ Methode: mache daraus Großbuchstaben
+            └────── String oder String-Variable
+        }
+    }
+    `
+  options:
+    showEditor: false
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            String text = "schattenbrief";
+
+            System.out.println(text.upper());
+            System.out.println(text.lower());
+        }
+    }
+    `
+- type: text
+  text: |-
+    ``upper()` erzeugt eine Version mit Großbuchstaben.
+    `lower()` erzeugt eine Version mit Kleinbuchstaben.
+
+    Der ursprüngliche String wird dabei nicht verändert:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            String text = "schattenbrief";
+            gross = text.upper();
+
+            System.out.println(text);
+            System.out.println(gross);
+        }
+    }
+    `
+- type: text
+  text: |-
+    `!!! note Merke
+    String-Methoden erzeugen meistens einen neuen String. Wenn du das Ergebnis
+    später brauchst, speichere es in einer Variable.
+    !!!
+
+    ### Leerzeichen entfernen
+
+    Manchmal enthalten Eingaben am Anfang oder Ende Leerzeichen. Das passiert
+    schnell, wenn jemand beim Tippen aus Versehen vor oder nach dem eigentlichen
+    Wort eine Leertaste drückt.
+
+    Mit `strip()` kannst du sie entfernen:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            String eingabe = "  geheime Notiz aus dem Turm  ";
+
+            System.out.println(eingabe);
+            System.out.println(eingabe.strip());
+        }
+    }
+    `
+- type: text
+  text: |-
+    ``strip()` entfernt nur außen Leerzeichen. Leerzeichen zwischen Wörtern bleiben
+    erhalten.
+
+    ### Texte untersuchen
+
+    Mit `in` kannst du prüfen, ob ein Text in einem anderen Text vorkommt:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            String satz = "Im alten Spind liegt eine schwarze Karte";
+
+            System.out.println("Karte" in satz);
+            System.out.println("rote" in satz);
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Das Ergebnis ist ein Wahrheitswert: `True` oder `False`.
+
+    !!! note Groß- und Kleinschreibung
+    `"karte" in satz` ist etwas anderes als `"Karte" in satz`. Wenn dir die
+    Schreibweise egal sein soll, kannst du vorher `satz.lower()` verwenden.
+    !!!
+
+    ### Exkurs: f-Strings
+
+    Wenn du Variablen in einen Text einsetzen möchtest, sind **f-Strings** oft
+    übersichtlicher als viele `+`-Zeichen.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            String figur = "Iva";
+            int punkte = 17;
+
+            System.out.println(f"{figur} hat {punkte} Punkte.");
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Vor dem String steht ein `f`. Innerhalb des Strings kannst du Variablen in
+    geschweifte Klammern schreiben.
+
+    In den Einrückungn dürfen auch kleine Ausdrücke stehen:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            String figur = "Iva";
+            int punkte = 17;
+            int maximum = 20;
+
+            System.out.println(f"{figur}: {punkte}/{maximum} Erfahrungspunkte");
+            System.out.println(f"Noch {maximum - punkte} Punkte bis zum nächsten Levelaufstieg.");
+        }
+    }
+    `
+- type: text
+  text: 'Du kannst dort auch String-Methoden verwenden:'
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            String name = "  sora  ";
+            name = name.strip();
+
+            System.out.println(f"Willkommen, {name.title()}!");
+            System.out.println(f"Dein Kürzel ist {name[:3].upper()}.");
+        }
+    }
+    `
+- type: text
+  text: |-
+    `f-Strings verändern die Variablen nicht. Sie bauen nur einen neuen Text für
+    die Ausgabe.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            String name = "sora";
+            f"Willkommen, {name.title()}!"
+                         └────────────┘
+                         wird zuerst ausgewertet
+        }
+    }
+    `
+  options:
+    showEditor: false
+- type: text
+  text: |-
+    `### Kombination
+
+    Im nächsten Beispiel wird eine Eingabe zuerst bereinigt und dann in einem
+    Satz verwendet. Das ist ein typischer Ablauf in kleinen Programmen:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            Eingabe -> bereinigen -> auswerten -> lesbare Ausgabe bauen
+        }
+    }
+    `
+  options:
+    showEditor: false
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            name = input();
+            name = name.strip();
+
+            System.out.println(f"Eintrag auf der Einsatztafel: {name.upper()}");
+            System.out.println(f"Dieses Codewort hat {len(name)} Zeichen.");
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Variiere das Programm:
+
+    - Gib Rufnamen mit Leerzeichen am Anfang ein.
+    - Ersetze `upper()` durch `lower()`.
+    - Baue einen Satz, in dem der erste und der letzte Buchstabe vorkommen.`

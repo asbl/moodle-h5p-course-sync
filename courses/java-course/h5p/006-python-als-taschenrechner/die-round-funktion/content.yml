@@ -1,0 +1,104 @@
+contentType: text_only
+contents:
+- type: text
+  text: Die eingebaute Funktion
+- type: code
+  code: |-
+    `
+    `
+- type: text
+  text: Java
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            Java
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Java
+
+    Java
+    Sie hat zwei mögliche Aufrufvarianten:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            Java
+
+            Java
+            round(number)                # Rundet auf die nächste ganze Zahl
+            round(number, ndigits)       # Rundet auf *ndigits* Nachkommastellen
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Java
+
+    Java
+
+    Beispiele:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            Java
+
+            Java
+            System.out.println(round(3.14159)) # Rundet auf eine ganze Zahl);
+            System.out.println(round(3.14159, 2)) # Rundet auf zwei Stellen);
+            System.out.println(round(2.51)) # Rundet auf);
+            System.out.println(round(3.49)) # Rundet ab);
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Java
+
+    Java
+
+    Man kann auch auf negative Stellen runden:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            Java
+
+            Java
+            round(1234, -2)
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Java
+
+    Java
+
+    !!! caution Spezialfall 0.5
+
+    Achtung: .5 wird auf die nächste **gerade Zahl** gerundet:
+    !!!`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            Java
+
+            Java
+            System.out.println(round(2.5)) # --> 2);
+            System.out.println(round(5.5)) # --> 6);
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Man nennt dies **kaufmännisches Runden** - Die Idee dahinter ist, dass bei längeren Rechnungen, bei denen
+    mit gerundeten Werten gerechnet wird, nicht immer aufgerundet wird.
+
+    Dadurch, dass auf die nächste gerade Zahl gerundet wird, wird mal auf- und mal abgerundet,
+    was die Fehlerfortpflanzung minimiert.`

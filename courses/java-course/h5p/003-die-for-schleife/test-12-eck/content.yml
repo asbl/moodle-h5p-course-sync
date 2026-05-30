@@ -1,0 +1,41 @@
+contentType: ide_only
+contents: []
+editorSettings:
+  instructions: Zeichne mit Hilfe einer Schleife ein (regelmäßiges) Zwölf-Eck 
+    mit Seitenlänge 50
+  startingCode: |-
+    `public class Main {
+        public static void main(String[] args) {
+            // import turtle
+
+
+
+
+
+            // turtle.hideturtle()
+        }
+    }
+    `
+gradingSettings:
+  targetCode: |-
+    `public class Main {
+        public static void main(String[] args) {
+            // import turtle
+
+            // t = turtle.Turtle()
+
+            for (int i = 0; i < 12; i++) {
+                t.forward(50)
+                t.left(30)
+
+            }
+            t.hideturtle()
+        }
+    }
+    `
+  gradingMethod: byOutputMatch
+  dueDateGroup:
+    enableDueDate: true
+    duedate: '2026-02-22T23:00:00.000Z'
+  testCases:
+  - hidden: false

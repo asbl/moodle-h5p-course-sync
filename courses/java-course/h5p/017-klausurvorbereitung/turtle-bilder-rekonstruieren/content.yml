@@ -1,0 +1,86 @@
+contentType: text_only
+contents:
+- type: text
+  text: |-
+    `Bei Programm-Aufgaben lohnt sich ein ruhiges Vorgehen:
+
+    1. Bestimme den Startpunkt.
+    2. Markiere Richtungen und Drehwinkel.
+    3. Suche Wiederholungen.
+    4. Schreibe erst danach den Code.
+
+    ### Übung
+
+    Der folgende Code zeichnet drei gleich große Quadrate nebeneinander.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            // turtle.speed(0)
+            // turtle.penup()
+            // turtle.goto(-120, -40)
+            // turtle.pendown()
+
+            for (int block = 0; block < 3; block++) {
+                for (int i = 0; i < 4; i++) {
+            // // turtle.forward(60) → in Java: Ausgabe/Zeichnung
+            // turtle.left(90)
+            // turtle.penup()
+            // // turtle.forward(80) → in Java: Ausgabe/Zeichnung
+            // turtle.pendown()
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Ändere ihn so, dass statt drei Quadraten vier Quadrate entstehen und jedes
+    zweite Quadrat eine andere Füllfarbe bekommt.
+
+    ---
+
+    ## Niveau 2
+
+    ### Übung 2
+
+    Schreibe ein Programm, das 5 gleichmäßig nebeneinander angeordnete
+    **Dreiecke** zeichnet. Ein gleichseitiges Dreieck hat 3 Seiten und dreht
+    bei jeder Seite um 120°. Seitenlänge: 50.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            // turtle.speed(0)
+            // turtle.penup()
+            // turtle.goto(-200, -20)
+            // turtle.pendown()
+
+            // Ergänze die Schleifen.
+        }
+    }
+    `
+- type: text
+  text: |-
+    `---
+
+    ## Niveau 3
+
+    ### Übung 3 – Eigenes Muster entwerfen und implementieren
+
+    Entwirf ein Programm, das folgendes Muster zeichnet:
+
+    * 6 Quadrate, jedes um 30° gegen den Uhrzeigersinn gedreht.
+    * Alle Quadrate haben denselben Mittelpunkt (0, 0).
+    * Seitenlänge: 100.
+
+    Schreibe zuerst auf Papier, welche Befehle du brauchst (goto, left/right,
+    penup/pendown, forward), dann implementiere.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            // turtle.speed(0)
+            // turtle.hideturtle()
+            // Dein Code:
+        }
+    }
+    `

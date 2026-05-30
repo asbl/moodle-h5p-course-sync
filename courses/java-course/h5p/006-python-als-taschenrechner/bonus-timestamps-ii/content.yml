@@ -1,0 +1,70 @@
+contentType: ide_only
+l10n:
+  checkAnswer: Check Anwer
+  run: ▶ Run
+  stop: Stop
+  failedText: You failed - Try again
+  successText: All tests passed
+  testCase: Test Case
+  hidden: '[hidden]'
+  testInput: Test Input
+  lastOutput: Last Output
+  passed: passed?
+  expectedOutput: Expected Output
+  canvas: Canvas
+  instructions: Instructions
+  showCode: Show Code
+  exportImage: Export Image
+contents: []
+editorSettings:
+  instructions: |-
+    `Berechne die Anzahl an ganzen verstrichenen Minuten zwischen zwei Timestamps. 
+    Es ist vorher nicht bekannt, welcher der timestamp der frühere ist, du 
+    musst also wieder die Funktion `abs` verwenden.
+
+    Angebrochene Minuten werden nicht mitgezählt.
+
+    Beispiel:
+    ```
+    timestamp1: 1515142800  # 05.01.2018 10:00
+    timestamp2: 1515142860  # 05.01.2018 10:01
+    Ergebnis: 1
+    ````
+  preCode: |-
+    `public class Main {
+        public static void main(String[] args) {
+            timestamp1 = int(input())
+            timestamp2 = int(input())
+        }
+    }
+    `
+gradingSettings:
+  gradingMethod: ioTestCases
+  testCases:
+  - hidden: false
+    inputs:
+    - '1515142800'
+    - '1515142860'
+    outputs:
+    - '1'
+  - hidden: false
+    inputs:
+    - '0'
+    - '1515142800'
+    outputs:
+    - '25252380'
+  - hidden: true
+    inputs:
+    - '60'
+    - '0'
+    outputs:
+    - '1'
+  - hidden: true
+    inputs:
+    - '61'
+    - '0'
+    outputs:
+    - '1'
+  dueDateGroup:
+    enableDueDate: true
+    duedate: '2026-03-02T07:00:00.000Z'

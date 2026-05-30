@@ -1,0 +1,101 @@
+contentType: text_only
+contents:
+- type: text
+  text: |-
+    `Beim Vergleichen von Code geht es nicht nur darum, ob zwei Programme zufällig
+    für ein Beispiel dasselbe ausgeben.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void genug_holz_a(int anzahl) {
+        return anzahl >= 4;
+
+
+        public static void genug_holz_b(int anzahl) {
+        if (anzahl > 4) {
+        return True;
+        } else {
+        return False;
+        }
+        }
+
+        public static void main(String[] args) {
+    `
+- type: text
+  text: |-
+    `Für `anzahl = 5` liefern beide Funktionen `True`. Für `anzahl = 4` unterscheiden
+    sie sich.
+
+    ### Übung
+
+    Vergleiche die beiden Funktionen für die Werte `0`, `1`, `2`, `3`.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void darf_bauen_a(int stein, int holz) {
+        return stein >= 2 and holz >= 1;
+
+
+        public static void darf_bauen_b(int stein, int holz) {
+        return stein + holz >= 3;
+        }
+        }
+
+        public static void main(String[] args) {
+    `
+- type: text
+  text: |-
+    `Formuliere danach in einem Satz, worin der Unterschied liegt.
+
+    ---
+
+    ## Niveau 2
+
+    ### Übung 2
+
+    Finde selbst **zwei Eingaben**, für die sich `darf_bauen_a` und
+    `darf_bauen_b` unterschiedlich verhalten. Erkläre, warum sie dort
+    abweichen.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void darf_bauen_a(int stein, int holz) {
+        return stein >= 2 and holz >= 1;
+
+
+        public static void darf_bauen_b(int stein, int holz) {
+        return stein + holz >= 3;
+        }
+        }
+
+        public static void main(String[] args) {
+    `
+- type: text
+  text: |-
+    `---
+
+    ## Niveau 3
+
+    ### Übung 3 – Beurteilen und erweitern
+
+    Die Regel lautet: „Man braucht mindestens 2 Steine **und** mindestens 1 Holz."
+
+    a) Welche der beiden Funktionen setzt diese Regel korrekt um? Nenne ein
+       konkretes Gegenbeispiel, das zeigt, dass die andere Funktion versagt.
+    b) Schreibe eine Funktion `darf_bauen_c(stein, holz, seil)`, die zusätzlich
+       mindestens 1 Seil erfordert.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void darf_bauen_c(int stein, int holz, int seil) {
+        // Dein Code
+        pass
+
+        System.out.println(darf_bauen_c(2, 1, 1))  # True);
+        System.out.println(darf_bauen_c(2, 1, 0))  # False);
+        System.out.println(darf_bauen_c(3, 0, 1))  # False);
+        }
+
+        public static void main(String[] args) {
+    }
+    `

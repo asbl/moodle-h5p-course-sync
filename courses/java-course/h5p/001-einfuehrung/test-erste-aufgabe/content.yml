@@ -1,0 +1,29 @@
+contentType: text_and_ide
+editorSettings:
+  preCode: |-
+    ``
+  startingCode: |-
+    `
+    `
+  postCode: |-
+    ``
+  instructions: |-
+    `**Aufgabe:**
+
+    Gebe mit der print-Anweisung das Wort Informatik aus.
+    `
+gradingSettings:
+  gradingMethod: ioTestCases
+  testCases:
+  - outputs:
+    - Informatik
+    hidden: false
+  dueDateGroup:
+    enableDueDate: true
+    duedate: '2026-02-22T23:00:00.000Z'
+contents:
+- type: text
+  text: |-
+    `Dieser Kurs besteht immer wieder aus Programmieraufgaben, die du in einer vorgegebenen Zeit lösen musst.
+
+    Wenn du fertig bist, klicke unten auf den Button **"Check answer"**.`

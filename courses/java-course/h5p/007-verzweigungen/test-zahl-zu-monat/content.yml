@@ -1,0 +1,54 @@
+contentType: ide_only
+contents: []
+editorSettings:
+  instructions: |-
+    `Schreibe ein Programm, das den eingelesenen Monat 
+    als Zahl zwischen 1 und 12 in den entsprechenden Monat umwandelt.
+
+    Beispiel:
+
+    * **Eingabe**: 1 
+    * **Ausgabe**: Januar
+
+    Beispiel 2:
+
+    * **Eingabe**: 4 
+    * **Ausgabe**: April`
+  startingCode: |-
+    `public class Main {
+        public static void main(String[] args) {
+            m = int(input())
+        }
+    }
+    `
+gradingSettings:
+  gradingMethod: ioTestCases
+  testCases:
+  - inputs:
+    - '1'
+    outputs:
+    - Januar
+    hidden: false
+  - inputs:
+    - '3'
+    outputs:
+    - März
+    hidden: false
+  - inputs:
+    - '6'
+    outputs:
+    - Juni
+    hidden: false
+  - inputs:
+    - '10'
+    outputs:
+    - Oktober
+    hidden: true
+  - inputs:
+    - '12'
+    outputs:
+    - Dezember
+    hidden: true
+  dueDateGroup:
+    enableDueDate: true
+    duedate: '2026-03-09T07:00:00.000Z'

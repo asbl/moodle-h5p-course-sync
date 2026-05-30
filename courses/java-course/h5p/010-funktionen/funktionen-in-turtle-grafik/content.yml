@@ -1,0 +1,36 @@
+contentType: text_only
+contents:
+- type: text
+  text: |-
+    `Funktionen kannst in Java-Programm benutzen um einzelne 
+    Teilbefehle auszulagern.
+
+    z.B:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void move_to(int x, int y) {
+        // turtle.penup()
+        // turtle.goto(x, y)
+        // turtle.pendown()
+
+        public static void quadrat(int a) {
+        for (int i = 0; i < 4; i++) {
+        // turtle.forward(a)
+        // // turtle.right(90) → in Java: Richtungsänderung
+
+        move_to(50,50)
+        quadrat(10)
+        }
+        }
+
+        public static void main(String[] args) {
+    `
+- type: text
+  text: |-
+    `!!! info Was passiert hier?
+    * Die Funktion **move_to** bewegt die Programm an eine beliebige Stelle des Bildschirms
+      ohne dabei zu zeichnen.
+
+    * Die Funktion **quadrat** erlaubt es, ein Quadrat von beliebiger Größe zu zeichnen.
+    !!!`

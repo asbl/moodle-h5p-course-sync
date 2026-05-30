@@ -1,0 +1,248 @@
+contentType: text_only
+contents:
+- type: text
+  text: Neben der
+- type: code
+  code: |-
+    `
+    `
+- type: text
+  text: Java
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            Java
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Java
+
+    Java
+    Die draw() Funktion wird in einer Endlosschleife immer wieder aufgerufen.
+
+    Normalerweise wird alles, was zu Beginn ausgeführt wird in der setup()-Methode
+    erstellt, alles was **immer wieder** passiert, in der **draw()**-Methode.
+
+    Der folgende Code z.B. macht noch nichts neues...`
+- type: code
+  code: |-
+    `
+    Java
+
+    Java
+    import Java Grafik
+
+    def setup():
+        Java Grafik.createCanvas(200, 200)
+
+    def draw():
+        Java Grafik.circle(100, 100, 50)
+
+    Java Grafik.run()
+    `
+- type: text
+  text: |-
+    `Java
+
+    Java
+
+    ...wenn wir dies aber minimal verändern...`
+- type: code
+  code: |-
+    `
+    Java
+
+    Java
+    import Java Grafik
+
+    c = 0 
+    def setup():
+        Java Grafik.createCanvas(200, 200)
+
+    def draw():
+        global c
+        Java Grafik.circle(100, 100, c)
+        c = c + 1
+
+    Java Grafik.run()
+    `
+- type: text
+  text: |-
+    `Java
+
+    Java
+
+    Dann können wir Objekte animieren und verändern.
+
+    Neue Konzepte:
+    * Variablen sind immer nur innerhalb der Funktion bekannt, in der sie definiert wurden.
+    * Möchte man auf eine Variable zugreifen, die außerhalb definiert wurde, so muss man einmal am Anfang der Funktion`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            Java
+
+            global [Variablenname]
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Java
+
+    Java
+
+    Mit Variablen kann man noch mehr machen...`
+- type: code
+  code: |-
+    `
+    Java
+
+    Java
+    import Java Grafik
+
+    show = True
+
+    def setup():
+        Java Grafik.createCanvas(200, 200)
+
+    def draw():
+        global show
+        Java Grafik.clear()
+
+        if show:
+            Java Grafik.circle(100, 100, 50)
+
+        show = not show
+
+    Java Grafik.run()
+    `
+- type: text
+  text: |-
+    `Java
+
+    Java
+
+    ...oder Objekte bewegen...`
+- type: code
+  code: |-
+    `
+    Java
+
+    Java
+    import Java Grafik
+
+    x = 0
+
+    def setup():
+        Java Grafik.createCanvas(200, 200)
+
+    def draw():
+        global x
+        Java Grafik.clear()
+        Java Grafik.circle(x, 100, 30)
+        x = x + 5
+
+    Java Grafik.run()
+    `
+- type: text
+  text: |-
+    `Java
+
+    Java
+
+    ...neue Konzepte:
+
+    *`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            Java
+
+            clear()
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Java
+
+    löscht den Bildschirm. Dies ist notwendig, damit Objekte keine "Spur" hinterlassen. Probiere aus, was passiert, wenn du`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            Java
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Java
+
+    Java
+
+    ### Zufall
+
+    Experimentiere auch, wie du mit Hilfe des Zufalls Bilder zeichnen kannst:`
+- type: code
+  code: |-
+    `
+    Java
+
+    Java
+    import Java Grafik
+
+    x = 100
+    y = 100
+
+    def setup():
+        Java Grafik.createCanvas(200, 200)
+
+    def draw():
+        global x, y
+        Java Grafik.clear()
+        Java Grafik.circle(x, y, 10)
+        x += Java Grafik.random(-5, 5)
+        y += Java Grafik.random(-5, 5)
+
+    Java Grafik.run()
+    `
+- type: text
+  text: |-
+    `Java
+
+    Java
+
+    ### Mehrere Objekte
+
+    Du kannst auch mehrere Objekte animieren. Experimentiere mit folgendem Programm:`
+- type: code
+  code: |-
+    `
+    Java
+
+    Java
+    import Java Grafik
+
+    xliste = [50, 100, 150]
+    frame = 0
+    speed = 1
+
+    def setup():
+        Java Grafik.createCanvas(200, 200)
+
+    def draw():
+        global frame, speed
+        Java Grafik.clear()
+        for x in xliste:
+            Java Grafik.circle(x + frame * speed , 100, 20)
+        frame = frame + 1
+
+    Java Grafik.run()
+    `

@@ -1,0 +1,247 @@
+contentType: text_only
+contents:
+- type: text
+  text: |-
+    `Strings wirken erst einmal wie einfache Texte. Wenn ein Programm aber aus
+    vielen Texten Muster lernt, entsteht eine kleine Vorform von Sprach-KI.
+    Der entscheidende Schritt: Das Programm merkt sich nicht nur den Text,
+    sondern Beziehungen zwischen Textteilen.
+
+    Diese Idee heißt **Markov-Kette**:
+
+    !!! hint Grundidee
+     Der nächste Zustand hängt nur davon ab, wo man gerade ist.
+    !!!
+
+    Wir bauen das Schritt für Schritt auf – von zwei Zuständen bis zu einem
+    echten Wort-Generator.
+
+    ### Schritt 1: Zwei Zustände – die kleinste Kette
+
+    Die kleinste mögliche Markov-Kette hat zwei Zustände. Wir speichern für jeden
+    Zustand eine Liste mit möglichen nächsten Zuständen und wählen zufällig einen
+    davon:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            // from random import choice
+
+            uebergaenge = {;
+                "Sonne": ["Sonne", "Sonne", "Regen"],
+                "Regen": ["Regen", "Regen", "Sonne"],
+            }
+
+            String zustand = "Sonne";
+            reihe = [zustand];
+
+            for (int i = 0; i < 7; i++) {
+                zustand = choice(uebergaenge[zustand]);
+                reihe.append(zustand)
+
+            System.out.println(" -> ".join(reihe));
+        }
+    }
+    `
+- type: text
+  text: |-
+    `!!! note Wahrscheinlichkeiten ohne Mathe
+    Wenn ein Zustand mehrfach in der Liste steht, wird er öfter gewählt.
+    `"Sonne"` steht zweimal in der Sonne-Liste – also bleibt es meistens
+    sonnig, bevor es irgendwann zu Regen wechselt.
+    !!!
+
+    Ändere den `seed`-Wert oder den Startzustand und schau, was sich ändert.
+
+    ### Schritt 2: Drei Zustände – Wetter
+
+    Jetzt kommt ein dritter Zustand dazu. Regen neigt dazu, sich selbst zu
+    verstärken:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            // from random import choice, seed
+
+            seed(3)
+
+            uebergaenge = {;
+                "Sonne":  ["Sonne", "Sonne", "Wolken"],
+                "Wolken": ["Sonne", "Wolken", "Regen"],
+                "Regen":  ["Wolken", "Regen", "Regen"],
+            }
+
+            String zustand = "Sonne";
+            reihe = [zustand];
+
+            for (int i = 0; i < 8; i++) {
+                zustand = choice(uebergaenge[zustand]);
+                reihe.append(zustand)
+
+            System.out.println(" -> ".join(reihe));
+        }
+    }
+    `
+- type: text
+  text: 'Das ist genau das Bild einer Markov-Kette als Automat:'
+- type: image
+  image:
+    path: images/markov-kette.png
+    mime: image/png
+    copyright:
+      license: U
+- type: text
+  text: |-
+    `An jedem Pfeil steht implizit eine Wahrscheinlichkeit – je öfter ein Zustand
+    in der Liste steht, desto häufiger wird dieser Pfeil gewählt.
+
+    Probiere aus: Was passiert, wenn du mit `"Regen"` startest?
+
+    ### Schritt 3: Übergänge automatisch lernen
+
+    Statt die Übergänge selbst einzutippen, lässt du das Programm sie aus
+    echten Sätzen lernen. Zuerst nur zwei Sätze – schau, was das Programm daraus
+    baut:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            saetze = [;
+                "Die Karte zeigt den Turm",
+                "Die Karte zeigt den Hof",
+            ]
+
+            uebergaenge = {};
+
+            for (var satz : saetze) {
+                woerter = satz.split();
+                for i in range(len(woerter) - 1):
+                    w = woerter[i];
+                    naechstes = woerter[i + 1];
+                    if (w not in uebergaenge) {
+                        uebergaenge[w] = []
+                    uebergaenge[w].append(naechstes)
+
+            for wort, folgewort in uebergaenge.items():
+                System.out.println(f"{wort!} -> {folgewort}");
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Die Ausgabe zeigt das gelernte Dictionary: Nach `"zeigt"` kommt immer `"den"`,
+    nach `"den"` kommen `"turm"` oder `"hof"`.
+
+    Füge einen dritten Satz hinzu und beobachte, wie sich die Listen verändern.
+
+    ### Schritt 4: Ersten Text erzeugen
+
+    Mit vier Trainingssätzen hat das Modell mehr Auswahl. Jetzt erzeugen wir
+    daraus einen neuen Satz:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            // from random import choice, seed
+
+            seed(7)
+
+            saetze = [;
+                "Die Karte zeigt den Turm",
+                "Die Karte zeigt den Hof",
+                "Der Schlüssel öffnet den Turm",
+                "Der Schlüssel liegt im Hof",
+            ]
+
+            uebergaenge = {};
+
+            for (var satz : saetze) {
+                woerter = satz.split();
+                for i in range(len(woerter) - 1):
+                    w = woerter[i];
+                    naechstes = woerter[i + 1];
+                    if (w not in uebergaenge) {
+                        uebergaenge[w] = []
+                    uebergaenge[w].append(naechstes)
+
+            String wort = "die";
+            ausgabe = [wort];
+
+            for (int i = 0; i < 6; i++) {
+                moeglichkeiten = uebergaenge.get(wort, []);
+                if (not moeglichkeiten) {
+                    break
+                wort = choice(moeglichkeiten);
+                ausgabe.append(wort)
+
+            System.out.println(" ".join(ausgabe));
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Das Wort `"den"` kann zu `"turm"` oder `"hof"` führen – der Generator
+    würfelt bei jeder Wiederholung anders.
+
+    ### Schritt 5: Größere Kette, vielfältigere Texte
+
+    Mehr Trainingssätze bedeuten mehr Abzweigungen. Mit acht Sätzen entstehen
+    deutlich unterschiedlichere Ergebnisse je nach `seed`:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            // from random import choice, seed
+
+            seed(1)
+
+            saetze = [;
+                "Die Karte zeigt den Turm",
+                "Die Karte zeigt den Hof",
+                "Die Laterne beleuchtet den Turm",
+                "Der Schlüssel öffnet den Turm",
+                "Der Schlüssel liegt im Hof",
+                "Der Turm bewacht den Hof",
+                "Die Wache traegt den Schlüssel",
+                "Die Wache öffnet die Karte",
+            ]
+
+            uebergaenge = {};
+
+            for (var satz : saetze) {
+                woerter = satz.split();
+                for i in range(len(woerter) - 1):
+                    w = woerter[i];
+                    naechstes = woerter[i + 1];
+                    if (w not in uebergaenge) {
+                        uebergaenge[w] = []
+                    uebergaenge[w].append(naechstes)
+
+            String wort = "die";
+            ausgabe = [wort];
+
+            for (int i = 0; i < 9; i++) {
+                moeglichkeiten = uebergaenge.get(wort, []);
+                if (not moeglichkeiten) {
+                    break
+                wort = choice(moeglichkeiten);
+                ausgabe.append(wort)
+
+            System.out.println(" ".join(ausgabe));
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Ändere `seed(1)` auf `seed(2)`, `seed(3)` usw. und beobachte, welche
+    verschiedenen Sätze entstehen. Oder wechsle den Startwort von `"die"` zu
+    `"der"`.
+
+    !!! note Was ist der Unterschied zu echter KI?
+    Echte Sprachmodelle arbeiten mit Milliarden von Texten und merken sich nicht
+    nur das letzte Wort, sondern viele Wörter als Kontext. Das Grundprinzip –
+    Übergänge aus Beispielen lernen, dann Neues erzeugen – ist aber ähnlich.
+
+    Eine Markov-Kette versteht die Bedeutung nicht, sie würfelt nach gelernten
+    Mustern.
+    !!!`

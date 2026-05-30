@@ -1,0 +1,69 @@
+contentType: ide_only
+contents: []
+editorSettings:
+  instructions: |-
+    `Schreibe ein Programm, dass nacheinander Zahlen einliest und diese so lange 
+    **aufaddiert**, bis der Benutzer eine 0 eingibt.
+
+    Wenn dieser Beispielsweise die Zahlen
+
+    5
+    7
+    3
+    2
+    1
+    0
+
+    eingibt, dann gibt das Programm als Ausgabe die Summe **18** aus`
+  startingCode: |-
+    `public class Main {
+        public static void main(String[] args) {
+            x = - 1
+            int sum = 0;
+            while (x != 0) {
+                x = int(input())
+            }
+        }
+    }
+    `
+gradingSettings:
+  gradingMethod: ioTestCases
+  testCases:
+  - hidden: false
+    inputs:
+    - '3'
+    - '0'
+    outputs:
+    - '3'
+  - hidden: false
+    inputs:
+    - '4'
+    - '2'
+    - '6'
+    - '0'
+    outputs:
+    - '12'
+  - hidden: true
+    inputs:
+    - '1'
+    - '2'
+    - '1'
+    - '2'
+    - '1'
+    - '2'
+    - '0'
+    outputs:
+    - '9'
+  - hidden: false
+    inputs:
+    - '1'
+    - '1'
+    - '2'
+    - '3'
+    - '5'
+    - '0'
+    outputs:
+    - '12'
+  dueDateGroup:
+    enableDueDate: true
+    duedate: '2026-03-28T09:00:00.000Z'

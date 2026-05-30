@@ -1,0 +1,41 @@
+contentType: ide_only
+  - package: miniworlds
+contents: []
+editorSettings:
+  instructions: Schreibe ein Python-Programm, das mit miniworlds ein 
+    regelmäßiges Zwölfeck zeichnet.
+  preCode: |-
+    ``
+  startingCode: |-
+    `import miniworlds
+
+    world = miniworlds.World(400, 400)
+    pen = miniworlds.Turtle()
+
+    # Ergänze hier deinen Code.
+
+    world.run()`
+  postCode: |-
+    ``
+  options:
+    sourceFiles: []
+gradingSettings:
+  gradingMethod: ioTestCases
+  dueDateGroup:
+    enableDueDate: false
+    duedate: 01.01.1970
+  testCases:
+  - hidden: false
+    inputs: []
+    outputs: []
+  targetCode: |-
+    `import miniworlds
+
+    world = miniworlds.World(400, 400)
+    pen = miniworlds.Turtle()
+
+    for _ in range(12):
+    		pen.forward(80)
+    		pen.left(30)
+
+    world.run()`

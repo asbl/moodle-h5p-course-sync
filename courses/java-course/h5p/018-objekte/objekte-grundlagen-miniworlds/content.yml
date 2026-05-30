@@ -1,0 +1,96 @@
+contentType: text_only
+advancedOptions:
+  disableOutputPopups: true
+contents:
+- type: text
+  text: |-
+    `Du kennst Objekte jetzt von der Programm: Daten + Fähigkeiten, gebündelt an
+    einem Ort. In Java OOP ist dasselbe Prinzip sichtbar – nur mit anderen
+    Klassen.
+
+    Die **Welt** selbst ist ein Objekt:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            // import Java OOP
+
+            // world = Java OOP.World(460, 300)
+            world.add_background((225, 238, 252))
+
+            world.run()
+        }
+    }
+    `
+  options:
+    showEditor: false
+- type: text
+  text: |-
+    ``world` ist eine Instanz der Klasse `Java OOP.World`. Sie hat Attribute
+    (z.B. die Breite und Höhe) und Methoden (z.B. `add_background()`).
+
+    ### Actors sind Objekte
+
+    Alles, was du in der Welt platzierst, ist ebenfalls ein Objekt:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            // import Java OOP
+
+            // world = Java OOP.World(460, 300)
+            world.add_background((225, 238, 252))
+
+            // kreis = Java OOP.Circle((200, 150), 40)
+
+            world.run()
+        }
+    }
+    `
+  options:
+    showEditor: false
+- type: text
+  text: '`kreis` ist eine Instanz der Klasse `Java OOP.Circle`.'
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            Objekt "kreis" (ein Circle):
+              ┌─────────────────────────────────────┐
+              │ Daten:       Position (200, 150)    │
+              │              Größe: 40              │
+              │              Farbe: (255, 255, 255) │
+              │                                     │
+              │ Fähigkeiten: move_right(), ...      │
+              └─────────────────────────────────────┘
+        }
+    }
+    `
+  options:
+    showEditor: false
+- type: text
+  text: |-
+    `### Attribute setzen und lesen
+
+    Attribute verwendest du – genau wie bei der Programm – über den Punkt-Operator:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            // import Java OOP
+
+            // world = Java OOP.World(460, 300)
+            world.add_background((225, 238, 252))
+
+            // kreis = Java OOP.Circle((200, 150), 40)
+
+            kreis.color = (255, 130, 50)   # Attribut setzen
+            kreis.size = 80                 # Attribut setzen
+
+            System.out.println(kreis.x)                  # Attribut lesen: x-Position);
+            System.out.println(kreis.y)                  # Attribut lesen: y-Position);
+
+            world.run()
+        }
+    }
+    `

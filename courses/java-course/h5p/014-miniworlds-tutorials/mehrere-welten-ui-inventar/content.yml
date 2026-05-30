@@ -1,0 +1,338 @@
+contentType: text_only
+advancedOptions:
+  disableOutputPopups: true
+contents:
+- type: text
+  text: |-
+    `# Mehrere Welten für UI und Inventar
+
+    In Java OOP muss nicht alles in derselben Welt liegen. Das eigentliche Spiel
+    kann in einer `World` laufen, während UI, Punkte oder Inventar in einer zweiten
+    Welt angezeigt werden.
+
+    Das ist praktisch, wenn die Spielfigur von einer Kamera verfolgt wird: Die
+    Spielwelt darf sich bewegen, aber die Anzeige soll ruhig am Rand stehen bleiben.
+
+    ### Eine zweite Welt andocken
+
+    Für UI-Elemente gibt es `Toolbar`. Eine Toolbar ist eine eigene kleine Welt, die
+    rechts oder unten an die Hauptwelt angedockt werden kann.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            // import Java OOP
+
+            // world = Java OOP.World(500, 300)
+            world.add_background((220, 235, 245))
+
+            // spieler = Java OOP.Actor((120, 150))
+            spieler.size = (35, 35)
+            spieler.color = (60, 120, 220)
+
+            // ui = Java OOP.Toolbar()
+            ui.background_color = (245, 247, 250)
+            // ui.add(Java OOP.Label("Inventar"))
+            // ui.add(Java OOP.Label("Muenzen: 0"))
+            // ui.add(Java OOP.Label("Schluessel: 0"))
+
+            world.camera.add_right(ui, size=160)
+
+            world.run()
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Die Hauptwelt bleibt `500 x 300` Pixel groß. Rechts daneben hängt jetzt eine
+    zweite Welt mit `160` Pixeln Breite. Actors in der Hauptwelt und Widgets in der
+    Toolbar bleiben dadurch getrennt.
+
+    !!! note Zwei Aufgaben, zwei Welten
+    Die Hauptwelt enthält Spielfiguren, Gegner, Münzen und Level. Die UI-Welt
+    enthält Anzeigen, Buttons und Inventarplätze. Beide gehören zum selben Programm,
+    aber sie haben unterschiedliche Aufgaben.
+    !!!
+
+    ### Gemeinsame Spieldaten
+
+    Die UI-Welt soll Daten aus dem Spiel anzeigen. Dafür speichern wir den Zustand
+    an einer gemeinsamen Stelle, zum Beispiel in einem Dictionary.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void aktualisiere_ui() {
+        muenzen_text.text = f"Muenzen: {spiel['muenzen']}"
+        schluessel_text.text = f"Schluessel: {spiel['schluessel']}"
+
+        // @spieler.register
+        public static void on_key_down_right(int self) {
+        self.x = self.x + 10
+
+        // @spieler.register
+        public static void on_key_down_left(int self) {
+        self.x = self.x - 10
+
+        world.run()
+        }
+        }
+
+        public static void main(String[] args) {
+            // import Java OOP
+
+            // world = Java OOP.World(500, 300)
+            world.add_background((220, 235, 245))
+
+            spiel = {;
+                "muenzen": 0,
+                "schluessel": 0,
+            }
+
+            // spieler = Java OOP.Actor((120, 150))
+            spieler.size = (35, 35)
+            spieler.color = (60, 120, 220)
+
+            // ui = Java OOP.Toolbar()
+            ui.background_color = (245, 247, 250)
+
+            // titel = Java OOP.Label("Inventar")
+            // muenzen_text = Java OOP.Label("Muenzen: 0")
+            // schluessel_text = Java OOP.Label("Schluessel: 0")
+
+            ui.add(titel)
+            ui.add(muenzen_text)
+            ui.add(schluessel_text)
+            world.camera.add_right(ui, size=170)
+
+    `
+- type: text
+  text: |-
+    `Die Funktion `aktualisiere_ui()` gehört nicht zu einem bestimmten Actor. Sie
+    liest die gemeinsamen Spieldaten und schreibt sie in die Labels der UI-Welt.
+
+    ### Münzen einsammeln und UI aktualisieren
+
+    Jetzt bekommt die Hauptwelt Sammelobjekte. Wenn der Spieler eine Münze berührt,
+    wird die Münze entfernt, der Wert in `spiel` erhöht und die Anzeige neu gesetzt.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void aktualisiere_ui() {
+        muenzen_text.text = f"Muenzen: {spiel['muenzen']}"
+        schluessel_text.text = f"Schluessel: {spiel['schluessel']}"
+
+        // @spieler.register
+        public static void act(int self) {
+        for (var muenze : muenzen) {
+        if (self.detect(muenze)) {
+        muenze.remove()
+        muenzen.remove(muenze)
+        spiel["muenzen"] = spiel["muenzen"] + 1
+        aktualisiere_ui()
+        break
+
+        // @spieler.register
+        public static void on_key_down_right(int self) {
+        self.x = self.x + 10
+
+        // @spieler.register
+        public static void on_key_down_left(int self) {
+        self.x = self.x - 10
+
+        // @spieler.register
+        public static void on_key_down_up(int self) {
+        self.y = self.y - 10
+
+        // @spieler.register
+        public static void on_key_down_down(int self) {
+        self.y = self.y + 10
+
+        world.run()
+        }
+        }
+
+        public static void main(String[] args) {
+            // import Java OOP
+
+            // world = Java OOP.World(500, 300)
+            world.add_background((220, 235, 245))
+
+            spiel = {;
+                "muenzen": 0,
+                "schluessel": 0,
+            }
+
+            // spieler = Java OOP.Actor((80, 150))
+            spieler.size = (35, 35)
+            spieler.color = (60, 120, 220)
+
+            muenzen = [];
+
+            for position in [(180, 90), (280, 210), (390, 130)]:
+            // muenze = Java OOP.Circle(position, 13)
+                muenze.color = (240, 190, 70)
+                muenzen.append(muenze)
+
+            // ui = Java OOP.Toolbar()
+            ui.background_color = (245, 247, 250)
+
+            // ui.add(Java OOP.Label("Inventar"))
+            // muenzen_text = Java OOP.Label("Muenzen: 0")
+            // schluessel_text = Java OOP.Label("Schluessel: 0")
+            ui.add(muenzen_text)
+            ui.add(schluessel_text)
+
+            world.camera.add_right(ui, size=170)
+
+    `
+- type: text
+  text: |-
+    `Die Münzen liegen in der Hauptwelt. Die Texte liegen in der UI-Welt. Verbunden
+    werden beide nur durch die gemeinsamen Daten und die Funktion
+    `aktualisiere_ui()`.
+
+    ### Buttons senden Nachrichten
+
+    Eine Toolbar kann nicht nur Texte anzeigen. Buttons senden beim Anklicken eine
+    Nachricht an die Welt. Die Hauptwelt kann mit `on_message` darauf reagieren.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void aktualisiere_ui() {
+        leben_text.text = f"Leben: {spiel['leben']}"
+        trank_text.text = f"Traenke: {spiel['trank']}"
+
+        // @world.register
+        public static void on_message(int self, int message) {
+        if (message == "Trank benutzen" and spiel["trank"] > 0) {
+        spiel["trank"] = spiel["trank"] - 1
+        spiel["leben"] = spiel["leben"] + 1
+        aktualisiere_ui()
+
+        // @spieler.register
+        public static void on_key_down_right(int self) {
+        self.x = self.x + 10
+
+        // @spieler.register
+        public static void on_key_down_left(int self) {
+        self.x = self.x - 10
+
+        world.run()
+        }
+        }
+
+        public static void main(String[] args) {
+            // import Java OOP
+
+            // world = Java OOP.World(500, 300)
+            world.add_background((220, 235, 245))
+
+            spiel = {;
+                "leben": 3,
+                "trank": 1,
+            }
+
+            // spieler = Java OOP.Actor((120, 150))
+            spieler.size = (35, 35)
+            spieler.color = (60, 120, 220)
+
+            // ui = Java OOP.Toolbar()
+            ui.background_color = (245, 247, 250)
+
+            // leben_text = Java OOP.Label("Leben: 3")
+            // trank_text = Java OOP.Label("Traenke: 1")
+
+            // ui.add(Java OOP.Label("Status"))
+            ui.add(leben_text)
+            ui.add(trank_text)
+            // ui.add(Java OOP.Button("Trank benutzen"))
+
+            world.camera.add_right(ui, size=180)
+
+    `
+- type: text
+  text: |-
+    `Der Button verändert den Spieler nicht direkt. Er sendet nur die Nachricht
+    `"Trank benutzen"`. Die Hauptwelt entscheidet dann, was diese Nachricht im Spiel
+    bedeutet.
+
+    ### Eine Kamera und ein festes Inventar
+
+    Besonders nützlich wird die zweite Welt bei großen Spielwelten. Die Kamera folgt
+    dem Spieler, aber die UI-Welt bleibt am Rand stehen.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void aktualisiere_ui() {
+        muenzen_text.text = f"Muenzen: {spiel['muenzen']}"
+
+        // @spieler.register
+        public static void act(int self) {
+        world.camera.from_actor(self)
+
+        for (var muenze : muenzen) {
+        if (self.detect(muenze)) {
+        muenze.remove()
+        muenzen.remove(muenze)
+        spiel["muenzen"] = spiel["muenzen"] + 1
+        aktualisiere_ui()
+        break
+
+        // @spieler.register
+        public static void on_key_down_right(int self) {
+        self.x = self.x + 15
+
+        // @spieler.register
+        public static void on_key_down_left(int self) {
+        self.x = self.x - 15
+
+        world.run()
+        }
+        }
+
+        public static void main(String[] args) {
+            // import Java OOP
+
+            // world = Java OOP.World(500, 300)
+            world.add_background((220, 235, 245))
+            world.camera.world_size_x = 1200
+
+            spiel = {;
+                "muenzen": 0,
+            }
+
+            // spieler = Java OOP.Actor((80, 220))
+            spieler.size = (35, 35)
+            spieler.color = (60, 120, 220)
+
+            for (int x = 0; x < 1200, 120; x++) {
+            // boden = Java OOP.Rectangle.from_topleft((x, 260), 80, 40)
+                boden.color = (90, 150, 105)
+
+            muenzen = [];
+
+            for x in (250, 450, 750, 1000):
+            // muenze = Java OOP.Circle((x, 220), 13)
+                muenze.color = (240, 190, 70)
+                muenzen.append(muenze)
+
+            // ui = Java OOP.Toolbar()
+            ui.background_color = (245, 247, 250)
+            // ui.add(Java OOP.Label("Inventar"))
+            // muenzen_text = Java OOP.Label("Muenzen: 0")
+            ui.add(muenzen_text)
+
+            world.camera.add_right(ui, size=170)
+
+    `
+- type: text
+  text: |-
+    `Die Münzen haben Weltpositionen wie `x = 750` oder `x = 1000`. Das Label
+    `Muenzen: ...` gehört aber zur angedockten UI-Welt. Darum bleibt es sichtbar,
+    auch wenn die Kamera weit nach rechts scrollt.
+
+    !!! note Merksatz
+    Lagere alles aus, was nicht Teil des Levels ist: Punkte, Lebensanzeige,
+    Inventar, Buttons oder Debug-Informationen. Die Spielwelt bleibt dadurch für
+    das Spiel zuständig, die zweite Welt für die Anzeige.
+    !!!`

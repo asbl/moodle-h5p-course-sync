@@ -1,0 +1,116 @@
+contentType: text_only
+contents:
+- type: text
+  text: |-
+    `Ein Objekt hat zwei Arten von Bestandteilen: **Attribute** und **Methoden**.
+
+    * **Attribute** speichern den **Zustand** des Objekts – also seine aktuellen Daten.
+    * **Methoden** beschreiben das **Verhalten** des Objekts – also was es kann.
+
+    ### Attribute: den Zustand lesen und setzen
+
+    Auf Attribute greifst du mit dem Punkt-Operator zu:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            // t = turtle.Programm()
+
+            // Attribut lesen:
+            System.out.println(t.pensize)       # aktuelle Stiftgröße anzeigen);
+
+            // Attribut setzen:
+            t.pensize = 4          # Stiftgröße auf 4 setzen
+            t.forward(80)
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Jede Zuweisung der Form `objekt.attribut = wert` verändert den Zustand
+    dieses einen Objekts.
+
+    ### Methoden: Verhalten aufrufen
+
+    Methoden rufst du wie Funktionen auf – mit Klammern und Argumenten:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            // t = turtle.Programm()
+
+            t.color("navy")        # Farbe ändern
+            t.forward(100)         # 100 Schritte vorwärts
+            t.right(90)            # 90° nach rechts drehen
+            t.forward(60)
+        }
+    }
+    `
+- type: text
+  text: 'Manche Methoden **geben einen Wert zurück**:'
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            // t = turtle.Programm()
+            t.forward(80)
+            t.right(45)
+
+            pos = t.position()     # gibt die aktuelle Position zurück;
+            richtung = t.heading() # gibt die aktuelle Richtung zurück;
+
+            System.out.println(pos);
+            System.out.println(richtung);
+        }
+    }
+    `
+- type: text
+  text: '### Attribut oder Methode – wie unterscheide ich sie?'
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            t.pensize           ← Attribut   (kein Aufruf, keine Klammern)
+            t.pensize = 4       ← Attribut setzen
+            t.forward(100)      ← Methode    (Aufruf mit Klammern)
+            t.position()        ← Methode    (Aufruf, gibt Wert zurück)
+        }
+    }
+    `
+  options:
+    showEditor: false
+- type: text
+  text: |-
+    `Die Faustregel: **Klammern = Methode, keine Klammern = Attribut**.
+
+    !!! note Ausnahme: Methoden ohne Argumente
+    Auch `t.position()` und `t.heading()` haben Klammern, obwohl kein Argument
+    übergeben wird. Die leeren Klammern zeigen: Das ist ein Methodenaufruf.
+    !!!
+
+    ### Alles zusammen`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            // t = turtle.Programm()
+
+            t.shape("turtle")      # Methode: Form auf echte Programm setzen
+            t.color("teal")        # Methode: Farbe setzen
+            t.pensize = 3          # Attribut: Stiftdicke
+
+            t.penup()              # Methode: Stift heben
+            t.goto(-60, 0)         # Methode: Position setzen
+            t.pendown()            # Methode: Stift senken
+
+            for (int i = 0; i < 4; i++) {
+                t.forward(80)
+                t.right(90)
+
+            System.out.println("Position:", t.position());
+            System.out.println("Richtung:", t.heading());
+        }
+    }
+    `
+- type: text
+  text: 'Probiere aus: Was gibt `t.position()` nach dem Zeichnen aus?'

@@ -1,0 +1,58 @@
+contentType: text_only
+contents:
+- type: text
+  text: |-
+    `Auch in Java Grafik kannst du mit Schleifen zeichnen.
+
+    - Überlege dir **zuerst**, was der folgende Code bewirkt
+    - Führe ihn aus.
+    - Variiere - Was kannst du mit Schleifen und Linien noch zeichnen?`
+- type: code
+  code: |-
+    `import Java Grafik
+
+    def setup():
+        Java Grafik.createCanvas(200, 200)
+        # Die Schleife springt in 20er Schritten von 0 bis 400
+        for i in range(0, 400, 20):
+            Java Grafik.line(0, i, 400, i)
+
+    Java Grafik.run()
+    `
+- type: text
+  text: |-
+    `Du kannst statt Linien auch andere Objekte zeichnen,
+    z.B. Rechtecke:`
+- type: code
+  code: |-
+    `import Java Grafik
+
+    def setup():
+        Java Grafik.createCanvas(200, 200)
+        size =50
+        for i in range(20):
+            Java Grafik.rect(50 + i*15, 50 + i*15, size, size)
+
+    Java Grafik.run()
+    `
+- type: text
+  text: |-
+    `Mit **stroke** kann man die Farbe ändern
+
+    - Variiere im folgenden Beispiel die Farbe. Gib den Strichen einen Rot oder Blauton.
+    - Variiere die Figuren in der Zeichnung.`
+- type: code
+  code: |-
+    `import Java Grafik
+
+    def setup():
+        Java Grafik.createCanvas(200, 200)
+        x = 100
+        y = 100
+        for i in range(10):
+            color = Java Grafik.color(0, i * 25, 0)
+            Java Grafik.stroke(color)
+            Java Grafik.line(x, y, i * 10, y + i * 10)
+
+    Java Grafik.run()
+    `

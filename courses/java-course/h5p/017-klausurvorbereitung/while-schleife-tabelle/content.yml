@@ -1,0 +1,161 @@
+contentType: text_only
+contents:
+- type: text
+  text: |-
+    `Die `while`-Schleife wiederholt sich, solange die Bedingung wahr ist. Verfolge
+    die Werte Schritt für Schritt – am besten als Tabelle.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            int n = 1;
+            while (n < 20) {
+                n = n * 2;
+            System.out.println(n);
+        }
+    }
+    `
+  options:
+    showEditor: false
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            Schritt | n (vor Prüfung) | Bedingung n < 20 | n (nach n * 2)
+            1       | 1               | wahr              | 2
+            2       | 2               | wahr              | 4
+            3       | 4               | wahr              | 8
+            4       | 8               | wahr              | 16
+            5       | 16              | wahr              | 32
+            6       | 32              | falsch → Ende
+            Ausgabe: 32
+        }
+    }
+    `
+  options:
+    showEditor: false
+- type: text
+  text: |-
+    `### Übung
+
+    Bestimme die Ausgabe, bevor du den Code ausführst.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            int wert = 100;
+            int zaehler = 0;
+            while (wert > 1) {
+                wert = wert // 2;
+                zaehler = zaehler + 1;
+            System.out.println(zaehler);
+        }
+    }
+    `
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            Schritt | wert | Bedingung wert > 1 | zaehler
+            Start   | 100  | –                  | 0
+            1       | ?    | wahr               | ?
+            2       | ?    | ?                  | ?
+            3       | ?    | ?                  | ?
+            ...     | ?    | ?                  | ?
+            Ende    | ?    | falsch → Ende      | ?
+        }
+    }
+    `
+  options:
+    showEditor: false
+- type: text
+  text: |-
+    `---
+
+    ## Niveau 2
+
+    ### Übung 2
+
+    Jetzt verändern sich zwei Variablen pro Schritt. Lege eine Tabelle an.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            int x = 1;
+            int summe = 0;
+            while (summe < 15) {
+                summe = summe + x;
+                x = x + 2;
+            System.out.println(x, summe);
+        }
+    }
+    `
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            Schritt | x | summe | Bedingung summe < 15
+            Start   | 1 | 0     | –
+            1       | ? | ?     | wahr
+            2       | ? | ?     | ?
+            3       | ? | ?     | ?
+            ...     | ? | ?     | ?
+            Ende    | ? | ?     | falsch → Ende
+        }
+    }
+    `
+  options:
+    showEditor: false
+- type: text
+  text: |-
+    `---
+
+    ## Niveau 3
+
+    ### Übung 3 – Schleife schreiben
+
+    Schreibe eine `while`-Schleife, die alle Zweierpotenzen (1, 2, 4, 8, …)
+    ausgibt, solange sie kleiner als 200 sind.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            // Dein Code:
+        }
+    }
+    `
+- type: text
+  text: '### Übung 4 – Analyse und Anpassung'
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            int n = 1;
+            while (n * n < 50) {
+                n = n + 1;
+            System.out.println(n);
+        }
+    }
+    `
+- type: text
+  text: 'a) Fülle die Tabelle aus:'
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            n | n * n | n * n < 50
+            1 | 1     | wahr
+            2 | ?     | ?
+            3 | ?     | ?
+            ...
+            ? | ?     | falsch → Ende
+        }
+    }
+    `
+  options:
+    showEditor: false
+- type: text
+  text: |-
+    `b) Beschreibe in einem Satz, was der Code berechnet.
+    c) Ändere die Schleife so, dass sie die **größte** Zahl ausgibt, deren
+       Quadrat kleiner als 50 ist.`

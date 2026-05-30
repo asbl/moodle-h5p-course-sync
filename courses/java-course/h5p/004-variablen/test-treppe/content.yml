@@ -1,0 +1,55 @@
+contentType: text_and_ide
+editorSettings:
+  preCode: |-
+    `import turtle
+    x = int(input())
+    `
+  startingCode: |-
+    `for i in range(x):
+        ...
+    `
+  postCode: |-
+    ``
+  instructions: |-
+    `Schreibe ein Programm, dass bei Eingabe x eine
+    Turtle-Treppe der Länge x zeichnet. 
+
+    Jede Stufe soll die Breite 50 und die Höhe 50 haben.
+    `
+gradingSettings:
+  gradingMethod: targetImage
+  targetCode: |-
+    `import turtle
+    x = int(input())
+
+    for i in range(x):
+        turtle.forward(50)
+        turtle.left(90)
+        turtle.forward(50)
+        turtle.right(90)
+    `
+  testCases:
+  - hidden: false
+    inputs:
+    - '1'
+  - hidden: false
+    inputs:
+    - '2'
+  - hidden: false
+    inputs:
+    - '3'
+  - hidden: false
+    inputs:
+    - '4'
+  dueDateGroup:
+    enableDueDate: true
+    duedate: '2026-02-22T23:00:00.000Z'
+contents:
+- type: text
+  text: |-
+    `Eine Programm-Treppe besteht aus einzelnen Stufen, die jeweils
+    so aussehen:
+
+    So sieht eine Treppe mit 2 Stufen aus:
+
+    ...und so mit 3 Stufen`

@@ -1,0 +1,89 @@
+contentType: text_only
+contents:
+- type: text
+  text: |-
+    `Schau dir den folgenden Code an.
+
+    Überlege dir bevor du auf "Run" klickst:
+        
+    - Was macht der Code?
+    - Was wird das gezeichnete Bild darstellen?`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            // turtle.left(90)
+            // turtle.pensize(60)
+            // turtle.color("red")
+            // // turtle.forward(100) → in Java: Ausgabe/Zeichnung
+            // turtle.penup()
+            // // turtle.forward(50) → in Java: Ausgabe/Zeichnung
+            // turtle.pendown()
+            // turtle.color("yellow")
+            // turtle.dot(40)
+            // turtle.pensize(5)
+            // turtle.color("black")
+            // turtle.back(15)
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Verändere das Bild leicht, spiele z.B. mit den Farben
+
+    !!! note Farben
+
+    Farben kannst du mit turtle.color("Farbe") setzen. 
+
+    Hier findest du eine Liste der Farben, die du verwenden kannst: [Liste](https://trinket.io/docs/colors)
+    !!!
+
+    Farben können mit **Namen**, **rgb**-Code oder als **Hex-Code** angegeben werden.
+
+    !!! note Exkurs: RGB-Modell
+
+    Im RGB-Modell wird eine Farbe aus 3 Bestandteilen gemischt: Rot, Grün und Blau.
+    Man kann alle möglichen Farben mit diesen 3 Grundfarben "zusammenmischen".
+
+    Oft werden Farben im RGB-Modell als Hex-Code angegeben, z.B.:
+
+    #FF0ECD
+
+    Je zwei Ziffern stellen eine Farbe dar. FF stellt den Rot-Anteil dar,
+    0E den Grün-Anteil und CD den Blau-Anteil der zusammengemischten Farbe.
+
+    [Mehf Infos: Siehe Wikipedia](https://de.wikipedia.org/wiki/RGB-Farbraum)
+    !!!
+    Hier siehst du die unterschiedlichen Arten, wie du eine Farbe setzen kannst:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            // Über den Namen der Farbe
+            // turtle.color("dark goldenrod")
+            // turtle.dot(20)
+
+            // turtle.penup()
+            // // turtle.forward(40) → in Java: Ausgabe/Zeichnung
+            // turtle.pendown()
+
+            // Über den rgb Wert
+            // erst den Red-Anteil, dann den Green-Anteil, zuletzt den Blau-Anteil
+            // turtle.color(1, 0.5, 0.5)
+            // turtle.dot(20)
+
+            // turtle.penup()
+            // // turtle.forward(40) → in Java: Ausgabe/Zeichnung
+            // turtle.pendown()
+
+
+            // Über den Hex-Code
+            // Auch dies ist ein RGB Code. Die ersten beiden Ziffern geben
+            // den Rot-Anteil an, die nächsten beiden den Grün-Anteil und die letzten
+            // beiden den Blau-Anteil.
+            // 00: Farbe nicht vorhanden. #FF=255: Voller Farbanteil
+            // turtle.color("#00FFFF")
+            // turtle.dot(20)
+        }
+    }
+    `

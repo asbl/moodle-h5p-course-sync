@@ -58,6 +58,7 @@ from scripts.classes.h5p_runtime_manager.runtime_manager import H5PRuntimeManage
 from scripts.classes.moodle_sync import MoodleSyncer
 from scripts.classes.moodle_sync import MoodleApiClient
 from scripts.classes.moodle_sync import MoodleBackupExtractor
+from scripts.classes.moodle_sync import MoodleBackupImporter
 from scripts.classes.moodle_sync import MoodleClientResolver
 from scripts.classes.moodle_playwright_uploader import (
     MoodleH5PUploadResult,
@@ -238,6 +239,24 @@ def import_moodle_course(course: str, remote_course_id: int, client: MoodleApiCl
         remote_course_id=remote_course_id,
         client=client,
     )
+
+
+def import_moodle_from_mbz(
+    course: str,
+    mbz_path: Path,
+    remote_course_id: int = 0,
+    base_url: str = "",
+) -> Path:
+    importer = MoodleBackupImporter(
+        mbz_path=mbz_path,
+        base_url=base_url or "",
+        backup_extractor=moodle_backup_extractor(),
+        make_stable_identifier=make_stable_identifier,
+        strip_html=strip_html,
+        build_imported_question_from_h5p_package=build_imported_question_from_h5p_package,
+        write_source_package_sidecar=write_source_package_sidecar,
+    )
+    return import_moodle_course(course, remote_course_id, importer)
 
 
 def push_moodle_course(course_dir: Path, remote_course_id: int, client: MoodleApiClient) -> list[PythonQuestionBlock]:
@@ -980,6 +999,7 @@ def main() -> None:
         export_chapter=export_chapter,
         upload_moodle_chapter=upload_moodle_chapter,
         update_h5p_libraries_from_github=update_h5p_libraries_from_github,
+        import_moodle_from_mbz=import_moodle_from_mbz,
     )
 
 

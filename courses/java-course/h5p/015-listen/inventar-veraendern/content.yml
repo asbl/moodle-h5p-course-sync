@@ -1,0 +1,113 @@
+contentType: text_only
+contents:
+- type: text
+  text: |-
+    `Listen können u.a. **wachsen** und **verändert** werden. 
+
+    Das macht sie in Spielen für Inventar-Listen besonders nützlich.
+
+    ### Listenelemente an eine Liste anhängen
+
+    Mit `append()` kannst du ein Listenelement zu einer Liste hinzufügen:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            inventar = ["Holz", "Stein"];
+            inventar.append("Fackel")
+
+            System.out.println(inventar);
+        }
+    }
+    `
+- type: text
+  text: |-
+    `| Schritt | Inhalt der Liste |
+    | --- | --- |
+    | Start | `["Holz", "Stein"]` |
+    | nach `append("Fackel")` | `["Holz", "Stein", "Fackel"]` |
+
+    `append(...)` hängt den neuen Wert an das Ende der Liste.
+
+    ### Listenelemente ersetzen
+
+    Du kannst ein Element über seinen Index ersetzen.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            inventar = ["Holz", "Stein", "Erde"];
+            inventar[2] = "Glas"
+
+            System.out.println(inventar);
+        }
+    }
+    `
+- type: text
+  text: |-
+    `| Index | `0` | `1` | `2` |
+    | --- | --- | --- | --- |
+    | vorher | `"Holz"` | `"Stein"` | `"Erde"` |
+    | nach `inventar[2] = "Glas"` | `"Holz"` | `"Stein"` | `"Glas"` |
+
+    ### Prüfen, ob etwas vorhanden ist
+
+    Mit `in` kannst du prüfen, ob ein Wert in der Liste vorkommt.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            inventar = ["Holz", "Stein", "Fackel"];
+
+            if ("Fackel" in inventar) {
+                System.out.println("Du kannst in die Höhle gehen.");
+            } else {
+                System.out.println("Es ist zu dunkel.");
+        }
+    }
+    `
+- type: text
+  text: 'Java sucht dabei durch die Liste:'
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            ["Holz", "Stein", "Fackel"]
+                              ^
+                              gefunden
+        }
+    }
+    `
+  options:
+    showEditor: false
+- type: text
+  text: |-
+    `### Aufgabe
+
+    Ergänze den Code so, dass am Ende genau diese Ausgaben entstehen:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            Holz
+            Stein
+            Fackel
+            Diamant
+        }
+    }
+    `
+  options:
+    showEditor: false
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            inventar = ["Holz", "Stein"];
+
+            // Ergänze hier zwei Zeilen.
+
+            for (var gegenstand : inventar) {
+                System.out.println(gegenstand);
+        }
+    }
+    `

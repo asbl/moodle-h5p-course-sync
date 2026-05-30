@@ -1,0 +1,90 @@
+contentType: text_only
+contents:
+- type: text
+  text: |-
+    `Transfer bedeutet: Du kennst die Bausteine, musst sie aber in einer neuen
+    Situation einsetzen.
+
+    ### Übung
+
+    Ein Spiel speichert gefundene Gegenstände in einer Liste. Schreibe eine
+    Funktion `bewerte_inventar(inventar)`, die Punkte berechnet:
+
+    * `"Diamant"` zählt 5 Punkte.
+    * `"Gold"` zählt 3 Punkte.
+    * Jeder andere Gegenstand zählt 1 Punkt.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void bewerte_inventar(int inventar) {
+        int punkte = 0;
+        // Ergänze die Schleife.
+        return punkte;
+
+
+        System.out.println(bewerte_inventar(["Stein", "Diamant", "Gold", "Erde"]));
+        }
+
+        public static void main(String[] args) {
+    }
+    `
+- type: text
+  text: |-
+    `Bevor du programmierst: Erstelle zuerst eine Tabelle mit den Spalten
+    `gegenstand`, `punkte_fuer_gegenstand` und `punkte_insgesamt`.
+
+    ---
+
+    ## Niveau 2
+
+    ### Übung 2
+
+    Das Inventar-System wird erweitert: Diamant = 5 Punkte, Gold = 3 Punkte,
+    Silber = 2 Punkte, alles andere = 1 Punkt. Zusätzlich gibt es einen Bonus
+    von 10 Punkten, wenn das Inventar **mindestens 5 Gegenstände** enthält.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void bewerte_inventar_v2(int inventar) {
+        int punkte = 0;
+        // Ergänze Schleife und Bonus-Bedingung.
+        return punkte;
+
+
+        System.out.println(bewerte_inventar_v2(["Stein", "Diamant", "Gold", "Silber", "Erde"]));
+        // erwartet: 1 + 5 + 3 + 2 + 1 + 10 = 22
+        }
+
+        public static void main(String[] args) {
+    }
+    `
+- type: text
+  text: |-
+    `---
+
+    ## Niveau 3
+
+    ### Übung 3 – Entwurf und Begründung
+
+    Schreibe eine Funktion `top_gegenstand(inventar)`, die den Namen des
+    **wertvollsten** Gegenstands zurückgibt. Punktevergabe wie oben
+    (Diamant = 5, Gold = 3, alles andere = 1).`
+- type: code
+  code: |-
+    `public class Main {
+        public static void top_gegenstand(int inventar) {
+        // Erstelle zuerst eine Tabelle auf Papier.
+        pass
+
+
+        System.out.println(top_gegenstand(["Stein", "Diamant", "Gold"]))  # Diamant);
+        System.out.println(top_gegenstand(["Erde", "Stein"]))             # Erde (oder Stein);
+        }
+
+        public static void main(String[] args) {
+    }
+    `
+- type: text
+  text: |-
+    `Beantworte danach schriftlich: Was gibt deine Funktion zurück, wenn mehrere
+    Gegenstände denselben Höchstwert haben? Ist das sinnvoll?`

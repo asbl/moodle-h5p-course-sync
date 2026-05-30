@@ -1,0 +1,20 @@
+contentType: text_only
+contents:
+- type: text
+  text: |-
+    `Mit dot(20) zeichnet die Programm einen ausgefüllten Kreis mit Durchmesser 20.
+    Mit turtle.hideturtle() wird die turtle ausgeblendet.
+
+    Zeichne das untenstehende Bild.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            // // turtle.forward(50) → in Java: Ausgabe/Zeichnung
+            // turtle.dot(20)
+
+
+            // turtle.hideturtle()
+        }
+    }
+    `

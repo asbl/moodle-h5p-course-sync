@@ -1,0 +1,98 @@
+contentType: ide_only
+contents: []
+editorSettings:
+  instructions: |-
+    `Pruefe einen Text auf Umlaute.
+
+    Dein Programm soll in der Eingabe nach den Umlauten `ä`, `ö` und `ü`
+    suchen. Arbeite mit einer Schleife und
+    baue eine Ausgabe, die nur die gefundenen Umlaute enthaelt.
+
+    Regeln:
+
+    - Verarbeite den Text in Kleinbuchstaben.
+    - Gib jeden Umlaut hoechstens einmal aus.
+    - Behalte die Reihenfolge `ä`, `ö`, `ü` bei.
+    - Wenn kein Umlaut vorkommt, gib `keine` aus.
+
+    #### Eingabe
+      Frühstück
+
+    #### Ausgabe
+    ü`
+  preCode: |-
+    `public class Main {
+        public static void main(String[] args) {
+            text = input()
+        }
+    }
+    `
+  startingCode: |-
+    `public class Main {
+        public static void main(String[] args) {
+            text = text.strip().lower()
+            gefunden = []
+
+            // TODO: Umlaute suchen
+            ergebnis =
+        }
+    }
+    `
+  postCode: |-
+    `public class Main {
+        public static void main(String[] args) {
+            System.out.println(ergebnis);
+        }
+    }
+    `
+gradingSettings:
+  targetCode: |-
+    `public class Main {
+        public static void main(String[] args) {
+            text = input().strip().lower()
+
+            hat_ae = "ä" in text
+            hat_oe = "ö" in text
+            hat_ue = "ü" in text
+
+            teile = []
+            if (hat_ae) {
+            }
+              teile.append("ä")
+            if (hat_oe) {
+            }
+              teile.append("ö")
+            if (hat_ue) {
+            }
+              teile.append("ü")
+
+            String ergebnis = " ".join(teile) if teile else "keine";
+            System.out.println(ergebnis);
+        }
+    }
+    `
+  dueDateGroup:
+    enableDueDate: true
+    duedate: '2026-06-01T07:00:00.000Z'
+  gradingMethod: ioTestCases
+  testCases:
+  - hidden: false
+    inputs:
+    - Frühstück
+    outputs:
+    - ü
+  - hidden: false
+    inputs:
+    - Öl und Äpfel
+    outputs:
+    - ä ö
+  - hidden: false
+    inputs:
+    - Banane
+    outputs:
+    - keine
+  - hidden: true
+    inputs:
+    - ÜBER ÖL und ÄRGER
+    outputs:
+    - ä ö ü

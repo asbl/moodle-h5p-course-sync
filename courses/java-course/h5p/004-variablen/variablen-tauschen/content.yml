@@ -1,0 +1,65 @@
+contentType: text_and_ide
+editorSettings:
+  preCode: |-
+    `a = input()
+    b = input()
+    `
+  startingCode: |-
+    `c = 
+    a = 
+    b = 
+    `
+  postCode: |-
+    `print(a)
+    print(b)
+    `
+  instructions: |-
+    `Tausche den Wert der Variablen a und b. Verwende dafür eine Hilfsvariable
+    `
+gradingSettings:
+  gradingMethod: ioTestCases
+  dueDateGroup:
+    enableDueDate: true
+    duedate: '2026-02-22T23:00:00.000Z'
+  testCases:
+  - hidden: false
+    inputs:
+    - '3'
+    - '4'
+    outputs:
+    - '4'
+    - '3'
+  - hidden: true
+    inputs:
+    - '7'
+    - '8'
+    outputs:
+    - '8'
+    - '7'
+contents:
+- type: text
+  text: |-
+    `Eine besonders wichtige Operation ist das Tauschen des Inhalts zweier Variablen. 
+
+    Das Problem dabei ist: An einem Speicherplatz steht immer genau **ein Wert.*
+    Wenn dieser Wert überschrieben wird, dann ist er unwiderruflich verloren.
+
+    Betrachte folgenden Code und überlege dir, warum er nicht geeignet ist, 
+    um den Wert zweier Variablen zu tauschen.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            int a = 3;
+            int b = 4;
+            b = a;
+            a = b;
+        }
+    }
+    `
+- type: text
+  text: |-
+    `In den meisten Programmiersprachen benötigst du daher eine dritte Variable
+    als Hilfsvariable, um die beiden Werte zu tauschen.
+
+    Dies ist deine nächste Aufgabe:`

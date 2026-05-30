@@ -1,0 +1,79 @@
+contentType: ide_only
+contents: []
+editorSettings:
+  instructions: |-
+    `Ändere die Farben folgendermaßen:
+    - Die erste Farbe soll die Farbe "royal blue" erhalten.
+    - Die zweite Farbe soll Blau sein (Blau: 1, Rot und Grün  0)
+    - Die dritte Farbe soll den Hex-Farbcode #FFFF00 erhalten.`
+  startingCode: |-
+    `public class Main {
+        public static void main(String[] args) {
+            // import turtle
+
+            // Über den Namen der Farbe
+            // turtle.color("dark goldenrod")
+            // turtle.dot(20)
+
+            // turtle.penup()
+            // // turtle.forward(40) → in Java: Ausgabe/Zeichnung
+            // turtle.pendown()
+
+            // Über den rgb Wert
+            // erst den Red-Anteil, dann den Green-Anteil, zuletzt den Blau-Anteil
+            // turtle.color(1, 0.5, 0.5)
+            // turtle.dot(20)
+
+            // turtle.penup()
+            // // turtle.forward(40) → in Java: Ausgabe/Zeichnung
+            // turtle.pendown()
+
+            // Über den Hex-Code
+            // Auch dies ist ein RGB Code. Die ersten beiden Ziffern geben
+            // den Rot-Anteil an, die nächsten beiden den Grün-Anteil und die letzten
+            // beiden den Blau-Anteil.
+            // 00: Farbe nicht vorhanden. #FF=255: Voller Farbanteil
+            // turtle.color("#00FFFF")
+            // turtle.dot(20)
+        }
+    }
+    `
+gradingSettings:
+  targetCode: |-
+    `public class Main {
+        public static void main(String[] args) {
+            // import turtle
+
+            // Über den Namen der Farbe
+            // turtle.color("royal blue")
+            // turtle.dot(20)
+
+            // turtle.penup()
+            // // turtle.forward(40) → in Java: Ausgabe/Zeichnung
+            // turtle.pendown()
+
+            // Über den rgb Wert
+            // erst den Red-Anteil, dann den Green-Anteil, zuletzt den Blau-Anteil
+            // turtle.color(0, 0, 1)
+            // turtle.dot(20)
+
+            // turtle.penup()
+            // // turtle.forward(40) → in Java: Ausgabe/Zeichnung
+            // turtle.pendown()
+
+            // Über den Hex-Code
+            // Auch dies ist ein RGB Code. Die ersten beiden Ziffern geben
+            // den Rot-Anteil an, die nächsten beiden den Grün-Anteil und die letzten
+            // beiden den Blau-Anteil.
+            // 00: Farbe nicht vorhanden. #FF=255: Voller Farbanteil
+            // turtle.color("#FFFF00")
+            // turtle.dot(20)
+        }
+    }
+    `
+  gradingMethod: byOutputMatch
+  dueDateGroup:
+    enableDueDate: true
+    duedate: '2026-02-22T23:00:00.000Z'
+  testCases:
+  - hidden: false

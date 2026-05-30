@@ -1,0 +1,100 @@
+contentType: text_only
+contents:
+- type: text
+  text: |-
+    `Eine der wichtigsten Eigenschaften von Objekten: Jede Instanz hat ihren
+    **eigenen Zustand**. Was du mit einem Objekt machst, hat keinen Einfluss auf
+    ein anderes.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            // t1 = turtle.Programm()
+            // t2 = turtle.Programm()
+
+            t1.color("navy")
+            t1.forward(100)   # bewegt nur t1
+
+            t2.color("firebrick")
+            t2.left(90)
+            t2.forward(80)    # bewegt nur t2
+        }
+    }
+    `
+- type: text
+  text: |-
+    ``t1` und `t2` sind zwei unabhängige Schildkröten. Beide sind Instanzen
+    derselben Klasse `Programm`, aber jede hat ihre eigenen Attributwerte:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            t1: Farbe "navy",      Position (100, 0),  Richtung 0°
+            t2: Farbe "firebrick", Position (0, 80),   Richtung 90°
+        }
+    }
+    `
+  options:
+    showEditor: false
+- type: text
+  text: |-
+    `### Zustand ist pro Instanz
+
+    Wenn du `t1.color("navy")` schreibst, änderst du nur die Farbe von `t1`.
+    Die Farbe von `t2` bleibt unberührt. Jedes Objekt trägt seinen Zustand
+    selbst.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            // t1 = turtle.Programm()
+            // t2 = turtle.Programm()
+
+            t1.color("steelblue")
+            t1.pensize = 3
+
+            t2.color("darkorange")
+            t2.pensize = 1
+
+            t1.forward(80)
+
+            t2.penup()
+            t2.goto(0, -50)
+            t2.pendown()
+            t2.forward(80)
+
+            System.out.println("t1 Farbe:", t1.pencolor());
+            System.out.println("t2 Farbe:", t2.pencolor());
+        }
+    }
+    `
+- type: text
+  text: |-
+    `### Viele Objekte auf einmal
+
+    In einer Schleife kannst du schnell viele Objekte erzeugen:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            schildkroeten = [];
+
+            for (int i = 0; i < 5; i++) {
+            // t = turtle.Programm()
+                t.penup()
+                t.goto(-100 + i * 50, 0)
+                t.pendown()
+                t.forward(40)
+                schildkroeten.append(t)
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Jedes `t` in der Schleife ist eine neue, unabhängige Instanz. Am Ende
+    enthält `schildkroeten` fünf Objekte – jedes mit seiner eigenen Position.
+
+    !!! note Jede Instanz ist eigenständig
+    Wenn du ein Attribut eines Objekts änderst, änderst du nur dieses eine
+    Objekt. Andere Instanzen derselben Klasse sind davon nicht betroffen.
+    !!!`

@@ -1,0 +1,142 @@
+contentType: text_only
+contents:
+- type: text
+  text: |-
+    `In einer Klausur musst du Code nicht nur schreiben, sondern oft zuerst
+    **analysieren**. Eine Wertetabelle hilft dabei.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            int energie = 3;
+            for (int runde = 0; runde < 4; runde++) {
+                energie = energie + runde;
+                System.out.println(runde, energie);
+        }
+    }
+    `
+- type: text
+  text: 'Lege für solche Programme eine Tabelle an:'
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            runde | energie nach der Zuweisung | Ausgabe
+            0     | 3                           | 0 3
+            1     | 4                           | 1 4
+            ...
+        }
+    }
+    `
+  options:
+    showEditor: false
+- type: text
+  text: |-
+    `### Übung
+
+    Fülle zuerst eine Tabelle auf Papier aus. Starte den Code erst danach.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            int punkte = 2;
+            for (int schritt = 1; schritt < 5; schritt++) {
+                punkte = punkte * 2;
+                if (punkte > 10) {
+                    punkte = punkte - 3;
+                System.out.println(schritt, punkte);
+        }
+    }
+    `
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            schritt | punkte * 2 | punkte > 10? | punkte final | Ausgabe
+            1       | ?          | ?            | ?            | ?
+            2       | ?          | ?            | ?            | ?
+            3       | ?          | ?            | ?            | ?
+            4       | ?          | ?            | ?            | ?
+        }
+    }
+    `
+  options:
+    showEditor: false
+- type: text
+  text: |-
+    `---
+
+    ## Niveau 2
+
+    ### Übung 2
+
+    Jetzt verändern sich zwei Variablen gemeinsam. Lege eine Tabelle mit den
+    Spalten `schritt`, `a`, `b` und `Ausgabe` an.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            int a = 1;
+            int b = 10;
+            for (int schritt = 0; schritt < 4; schritt++) {
+                a = a + schritt;
+                b = b - a;
+                System.out.println(schritt, a, b);
+        }
+    }
+    `
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            schritt | a  | b  | Ausgabe
+            0       | ?  | ?  | ?
+            1       | ?  | ?  | ?
+            2       | ?  | ?  | ?
+            3       | ?  | ?  | ?
+        }
+    }
+    `
+  options:
+    showEditor: false
+- type: text
+  text: |-
+    `---
+
+    ## Niveau 3
+
+    ### Übung 3 – Ausgabe verstehen und Code anpassen`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            int ergebnis = 0;
+            for (int n = 1; n < 6; n++) {
+                if (n % 2 != 0) {
+                    ergebnis = ergebnis + n;
+            System.out.println(ergebnis);
+        }
+    }
+    `
+- type: text
+  text: 'a) Fülle die Tabelle aus:'
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            n | n % 2 != 0 | ergebnis
+            1 | ?          | ?
+            2 | ?          | ?
+            3 | ?          | ?
+            4 | ?          | ?
+            5 | ?          | ?
+        }
+    }
+    `
+  options:
+    showEditor: false
+- type: text
+  text: |-
+    `b) Beschreibe in einem Satz, was das Programm insgesamt berechnet.
+    c) Ändere den Code so, dass er die Summe aller **geraden** Zahlen von
+       2 bis 10 berechnet.`

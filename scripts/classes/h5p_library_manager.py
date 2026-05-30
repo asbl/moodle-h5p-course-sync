@@ -329,6 +329,15 @@ class H5PLibraryManager:
         if matches and (major_version is None or minor_version is None):
             return self._copy_library_dir_to_runtime(matches[-1])
 
+        if matches and major_version is not None:
+            for candidate in reversed(matches):
+                try:
+                    lib_meta = self._read_json(candidate / "library.json")
+                    if lib_meta.get("majorVersion") == major_version:
+                        return self._copy_library_dir_to_runtime(candidate)
+                except (OSError, ValueError):
+                    continue
+
         return None
 
     def _seed_library_from_local_archives(

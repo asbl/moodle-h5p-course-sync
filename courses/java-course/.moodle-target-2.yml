@@ -1,0 +1,2 @@
+auth: sso
+notes: "Schulportal Hessen - nutzt SSO-Login, kein Standard-Moodle-Loginformular. Zugangsdaten werden fuer den Schulportal-Login verwendet; der erfolgreiche Login wird zusaetzlich als Storage-State gespeichert."

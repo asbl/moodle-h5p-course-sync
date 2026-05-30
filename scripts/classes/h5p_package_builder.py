@@ -169,6 +169,19 @@ class H5PPackageBuilder:
             source_archive_path = (question.course_dir / question.source_package_path) if question.source_package_path else None
             source_mtime_ns = self._source_tree_mtime_ns(source_archive_path)
 
+            if question.raw_package and source_archive_path is not None and source_archive_path.is_file():
+                raw_fingerprint = self._fingerprint_payload({
+                    "mode": "raw-sidecar",
+                    "mainLibrary": question.main_library,
+                    "sourceMtime": source_mtime_ns,
+                })
+                if self._can_reuse_package(question, raw_fingerprint):
+                    return question.package_path
+                self._ensure_directory(question.package_path.parent)
+                shutil.copy2(source_archive_path, question.package_path)
+                self._write_build_state(question, raw_fingerprint)
+                return question.package_path
+
             if (question.package_url or source_archive_path is not None) and question.h5p_metadata is not None and question.h5p_content is not None:
                 self._ensure_h5p_runtime_libraries()
                 metadata_payload = deepcopy(question.h5p_metadata)
@@ -203,12 +216,13 @@ class H5PPackageBuilder:
                         source_path = Path(temp_dir) / "original.h5p"
                         self._download_file(question.package_url, source_path)
 
-                    self._populate_imported_h5p_directory(source_path, question.exploded_dir, metadata_payload, content_payload)
                     shared_libraries = self.sync_shared_h5p_libraries(
                         question,
                         self._collect_required_library_dirs_from_metadata(metadata_payload),
                     )
+                    metadata_payload = self._normalize_metadata_dependencies(metadata_payload, shared_libraries)
 
+                    self._populate_imported_h5p_directory(source_path, question.exploded_dir, metadata_payload, content_payload)
                     self._write_package_archive(question, shared_libraries=shared_libraries)
 
                 self._write_build_state(question, imported_fingerprint)
@@ -260,6 +274,42 @@ class H5PPackageBuilder:
             self._write_build_state(question, scratch_fingerprint)
 
             return question.package_path
+
+    def _normalize_metadata_dependencies(
+        self,
+        metadata_payload: dict[str, object],
+        library_dirs: list[Path],
+    ) -> dict[str, object]:
+        """Replace preloadedDependencies version numbers with the actual installed versions."""
+        installed: dict[str, tuple[int, int]] = {}
+        for lib_dir in library_dirs:
+            try:
+                lib_json = self._read_json(lib_dir / "library.json")
+                machine_name = str(lib_json.get("machineName") or "")
+                major = lib_json.get("majorVersion")
+                minor = lib_json.get("minorVersion")
+                if machine_name and isinstance(major, int) and isinstance(minor, int):
+                    installed[machine_name] = (major, minor)
+            except (OSError, ValueError):
+                continue
+
+        dependencies = metadata_payload.get("preloadedDependencies", [])
+        if not isinstance(dependencies, list):
+            return metadata_payload
+
+        updated: list[object] = []
+        for dep in dependencies:
+            if not isinstance(dep, dict):
+                updated.append(dep)
+                continue
+            machine_name = str(dep.get("machineName") or "")
+            if machine_name in installed:
+                major, minor = installed[machine_name]
+                updated.append({**dep, "majorVersion": major, "minorVersion": minor})
+            else:
+                updated.append(dep)
+
+        return {**metadata_payload, "preloadedDependencies": updated}
 
     def _normalize_imported_python_question_metadata(
         self,

@@ -1,0 +1,66 @@
+contentType: text_only
+advancedOptions:
+  disableOutputPopups: true
+contents:
+- type: text
+  text: |-
+    `In Java OOP entstehen schnell mehrere ähnliche Objekte. Dafür sind Funktionen
+    ideal.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void block(int x, int y, int farbe) {
+        // actor = Java OOP.Actor((x, y))
+        actor.size = (45, 45)
+        actor.color = farbe
+        return actor;
+
+
+        block(120, 220, (120, 90, 60))
+        block(170, 220, (120, 90, 60))
+        block(220, 220, (90, 150, 95))
+        block(270, 220, (90, 150, 95))
+
+        world.run()
+        }
+
+        public static void main(String[] args) {
+            // import Java OOP
+
+            // world = Java OOP.World(560, 300)
+            world.add_background((229, 238, 230))
+
+    }
+    `
+- type: text
+  text: |-
+    `Die Funktion `block` erzeugt ein Objekt und gibt es zurück. Dadurch kannst du
+    das Objekt später noch speichern oder verändern.
+
+    ### Aufgabe
+
+    Ergänze eine Funktion `muenze(x, y)`, die einen gelben Kreis erzeugt. Platziere
+    damit drei Münzen in der Welt.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void muenze(int x, int y) {
+        // Ergänze hier.
+        pass
+
+
+        muenze(160, 160)
+        muenze(260, 130)
+        muenze(360, 160)
+
+        world.run()
+        }
+
+        public static void main(String[] args) {
+            // import Java OOP
+
+            // world = Java OOP.World(560, 300)
+            world.add_background((232, 238, 244))
+
+    }
+    `

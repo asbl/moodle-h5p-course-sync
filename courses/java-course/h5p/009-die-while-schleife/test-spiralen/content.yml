@@ -1,0 +1,73 @@
+contentType: ide_only
+advancedOptions:
+  enableSaveLoadButtons: false
+contents: []
+editorSettings:
+  instructions: |-
+    `### Beschreibung:
+    Zeichne eine Spirale aus Linien, die sich nach außen bewegen.
+
+    ### Regeln:
+
+    Die Spirale startet in der Mitte (0, 0).
+
+    Die Länge der ersten Linie ist 25.
+
+    Jede nächste Linie ist um 5 länger als die vorherige.
+
+    Nach jeder Linie dreht sich die Figur 90° im Uhrzeigersinn.
+
+    Stoppe, wenn die Länge der Linie ≥ x ist (x wird mit input() eingelesen.
+
+    Verwende eine while-Schleife, weil die Anzahl der Linien vorher nicht bekannt ist.`
+  preCode: |-
+    `public class Main {
+        public static void main(String[] args) {
+            // import turtle
+            x = int(input())
+        }
+    }
+    `
+  instructionsImage:
+    path: images/instructionsImage-69b8540acff83.png
+    mime: image/png
+    copyright:
+      license: U
+    width: 591
+    height: 581
+gradingSettings:
+  targetCode: |-
+    `public class Main {
+        public static void main(String[] args) {
+            // import turtle
+
+            x = int(input())
+
+            // t = turtle.Turtle()
+            t.speed(0)
+
+            int length = 25;
+            while (length <= x) {
+                t.forward(length)
+                t.right(90)
+                length += 5
+
+            }
+            // turtle.done()
+        }
+    }
+    `
+  gradingMethod: byOutputMatch
+  dueDateGroup:
+    enableDueDate: false
+    duedate: '2026-03-28T09:00:00.000Z'
+  testCases:
+  - hidden: false
+    inputs:
+    - '50'
+  - hidden: false
+    inputs:
+    - '100'
+  - hidden: true
+    inputs:
+    - '150'

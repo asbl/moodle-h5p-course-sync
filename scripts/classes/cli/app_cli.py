@@ -58,6 +58,24 @@ def build_arg_parser(default_port: int) -> argparse.ArgumentParser:
     import_parser.add_argument("--base-url", help="Moodle-Basis-URL. Faellt sonst auf MOODLE_BASE_URL zurueck.")
     import_parser.add_argument("--token", help="Moodle-Token. Faellt sonst auf MOODLE_TOKEN zurueck.")
 
+    import_mbz_parser = subparsers.add_parser(
+        "import-mbz",
+        help="Importiert einen Moodle-Kurs aus einer lokalen .mbz-Sicherungsdatei ohne API-Zugangsdaten.",
+    )
+    import_mbz_parser.add_argument("course", help="Lokaler Kursordner unter courses/, zum Beispiel h5p-demo")
+    import_mbz_parser.add_argument("mbz_path", help="Pfad zur .mbz-Sicherungsdatei")
+    import_mbz_parser.add_argument(
+        "--remote-course-id",
+        type=int,
+        default=0,
+        help="Remote Moodle Course ID fuer die Sync-Metadaten (optional).",
+    )
+    import_mbz_parser.add_argument(
+        "--base-url",
+        default="",
+        help="Moodle-Basis-URL fuer die Sync-Metadaten (optional).",
+    )
+
     push_parser = subparsers.add_parser(
         "push-moodle", help="Versucht, einen lokalen Kurs als H5P-Aktivitaeten in einen Moodle-Kurs zu pushen."
     )

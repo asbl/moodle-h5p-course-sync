@@ -1,0 +1,60 @@
+contentType: ide_only
+advancedOptions:
+  enableSaveLoadButtons: false
+contents: []
+editorSettings:
+  instructions: |-
+    `Es soll eine Zahl eingelesen werden.
+
+    Es sollen alle Quadratzahlen ausgegeben werden, die kleiner als
+    die Zahl sind.
+
+    Eingabe: 17
+    Ausgabe
+    1
+    4
+    9
+    16`
+  preCode: |-
+    `public class Main {
+        public static void main(String[] args) {
+            x = int(input())
+        }
+    }
+    `
+  startingCode: |-
+    `public class Main {
+        public static void main(String[] args) {
+            int i = 1;
+            while(i * i < x):
+        }
+    }
+    `
+gradingSettings:
+  gradingMethod: ioTestCases
+  testCases:
+  - inputs:
+    - '7'
+    outputs:
+    - '1'
+    - '4'
+    hidden: false
+  - inputs:
+    - '13'
+    outputs:
+    - '1'
+    - '4'
+    - '9'
+    hidden: false
+  - inputs:
+    - '29'
+    outputs:
+    - '1'
+    - '4'
+    - '9'
+    - '16'
+    - '25'
+    hidden: false
+  dueDateGroup:
+    enableDueDate: false
+    duedate: '2026-03-28T09:00:00.000Z'

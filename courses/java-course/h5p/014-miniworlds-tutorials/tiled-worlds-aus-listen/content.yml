@@ -1,0 +1,155 @@
+contentType: text_only
+advancedOptions:
+  disableOutputPopups: true
+contents:
+- type: text
+  text: |-
+    `# Tiled Worlds aus Listen erstellen
+
+    Bei einem größeren Level möchtest du nicht jede Wand einzeln schreiben. Eine
+    Liste kann den Grundriss der Welt speichern. Jedes Zeichen steht für ein Feld.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            level = [;
+                "##########",
+                "#S.......#",
+                "#..###...#",
+                "#....#...#",
+                "#....#..Z#",
+                "##########",
+            ]
+        }
+    }
+    `
+- type: text
+  text: |-
+    `Die Zeichen bedeuten:
+
+    * `#` ist eine Wand
+    * `S` ist der Start des Spielers
+    * `Z` ist das Ziel
+    * `.` ist ein freies Feld
+
+    ### Aus der Liste eine TiledWorld bauen
+
+    Mit zwei Schleifen gehst du durch alle Zeilen und Spalten. `y` ist die
+    Zeilennummer, `x` ist die Spaltennummer.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            // import Java OOP
+
+            level = [;
+                "##########",
+                "#S.......#",
+                "#..###...#",
+                "#....#...#",
+                "#....#..Z#",
+                "##########",
+            ]
+
+            // world = Java OOP.TiledWorld(10, 6)
+            world.add_background((220, 235, 215))
+
+            spieler = None;
+            ziel = None;
+
+            for y, zeile in enumerate(level):
+                for x, zeichen in enumerate(zeile):
+                    position = (x, y);
+
+                    if (zeichen == "#") {
+            // wand = Java OOP.Actor(position)
+                        wand.color = (80, 90, 95)
+                        wand.is_blocking = True
+
+                    if (zeichen == "S") {
+            // spieler = Java OOP.Actor(position)
+                        spieler.color = (60, 120, 220)
+                        spieler.is_blockable = True
+
+                    if (zeichen == "Z") {
+            // ziel = Java OOP.Actor(position)
+                        ziel.color = (240, 190, 70)
+
+            world.run()
+        }
+    }
+    `
+- type: text
+  text: |-
+    ``enumerate(level)` liefert dir die Zeilennummer. `enumerate(zeile)` liefert dir
+    die Spaltennummer und das Zeichen an dieser Stelle.
+
+    ### Steuerung ergänzen
+
+    Jetzt bekommt der Spieler wieder die Tastensteuerung. Weil `spieler` erst in
+    der Schleife erstellt wird, steht die Steuerung darunter.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void on_key_down_w(int self) {
+        self.y = self.y  + 1
+
+        // @spieler.register
+        public static void on_key_down_s(int self) {
+        self.y = self.y - 1
+
+        // @spieler.register
+        public static void on_key_down_a(int self) {
+        self.x = self.x - 1
+
+        // @spieler.register
+        public static void on_key_down_d(int self) {
+        self.x = self.x + 1
+
+        world.run()
+        }
+        }
+
+        public static void main(String[] args) {
+            // import Java OOP
+
+            level = [;
+                "##########",
+                "#S.......#",
+                "#..###...#",
+                "#....#...#",
+                "#....#..Z#",
+                "##########",
+            ]
+
+            // world = Java OOP.TiledWorld(10, 6)
+            world.add_background((220, 235, 215))
+
+            spieler = None;
+            ziel = None;
+
+            for y, zeile in enumerate(level):
+                for x, zeichen in enumerate(zeile):
+                    position = (x, y);
+
+                    if (zeichen == "#") {
+            // wand = Java OOP.Actor(position)
+                        wand.color = (80, 90, 95)
+                        wand.is_blocking = True
+                    } else if (zeichen == "S") {
+            // spieler = Java OOP.Actor(position)
+                        spieler.color = (60, 120, 220)
+                        spieler.is_blockable = True
+                    } else if (zeichen == "Z") {
+            // ziel = Java OOP.Actor(position)
+                        ziel.color = (240, 190, 70)
+
+            // @spieler.register
+    `
+- type: text
+  text: |-
+    `!!! note Leveldesign als Daten
+    Der wichtigste Trick ist: Das Level steht nicht mehr als viele einzelne
+    Anweisungen im Code. Es steht als Datenstruktur am Anfang. Dadurch kannst du
+    Welten schnell umbauen, ohne die Spiellogik zu verändern.
+    !!!`

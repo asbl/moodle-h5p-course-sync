@@ -1,0 +1,294 @@
+contentType: text_only
+advancedOptions:
+  disableOutputPopups: true
+contents:
+- type: text
+  text: |-
+    `# Rand erkennen und abprallen
+
+    Objekte in einer Java OOP-Welt können an den Rand stoßen – und dann entweder
+    stoppen, umkehren oder verschwinden. Dieses Tutorial zeigt, wie du den Rand
+    erkennst und einen Actor davon abprallen lässt: zuerst mit eigenen Berechnungen,
+    dann mit der Java OOP-API.
+
+    ### Das Ziel
+
+    Ein Ball bewegt sich diagonal durch die Welt und prallt an allen vier Rändern ab.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void act(int self) {
+        self.move()
+        borders = self.detect_borders();
+        if (borders) {
+        self.bounce_from_border(borders)
+
+        world.run()
+        }
+        }
+
+        public static void main(String[] args) {
+            // import Java OOP
+
+            // world = Java OOP.World(460, 300)
+            world.add_background((230, 238, 248))
+
+            // ball = Java OOP.Circle((100, 80), 20)
+            ball.color = (60, 120, 220)
+            ball.direction = 45
+            ball.speed = 3
+
+            // @ball.register
+    `
+- type: text
+  text: |-
+    `Der Ball prallt endlos ab. Im Folgenden wird erklärt, wie das funktioniert.
+
+    ## Rand erkennen
+
+    ### Ohne API: Position prüfen
+
+    Die einfachste Art, den Rand zu erkennen: die x- und y-Position des Actors mit
+    den Weltgrenzen vergleichen. Die Position bezieht sich auf den **Mittelpunkt**
+    des Actors.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void act(int self) {
+        self.x = self.x + self.vx
+        self.y = self.y + self.vy
+
+        if (self.x - 20 <= 0) {
+        System.out.println("linker Rand");
+        if (self.x + 20 >= world.width) {
+        System.out.println("rechter Rand");
+        if (self.y - 20 <= 0) {
+        System.out.println("oberer Rand");
+        if (self.y + 20 >= world.height) {
+        System.out.println("unterer Rand");
+
+        world.run()
+        }
+        }
+
+        public static void main(String[] args) {
+            // import Java OOP
+
+            // world = Java OOP.World(460, 300)
+            world.add_background((230, 238, 248))
+
+            // ball = Java OOP.Circle((230, 150), 20)
+            ball.color = (60, 120, 220)
+            ball.vx = 3
+            ball.vy = 2
+
+            // @ball.register
+    `
+- type: text
+  text: |-
+    `Der Radius des Kreises (20) muss mitgerechnet werden, damit der Rand erst dann
+    als erreicht gilt, wenn der Ball wirklich die Kante berührt – nicht erst wenn
+    sein Mittelpunkt dort ankommt.
+
+    ### Mit API: detect_borders()
+
+    `detect_borders()` macht diese Prüfung für dich. Es berücksichtigt
+    automatisch die Größe des Actors und gibt eine Liste der berührten Ränder zurück.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void act(int self) {
+        self.move()
+        borders = self.detect_borders();
+        if (borders) {
+        System.out.println("Ränder berührt:", borders);
+
+        world.run()
+        }
+        }
+
+        public static void main(String[] args) {
+            // import Java OOP
+
+            // world = Java OOP.World(460, 300)
+            world.add_background((230, 238, 248))
+
+            // ball = Java OOP.Circle((230, 150), 20)
+            ball.color = (60, 120, 220)
+            ball.direction = 45
+            ball.speed = 3
+
+            // @ball.register
+    `
+- type: text
+  text: |-
+    ``borders` ist eine Liste mit Strings wie `["left"]` oder `["top", "right"]`.
+    Du kannst einzelne Ränder gezielt abfragen:`
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            if ("left" in borders) {
+                System.out.println("linker Rand");
+            if ("right" in borders) {
+                System.out.println("rechter Rand");
+            if ("top" in borders) {
+                System.out.println("oberer Rand");
+            if ("bottom" in borders) {
+                System.out.println("unterer Rand");
+        }
+    }
+    `
+  options:
+    showEditor: false
+- type: text
+  text: |-
+    `## Abprallen
+
+    ### Ohne API: Geschwindigkeit umkehren
+
+    Beim Abprallen gilt: Der Einfallswinkel ist gleich dem Ausfallswinkel. Mit
+    Geschwindigkeitskomponenten `vx` und `vy` bedeutet das: Das Vorzeichen der
+    jeweiligen Komponente wird umgekehrt.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void act(int self) {
+        self.x = self.x + self.vx
+        self.y = self.y + self.vy
+
+        if (self.x - 20 <= 0 or self.x + 20 >= world.width) {
+        self.vx = -self.vx
+        if (self.y - 20 <= 0 or self.y + 20 >= world.height) {
+        self.vy = -self.vy
+
+        world.run()
+        }
+        }
+
+        public static void main(String[] args) {
+            // import Java OOP
+
+            // world = Java OOP.World(460, 300)
+            world.add_background((230, 238, 248))
+
+            // ball = Java OOP.Circle((100, 80), 20)
+            ball.color = (60, 120, 220)
+            ball.vx = 3
+            ball.vy = 2
+
+            // @ball.register
+    `
+- type: text
+  text: |-
+    `Links- und Rechtsrand kehren `vx` um, oben und unten kehren `vy` um. Der Ball
+    prallt dadurch korrekt ab.
+
+    ### Mit API: bounce_from_border()
+
+    `bounce_from_border(borders)` berechnet die neue Richtung automatisch aus den
+    berührten Rändern. Voraussetzung ist, dass der Actor mit `direction` und
+    `move()` bewegt wird.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void act(int self) {
+        self.move()
+        borders = self.detect_borders();
+        if (borders) {
+        self.bounce_from_border(borders)
+
+        world.run()
+        }
+        }
+
+        public static void main(String[] args) {
+            // import Java OOP
+
+            // world = Java OOP.World(460, 300)
+            world.add_background((230, 238, 248))
+
+            // ball = Java OOP.Circle((100, 80), 20)
+            ball.color = (60, 120, 220)
+            ball.direction = 45
+            ball.speed = 3
+
+            // @ball.register
+    `
+- type: text
+  text: |-
+    `!!! note Wichtige Reihenfolge
+    `bounce_from_border()` erwartet die Liste aus `detect_borders()`. Der Aufruf
+    ohne vorherige Randerkennung hat keinen Effekt. Zuerst `detect_borders()`,
+    dann `bounce_from_border(borders)`.
+    !!!
+
+    ## Der Ereignis-Ansatz: on_detecting_borders
+
+    Statt in jedem Frame aktiv zu prüfen, kannst du den Rand auch als Ereignis
+    behandeln. Java OOP ruft `on_detecting_borders` automatisch auf, sobald
+    der Actor einen Rand berührt.`
+- type: code
+  code: |-
+    `public class Main {
+        public static void act(int self) {
+        self.move()
+
+        // @ball.register
+        public static void on_detecting_borders(int self, int borders) {
+        self.bounce_from_border(borders)
+
+        world.run()
+        }
+        }
+
+        public static void main(String[] args) {
+            // import Java OOP
+
+            // world = Java OOP.World(460, 300)
+            world.add_background((230, 238, 248))
+
+            // ball = Java OOP.Circle((100, 80), 20)
+            ball.color = (60, 120, 220)
+            ball.direction = 45
+            ball.speed = 3
+
+            // @ball.register
+    `
+- type: text
+  text: |-
+    `Der `act`-Handler bewegt den Ball, `on_detecting_borders` reagiert automatisch
+    auf den Kontakt. Die Logik ist so auf zwei klare Aufgaben aufgeteilt.
+
+    ## Zusammenfassung`
+- type: code
+  code: |-
+    `public class Main {
+        public static void on_detecting_borders(int self, int borders) {
+        self.bounce_from_border(borders)
+        }
+
+        public static void main(String[] args) {
+            // Rand erkennen
+            borders = ball.detect_borders()        # gibt Liste zurück: ["left"], ["top", "right"], ...;
+
+            // Einzelne Ränder prüfen
+            ball.detect_left_border()              # True/False
+            ball.detect_right_border()             # True/False
+
+            // Abprallen
+            ball.bounce_from_border(borders)       # Richtung automatisch spiegeln
+
+            // Ereignis-basiert
+            @ball.register
+    }
+    `
+  options:
+    showEditor: false
+- type: text
+  text: |-
+    `| Ansatz | Vorteil | Nachteil |
+    |---|---|---|
+    | Manuell (vx/vy) | Vollständige Kontrolle | Mehr Code, Radius manuell beachten |
+    | detect_borders() | Kein manuelles Rechnen | Erfordert direction/move-Bewegungsmodell |
+    | on_detecting_borders | Saubere Trennung | Weniger direkter Einblick in den Ablauf |`

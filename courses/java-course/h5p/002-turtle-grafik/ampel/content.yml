@@ -1,0 +1,35 @@
+contentType: text_only
+contents:
+- type: text
+  text: Probiere selbst. Zeichne eine Verkehrsampel
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            // turtle.left(90)
+            // turtle.pensize(60)
+            // // turtle.forward(120) → in Java: Ausgabe/Zeichnung
+            // turtle.color(1,0,0)
+            // turtle.dot(40)
+
+            // turtle.penup()
+            // turtle.back(50)
+            // turtle.pendown()
+            // turtle.color(1,1,0)
+            // turtle.dot(40)
+        }
+    }
+    `
+- type: text
+  text: 'Verwende folgende Anweisungen:'
+- type: code
+  code: |-
+    `public class Main {
+        public static void main(String[] args) {
+            // turtle.dot(n) # Zeichnet einen Punkt mit Durchmesser 20
+            // turtle.pendown() # Hebt den Stift an. Du kannst die turtle nun bewegen ohne zu zeichnen
+            // turtle.penup() # Nun zeichnet die turtle wieder
+            // turtle.back(n) # Bewegt die Programm um n Schritte rückwärts
+        }
+    }
+    `

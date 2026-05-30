@@ -30,11 +30,12 @@ CUSTOM_H5P_LIBRARY_SHORT_NAMES = {
     "H5P.MathDisplay": "h5p-math-display",
 }
 PYTHON_QUESTION_MACHINE_NAME = "H5P.PythonQuestion"
+JAVA_QUESTION_MACHINE_NAME = "H5P.JavaQuestion"
 PLACEHOLDER_TEMPLATE = "[[[PYTHON_QUESTION:{identifier}]]]"
 SYNC_METADATA_FILE = ".course-sync.json"
 H5P_SIDECAR_DIRNAME = "h5p-imports"
 
-TAG_RE = re.compile(r"<PythonQuestion(?P<attrs>.*?)\/>", re.DOTALL)
+TAG_RE = re.compile(r"<(?P<tag>(?:Python|Java|SQL|Automata)Question)(?P<attrs>.*?)\/>", re.DOTALL)
 FENCE_RE = re.compile(r"```(?P<spec>[^\n`]*)\n(?P<body>.*?)\n```", re.DOTALL)
 HTML_TAG_RE = re.compile(r"<[^>]+>")
 WHITESPACE_RE = re.compile(r"\s+")
