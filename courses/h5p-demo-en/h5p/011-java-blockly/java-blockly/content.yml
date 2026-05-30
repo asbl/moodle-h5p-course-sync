@@ -1,0 +1,29 @@
+contentType: ide_only
+editorSettings:
+  mainClassName: Main
+  instructions: |-
+    `Use the Blockly editor to write a Java program
+    that calculates and prints the sum of the numbers from 1 to 10.`
+  startingCode: |-
+    `public class Main {
+        public static void main(String[] args) {
+            int sum = 0;
+            // Add the loop
+            System.out.println(sum);
+        }
+    }`
+  editorMode: blocks
+  options:
+    editorMode: blocks
+gradingSettings:
+  gradingMethod: bySolution
+  solution: |-
+    `public class Main {
+        public static void main(String[] args) {
+            int sum = 0;
+            for (int i = 1; i <= 10; i++) {
+                sum += i;
+            }
+            System.out.println(sum);
+        }
+    }`

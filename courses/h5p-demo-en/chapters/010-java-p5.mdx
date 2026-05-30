@@ -1,0 +1,26 @@
+## JavaQuestion with p5
+<JavaQuestion
+  identifier="java-p5"
+  title="Java p5 graphics: city skyline"
+  instructions="The starter code already shows a night sky with a moon. Add buildings and windows to create a city skyline."
+/>
+
+```java question:java-p5 starter
+public class Main {
+    public static void main(String[] args) {
+        H5P5.createCanvas(400, 300);
+
+        // Night sky
+        H5P5.background(15, 15, 40);
+
+        // Moon
+        H5P5.fill(255, 250, 200);
+        H5P5.noStroke();
+        H5P5.circle(340, 50, 60);
+
+        // Add buildings ...
+
+        H5P5.noLoop();
+    }
+}
+```

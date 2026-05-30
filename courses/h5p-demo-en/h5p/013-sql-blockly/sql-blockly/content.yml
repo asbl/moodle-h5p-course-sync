@@ -1,0 +1,22 @@
+contentType: ide_only
+databaseSettings:
+  select_db: from_defaults
+  selectDatabase: world23
+editorSettings:
+  instructions: |-
+    `Use the Blockly editor to build an SQL query:
+    Show all countries with a population greater than 100 million.
+    Display the name and population.`
+  startingCode: |-
+    `SELECT name, population
+    FROM world
+    WHERE population > 0`
+  editorMode: blocks
+  options:
+    editorMode: blocks
+gradingSettings:
+  gradingMethod: bySolution
+  solution: |-
+    `SELECT name, population
+    FROM world
+    WHERE population > 100000000`

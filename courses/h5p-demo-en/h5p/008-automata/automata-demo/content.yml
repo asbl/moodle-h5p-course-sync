@@ -1,0 +1,19 @@
+contentType: ide_only
+editorSettings:
+  instructions: |-
+    `Build a DFA over the alphabet {a, b} that accepts exactly the words
+    containing an **even number** of **a** characters.
+
+    Examples:
+    * ε (empty word) -> accepted (0 a's = even)
+    * b -> accepted (0 a's)
+    * a -> rejected (1 a)
+    * aa -> accepted (2 a's)
+    * aba -> accepted (2 a's)
+    * ab -> rejected (1 a)`
+  automatonType: dfa
+  startingCode: |-
+    `{"type":"dfa","alphabet":["a","b"],"states":[{"id":"q0","label":"q0","initial":true,"accepting":false,"x":120,"y":130}],"transitions":[]}`
+gradingSettings:
+  gradingMethod: bySolution
+  solutionAutomaton: '{"type":"dfa","alphabet":["a","b"],"states":[{"id":"q0","label":"q0","initial":true,"accepting":true,"x":120,"y":130},{"id":"q1","label":"q1","initial":false,"accepting":false,"x":320,"y":130}],"transitions":[{"id":"t0","from":"q0","to":"q1","symbols":["a"]},{"id":"t1","from":"q1","to":"q0","symbols":["a"]},{"id":"t2","from":"q0","to":"q0","symbols":["b"]},{"id":"t3","from":"q1","to":"q1","symbols":["b"]}]}'

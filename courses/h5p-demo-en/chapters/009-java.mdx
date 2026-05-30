@@ -1,0 +1,31 @@
+## Java-Question
+<JavaQuestion
+  identifier="java-demo"
+  title="Java: Collatz sequence"
+  instructions="This example shows Java in the H5P environment: the Collatz sequence for one starting number."
+/>
+
+```java question:java-demo starter
+public class Main {
+    public static void main(String[] args) {
+        int n = 27;
+        int schritte = 0;
+
+        System.out.print("Collatz sequence for " + n + ": ");
+        System.out.print(n);
+
+        while (n != 1) {
+            if (n % 2 == 0) {
+                n = n / 2;
+            } else {
+                n = 3 * n + 1;
+            }
+            System.out.print(" → " + n);
+            schritte++;
+        }
+
+        System.out.println();
+        System.out.println("Steps: " + schritte);
+    }
+}
+```

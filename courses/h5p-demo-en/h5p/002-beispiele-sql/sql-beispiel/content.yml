@@ -1,0 +1,38 @@
+contentType: text_and_ide
+databaseSettings:
+  select_db: from_defaults
+  selectDatabase: world23
+contents:
+- type: text
+  showEditor: false
+  text: |-
+    `The code returns all countries that start with any letter and have n as the second letter.
+
+    `
+- type: code
+  showEditor: false
+  code: |-
+    `SELECT name FROM world
+     WHERE name LIKE '_n%'
+    `
+editorSettings:
+  startingCode: |-
+    `SELECT name FROM world
+     WHERE name LIKE '_n%'
+    `
+  instructions: |-
+    `Change the query so that all countries with **t** as the
+    second letter are returned.
+    `
+  editorMode: code
+gradingSettings:
+  gradingMethod: bySolution
+  solution: "SELECT name FROM world\n WHERE name LIKE &#039;_t%&#039;\n"
+advancedOptions:
+  blocklyCdnUrl: ''
+  codeMirrorCdnUrl: ''
+  markdownCdnUrl: ''
+  fontAwesomeCdnUrl: ''
+  sweetAlertCdnUrl: ''
+  jsZipCdnUrl: ''
+  sqlJsUrl: ''

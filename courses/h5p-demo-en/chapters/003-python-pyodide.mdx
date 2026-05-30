@@ -1,0 +1,19 @@
+## Python-Question with Pyodide (data example)
+<PythonQuestion
+  identifier="python-pyodide"
+  title="Pyodide: NumPy statistics"
+  instructions="This example shows Python with Pyodide and NumPy: scientific computing directly in the browser."
+  runner="pyodide"
+  packages="numpy"
+/>
+
+```python question:python-pyodide starter
+import numpy as np
+
+measurements = np.array([12.5, 14.2, 11.8, 15.0, 13.7, 12.1, 14.8, 11.5, 13.9, 14.4])
+
+print(f"Mean:       {np.mean(measurements):.2f}")
+print(f"Median:     {np.median(measurements):.2f}")
+print(f"Std. dev.:  {np.std(measurements):.2f}")
+print(f"Min/max:    {measurements.min():.1f} / {measurements.max():.1f}")
+```

@@ -1,0 +1,49 @@
+contentType: ide_only
+advancedOptions:
+  showConsole: true
+  enableSaveLoadButtons: true
+  externalLibraryUrls: ''
+editorSettings:
+  mainClassName: Main
+  startingCode: |-
+    `public class Main {
+        public static void main(String[] args) {
+            for (int i = 1; i <= 20; i++) {
+                // Add the FizzBuzz logic
+                System.out.println(i);
+            }
+        }
+    }`
+  preCode: |-
+    ``
+  postCode: |-
+    ``
+  stdin: ''
+  instructions: |-
+    `Print all numbers from 1 to 20: 'Fizz' if divisible by 3, 'Buzz' if divisible by 5, 'FizzBuzz' if divisible by both, otherwise the number itself.`
+gradingSettings:
+  gradingMethod: bySolution
+  expectedOutput: "public class Main {\n    public static void main(String[] args)
+    {\n        for (int i = 1; i <= 20; i++) {\n            if (i % 15 == 0) {\n \
+    \               System.out.println(\"FizzBuzz\");\n            } else if (i %
+    3 == 0) {\n                System.out.println(\"Fizz\");\n            } else if
+    (i % 5 == 0) {\n                System.out.println(\"Buzz\");\n            } else
+    {\n                System.out.println(i);\n            }\n        }\n    }\n}"
+  trimOutput: true
+  solution: "public class Main {\n    public static void main(String[] args) {\n \
+    \       for (int i = 1; i <= 20; i++) {\n            if (i % 15 == 0) {\n    \
+    \            System.out.println(\"FizzBuzz\");\n            } else if (i % 3 ==
+    0) {\n                System.out.println(\"Fizz\");\n            } else if (i
+    % 5 == 0) {\n                System.out.println(\"Buzz\");\n            } else
+    {\n                System.out.println(i);\n            }\n        }\n    }\n}"
+l10n:
+  checkAnswer: Check
+  run: Run
+  stop: Stop
+  failedText: Not correct yet
+  successText: Correct!
+  testCase: Test case
+  hidden: '[hidden]'
+contents:
+- type: text
+  showEditor: false

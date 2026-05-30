@@ -1,0 +1,34 @@
+## PythonQuestion with tests
+<PythonQuestion
+  identifier="python-tests"
+  title="Test cases: temperature conversion"
+  instructions="Write a function `celsius_to_fahrenheit(c)` that converts Celsius to Fahrenheit. Formula: F = C x 9/5 + 32"
+  gradingMethod="ioTestCases"
+/>
+
+```python question:python-tests pre
+c = float(input())
+```
+
+```python question:python-tests starter
+def celsius_to_fahrenheit(c):
+    pass
+
+print(celsius_to_fahrenheit(c))
+```
+
+```json question:python-tests testcase
+{"hidden": false, "inputs": ["0"], "outputs": ["32.0"]}
+```
+
+```json question:python-tests testcase
+{"hidden": false, "inputs": ["100"], "outputs": ["212.0"]}
+```
+
+```json question:python-tests testcase
+{"hidden": true, "inputs": ["-40"], "outputs": ["-40.0"]}
+```
+
+```json question:python-tests testcase
+{"hidden": true, "inputs": ["25"], "outputs": ["77.0"]}
+```

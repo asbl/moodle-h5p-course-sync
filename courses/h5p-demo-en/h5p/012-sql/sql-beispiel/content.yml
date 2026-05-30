@@ -1,0 +1,14 @@
+contentType: ide_only
+databaseSettings:
+  select_db: from_defaults
+  selectDatabase: world23
+editorSettings:
+  instructions: |-
+    `This example shows SQL queries against the world23 database
+    (countries, cities, languages).`
+  startingCode: |-
+    `SELECT name, population, continent
+    FROM world
+    WHERE population > 100000000
+    ORDER BY population DESC`
+  editorMode: code

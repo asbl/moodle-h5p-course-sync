@@ -11,6 +11,7 @@ from unittest.mock import patch
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
 DEMO_COURSE_DIR = ROOT_DIR / "courses" / "h5p-demo"
+EN_DEMO_COURSE_DIR = ROOT_DIR / "courses" / "h5p-demo-en"
 
 
 def load_tasks_module():
@@ -53,6 +54,36 @@ class H5PDemoWorkflowTests(unittest.TestCase):
             expected_src = f'./chapters/{chapter_path.name}'
             self.assertIn(expected_src, index_source)
 
+    def test_english_h5p_demo_stays_structurally_synced_with_german_demo(self) -> None:
+        self.assertTrue(EN_DEMO_COURSE_DIR.exists(), "h5p-demo-en course is missing")
+
+        german_chapters = sorted(path.name for path in (DEMO_COURSE_DIR / "chapters").glob("*.mdx"))
+        english_chapters = sorted(path.name for path in (EN_DEMO_COURSE_DIR / "chapters").glob("*.mdx"))
+        self.assertEqual(english_chapters, german_chapters)
+
+        german_h5p_json = {
+            path.relative_to(DEMO_COURSE_DIR / "h5p"): json.loads(path.read_text(encoding="utf-8")).get("mainLibrary")
+            for path in sorted((DEMO_COURSE_DIR / "h5p").glob("**/h5p.json"))
+        }
+        english_h5p_json = {
+            path.relative_to(EN_DEMO_COURSE_DIR / "h5p"): json.loads(path.read_text(encoding="utf-8")).get("mainLibrary")
+            for path in sorted((EN_DEMO_COURSE_DIR / "h5p").glob("**/h5p.json"))
+        }
+        self.assertEqual(english_h5p_json, german_h5p_json)
+
+    def test_english_h5p_demo_uses_english_language_metadata(self) -> None:
+        h5p_json_paths = sorted(EN_DEMO_COURSE_DIR.glob("h5p/**/h5p.json"))
+        self.assertGreaterEqual(len(h5p_json_paths), 10)
+
+        for path in h5p_json_paths:
+            data = json.loads(path.read_text(encoding="utf-8"))
+            self.assertNotEqual(data.get("language"), "de", path)
+            self.assertNotEqual(data.get("defaultLanguage"), "de", path)
+            if "language" in data:
+                self.assertEqual(data["language"], "en", path)
+            if "defaultLanguage" in data:
+                self.assertEqual(data["defaultLanguage"], "en", path)
+
     def test_release_questions_workflow_orders_release_update_tests_and_demo_build(self) -> None:
         tasks = load_tasks_module()
 
@@ -72,6 +103,7 @@ class H5PDemoWorkflowTests(unittest.TestCase):
                     None,
                     h5p_dev_dir=str(h5p_dev_dir),
                     course="h5p-demo",
+                    english_course="h5p-demo-en",
                     tag="v6.90.0",
                     dry_run=True,
                 )
@@ -84,6 +116,7 @@ class H5PDemoWorkflowTests(unittest.TestCase):
                 ((tasks.PYTHON, "-m", "scripts.main", "update-h5p-libraries", "--tag", "v6.90.0"), ROOT_DIR),
                 ((tasks.PYTHON, "-m", "unittest", "discover", "-s", "tests", "-p", "test_*.py"), ROOT_DIR),
                 ((tasks.PYTHON, "-m", "scripts.main", "build", "h5p-demo"), ROOT_DIR),
+                ((tasks.PYTHON, "-m", "scripts.main", "build", "h5p-demo-en"), ROOT_DIR),
             ],
         )
 

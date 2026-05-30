@@ -1,0 +1,39 @@
+<Instructions>
+Use NumPy to calculate the mean, median and standard deviation of the given measurements.
+</Instructions>
+
+```python editor:startingCode
+import numpy as np
+
+measurements = np.array([12.5, 14.2, 11.8, 15.0, 13.7, 12.1, 14.8, 11.5, 13.9, 14.4])
+
+mean = 0    # Complete
+median = 0  # Complete
+std = 0     # Complete
+
+print(f"Mean:   {mean:.2f}")
+print(f"Median:     {median:.2f}")
+print(f"Std. dev.:  {std:.2f}")
+```
+
+```python grading:targetCode
+import numpy as np
+
+measurements = np.array([12.5, 14.2, 11.8, 15.0, 13.7, 12.1, 14.8, 11.5, 13.9, 14.4])
+
+mean = np.mean(measurements)
+median = np.median(measurements)
+std = np.std(measurements)
+
+print(f"Mean:   {mean:.2f}")
+print(f"Median:     {median:.2f}")
+print(f"Std. dev.:  {std:.2f}")
+```
+
+```yaml grading
+gradingMethod: bySolution
+dueDateGroup:
+  enableDueDate: false
+  duedate: 01.01.1970
+testCases: []
+```

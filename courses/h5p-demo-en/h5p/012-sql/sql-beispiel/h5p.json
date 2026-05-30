@@ -1,0 +1,29 @@
+{
+  "title": "sql-beispiel",
+  "language": "en",
+  "defaultLanguage": "en",
+  "mainLibrary": "H5P.SQLQuestion",
+  "embedTypes": [
+    "div"
+  ],
+  "license": "U",
+  "preloadedDependencies": [
+    {
+      "machineName": "H5P.SQLQuestion",
+      "majorVersion": 6,
+      "minorVersion": 90
+    },
+    {
+      "machineName": "H5P.CodeQuestion",
+      "majorVersion": 6,
+      "minorVersion": 90
+    },
+    {
+      "machineName": "H5P.LibCodeTools",
+      "majorVersion": 6,
+      "minorVersion": 90
+    }
+  ],
+  "majorVersion": 6,
+  "minorVersion": 90
+}

@@ -1,6 +1,6 @@
 # Questions-Release-Workflow
 
-Dieser Workflow baut die H5P-Question-Libraries in `../h5p-dev`, veroeffentlicht die Releases, zieht die neuen Libraries nach `course-sync` und prueft den lokalen `h5p-demo`-Kurs.
+Dieser Workflow baut die H5P-Question-Libraries in `../h5p-dev`, veroeffentlicht die Releases, zieht die neuen Libraries nach `course-sync` und prueft die lokalen Demo-Kurse `h5p-demo` und `h5p-demo-en`.
 
 ## Standardlauf
 
@@ -16,6 +16,7 @@ Der Task fuehrt der Reihe nach aus:
 3. `python -m scripts.main update-h5p-libraries` in `course-sync`
 4. `python -m unittest discover -s tests -p 'test_*.py'`
 5. `python -m scripts.main build h5p-demo`
+6. `python -m scripts.main build h5p-demo-en`
 
 ## Wichtige Optionen
 
@@ -24,13 +25,26 @@ Der Task fuehrt der Reihe nach aus:
 .venv/bin/invoke release-questions-workflow --tag v6.90.0
 .venv/bin/invoke release-questions-workflow --release-target pythonquestion
 .venv/bin/invoke release-questions-workflow --skip-release
-.venv/bin/invoke release-questions-workflow --h5p-dev-dir ../h5p-dev --course h5p-demo
+.venv/bin/invoke release-questions-workflow --h5p-dev-dir ../h5p-dev --course h5p-demo --english-course h5p-demo-en
 ```
 
 - `--dry-run` reicht an `h5p-dev` weiter und prueft den Release-Aufruf ohne GitHub-Release zu schreiben.
 - `--tag` zieht in `course-sync` ein bestimmtes GitHub-Release der Libraries statt des neuesten Defaults.
 - `--release-target` begrenzt den Release in `h5p-dev`; Standard ist `all`.
 - `--skip-release` baut Pakete und aktualisiert/prueft `course-sync`, ohne GitHub-Releases anzulegen.
+- `--course` und `--english-course` steuern, welche Demo-Kurse am Ende gebaut werden. Standard ist `h5p-demo` plus `h5p-demo-en`.
+
+## Demo-Kurse synchron halten
+
+`h5p-demo-en` ist die englische Fassung von `h5p-demo`. Wenn im deutschen Demo-Kurs ein Kapitel oder H5P-Beispiel hinzugefuegt, entfernt oder verschoben wird, muss dieselbe Struktur im englischen Kurs angepasst werden:
+
+```bash
+.venv/bin/python -m unittest tests.test_h5p_demo_workflow
+.venv/bin/python -m scripts.main build h5p-demo
+.venv/bin/python -m scripts.main build h5p-demo-en
+```
+
+Die Tests vergleichen Kapiteldateien und H5P-Beispiele beider Kurse und pruefen, dass die englischen H5P-Metadaten `language`/`defaultLanguage` auf `en` setzen.
 
 ## Nachbereitung
 

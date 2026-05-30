@@ -189,12 +189,13 @@ def smoke(ctx, course: str = "python-2026") -> None:
 
 @task(
     name="release-questions-workflow",
-    optional=["h5p_dev_dir", "course", "tag", "release_target"],
+    optional=["h5p_dev_dir", "course", "english_course", "tag", "release_target"],
 )
 def release_questions_workflow(
     ctx,
     h5p_dev_dir: str = "../h5p-dev",
     course: str = "h5p-demo",
+    english_course: str = "h5p-demo-en",
     tag: str = "",
     release_target: str = "all",
     dry_run: bool = False,
@@ -226,4 +227,6 @@ def release_questions_workflow(
     subprocess.run(update_args, check=True, cwd=ROOT_DIR)
 
     subprocess.run([PYTHON, "-m", "unittest", "discover", "-s", "tests", "-p", "test_*.py"], check=True, cwd=ROOT_DIR)
-    subprocess.run([PYTHON, "-m", "scripts.main", "build", course], check=True, cwd=ROOT_DIR)
+    for demo_course in dict.fromkeys([course, english_course]):
+        if demo_course:
+            subprocess.run([PYTHON, "-m", "scripts.main", "build", demo_course], check=True, cwd=ROOT_DIR)

@@ -1,0 +1,5 @@
+contentType: ide_only
+pythonRunner: pyodide
+pyodideOptions:
+  packages:
+  - numpy

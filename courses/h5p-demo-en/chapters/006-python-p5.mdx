@@ -1,0 +1,25 @@
+## PythonQuestion with p5
+<PythonQuestion
+  identifier="python-p5"
+  title="p5: complete the landscape"
+  instructions="The starter code already draws the sky and a sun. Add hills, a house, or anything else you like."
+/>
+
+```python question:python-p5 starter
+import p5
+
+def setup():
+    p5.createCanvas(400, 300)
+
+    # Sky
+    p5.background(100, 160, 220)
+
+    # Sun
+    p5.fill(255, 230, 0)
+    p5.noStroke()
+    p5.circle(330, 60, 80)
+
+    # Continue here ...
+
+p5.run()
+```

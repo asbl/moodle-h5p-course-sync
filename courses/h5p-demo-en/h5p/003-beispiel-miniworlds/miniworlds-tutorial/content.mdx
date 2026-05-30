@@ -1,0 +1,147 @@
+<Instructions>
+This miniworlds tutorial introduces the basic pieces of a small 2D game: a world, actors, movement, input, collisions and a score counter.
+</Instructions>
+
+## Create a world
+
+`miniworlds` programs start by creating a world. The world defines the visible area and the background.
+
+```python editor:startingCode
+import miniworlds
+
+world = miniworlds.World(400, 300)
+world.add_background((100, 180, 100))
+
+world.run()
+```
+
+```yaml editor
+options:
+  showConsole: true
+```
+
+## Add actors
+
+Actors are objects inside the world. They can move, react to keyboard or mouse input and detect other actors.
+
+```python editor:startingCode
+import miniworlds
+
+world = miniworlds.World(400, 300)
+world.add_background((100, 180, 100))
+
+player = miniworlds.Actor((200, 150))
+player.add_costume((40, 80, 220))
+
+target = miniworlds.Actor((320, 140))
+target.add_costume((230, 80, 60))
+
+world.run()
+```
+
+```yaml editor
+options:
+  showConsole: true
+```
+
+## Move with the keyboard
+
+The `on_key_pressed` event receives the keys that are currently pressed. Complete the missing checks so the player can move in all four directions.
+
+```python editor:startingCode
+import miniworlds
+
+world = miniworlds.World(400, 300)
+world.add_background((100, 180, 100))
+
+player = miniworlds.Actor((200, 150))
+player.add_costume((40, 80, 220))
+
+@player.register
+def on_key_pressed(self, keys):
+    if "UP" in keys:
+        self.y -= 4
+    if "LEFT" in keys:
+        self.x -= 4
+    # Add DOWN and RIGHT here.
+
+world.run()
+```
+
+```python grading:targetCode
+import miniworlds
+
+world = miniworlds.World(400, 300)
+world.add_background((100, 180, 100))
+
+player = miniworlds.Actor((200, 150))
+player.add_costume((40, 80, 220))
+
+@player.register
+def on_key_pressed(self, keys):
+    if "UP" in keys:
+        self.y -= 4
+    if "DOWN" in keys:
+        self.y += 4
+    if "LEFT" in keys:
+        self.x -= 4
+    if "RIGHT" in keys:
+        self.x += 4
+
+world.run()
+```
+
+```yaml grading
+gradingMethod: bySolution
+dueDateGroup:
+  enableDueDate: false
+  duedate: 01.01.1970
+testCases: []
+```
+
+## Collect a target
+
+In this example, the player collects the target by touching it. Each collision increases the score and moves the target to a new random position.
+
+```python editor:startingCode
+import random
+import miniworlds
+
+world = miniworlds.World(400, 300)
+world.add_background((100, 180, 100))
+
+score = 0
+
+player = miniworlds.Actor((80, 150))
+player.add_costume((40, 80, 220))
+
+target = miniworlds.Actor((300, 150))
+target.add_costume((230, 80, 60))
+
+@player.register
+def on_key_pressed(self, keys):
+    if "UP" in keys:
+        self.y -= 4
+    if "DOWN" in keys:
+        self.y += 4
+    if "LEFT" in keys:
+        self.x -= 4
+    if "RIGHT" in keys:
+        self.x += 4
+
+@player.register
+def on_detecting(self, other):
+    global score
+    if other == target:
+        score += 1
+        print("Score:", score)
+        target.x = random.randint(30, 370)
+        target.y = random.randint(30, 270)
+
+world.run()
+```
+
+```yaml editor
+options:
+  showConsole: true
+```
