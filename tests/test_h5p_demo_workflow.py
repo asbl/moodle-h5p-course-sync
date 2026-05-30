@@ -84,6 +84,36 @@ class H5PDemoWorkflowTests(unittest.TestCase):
             if "defaultLanguage" in data:
                 self.assertEqual(data["defaultLanguage"], "en", path)
 
+    def test_sync_h5p_demo_courses_moodle_builds_and_uploads_all_chapters(self) -> None:
+        tasks = load_tasks_module()
+        german_chapters = tasks._course_chapters("h5p-demo")
+        english_chapters = tasks._course_chapters("h5p-demo-en")
+        calls: list[tuple[tuple[str, ...], Path]] = []
+
+        def fake_run(args, *, check, cwd):
+            self.assertTrue(check)
+            calls.append((tuple(str(item) for item in args), Path(cwd)))
+            return subprocess.CompletedProcess(args=args, returncode=0)
+
+        with patch.object(tasks.subprocess, "run", side_effect=fake_run):
+            tasks.sync_h5p_demo_courses_moodle.body(None, headless=True)
+
+        expected_calls = [
+            ((tasks.PYTHON, "-m", "unittest", "discover", "-s", "tests", "-p", "test_*.py"), ROOT_DIR),
+            ((tasks.PYTHON, "-m", "scripts.main", "build", "h5p-demo"), ROOT_DIR),
+            ((tasks.PYTHON, "-m", "scripts.main", "build", "h5p-demo-en"), ROOT_DIR),
+        ]
+        expected_calls.extend(
+            ((tasks.PYTHON, "-m", "scripts.main", "upload-chapter-moodle", "h5p-demo", chapter, "--headless"), ROOT_DIR)
+            for chapter in german_chapters
+        )
+        expected_calls.extend(
+            ((tasks.PYTHON, "-m", "scripts.main", "upload-chapter-moodle", "h5p-demo-en", chapter, "--headless"), ROOT_DIR)
+            for chapter in english_chapters
+        )
+
+        self.assertEqual(calls, expected_calls)
+
     def test_release_questions_workflow_orders_release_update_tests_and_demo_build(self) -> None:
         tasks = load_tasks_module()
 

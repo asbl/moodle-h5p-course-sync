@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import json
+import re
 import shlex
 import shutil
 import subprocess
@@ -38,6 +40,43 @@ def _remove_path(path: Path) -> None:
         shutil.rmtree(path)
     elif path.exists():
         path.unlink()
+
+
+def _course_chapters(course: str) -> list[str]:
+    index_path = ROOT_DIR / "courses" / course / "index.mdx"
+    if not index_path.exists():
+        raise FileNotFoundError(f"Course index not found: {index_path}")
+
+    source = index_path.read_text(encoding="utf-8")
+    chapters = [
+        Path(match).stem
+        for match in re.findall(r"<Chapter\b[^>]*\bsrc=[\"']\.\/chapters\/([^\"']+\.mdx)[\"']", source)
+    ]
+    if not chapters:
+        raise RuntimeError(f"No chapters found in {index_path}")
+    return chapters
+
+
+def _ensure_course_sync_metadata(course: str, remote_course_id: int, moodle_base_url: str) -> None:
+    metadata_path = ROOT_DIR / "courses" / course / ".course-sync.json"
+    if metadata_path.exists():
+        return
+
+    metadata_path.write_text(
+        json.dumps(
+            {
+                "version": 1,
+                "course": course,
+                "remoteCourseId": remote_course_id,
+                "moodleBaseUrl": moodle_base_url.rstrip("/"),
+                "entries": [],
+            },
+            indent=2,
+            ensure_ascii=False,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
 
 
 @task
@@ -112,6 +151,39 @@ def upload_chapter_moodle(
     if timeout != 30000:
         args.extend(["--timeout", str(timeout)])
     _run_python(ctx, *args, pty=not headless)
+
+
+@task(
+    name="sync-h5p-demo-courses-moodle",
+    optional=["german_course", "english_course", "german_course_url", "english_course_url", "timeout"],
+)
+def sync_h5p_demo_courses_moodle(
+    ctx,
+    german_course: str = "h5p-demo",
+    english_course: str = "h5p-demo-en",
+    german_course_url: str = "",
+    english_course_url: str = "",
+    headless: bool = False,
+    timeout: int = 30000,
+) -> None:
+    """Build and upload both H5P demo courses to their configured Moodle courses."""
+    _ensure_course_sync_metadata(german_course, 2, "https://www.opencoding.de")
+    _ensure_course_sync_metadata(english_course, 9, "https://www.opencoding.de")
+
+    _run_python(ctx, "-m", "unittest", "discover", "-s", "tests", "-p", "test_*.py")
+    for course in [german_course, english_course]:
+        _run_python(ctx, str(COURSE_SYNC), "build", course)
+
+    for course, course_url in [(german_course, german_course_url), (english_course, english_course_url)]:
+        for chapter in _course_chapters(course):
+            args = [str(COURSE_SYNC), "upload-chapter-moodle", course, chapter]
+            if course_url:
+                args.extend(["--course-url", course_url])
+            if headless:
+                args.append("--headless")
+            if timeout != 30000:
+                args.extend(["--timeout", str(timeout)])
+            _run_python(ctx, *args, pty=not headless)
 
 
 @task(optional=["base_url", "token"])

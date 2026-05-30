@@ -46,6 +46,21 @@ Der Task fuehrt der Reihe nach aus:
 
 Die Tests vergleichen Kapiteldateien und H5P-Beispiele beider Kurse und pruefen, dass die englischen H5P-Metadaten `language`/`defaultLanguage` auf `en` setzen.
 
+## Demo-Kurse nach Moodle synchronisieren
+
+Der deutsche Demo-Kurs ist mit `https://www.opencoding.de/course/view.php?id=2` verknuepft, der englische mit `https://www.opencoding.de/course/view.php?id=9`. Beide Kurse werden nicht per API angelegt; der Task erwartet vorhandene Moodle-Kurse und synchronisiert alle Kapitel als H5P-Aktivitaeten:
+
+```bash
+.venv/bin/invoke sync-h5p-demo-courses-moodle
+```
+
+Optional koennen Kurs-URLs ueberschrieben oder ein Headless-Lauf mit vorhandenem Storage-State genutzt werden:
+
+```bash
+.venv/bin/invoke sync-h5p-demo-courses-moodle --english-course-url https://www.opencoding.de/course/view.php?id=9
+.venv/bin/invoke sync-h5p-demo-courses-moodle --headless
+```
+
 ## Nachbereitung
 
 Pruefe danach die Git-Staende:
