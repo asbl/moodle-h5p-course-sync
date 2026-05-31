@@ -106,6 +106,18 @@ class H5PDemoWorkflowTests(unittest.TestCase):
             if "defaultLanguage" in data:
                 self.assertEqual(data["defaultLanguage"], "en", path)
 
+    def test_demo_python_tests_use_mdx_payload_instead_of_empty_inferred_sidecar(self) -> None:
+        from scripts.main import parse_course
+
+        for course_dir in (DEMO_COURSE_DIR, EN_DEMO_COURSE_DIR):
+            _source, questions, _rendered = parse_course(course_dir)
+            question = next(item for item in questions if item.identifier == "python-tests")
+
+            self.assertEqual("", question.source_package_path)
+            self.assertIsNone(question.h5p_content)
+            self.assertIn("celsius", question.starter_code.lower())
+            self.assertGreater(len(question.test_cases), 0)
+
     def test_sync_h5p_demo_courses_moodle_builds_and_uploads_all_chapters(self) -> None:
         tasks = load_tasks_module()
         german_chapters = tasks._course_chapters("h5p-demo")

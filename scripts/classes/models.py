@@ -41,6 +41,7 @@ class PythonQuestionBlock:
     h5p_metadata_path: str = ""
     h5p_content_path: str = ""
     source_package_path: str = ""
+    source_package_path_inferred: bool = False
     h5p_subdir: str = ""
     runner: str = DEFAULT_PYTHON_RUNNER
     packages: list[str] = field(default_factory=list)

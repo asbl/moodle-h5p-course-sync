@@ -162,6 +162,7 @@ class MdxCourseParser:
         h5p_metadata_path = str(attrs.get("h5pMetadataPath", attrs.get("h5p-metadata-path", ""))).strip()
         h5p_content_path = str(attrs.get("h5pContentPath", attrs.get("h5p-content-path", ""))).strip()
         source_package_path = str(attrs.get("sourcePackagePath", attrs.get("source-package-path", ""))).strip()
+        explicit_source_package_path = bool(source_package_path)
         h5p_subdir = str(attrs.get("h5pSubdir", attrs.get("h5p-subdir", h5p_subdir))).strip()
         grading_method = str(attrs.get("gradingMethod", attrs.get("grading-method", "please_choose")))
         packages = ensure_miniworlds_packages(self.split_csv(str(attrs.get("packages", ""))))
@@ -224,6 +225,7 @@ class MdxCourseParser:
             question.raw_package = raw_package
         if source_package_path:
             question.source_package_path = source_package_path
+            question.source_package_path_inferred = not explicit_source_package_path
         question.h5p_subdir = h5p_subdir
         if "runner" in attrs:
             question.runner = runner
@@ -339,6 +341,7 @@ class MdxCourseParser:
         parse_source, chapter_subdirs = self._expand_chapters(course_dir, source)
 
         questions: dict[str, PythonQuestionBlock] = {}
+        questions_with_mdx_payload: set[str] = set()
         rendered_source = parse_source
         sorted_chapter_keys = sorted(chapter_subdirs)
         _TAG_TO_LIBRARY = {
@@ -388,14 +391,19 @@ class MdxCourseParser:
 
             if role == "starter":
                 question.starter_code = body
+                questions_with_mdx_payload.add(identifier)
             elif role == "solution":
                 question.solution_code = body
+                questions_with_mdx_payload.add(identifier)
             elif role == "pre":
                 question.pre_code = body
+                questions_with_mdx_payload.add(identifier)
             elif role == "post":
                 question.post_code = body
+                questions_with_mdx_payload.add(identifier)
             elif role == "testcase":
                 question.test_cases.append(self.parse_test_case(body))
+                questions_with_mdx_payload.add(identifier)
             elif role == "h5p-metadata":
                 question.h5p_metadata = self.parse_json_object(body, description="H5P-Metadaten")
             elif role == "h5p-content":
@@ -407,10 +415,16 @@ class MdxCourseParser:
                 )
             elif role.startswith("file:"):
                 question.source_files.append(self.parse_source_file(spec_parts[2:], fence.group("body")))
+                questions_with_mdx_payload.add(identifier)
             else:
                 raise ValueError(f"Unbekannte PythonQuestion-Rolle '{role}' in {mdx_path}.")
 
         for question in questions.values():
+            if question.identifier in questions_with_mdx_payload and question.source_package_path_inferred:
+                question.h5p_metadata = None
+                question.h5p_content = None
+                question.source_package_path = ""
+                question.source_package_path_inferred = False
             self._validate_question_runner(mdx_path, question)
 
         def strip_question_fence(match: re.Match[str]) -> str:
