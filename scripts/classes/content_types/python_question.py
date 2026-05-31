@@ -404,6 +404,7 @@ class PythonQuestion(H5PContentType):
         The caller is responsible for reading the file; this method contains no
         I/O so it is straightforward to test.
         """
+        default_language = "en" if self.course_slug.endswith("-en") else "de"
         preloaded_dependencies = [
             {
                 "machineName": library_json["machineName"],
@@ -421,8 +422,8 @@ class PythonQuestion(H5PContentType):
         )
         return {
             "title": self.title,
-            "language": "de",
-            "defaultLanguage": "de",
+            "language": default_language,
+            "defaultLanguage": default_language,
             "mainLibrary": self.MACHINE_NAME,
             "embedTypes": ["div"],
             "license": "U",

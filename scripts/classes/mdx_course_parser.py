@@ -145,6 +145,7 @@ class MdxCourseParser:
         attrs: dict[str, object],
         *,
         h5p_subdir: str = "",
+        infer_source_sidecar: bool = True,
     ) -> PythonQuestionBlock:
         course_slug = course_dir.name
         identifier = str(attrs.get("identifier", "")).strip()
@@ -171,7 +172,7 @@ class MdxCourseParser:
         allow_adding_files = self.parse_bool(str(attrs.get("allowAddingFiles", "false")), default=False)
         editable_h5p_payload = attrs.get("h5p")
 
-        if not source_package_path:
+        if not source_package_path and infer_source_sidecar:
             source_package_path = self._infer_source_package_sidecar_path(
                 PythonQuestionBlock(
                     identifier=identifier,
@@ -340,6 +341,16 @@ class MdxCourseParser:
         source = mdx_path.read_text(encoding="utf-8")
         parse_source, chapter_subdirs = self._expand_chapters(course_dir, source)
 
+        scratch_payload_identifiers: set[str] = set()
+        for fence in self._fence_re.finditer(parse_source):
+            spec = fence.group("spec").strip()
+            spec_parts = spec.split()
+            if len(spec_parts) < 3 or not spec_parts[1].startswith("question:"):
+                continue
+            role = spec_parts[2]
+            if role in {"starter", "solution", "pre", "post", "testcase"} or role.startswith("file:"):
+                scratch_payload_identifiers.add(spec_parts[1].split(":", 1)[1].strip())
+
         questions: dict[str, PythonQuestionBlock] = {}
         questions_with_mdx_payload: set[str] = set()
         rendered_source = parse_source
@@ -355,10 +366,12 @@ class MdxCourseParser:
             tag_name = match.group("tag") if "tag" in self._tag_re.groupindex else ""
             if tag_name in _TAG_TO_LIBRARY and "h5pLibrary" not in attrs and "h5p-library" not in attrs:
                 attrs = {**attrs, "h5pLibrary": _TAG_TO_LIBRARY[tag_name]}
+            identifier = str(attrs.get("identifier", "")).strip()
             question = self.build_question_from_attrs(
                 course_dir,
                 attrs,
                 h5p_subdir=self._h5p_subdir_for_position(match.start(), chapter_subdirs, sorted_chapter_keys),
+                infer_source_sidecar=identifier not in scratch_payload_identifiers,
             )
             question.course_dir = course_dir
             if question.identifier in questions:

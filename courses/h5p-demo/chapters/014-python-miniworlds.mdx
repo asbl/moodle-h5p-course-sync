@@ -1,0 +1,51 @@
+## PythonQuestion mit miniworlds
+<PythonQuestion
+  identifier="python-miniworlds"
+  title="miniworlds: Sammelspiel anpassen"
+  instructions="Dieses Beispiel nutzt miniworlds mit Pyodide. Bewege den blauen Spieler mit den Pfeiltasten und ändere Farben, Startpositionen oder Geschwindigkeit."
+  runner="pyodide"
+  packages="miniworlds"
+/>
+
+```python question:python-miniworlds starter
+import miniworlds
+
+world = miniworlds.World(400, 300)
+world.add_background((80, 170, 110))
+
+player = miniworlds.Circle((80, 150), 24)
+player.color = (40, 90, 230)
+
+target = miniworlds.Circle((310, 150), 18)
+target.color = (255, 220, 60)
+
+obstacle = miniworlds.Circle((200, 150), 34)
+obstacle.color = (210, 80, 80)
+
+speed = 4
+score = 0
+
+@player.register
+def on_key_pressed(self, keys):
+    if "UP" in keys:
+        self.y = self.y - speed
+    if "DOWN" in keys:
+        self.y = self.y + speed
+    if "LEFT" in keys:
+        self.x = self.x - speed
+    if "RIGHT" in keys:
+        self.x = self.x + speed
+
+@player.register
+def act(self):
+    global score
+    if self.detect(target):
+        score = score + 1
+        print("Punkte:", score)
+        target.x = 60 + (score * 70) % 280
+        target.y = 70 + (score * 45) % 180
+    if self.detect(obstacle):
+        print("Vorsicht, Hindernis!")
+
+world.run()
+```

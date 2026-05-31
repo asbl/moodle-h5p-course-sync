@@ -1,8 +1,8 @@
 ## PythonQuestion mit p5
 <PythonQuestion
   identifier="python-p5"
-  title="p5: Landschaft ergänzen"
-  instructions="Der Starter-Code zeichnet bereits Himmel und eine Sonne. Ergänze Hügel, ein Haus und was du möchtest."
+  title="p5: Formenlandschaft verändern"
+  instructions="Der Starter-Code zeichnet eine Landschaft aus geometrischen Figuren. Ändere mindestens drei Eigenschaften: Farbe, Position, Größe oder Form."
 />
 
 ```python question:python-p5 starter
@@ -11,15 +11,34 @@ import p5
 def setup():
     p5.createCanvas(400, 300)
 
-    # Himmel
+    # Hintergrund
     p5.background(100, 160, 220)
 
-    # Sonne
+    # Sonne: Kreis
     p5.fill(255, 230, 0)
     p5.noStroke()
     p5.circle(330, 60, 80)
 
-    # Hier weitermachen ...
+    # Wiese: Rechteck
+    p5.fill(70, 160, 90)
+    p5.rect(0, 210, 400, 90)
+
+    # Haus: Rechteck und Dreieck
+    p5.fill(240, 180, 110)
+    p5.rect(120, 135, 120, 90)
+
+    p5.fill(170, 70, 60)
+    p5.triangle(105, 135, 255, 135, 180, 80)
+
+    # Tür und Fenster: weitere Rechtecke
+    p5.fill(110, 70, 45)
+    p5.rect(168, 178, 28, 47)
+
+    p5.fill(210, 240, 255)
+    p5.rect(135, 155, 25, 25)
+    p5.rect(205, 155, 25, 25)
+
+    # Aufgabe: Verändere Farben, Größen oder Positionen der Formen.
 
 p5.run()
 ```

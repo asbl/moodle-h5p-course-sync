@@ -118,6 +118,25 @@ class H5PDemoWorkflowTests(unittest.TestCase):
             self.assertIn("celsius", question.starter_code.lower())
             self.assertGreater(len(question.test_cases), 0)
 
+    def test_demo_courses_include_miniworlds_and_shape_based_p5_examples(self) -> None:
+        from scripts.main import parse_course
+
+        for course_dir in (DEMO_COURSE_DIR, EN_DEMO_COURSE_DIR):
+            _source, questions, _rendered = parse_course(course_dir)
+            questions_by_identifier = {question.identifier: question for question in questions}
+
+            miniworlds_question = questions_by_identifier["python-miniworlds"]
+            self.assertEqual("pyodide", miniworlds_question.runner)
+            self.assertIn("miniworlds", miniworlds_question.packages)
+            self.assertIn("miniworlds.World", miniworlds_question.starter_code)
+
+            p5_question = questions_by_identifier["python-p5"]
+            self.assertIn("p5.circle", p5_question.starter_code)
+            self.assertIn("p5.rect", p5_question.starter_code)
+            self.assertIn("p5.triangle", p5_question.starter_code)
+            self.assertEqual("please_choose", p5_question.grading_method)
+            self.assertEqual("", p5_question.solution_code)
+
     def test_sync_h5p_demo_courses_moodle_builds_and_uploads_all_chapters(self) -> None:
         tasks = load_tasks_module()
         german_chapters = tasks._course_chapters("h5p-demo")

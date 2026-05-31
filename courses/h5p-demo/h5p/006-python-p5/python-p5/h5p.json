@@ -1,5 +1,5 @@
 {
-  "title": "p5: Landschaft ergänzen",
+  "title": "p5: Formenlandschaft verändern",
   "language": "de",
   "defaultLanguage": "de",
   "mainLibrary": "H5P.PythonQuestion",
@@ -25,5 +25,5 @@
     }
   ],
   "majorVersion": 6,
-  "minorVersion": 88
+  "minorVersion": 90
 }

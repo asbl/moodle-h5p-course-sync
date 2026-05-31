@@ -1,8 +1,8 @@
 ## PythonQuestion with p5
 <PythonQuestion
   identifier="python-p5"
-  title="p5: complete the landscape"
-  instructions="The starter code already draws the sky and a sun. Add hills, a house, or anything else you like."
+  title="p5: modify a shape landscape"
+  instructions="The starter code draws a landscape from geometric shapes. Change at least three properties: color, position, size, or shape."
 />
 
 ```python question:python-p5 starter
@@ -11,15 +11,34 @@ import p5
 def setup():
     p5.createCanvas(400, 300)
 
-    # Sky
+    # Background
     p5.background(100, 160, 220)
 
-    # Sun
+    # Sun: circle
     p5.fill(255, 230, 0)
     p5.noStroke()
     p5.circle(330, 60, 80)
 
-    # Continue here ...
+    # Meadow: rectangle
+    p5.fill(70, 160, 90)
+    p5.rect(0, 210, 400, 90)
+
+    # House: rectangle and triangle
+    p5.fill(240, 180, 110)
+    p5.rect(120, 135, 120, 90)
+
+    p5.fill(170, 70, 60)
+    p5.triangle(105, 135, 255, 135, 180, 80)
+
+    # Door and windows: more rectangles
+    p5.fill(110, 70, 45)
+    p5.rect(168, 178, 28, 47)
+
+    p5.fill(210, 240, 255)
+    p5.rect(135, 155, 25, 25)
+    p5.rect(205, 155, 25, 25)
+
+    # Task: Change colors, sizes, or positions of the shapes.
 
 p5.run()
 ```

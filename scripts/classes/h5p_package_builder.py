@@ -59,6 +59,7 @@ class H5PPackageBuilder:
 
     def build_h5p_metadata(self, question: PythonQuestionBlock) -> dict:
         library_metadata = self._read_json(self._find_library_dir(question.main_library) / "library.json")
+        default_language = "en" if question.course_slug.endswith("-en") else "de"
         preloaded_dependencies = [
             {
                 "machineName": library_metadata["machineName"],
@@ -76,8 +77,8 @@ class H5PPackageBuilder:
         )
         return {
             "title": question.title,
-            "language": "de",
-            "defaultLanguage": "de",
+            "language": default_language,
+            "defaultLanguage": default_language,
             "mainLibrary": question.main_library,
             "embedTypes": ["div"],
             "license": "U",

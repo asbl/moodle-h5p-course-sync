@@ -1,5 +1,5 @@
 <Instructions>
-Zeichne mit p5 einen roten Kreis und ein blaues Rechteck auf einem weißen Hintergrund.
+Der Starter-Code zeichnet eine Landschaft aus geometrischen Figuren. Ändere mindestens drei Eigenschaften: Farbe, Position, Größe oder Form.
 </Instructions>
 
 ```python editor:startingCode
@@ -7,32 +7,41 @@ import p5
 
 def setup():
     p5.createCanvas(400, 300)
-    p5.background(255)
 
-    # Zeichne hier einen roten Kreis und ein blaues Rechteck
+    # Hintergrund
+    p5.background(100, 160, 220)
 
-p5.run()
-```
-
-```python grading:targetCode
-import p5
-
-def setup():
-    p5.createCanvas(400, 300)
-    p5.background(255)
-
-    p5.fill(255, 0, 0)
+    # Sonne: Kreis
+    p5.fill(255, 230, 0)
     p5.noStroke()
-    p5.circle(100, 150, 80)
+    p5.circle(330, 60, 80)
 
-    p5.fill(0, 0, 255)
-    p5.rect(220, 110, 120, 80)
+    # Wiese: Rechteck
+    p5.fill(70, 160, 90)
+    p5.rect(0, 210, 400, 90)
+
+    # Haus: Rechteck und Dreieck
+    p5.fill(240, 180, 110)
+    p5.rect(120, 135, 120, 90)
+
+    p5.fill(170, 70, 60)
+    p5.triangle(105, 135, 255, 135, 180, 80)
+
+    # Tür und Fenster: weitere Rechtecke
+    p5.fill(110, 70, 45)
+    p5.rect(168, 178, 28, 47)
+
+    p5.fill(210, 240, 255)
+    p5.rect(135, 155, 25, 25)
+    p5.rect(205, 155, 25, 25)
+
+    # Aufgabe: Verändere Farben, Größen oder Positionen der Formen.
 
 p5.run()
 ```
 
 ```yaml grading
-gradingMethod: bySolution
+gradingMethod: please_choose
 dueDateGroup:
   enableDueDate: false
   duedate: 01.01.1970
