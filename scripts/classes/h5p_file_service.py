@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import shutil
 import subprocess
+import fnmatch
 from pathlib import Path
 from typing import TYPE_CHECKING, Callable, Iterable
 from zipfile import BadZipFile, ZipFile
@@ -15,6 +16,17 @@ class H5PFileService:
     """Handles H5P sidecar and archive file operations."""
 
     _IGNORED_ARCHIVE_PARTS = {"__pycache__", "node_modules", "editable-images"}
+    _IGNORED_LIBRARY_FILENAMES = {
+        "LICENSE",
+        "README",
+        "README.md",
+        "package.json",
+        "package-lock.json",
+        "webpack.config.js",
+        "eslint.config.js",
+        "eslint.config.mjs",
+        "vitest.config.mjs",
+    }
     _EDITABLE_IMAGE_DIR = "editable-images"
 
     def __init__(
@@ -253,21 +265,51 @@ class H5PFileService:
             for file_path in sorted(library_dir.rglob("*")):
                 if file_path.is_file():
                     relative_archive_path = file_path.relative_to(library_root).as_posix()
-                    if self._should_skip_archive_path(relative_archive_path):
+                    if self._should_skip_archive_path(relative_archive_path, archive_root=library_root):
                         continue
                     if relative_archive_path in written_entries:
                         continue
                     archive.write(file_path, relative_archive_path)
                     written_entries.add(relative_archive_path)
 
-    def _should_skip_archive_path(self, relative_path: str) -> bool:
+    def _should_skip_archive_path(self, relative_path: str, archive_root: Path | None = None) -> bool:
         parts = Path(relative_path).parts
         for part in parts:
             if part in self._IGNORED_ARCHIVE_PARTS:
                 return True
             if part.startswith("."):
                 return True
+        if archive_root is not None and self._should_skip_library_archive_path(relative_path, archive_root):
+            return True
         return False
+
+    def _should_skip_library_archive_path(self, relative_path: str, library_root: Path) -> bool:
+        parts = Path(relative_path).parts
+        if len(parts) < 2:
+            return False
+
+        library_dir = library_root / parts[0]
+        library_relative_path = Path(*parts[1:]).as_posix()
+        if Path(library_relative_path).name in self._IGNORED_LIBRARY_FILENAMES:
+            return True
+
+        ignore_file = library_dir / ".h5pignore"
+        if not ignore_file.exists():
+            return False
+
+        for raw_line in ignore_file.read_text(encoding="utf-8").splitlines():
+            pattern = raw_line.strip().lstrip("./")
+            if not pattern or pattern.startswith("#"):
+                continue
+            if self._matches_h5pignore_pattern(library_relative_path, pattern):
+                return True
+        return False
+
+    def _matches_h5pignore_pattern(self, relative_path: str, pattern: str) -> bool:
+        basename = Path(relative_path).name
+        if fnmatch.fnmatch(relative_path, pattern) or fnmatch.fnmatch(basename, pattern):
+            return True
+        return relative_path.startswith(pattern.rstrip("/") + "/")
 
     def render_editable_images(self, source_dir: Path) -> list[Path]:
         editable_dir = source_dir / self._EDITABLE_IMAGE_DIR

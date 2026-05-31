@@ -8,6 +8,8 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
+from scripts.classes.h5p_file_service import H5PFileService
+
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
 DEMO_COURSE_DIR = ROOT_DIR / "courses" / "h5p-demo"
@@ -24,6 +26,26 @@ def load_tasks_module():
 
 
 class H5PDemoWorkflowTests(unittest.TestCase):
+    def test_h5p_archive_filter_skips_library_development_files(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            library_dir = Path(temp_dir) / "H5P.Components-1.0"
+            library_dir.mkdir()
+            (library_dir / ".h5pignore").write_text("src\neslint.config.mjs\n", encoding="utf-8")
+            service = H5PFileService(
+                courses_dir=ROOT_DIR / "courses",
+                ensure_directory=lambda path: path.mkdir(parents=True, exist_ok=True),
+                read_yaml=lambda _path: {},
+                read_h5p_content_payload=lambda _path: {},
+                write_h5p_content_files=lambda _path, _payload: None,
+                write_json=lambda _path, _payload: None,
+            )
+
+            self.assertTrue(service._should_skip_archive_path("H5P.Components-1.0/LICENSE", archive_root=Path(temp_dir)))
+            self.assertTrue(service._should_skip_archive_path("H5P.Components-1.0/eslint.config.mjs", archive_root=Path(temp_dir)))
+            self.assertTrue(service._should_skip_archive_path("H5P.Components-1.0/vitest.config.mjs", archive_root=Path(temp_dir)))
+            self.assertTrue(service._should_skip_archive_path("H5P.Components-1.0/src/components/button.js", archive_root=Path(temp_dir)))
+            self.assertFalse(service._should_skip_archive_path("H5P.Components-1.0/dist/h5p-components.js", archive_root=Path(temp_dir)))
+
     def test_h5p_demo_covers_question_libraries(self) -> None:
         expected_libraries = {
             "H5P.PythonQuestion",

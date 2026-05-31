@@ -22,6 +22,8 @@ class H5PPackageBuilder:
     - scratch package assembly
     """
 
+    _ARCHIVE_FILTER_VERSION = 2
+
     def __init__(
         self,
         *,
@@ -200,6 +202,7 @@ class H5PPackageBuilder:
                         "content": content_payload,
                         "sourceMtime": source_mtime_ns,
                         "packageUrl": question.package_url,
+                        "archiveFilterVersion": self._ARCHIVE_FILTER_VERSION,
                     }
                 )
                 if self._can_reuse_package(question, imported_fingerprint):
@@ -253,6 +256,7 @@ class H5PPackageBuilder:
                     "metadata": h5p_json,
                     "content": content_json,
                     "sourceMtime": self._source_tree_mtime_ns(question.exploded_dir),
+                    "archiveFilterVersion": self._ARCHIVE_FILTER_VERSION,
                 }
             )
             if self._can_reuse_package(question, scratch_fingerprint):
