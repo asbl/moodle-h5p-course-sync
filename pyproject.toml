@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "course-sync"
+version = "0.1.0"
+description = "Textbasierte H5P-Kurse bauen, lokal vorschauen und mit Moodle synchronisieren."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { file = "LICENSE" }
+authors = [
+  { name = "course-sync contributors" }
+]
+dependencies = [
+  "invoke>=2.2,<3",
+  "playwright>=1.45,<2",
+  "PyYAML>=6,<7",
+  "ruamel.yaml>=0.18,<0.19",
+]
+
+[project.scripts]
+course-sync = "scripts.main:main"
+
+[tool.setuptools.packages.find]
+include = ["scripts*"]
+
+[tool.setuptools.package-data]
+"scripts.classes" = ["templates/*.html"]

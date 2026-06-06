@@ -10,7 +10,6 @@ fi
 
 ROOT_DIR="$(cd "$(dirname "$SCRIPT_PATH")" && pwd)"
 VENV_DIR="$ROOT_DIR/.venv"
-REQUIREMENTS_FILE="$ROOT_DIR/requirements.txt"
 
 if [[ ! -d "$VENV_DIR" ]]; then
   python3 -m venv "$VENV_DIR"
@@ -20,7 +19,7 @@ fi
 source "$VENV_DIR/bin/activate"
 
 python -m pip install --upgrade pip
-python -m pip install -r "$REQUIREMENTS_FILE"
+python -m pip install -e "$ROOT_DIR"
 
 export PYTHONPATH="$ROOT_DIR${PYTHONPATH:+:$PYTHONPATH}"
 
@@ -31,5 +30,6 @@ if [[ ! -d "$ROOT_DIR/libraries" ]] || [[ -z "$(ls -A "$ROOT_DIR/libraries" 2>/d
 fi
 
 echo "Virtuelle Umgebung aktiv: $VIRTUAL_ENV"
+echo "CLI verfuegbar: course-sync --help"
 echo "Verfuegbare Tasks:"
 inv -l

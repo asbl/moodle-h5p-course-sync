@@ -1,13 +1,16 @@
 from __future__ import annotations
 
+import io
 import tempfile
 import unittest
+from contextlib import redirect_stdout
 from dataclasses import dataclass
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
 
-from scripts.classes.cli.runner import resolve_course_dir, run_cli_command
+from scripts.classes.cli.app_cli import build_arg_parser
+from scripts.classes.cli.runner import create_new_course, list_course_summaries, resolve_course_dir, run_cli_command
 
 
 @dataclass(slots=True)
@@ -402,3 +405,77 @@ class CliRunnerTests(unittest.TestCase):
             )
 
         self.assertEqual(parser.error_calls, ["Unbekanntes Kommando."])
+
+
+def _unused(*args, **kwargs):
+    raise AssertionError("Unexpected callback call")
+
+
+class CliRunnerOnboardingTests(unittest.TestCase):
+    def test_create_new_course_writes_minimal_course_structure(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            courses_dir = Path(temp_dir) / "courses"
+            course_dir = create_new_course(courses_dir, "info-2026", title="Informatik 2026", language="en")
+
+            self.assertEqual(courses_dir / "info-2026", course_dir)
+            self.assertIn("# Informatik 2026", (course_dir / "index.mdx").read_text(encoding="utf-8"))
+            self.assertTrue((course_dir / "chapters" / "001-getting-started.mdx").exists())
+            self.assertTrue((course_dir / "h5p" / "001-getting-started" / "hello-world" / "content.mdx").exists())
+            self.assertTrue((course_dir / "h5p" / "001-getting-started" / "hello-world" / "settings.yml").exists())
+            self.assertTrue((course_dir / "h5p" / "001-getting-started" / "hello-world" / "h5p.json").exists())
+
+    def test_list_course_summaries_reads_index_title_and_chapter_count(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            courses_dir = Path(temp_dir) / "courses"
+            create_new_course(courses_dir, "info-2026", title="Informatik 2026")
+
+            self.assertEqual(
+                [{"slug": "info-2026", "title": "Informatik 2026", "chapters": 1}],
+                list_course_summaries(courses_dir),
+            )
+
+    def test_create_new_course_does_not_overwrite_existing_course_with_force(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            courses_dir = Path(temp_dir) / "courses"
+            create_new_course(courses_dir, "info-2026")
+
+            with self.assertRaises(FileExistsError):
+                create_new_course(courses_dir, "info-2026", force=True)
+
+    def test_resolve_course_dir_error_lists_available_courses(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            courses_dir = Path(temp_dir) / "courses"
+            create_new_course(courses_dir, "info-2026")
+
+            with self.assertRaises(FileNotFoundError) as context:
+                resolve_course_dir("missing-course", courses_dir)
+
+            self.assertIn("info-2026", str(context.exception))
+
+    def test_run_cli_command_handles_new_course_without_service_callbacks(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root_dir = Path(temp_dir)
+            courses_dir = root_dir / "courses"
+            parser = build_arg_parser(default_port=8765)
+            args = parser.parse_args(["new-course", "info-2026", "--title", "Informatik 2026"])
+
+            with redirect_stdout(io.StringIO()):
+                run_cli_command(
+                    args,
+                    parser=parser,
+                    root_dir=root_dir,
+                    courses_dir=courses_dir,
+                    sync_course=_unused,
+                    build_preview_runtime=_unused,
+                    serve_preview=_unused,
+                    resolve_moodle_client=_unused,
+                    import_moodle_course=_unused,
+                    push_moodle_course=_unused,
+                    sync_metadata_path=_unused,
+                    build_moodle_ping_report=_unused,
+                    print_moodle_ping_report=_unused,
+                    build_course_status=_unused,
+                    print_course_status=_unused,
+                )
+
+            self.assertTrue((courses_dir / "info-2026" / "index.mdx").exists())

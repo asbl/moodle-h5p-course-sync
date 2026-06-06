@@ -9,6 +9,36 @@ def build_arg_parser(default_port: int) -> argparse.ArgumentParser:
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
 
+    list_courses_parser = subparsers.add_parser(
+        "list-courses",
+        help="Listet alle lokalen Kursordner unter courses/.",
+    )
+    list_courses_parser.add_argument(
+        "--verbose",
+        action="store_true",
+        help="Zeigt zusaetzlich Titel und Anzahl der Kapitel.",
+    )
+
+    new_course_parser = subparsers.add_parser(
+        "new-course",
+        help="Legt einen neuen minimalen Kurs mit Beispielkapitel an.",
+    )
+    new_course_parser.add_argument("course", help="Neuer Kursordner unter courses/, zum Beispiel info-2026")
+    new_course_parser.add_argument(
+        "--title",
+        help="Anzeigename des Kurses. Standard: aus dem Kursordner abgeleitet.",
+    )
+    new_course_parser.add_argument(
+        "--language",
+        default="de",
+        help="Sprache fuer H5P-Metadaten, z.B. de oder en. Standard: de.",
+    )
+    new_course_parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Erlaubt das Anlegen in einem bereits vorhandenen leeren Kursordner.",
+    )
+
     sync_parser = subparsers.add_parser("sync", help="Erzeugt H5P-Dateien aus einer Kurs-MDX.")
     sync_parser.add_argument("course", help="Kursordner unter courses/, zum Beispiel python-2026")
 

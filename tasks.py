@@ -85,6 +85,28 @@ def test(ctx) -> None:
     _run_python(ctx, "-m", "unittest", "discover", "-s", "tests", "-p", "test_*.py")
 
 
+@task(name="list-courses", optional=["verbose"])
+def list_courses(ctx, verbose: bool = False) -> None:
+    """List local courses."""
+    args = [str(COURSE_SYNC), "list-courses"]
+    if verbose:
+        args.append("--verbose")
+    _run_python(ctx, *args)
+
+
+@task(name="new-course", optional=["title", "language", "force"])
+def new_course(ctx, course: str, title: str = "", language: str = "de", force: bool = False) -> None:
+    """Create a minimal new course scaffold."""
+    args = [str(COURSE_SYNC), "new-course", course]
+    if title:
+        args.extend(["--title", title])
+    if language != "de":
+        args.extend(["--language", language])
+    if force:
+        args.append("--force")
+    _run_python(ctx, *args)
+
+
 @task(optional=["course"])
 def sync(ctx, course: str = "python-2026") -> None:
     """Generate H5P output for a course."""

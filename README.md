@@ -1,188 +1,100 @@
 # course-sync
 
-**course-sync** ist ein Werkzeug für Lehrkräfte, um interaktive Programmieraufgaben als
-[H5P](https://h5p.org/)-Pakete zu verwalten und auf [Moodle](https://moodle.org/) zu
-synchronisieren. Kursinhalt liegt als lesbare Textdateien (MDX) vor und wird versioniert
-in Git gepflegt – wie Quellcode, nicht wie Word-Dokumente.
+`course-sync` verwaltet interaktive Programmieraufgaben als Textdateien und baut daraus
+H5P-Pakete. Die Pakete koennen lokal im Browser geprueft, als Dateien exportiert oder in
+Moodle-Kurse hochgeladen werden.
 
-Der Kern: Ein Kurs ist eine Sammlung von `.mdx`-Dateien. `inv sync` baut daraus H5P-Pakete,
-`inv serve` öffnet eine lokale Vorschau, `inv upload-chapter-moodle` lädt ein Kapitel direkt
-auf eine Moodle-Instanz hoch.
+Das Projekt ist fuer Lehrkraefte und Autorinnen gedacht, die Kursinhalte lieber in Git
+pflegen als in Moodle-Formularen. Ein Kurs besteht aus MDX-Dateien, kleinen YAML/JSON-
+Konfigurationen und optionalen Bildern.
 
-Entwickelt für das H5P-Format [PythonQuestion](https://github.com/andreas-siebel/h5p-python-question),
-das interaktive Python-Aufgaben mit Skulpt oder Pyodide direkt im Browser ausführt.
-
----
-
-## Voraussetzungen
-
-- Python 3.11+
-- Node.js mit `npx` (für die H5P-Vorschau)
-- Moodle-Instanz mit H5P-Plugin (für den Upload)
-
----
-
-## Einrichten
+## Schnellstart
 
 ```bash
 git clone <repo-url>
 cd course-sync
-
-# .env anlegen (Moodle-Zugangsdaten)
-cp .env.example .env
-# .env mit einem Editor öffnen und Werte eintragen
-
-# Virtuelle Umgebung, Abhängigkeiten und H5P-Libraries installieren
 source prepare.sh
+
+course-sync list-courses
+course-sync new-course mein-kurs --title "Mein Kurs"
+course-sync sync mein-kurs
+course-sync serve
 ```
 
-`prepare.sh` legt eine virtuelle Python-Umgebung an, installiert alle Abhängigkeiten
-und lädt die H5P-Libraries automatisch herunter. Danach ist `inv` im Terminal verfügbar.
+Danach ist die Vorschau unter <http://127.0.0.1:8765/> erreichbar.
 
----
-
-## Tägliche Arbeit
+Wenn du lieber `invoke` nutzt, funktionieren die bestehenden Kurzbefehle weiterhin:
 
 ```bash
-# Virtuelle Umgebung aktivieren (einmal pro Terminal-Session)
-source prepare.sh
-
-# H5P-Pakete aus den MDX-Quellen bauen
-inv sync
-
-# Lokale Vorschau starten (http://127.0.0.1:8765/)
+inv sync --course=mein-kurs
 inv serve
+```
 
-# Ein Kapitel auf Moodle hochladen
-inv upload-chapter-moodle 012-miniworlds
+## Was wird unterstuetzt?
 
-# Alle verfügbaren Tasks anzeigen
+- H5P-Pakete aus MDX-Kursen bauen
+- lokale Browser-Vorschau mit H5P-Runtime starten
+- vorhandene `.h5p`-Aktivitaeten und Moodle-Backups importieren
+- Kapitel als H5P-Dateien exportieren
+- Kapitel per Playwright in Moodle hochladen
+- mehrere Moodle-Ziele pro lokalem Kurs konfigurieren
+
+Der Hauptfokus liegt auf `H5P.PythonQuestion`; Demo-Kurse zeigen zusaetzlich SQL-, Java-
+und Automata-Fragen.
+
+## Wichtige Kommandos
+
+```bash
+course-sync --help
+course-sync list-courses --verbose
+course-sync new-course info-2026 --title "Informatik 2026"
+course-sync sync info-2026
+course-sync build info-2026
+course-sync export-chapter info-2026 001-einstieg
+course-sync serve --port 8765
+course-sync import-mbz imported-course backup.mbz
+course-sync moodle-ping
+course-sync upload-chapter-moodle info-2026 001-einstieg --target=schule
+```
+
+Die alten Task-Namen bleiben als Komfortschicht verfuegbar:
+
+```bash
 inv -l
+inv smoke --course=info-2026
 ```
 
----
+## Dokumentation
 
-## Kursstruktur
+- [Installation und erste Schritte](docs/getting-started.md)
+- [Kursformat und Dateistruktur](docs/course-format.md)
+- [Beispiel fuer das alte `content.yml`-Format](docs/content-example.yml)
+- [Release-Workflow fuer Question-Libraries](QUESTIONS_RELEASE_WORKFLOW.md)
 
-```
-courses/python-2026/
-  index.mdx                        ← Kapitelübersicht
-  chapters/
-    001-einfuehrung.mdx            ← Kapitel mit PythonQuestion-Blöcken
-    012-miniworlds.mdx
-  h5p/
-    012-miniworlds/
-      miniworlds-tutorial/
-        content.mdx                ← sichtbarer Inhalt der Aufgabe
-        settings.yml               ← Runner, Grading, Optionen
-        h5p.json                   ← H5P-Metadaten
-  build/                           ← generiert, nicht im Repo
+## Moodle-Zugangsdaten
+
+Kopiere `.env.example` nach `.env` und trage lokale Zugangsdaten ein. `.env` bleibt auf
+deinem Rechner und wird nicht committet.
+
+```bash
+cp .env.example .env
 ```
 
-Eine Aufgabe wird im Kapitel als `<PythonQuestion identifier="..." />` referenziert.
-`identifier` muss innerhalb eines Kurses eindeutig sein und dient als stabiler Schlüssel
-beim Moodle-Upload.
-
----
-
-## Neue Aufgabe anlegen
-
-1. Ordner anlegen: `courses/<kurs>/h5p/<kapitel>/<identifier>/`
-2. Drei Dateien anlegen: `content.mdx`, `settings.yml`, `h5p.json`
-3. Im Kapitel referenzieren: `<PythonQuestion identifier="<identifier>" />`
-4. Bauen und vorschauen: `inv sync && inv serve`
-
-Eine Vorlage für `content.yml` (älteres Format, wird weiterhin unterstützt) liegt unter
-`docs/content-example.yml`.
-
----
-
-## Moodle-Synchronisation
-
-### Zugangsdaten in `.env` eintragen
+Globale Werte:
 
 ```env
-MOODLE_BASE_URL=https://meine-schule.moodle.org
-MOODLE_TOKEN=webservice-token
-
-MOODLE_PYTHON_2026_COURSE_URL=https://meine-schule.moodle.org/course/view.php?id=42
-MOODLE_PYTHON_2026_USERNAME=mein-login
-MOODLE_PYTHON_2026_PASSWORD=mein-passwort
+MOODLE_BASE_URL=https://moodle.example.org
+MOODLE_TOKEN=...
+MOODLE_USERNAME=...
+MOODLE_PASSWORD=...
 ```
 
-Für mehrere Moodle-Instanzen (z.B. eigene Schule + zweite Schule eines Kollegen) wird
-ein numerisches Suffix verwendet: `MOODLE_PYTHON_2026_2_COURSE_URL`, `..._2_USERNAME` usw.
-
-### Verbindung prüfen
-
-```bash
-inv moodle-ping
-```
-
-### Kurs aus bestehendem Moodle importieren
-
-```bash
-inv import-moodle --course python-2026 --remote-course-id 42
-```
-
-Legt `index.mdx` und die Kursstruktur aus den H5P-Aktivitäten an.
-
-### Kapitel hochladen oder aktualisieren
-
-```bash
-inv upload-chapter-moodle 012-miniworlds --course python-2026
-```
-
-Bestehende Aktivitäten werden anhand des `identifier` erkannt und aktualisiert,
-neue werden angelegt. Kein manuelles Klicken in Moodle nötig.
-
----
-
-## Für Kollegen: kollaborativer Betrieb
-
-Alle inhaltlichen Änderungen (MDX-Dateien) können per Git geteilt werden.
-Moodle-Zugangsdaten bleiben **immer lokal** in `.env` – diese Datei wird
-niemals committet.
-
-Empfohlener Workflow für mehrere Lehrkräfte:
-
-```bash
-# Neue Inhalte holen
-git pull
-
-# Eigene Änderungen in einem Feature-Branch
-git checkout -b feature/neue-aufgabe-strings
-# ... Dateien bearbeiten ...
-git push origin feature/neue-aufgabe-strings
-# → Pull Request stellen
-```
-
-Jede Lehrkraft konfiguriert in `.env` ihre eigene Moodle-Instanz. Die
-Synchronisation läuft jeweils lokal; das Repo enthält nur den Quellinhalt.
-
-Klausuren und Prüfungsaufgaben gehören **nicht** in dieses Repository – sie
-liegen in einem separaten, privaten Repo.
-
----
-
-## H5P-Libraries aktualisieren
-
-Die H5P-Libraries sind nicht im Repository enthalten und werden lokal geladen:
-
-```bash
-# Aktuelle Version laden
-inv update-h5p-libraries
-
-# Bestimmten Release-Tag laden
-inv update-h5p-libraries --tag v6.88.0
-```
-
----
+Kurs- oder zielbezogene Werte folgen dem Muster `MOODLE_<KURS>_<TARGET>_<SETTING>`, zum
+Beispiel `MOODLE_INFO_2026_SCHULE_COURSE_URL`.
 
 ## Lizenz
 
-**Werkzeugcode** (`scripts/`, `tasks.py`, `prepare.sh` u.ä.): [MIT](LICENSE)
+Werkzeugcode wie `scripts/`, `tasks.py` und `prepare.sh`: [MIT](LICENSE)
 
-**Kursinhalt** (`courses/`): [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/deed.de) –
-Weiterverwendung und Anpassung erlaubt, solange Herkunft genannt und das Ergebnis
-unter gleicher Lizenz geteilt wird.
+Kursinhalt in `courses/`: [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/deed.de),
+sofern im jeweiligen Kurs nichts anderes angegeben ist.
