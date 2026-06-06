@@ -8,10 +8,24 @@ editorSettings:
   startingCode: |-
     `public class Main {
         public static void main(String[] args) {
-            for (int i = 1; i <= 20; i++) {
-                // Ergänze die FizzBuzz-Logik
-                System.out.println(i);
+            int n = 27;
+            int schritte = 0;
+
+            System.out.print("Collatz-Folge für " + n + ": ");
+            System.out.print(n);
+
+            while (n != 1) {
+                if (n % 2 == 0) {
+                    n = n / 2;
+                } else {
+                    n = 3 * n + 1;
+                }
+                System.out.print(" → " + n);
+                schritte++;
             }
+
+            System.out.println();
+            System.out.println("Schritte: " + schritte);
         }
     }`
   preCode: |-
@@ -19,23 +33,13 @@ editorSettings:
   postCode: |-
     ``
   stdin: ''
-  instructions: |-
-    `Gib für alle Zahlen von 1 bis 20 aus: 'Fizz' wenn durch 3 teilbar, 'Buzz' wenn durch 5 teilbar, 'FizzBuzz' wenn durch beides teilbar, sonst die Zahl selbst.`
+  instructions: Dieses Beispiel zeigt Java in der H5P-Umgebung – die 
+    Collatz-Folge für eine Startzahl.
 gradingSettings:
-  gradingMethod: bySolution
-  expectedOutput: "public class Main {\n    public static void main(String[] args)
-    {\n        for (int i = 1; i <= 20; i++) {\n            if (i % 15 == 0) {\n \
-    \               System.out.println(\"FizzBuzz\");\n            } else if (i %
-    3 == 0) {\n                System.out.println(\"Fizz\");\n            } else if
-    (i % 5 == 0) {\n                System.out.println(\"Buzz\");\n            } else
-    {\n                System.out.println(i);\n            }\n        }\n    }\n}"
+  gradingMethod: please_choose
+  expectedOutput: ''
   trimOutput: true
-  solution: "public class Main {\n    public static void main(String[] args) {\n \
-    \       for (int i = 1; i <= 20; i++) {\n            if (i % 15 == 0) {\n    \
-    \            System.out.println(\"FizzBuzz\");\n            } else if (i % 3 ==
-    0) {\n                System.out.println(\"Fizz\");\n            } else if (i
-    % 5 == 0) {\n                System.out.println(\"Buzz\");\n            } else
-    {\n                System.out.println(i);\n            }\n        }\n    }\n}"
+  solution: ''
 l10n:
   checkAnswer: Überprüfen
   run: Ausführen

@@ -1,0 +1,86 @@
+Eine leere Klasse erzeugt zwar Objekte, aber diese Objekte haben noch keine
+eigenen Daten. Meistens möchtest du beim Erzeugen festlegen, welche Attribute
+ein Objekt bekommen soll.
+
+Dafür gibt es die Methode `__init__`.
+
+```python
+class Hund:
+    def __init__(self, name, alter):
+        self.name = name
+        self.alter = alter
+
+luna = Hund("Luna", 4)
+bruno = Hund("Bruno", 7)
+
+print(luna.name)
+print(bruno.name)
+print(luna.alter)
+```
+
+`__init__` wird automatisch aufgerufen, wenn du ein neues Objekt erzeugst.
+Deshalb nennt man diese Methode auch **Konstruktor**.
+
+### Was passiert beim Erzeugen?
+
+```python noeditor
+luna = Hund("Luna", 4)
+       │     │       │
+       │     │       └── alter
+       │     └────────── name
+       └──────────────── Klasse
+```
+
+Python ruft intern ungefähr das hier auf:
+
+```python noeditor
+Hund.__init__(luna, "Luna", 4)
+              │
+              └── self
+```
+
+`self` ist das Objekt, das gerade erzeugt wird. Mit `self.name = name` speicherst
+du den übergebenen Namen als Attribut in genau diesem Objekt.
+
+### Jedes Objekt hat eigene Attribute
+
+```python
+class Spielfigur:
+    def __init__(self, name, leben):
+        self.name = name
+        self.leben = leben
+
+held = Spielfigur("Ada", 100)
+rivale = Spielfigur("Ben", 80)
+
+held.leben = held.leben - 20
+
+print(held.name, held.leben)
+print(rivale.name, rivale.leben)
+```
+
+Die Änderung betrifft nur `held`. Das Objekt `rivale` hat eigene Attribute.
+
+### Aufgabe
+
+Erweitere die Klasse `Spielfigur`:
+
+- Speichere zusätzlich ein Attribut `punkte`
+- Erzeuge zwei Figuren mit unterschiedlichen Punktzahlen
+- Erhöhe die Punkte einer Figur und gib beide Figuren aus
+
+```python
+class Spielfigur:
+    def __init__(self, name, leben, punkte):
+        self.name = name
+        self.leben = leben
+        self.punkte = punkte
+
+held = Spielfigur("Ada", 100, 0)
+rivale = Spielfigur("Ben", 80, 15)
+
+held.punkte = held.punkte + 10
+
+print(held.name, held.punkte)
+print(rivale.name, rivale.punkte)
+```

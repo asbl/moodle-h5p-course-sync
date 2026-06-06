@@ -1,25 +1,26 @@
 <Instructions>
-Use turtle graphics to draw a regular hexagon. Each side should be 80 pixels long.
+This example shows turtle graphics: a simple house made from geometric shapes.
 </Instructions>
 
 ```python editor:startingCode
 import turtle
 
-for i in range(6):
-    turtle.forward(80)
-    turtle.right(0)  # Which angle?
-```
+turtle.speed(3)
 
-```python grading:targetCode
-import turtle
+# Walls
+for _ in range(4):
+    turtle.forward(120)
+    turtle.right(90)
 
-for i in range(6):
-    turtle.forward(80)
-    turtle.right(60)
+# Roof
+turtle.left(30)
+for _ in range(3):
+    turtle.forward(120)
+    turtle.left(120)
 ```
 
 ```yaml grading
-gradingMethod: bySolution
+gradingMethod: please_choose
 dueDateGroup:
   enableDueDate: false
   duedate: 01.01.1970

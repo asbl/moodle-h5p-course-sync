@@ -8,12 +8,17 @@ editorSettings:
   startingCode: |-
     `public class Main {
         public static void main(String[] args) {
-            H5P5.createCanvas(120, 300);
-            H5P5.background(0);
+            H5P5.createCanvas(400, 300);
 
-            // Zeichne die drei Ampellichter
-            // Rot oben (y=60), Gelb Mitte (y=150), Grün unten (y=240)
-            // Durchmesser jeweils 60
+            // Nachthimmel
+            H5P5.background(15, 15, 40);
+
+            // Mond
+            H5P5.fill(255, 250, 200);
+            H5P5.noStroke();
+            H5P5.circle(340, 50, 60);
+
+            // Gebäude ergänzen ...
 
             H5P5.noLoop();
         }
@@ -23,21 +28,13 @@ editorSettings:
   postCode: |-
     ``
   stdin: ''
-  instructions: 'Zeichne mit H5P5 eine Ampel (drei Kreise: rot, gelb, grün) auf schwarzem
-    Hintergrund.'
+  instructions: Der Starter-Code zeigt bereits einen Nachthimmel mit Mond. 
+    Ergänze Gebäude und Fenster für eine Stadtsilhouette.
 gradingSettings:
-  gradingMethod: bySolution
-  expectedOutput: "public class Main {\n    public static void main(String[] args)
-    {\n        H5P5.createCanvas(120, 300);\n        H5P5.background(0);\n\n     \
-    \   H5P5.fill(255, 0, 0);\n        H5P5.circle(60, 60, 60);\n\n        H5P5.fill(255,
-    200, 0);\n        H5P5.circle(60, 150, 60);\n\n        H5P5.fill(0, 200, 0);\n\
-    \        H5P5.circle(60, 240, 60);\n\n        H5P5.noLoop();\n    }\n}"
+  gradingMethod: please_choose
+  expectedOutput: ''
   trimOutput: true
-  solution: "public class Main {\n    public static void main(String[] args) {\n \
-    \       H5P5.createCanvas(120, 300);\n        H5P5.background(0);\n\n        H5P5.fill(255,
-    0, 0);\n        H5P5.circle(60, 60, 60);\n\n        H5P5.fill(255, 200, 0);\n\
-    \        H5P5.circle(60, 150, 60);\n\n        H5P5.fill(0, 200, 0);\n        H5P5.circle(60,
-    240, 60);\n\n        H5P5.noLoop();\n    }\n}"
+  solution: ''
 l10n:
   checkAnswer: Überprüfen
   run: Ausführen

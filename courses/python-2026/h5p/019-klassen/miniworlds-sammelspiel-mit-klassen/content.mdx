@@ -1,0 +1,105 @@
+Klassen werden besonders nützlich, wenn mehrere Objektarten zusammenarbeiten.
+In einem kleinen Spiel könnten das zum Beispiel `Spieler`, `Muenze` und
+`Anzeige` sein.
+
+```python
+import miniworlds
+
+world = miniworlds.World(500, 320)
+world.add_background((226, 239, 250))
+
+punkte = 0
+
+class Anzeige(miniworlds.Text):
+    def on_setup(self):
+        self.x = 15
+        self.y = 15
+        self.font_size = 20
+        self.color = (30, 40, 60)
+        self.text = "Punkte: 0"
+
+    def aktualisieren(self):
+        self.text = "Punkte: " + str(punkte)
+
+class Spieler(miniworlds.Actor):
+    def on_setup(self):
+        self.color = (70, 135, 220)
+        self.size = (34, 34)
+        self.speed = 14
+
+    def on_key_down_right(self):
+        self.x = self.x + self.speed
+
+    def on_key_down_left(self):
+        self.x = self.x - self.speed
+
+    def on_key_down_up(self):
+        self.y = self.y - self.speed
+
+    def on_key_down_down(self):
+        self.y = self.y + self.speed
+
+class Muenze(miniworlds.Circle):
+    def on_setup(self):
+        self.color = (255, 190, 45)
+
+    def einsammeln(self):
+        global punkte
+        punkte = punkte + 1
+        self.x = -100
+        anzeige.aktualisieren()
+
+anzeige = Anzeige((15, 15), "")
+spieler = Spieler((80, 160))
+
+muenzen = [
+    Muenze((210, 90), 15),
+    Muenze((340, 160), 15),
+    Muenze((250, 245), 15),
+]
+
+@spieler.register
+def on_detecting(self, other):
+    if other in muenzen:
+        other.einsammeln()
+
+world.run()
+```
+
+In diesem Beispiel hat jede Klasse eine klare Aufgabe:
+
+- `Spieler` kümmert sich um Bewegung
+- `Muenze` weiß, was beim Einsammeln passiert
+- `Anzeige` weiß, wie Punkte angezeigt werden
+
+Das ist der Kern objektorientierter Programmierung: Objekte haben Daten und
+Verhalten, die zusammengehören.
+
+### Mini-Aufgabe: eigene Klasse `Hindernis`
+
+Erweitere das Spiel um eine neue Klasse:
+
+```python noeditor
+class Hindernis(miniworlds.Rectangle):
+    def on_setup(self):
+        self.color = (180, 70, 70)
+```
+
+Erzeuge zwei Hindernisse in der Welt. Danach kannst du überlegen:
+
+- Was soll passieren, wenn der Spieler ein Hindernis berührt?
+- Soll der Spieler zurückgesetzt werden?
+- Soll er Punkte verlieren?
+
+### Noch kompakter: Klassen als Ordnungssystem
+
+Je mehr dein Spiel wächst, desto wichtiger wird Ordnung:
+
+```python noeditor
+Spieler:   bewegen, Geschwindigkeit, Farbe
+Muenze:    einsammeln, verschwinden, Punkte geben
+Anzeige:   Text setzen, Punkte anzeigen
+Hindernis: blockieren, Schaden verursachen
+```
+
+Jede Klasse sammelt das, was fachlich zusammengehört.

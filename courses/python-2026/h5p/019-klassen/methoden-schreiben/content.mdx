@@ -1,0 +1,84 @@
+Attribute speichern den Zustand eines Objekts. Methoden verändern diesen
+Zustand oder berechnen etwas mit ihm.
+
+Eine Methode ist eine Funktion, die in einer Klasse steht. Ihr erster
+Parameter ist fast immer `self`.
+
+```python
+class Spielfigur:
+    def __init__(self, name, leben):
+        self.name = name
+        self.leben = leben
+
+    def schaden(self, menge):
+        self.leben = self.leben - menge
+
+    def heilen(self, menge):
+        self.leben = self.leben + menge
+
+held = Spielfigur("Ada", 100)
+
+held.schaden(30)
+held.heilen(10)
+
+print(held.name, held.leben)
+```
+
+Wenn du `held.schaden(30)` aufrufst, ist `self` das Objekt `held`.
+Die Methode verändert also `held.leben`.
+
+### Methoden können Werte zurückgeben
+
+Methoden können wie normale Funktionen mit `return` einen Wert zurückgeben:
+
+```python
+class Rechteck:
+    def __init__(self, breite, hoehe):
+        self.breite = breite
+        self.hoehe = hoehe
+
+    def flaeche(self):
+        return self.breite * self.hoehe
+
+karte = Rechteck(12, 8)
+print(karte.flaeche())
+```
+
+### Methoden halten Code zusammen
+
+Ohne Methode müsstest du die Lebenspunkte überall direkt verändern:
+
+```python noeditor
+held.leben = held.leben - 30
+held.leben = held.leben + 10
+```
+
+Mit Methoden steht die Logik an einer Stelle:
+
+```python noeditor
+held.schaden(30)
+held.heilen(10)
+```
+
+Das ist lesbarer und später leichter zu erweitern. Du könntest zum Beispiel
+in `schaden()` verhindern, dass `leben` unter `0` fällt.
+
+### Aufgabe
+
+Erweitere die Methode `schaden()` so, dass die Lebenspunkte nie negativ werden.
+
+```python
+class Spielfigur:
+    def __init__(self, name, leben):
+        self.name = name
+        self.leben = leben
+
+    def schaden(self, menge):
+        self.leben = self.leben - menge
+        if self.leben < 0:
+            self.leben = 0
+
+held = Spielfigur("Ada", 20)
+held.schaden(50)
+print(held.leben)
+```

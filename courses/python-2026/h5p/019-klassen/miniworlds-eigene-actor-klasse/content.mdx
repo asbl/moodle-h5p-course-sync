@@ -1,0 +1,92 @@
+Bisher hast du miniworlds-Objekte direkt aus vorhandenen Klassen erzeugt:
+
+```python noeditor
+spieler = miniworlds.Actor((80, 150))
+muenze = miniworlds.Circle((300, 150), 20)
+```
+
+Du kannst aber auch eigene Klassen schreiben, die von miniworlds-Klassen
+erben. Dann legst du selbst fest, wie deine Spielfigur beim Start aussieht
+und welche Fähigkeiten sie hat.
+
+```python
+import miniworlds
+
+world = miniworlds.World(460, 300)
+world.add_background((224, 238, 250))
+
+class Spieler(miniworlds.Actor):
+    def on_setup(self):
+        self.color = (60, 130, 220)
+        self.size = (36, 36)
+        self.speed = 12
+
+    def on_key_down_right(self):
+        self.x = self.x + self.speed
+
+    def on_key_down_left(self):
+        self.x = self.x - self.speed
+
+    def on_key_down_up(self):
+        self.y = self.y - self.speed
+
+    def on_key_down_down(self):
+        self.y = self.y + self.speed
+
+spieler = Spieler((230, 150))
+
+world.run()
+```
+
+`class Spieler(miniworlds.Actor):` bedeutet:
+
+Die Klasse `Spieler` übernimmt die Grundfunktionen von `miniworlds.Actor`.
+Zusätzlich bekommt sie eigene Methoden für Startzustand und Steuerung.
+
+### Warum ist das besser als viele Register-Funktionen?
+
+Bei einem einzelnen Objekt funktionieren beide Varianten. Bei größeren
+Programmen ist eine eigene Klasse übersichtlicher:
+
+- alle Regeln der Spielfigur stehen an einer Stelle
+- neue Spieler-Objekte bekommen automatisch dieselbe Steuerung
+- Attribute wie `speed` gehören direkt zur Figur
+
+### Zwei Spieler aus derselben Klasse
+
+```python
+import miniworlds
+
+world = miniworlds.World(460, 300)
+world.add_background((224, 238, 250))
+
+class Spieler(miniworlds.Actor):
+    def on_setup(self):
+        self.color = (60, 130, 220)
+        self.size = (32, 32)
+        self.speed = 10
+
+    def on_key_down_right(self):
+        self.x = self.x + self.speed
+
+    def on_key_down_left(self):
+        self.x = self.x - self.speed
+
+spieler1 = Spieler((120, 150))
+spieler2 = Spieler((250, 150))
+spieler2.color = (255, 130, 60)
+spieler2.speed = 18
+
+world.run()
+```
+
+Beide Objekte entstehen aus derselben Klasse. Trotzdem kann jedes Objekt
+eigene Attributwerte haben.
+
+### Aufgabe
+
+Erweitere das erste Beispiel:
+
+- Füge eine Methode `on_key_down_space(self)` hinzu
+- Ändere darin die Farbe der Figur
+- Erhöhe oder verringere `self.speed`, wenn die Leertaste gedrückt wird

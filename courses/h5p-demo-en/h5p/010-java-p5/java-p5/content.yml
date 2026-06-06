@@ -8,12 +8,17 @@ editorSettings:
   startingCode: |-
     `public class Main {
         public static void main(String[] args) {
-            H5P5.createCanvas(120, 300);
-            H5P5.background(0);
+            H5P5.createCanvas(400, 300);
 
-            // Draw the three traffic light circles
-            // Red at the top (y=60), yellow in the middle (y=150), green at the bottom (y=240)
-            // Diameter 60 each
+            // Night sky
+            H5P5.background(15, 15, 40);
+
+            // Moon
+            H5P5.fill(255, 250, 200);
+            H5P5.noStroke();
+            H5P5.circle(340, 50, 60);
+
+            // Add buildings ...
 
             H5P5.noLoop();
         }
@@ -23,29 +28,21 @@ editorSettings:
   postCode: |-
     ``
   stdin: ''
-  instructions: 'Use H5P5 to draw a traffic light (three circles: red, yellow, green)
-    on a black background.'
+  instructions: The starter code already shows a night sky with a moon. Add 
+    buildings and windows to create a city skyline.
 gradingSettings:
-  gradingMethod: bySolution
-  expectedOutput: "public class Main {\n    public static void main(String[] args)
-    {\n        H5P5.createCanvas(120, 300);\n        H5P5.background(0);\n\n     \
-    \   H5P5.fill(255, 0, 0);\n        H5P5.circle(60, 60, 60);\n\n        H5P5.fill(255,
-    200, 0);\n        H5P5.circle(60, 150, 60);\n\n        H5P5.fill(0, 200, 0);\n\
-    \        H5P5.circle(60, 240, 60);\n\n        H5P5.noLoop();\n    }\n}"
+  gradingMethod: please_choose
+  expectedOutput: ''
   trimOutput: true
-  solution: "public class Main {\n    public static void main(String[] args) {\n \
-    \       H5P5.createCanvas(120, 300);\n        H5P5.background(0);\n\n        H5P5.fill(255,
-    0, 0);\n        H5P5.circle(60, 60, 60);\n\n        H5P5.fill(255, 200, 0);\n\
-    \        H5P5.circle(60, 150, 60);\n\n        H5P5.fill(0, 200, 0);\n        H5P5.circle(60,
-    240, 60);\n\n        H5P5.noLoop();\n    }\n}"
+  solution: ''
 l10n:
-  checkAnswer: Check
-  run: Run
-  stop: Stop
-  failedText: Not correct yet
-  successText: Correct!
-  testCase: Test case
-  hidden: '[hidden]'
+  checkAnswer: Überprüfen
+  run: Ausführen
+  stop: Stopp
+  failedText: Noch nicht korrekt
+  successText: Korrekt!
+  testCase: Testfall
+  hidden: '[versteckt]'
 contents:
 - type: text
   showEditor: false

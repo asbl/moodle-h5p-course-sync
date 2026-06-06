@@ -1,26 +1,24 @@
 <Instructions>
-Berechne die Summe aller geraden Zahlen von 1 bis 100 und gib das Ergebnis aus.
+Dieses Beispiel zeigt Python mit dem Skulpt-Runner (läuft direkt im Browser ohne Server).
 </Instructions>
 
 ```python editor:startingCode
-summe = 0
-for zahl in range(1, 101):
-    pass  # Ergänze hier die Bedingung
+def ist_primzahl(n):
+    if n < 2:
+        return False
+    for i in range(2, int(n**0.5) + 1):
+        if n % i == 0:
+            return False
+    return True
 
-print(summe)
-```
-
-```python grading:targetCode
-summe = 0
-for zahl in range(1, 101):
-    if zahl % 2 == 0:
-        summe += zahl
-
-print(summe)
+primzahlen = [n for n in range(2, 51) if ist_primzahl(n)]
+print("Primzahlen bis 50:")
+print(primzahlen)
+print(f"Anzahl: {len(primzahlen)}")
 ```
 
 ```yaml grading
-gradingMethod: bySolution
+gradingMethod: please_choose
 dueDateGroup:
   enableDueDate: false
   duedate: 01.01.1970

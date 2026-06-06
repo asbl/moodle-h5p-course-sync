@@ -1,0 +1,77 @@
+Im letzten Kapitel hast du Objekte benutzt: Turtle-Objekte, miniworlds-Actors,
+Strings und eigene kleine Datenobjekte. Jetzt geht es um die Frage:
+
+**Woher weiß Python eigentlich, wie solche Objekte aussehen sollen?**
+
+Die Antwort lautet: aus einer **Klasse**.
+
+Eine Klasse ist ein Bauplan. Ein Objekt ist ein konkretes Ding, das nach
+diesem Bauplan gebaut wurde.
+
+```python noeditor
+Klasse "Hund"                    Objekt "luna"
+┌──────────────────────┐         ┌──────────────────────┐
+│ Attribute: name      │  --->   │ name = "Luna"        │
+│            alter     │         │ alter = 4            │
+│                      │         │                      │
+│ Methoden: bellen()   │         │ bellen()             │
+└──────────────────────┘         └──────────────────────┘
+```
+
+In Python schreibst du eine Klasse mit dem Schlüsselwort `class`:
+
+```python
+class Hund:
+    pass
+
+luna = Hund()
+print(luna)
+```
+
+`Hund` ist die Klasse. `luna` ist ein Objekt dieser Klasse. Man sagt auch:
+`luna` ist eine **Instanz** von `Hund`.
+
+### Eine Klasse kann viele Objekte erzeugen
+
+Aus einem Bauplan können viele Objekte entstehen:
+
+```python
+class Hund:
+    pass
+
+luna = Hund()
+bruno = Hund()
+
+print(luna)
+print(bruno)
+print(luna == bruno)
+```
+
+`luna` und `bruno` wurden mit demselben Bauplan erzeugt, sind aber zwei
+verschiedene Objekte.
+
+Das kennst du schon aus miniworlds:
+
+```python noeditor
+spieler = miniworlds.Actor((80, 150))
+gegner = miniworlds.Actor((300, 150))
+```
+
+Beide Objekte kommen aus der Klasse `Actor`, haben aber eigene Positionen,
+Farben und Zustände.
+
+### Wofür Klassen gut sind
+
+Klassen helfen dir, Code zu ordnen:
+
+- zusammengehörige Daten liegen als Attribute in einem Objekt
+- passende Funktionen liegen als Methoden in derselben Klasse
+- aus einem Bauplan kannst du beliebig viele ähnliche Objekte erzeugen
+
+Das ist besonders nützlich, wenn dein Programm aus mehreren Dingen besteht:
+Spielfiguren, Gegnern, Items, Karten, Projektilen oder UI-Elementen.
+
+!!! note Merke
+Eine Klasse ist ein Bauplan. Ein Objekt ist eine konkrete Instanz dieses
+Bauplans.
+!!!

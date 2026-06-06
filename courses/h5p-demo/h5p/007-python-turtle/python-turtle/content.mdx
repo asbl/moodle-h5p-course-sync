@@ -1,25 +1,26 @@
 <Instructions>
-Zeichne mit Turtle-Grafik ein regelmäßiges Sechseck. Jede Seite soll 80 Pixel lang sein.
+Dieses Beispiel zeigt Turtle-Grafik – ein einfaches Haus aus geometrischen Formen.
 </Instructions>
 
 ```python editor:startingCode
 import turtle
 
-for i in range(6):
-    turtle.forward(80)
-    turtle.right(0)  # Welcher Winkel?
-```
+turtle.speed(3)
 
-```python grading:targetCode
-import turtle
+# Wände
+for _ in range(4):
+    turtle.forward(120)
+    turtle.right(90)
 
-for i in range(6):
-    turtle.forward(80)
-    turtle.right(60)
+# Dach
+turtle.left(30)
+for _ in range(3):
+    turtle.forward(120)
+    turtle.left(120)
 ```
 
 ```yaml grading
-gradingMethod: bySolution
+gradingMethod: please_choose
 dueDateGroup:
   enableDueDate: false
   duedate: 01.01.1970

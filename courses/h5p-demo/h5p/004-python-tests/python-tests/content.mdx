@@ -1,1 +1,42 @@
+<Instructions>
+Schreibe eine Funktion `celsius_zu_fahrenheit(c)`, die Celsius in Fahrenheit umrechnet. Formel: F = C × 9/5 + 32
+</Instructions>
 
+```python editor:preCode
+c = float(input())
+```
+
+```python editor:startingCode
+def celsius_zu_fahrenheit(c):
+    pass
+
+print(celsius_zu_fahrenheit(c))
+```
+
+```yaml grading
+gradingMethod: ioTestCases
+dueDateGroup:
+  enableDueDate: false
+  duedate: 01.01.1970
+testCases:
+- hidden: false
+  inputs:
+  - '0'
+  outputs:
+  - '32.0'
+- hidden: false
+  inputs:
+  - '100'
+  outputs:
+  - '212.0'
+- hidden: true
+  inputs:
+  - '-40'
+  outputs:
+  - '-40.0'
+- hidden: true
+  inputs:
+  - '25'
+  outputs:
+  - '77.0'
+```
