@@ -29,6 +29,27 @@ from ._helpers import (
 from .base import H5PContentType
 
 
+DEFAULT_ADVANCED_OPTIONS: dict[str, object] = {
+    "showConsole": True,
+    "disableOutputPopups": False,
+    "enableSaveLoadButtons": True,
+    "execLimit": 0,
+    "blocklyCdnUrl": "",
+    "codeMirrorCdnUrl": "",
+    "markdownCdnUrl": "",
+    "fontAwesomeCdnUrl": "",
+    "sweetAlertCdnUrl": "",
+    "jsZipCdnUrl": "",
+    "p5CdnUrl": "",
+    "skulptCdnUrl": "",
+    "sqlJsUrl": "",
+}
+
+DEFAULT_PYODIDE_OPTIONS: dict[str, object] = {
+    "pyodideCdnUrl": "",
+}
+
+
 @dataclass(slots=True)
 class PythonQuestion(H5PContentType):
     """H5P.PythonQuestion — the custom Python IDE activity.
@@ -203,16 +224,22 @@ class PythonQuestion(H5PContentType):
                 value = clone_json_value(value)
                 if isinstance(value, dict) and value.get("showConsole") == self.show_console:
                     value.pop("showConsole", None)
+                if isinstance(value, dict):
+                    self._strip_default_values(value, DEFAULT_ADVANCED_OPTIONS)
             if key == "pyodideOptions" and isinstance(value, dict):
                 value = clone_json_value(value)
                 if isinstance(value, dict) and value.get("packages") == defaults.get(
                     "pyodideOptions", {}
                 ).get("packages"):
                     value.pop("packages", None)
+                if isinstance(value, dict):
+                    self._strip_default_values(value, DEFAULT_PYODIDE_OPTIONS)
             if key == "gradingSettings" and isinstance(value, dict):
                 value = clone_json_value(value)
                 if isinstance(value, dict) and value.get("gradingMethod") == self.grading_method:
                     value.pop("gradingMethod", None)
+            if isinstance(value, dict) and not value:
+                continue
 
             # Semantics-based compaction for remaining keys
             sem_field = semantic_fields.get(key)
@@ -389,8 +416,8 @@ class PythonQuestion(H5PContentType):
                 "testCases": [
                     {
                         "hidden": tc.hidden,
-                        "inputs": list(tc.inputs),
-                        "outputs": list(tc.outputs),
+                        "inputs": self._test_case_values_to_h5p(tc.inputs, field_name="input"),
+                        "outputs": self._test_case_values_to_h5p(tc.outputs, field_name="output"),
                     }
                     for tc in self.test_cases
                 ],
@@ -435,6 +462,14 @@ class PythonQuestion(H5PContentType):
     # ------------------------------------------------------------------
     # Private helpers
     # ------------------------------------------------------------------
+
+    def _test_case_values_to_h5p(self, values: list[str], *, field_name: str) -> list[dict[str, str]]:
+        return [{field_name: value} for value in values]
+
+    def _strip_default_values(self, target: dict[str, object], defaults: dict[str, object]) -> None:
+        for key, default_value in defaults.items():
+            if target.get(key) == default_value:
+                target.pop(key, None)
 
     def _build_default_content(
         self,

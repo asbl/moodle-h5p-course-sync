@@ -70,6 +70,7 @@ DEFAULT_ADVANCED_OPTIONS: dict[str, object] = {
 DEFAULT_PYODIDE_OPTIONS: dict[str, object] = {
     "pyodideCdnUrl": "",
 }
+SPLIT_DEFAULTS_MARKER = "__course_sync_split_defaults"
 
 LITERAL_TEXT_FIELDS = {"text", "instructions"}
 LITERAL_CODE_FIELDS = {"code", "startingCode", "preCode", "postCode", "targetCode"}
@@ -193,7 +194,7 @@ class ContentStore:
         raise FileNotFoundError(f"Kein H5P-Content in {source_dir} gefunden.")
 
     def write_h5p_content_files(self, target_dir: Path, payload: dict[str, object]) -> None:
-        if self._is_python_question_payload(payload):
+        if self._should_write_split_content_files(payload):
             settings_payload, mdx_source = self._split_python_question_payload_for_mdx(payload)
             self.write_object(target_dir / "settings.yml", settings_payload)
             self._write_text(target_dir / "content.mdx", mdx_source)
@@ -256,7 +257,7 @@ class ContentStore:
 
     def _strip_redundant_defaults(self, payload: dict[str, object]) -> dict[str, object]:
         compact = deepcopy(payload)
-        is_python_payload = self._is_python_question_payload(compact)
+        uses_python_defaults = self._uses_python_question_defaults(compact)
         contents = compact.get("contents")
         if isinstance(contents, list):
             for item in contents:
@@ -274,7 +275,7 @@ class ContentStore:
             self._strip_option_group(editor, "options", DEFAULT_EDITOR_OPTIONS)
             self._strip_option_group(editor, "blocklyCategories", DEFAULT_BLOCKLY_CATEGORIES)
 
-        if is_python_payload:
+        if uses_python_defaults:
             self._strip_option_group(compact, "advancedOptions", DEFAULT_ADVANCED_OPTIONS)
             self._strip_option_group(compact, "pyodideOptions", DEFAULT_PYODIDE_OPTIONS)
 
@@ -282,7 +283,7 @@ class ContentStore:
 
     def _expand_compact_defaults(self, payload: dict[str, object], *, source_dir: Path | None = None) -> dict[str, object]:
         expanded = deepcopy(payload)
-        is_python_payload = self._is_python_question_payload(expanded)
+        uses_python_defaults = self._uses_python_question_defaults(expanded)
         contents = expanded.get("contents")
         if isinstance(contents, list):
             for item in contents:
@@ -300,13 +301,14 @@ class ContentStore:
             self._apply_option_group(editor, "options", DEFAULT_EDITOR_OPTIONS)
             self._apply_option_group(editor, "blocklyCategories", DEFAULT_BLOCKLY_CATEGORIES)
 
-        if is_python_payload:
+        if uses_python_defaults:
             payload_source = "\n".join(self._iter_payload_strings(expanded))
-            expanded["pythonRunner"] = resolve_python_runner(
-                expanded.get("pythonRunner", ""),
-                packages=self._extract_pyodide_packages(expanded),
-                source=payload_source,
-            )
+            if self._is_python_question_payload(expanded):
+                expanded["pythonRunner"] = resolve_python_runner(
+                    expanded.get("pythonRunner", ""),
+                    packages=self._extract_pyodide_packages(expanded),
+                    source=payload_source,
+                )
             self._apply_option_group(expanded, "advancedOptions", DEFAULT_ADVANCED_OPTIONS)
             self._apply_option_group(expanded, "pyodideOptions", DEFAULT_PYODIDE_OPTIONS)
             packages = ensure_miniworlds_packages(
@@ -318,6 +320,7 @@ class ContentStore:
                 pyodide_options["packages"] = packages
             self._apply_miniworlds_editor_defaults(expanded, payload_source, source_dir=source_dir)
 
+        expanded.pop(SPLIT_DEFAULTS_MARKER, None)
         return expanded
 
     def _is_code_content_item(self, item: dict[str, object]) -> bool:
@@ -418,6 +421,28 @@ class ContentStore:
         runner = payload.get("pythonRunner")
         return isinstance(runner, str) and bool(runner.strip())
 
+    def _uses_python_question_defaults(self, payload: dict[str, object]) -> bool:
+        return (
+            self._is_python_question_payload(payload)
+            or isinstance(payload.get("pyodideOptions"), dict)
+            or payload.get(SPLIT_DEFAULTS_MARKER) is True
+        )
+
+    def _should_write_split_content_files(self, payload: dict[str, object]) -> bool:
+        content_type = str(payload.get("contentType") or "")
+        if content_type not in {"ide_only", "text_only"}:
+            return False
+        return any(
+            key in payload
+            for key in [
+                "pythonRunner",
+                "editorSettings",
+                "gradingSettings",
+                "advancedOptions",
+                "pyodideOptions",
+            ]
+        )
+
     def _extract_pyodide_packages(self, payload: dict[str, object]) -> list[str]:
         pyodide_options = payload.get("pyodideOptions")
         if not isinstance(pyodide_options, dict):
@@ -504,6 +529,8 @@ class ContentStore:
         content_payload = deepcopy(settings_payload)
         mdx_payload = self._parse_content_mdx(mdx_path.read_text(encoding="utf-8"))
         content_payload["contents"] = mdx_payload["contents"]
+        if self._should_use_python_defaults_for_split_source(source_dir):
+            content_payload[SPLIT_DEFAULTS_MARKER] = True
         if mdx_payload["editorSettings"]:
             editor = content_payload.get("editorSettings")
             if not isinstance(editor, dict):
@@ -517,6 +544,16 @@ class ContentStore:
                 content_payload["gradingSettings"] = grading
             grading.update(mdx_payload["gradingSettings"])
         return self._unwrap_backtick_templates(content_payload)
+
+    def _should_use_python_defaults_for_split_source(self, source_dir: Path) -> bool:
+        h5p_json = source_dir / "h5p.json"
+        if not h5p_json.exists():
+            return True
+        try:
+            payload = self.read_object(h5p_json)
+        except (FileNotFoundError, ValueError, json.JSONDecodeError):
+            return False
+        return isinstance(payload, dict) and payload.get("mainLibrary") == "H5P.PythonQuestion"
 
     def _split_python_question_payload_for_mdx(self, payload: dict[str, object]) -> tuple[dict[str, object], str]:
         compact_payload = self._strip_redundant_defaults(payload)
