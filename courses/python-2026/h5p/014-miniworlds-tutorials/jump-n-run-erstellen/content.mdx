@@ -96,21 +96,35 @@ neue_plattform(420, 195, 120, 18)
 
 @spieler.register
 def act(self):
+    alter_boden = self.y + self.height
+
     self.vy = self.vy + 1
     self.y = self.y + self.vy
     self.am_boden = False
 
     for plattform in plattformen:
-        if self.detect(plattform) and self.vy >= 0:
+        neuer_boden = self.y + self.height
+        horizontal_ueberlappt = (
+            self.x + self.width > plattform.x
+            and self.x < plattform.x + plattform.width
+        )
+        kommt_von_oben = (
+            alter_boden <= plattform.y
+            and neuer_boden >= plattform.y
+        )
+
+        if horizontal_ueberlappt and kommt_von_oben and self.vy >= 0:
             self.y = plattform.y - self.height
             self.vy = 0
             self.am_boden = True
+            break
 
 world.run()
 ```
 
-Der Spieler fällt nach unten. Sobald er eine Plattform von oben berührt, wird er
-auf die Plattform gesetzt.
+Der Spieler fällt nach unten. Sobald seine Unterkante beim Fallen die Oberkante
+einer Plattform erreicht, wird er auf die Plattform gesetzt. Dadurch zählt nur
+eine Landung von oben als Bodenkontakt.
 
 ### Laufen und springen
 
@@ -149,6 +163,8 @@ meldung.color = (40, 45, 55)
 
 @spieler.register
 def act(self):
+    alter_boden = self.y + self.height
+
     self.vy = self.vy + 1
     if self.vy > 12:
         self.vy = 12
@@ -157,16 +173,27 @@ def act(self):
     self.am_boden = False
 
     for plattform in plattformen:
-        if self.detect(plattform) and self.vy >= 0:
+        neuer_boden = self.y + self.height
+        horizontal_ueberlappt = (
+            self.x + self.width > plattform.x
+            and self.x < plattform.x + plattform.width
+        )
+        kommt_von_oben = (
+            alter_boden <= plattform.y
+            and neuer_boden >= plattform.y
+        )
+
+        if horizontal_ueberlappt and kommt_von_oben and self.vy >= 0:
             self.y = plattform.y - self.height
             self.vy = 0
             self.am_boden = True
+            break
 
     if self.detect(ziel):
         meldung.text = "Geschafft!"
 
 @spieler.register
-def on_key_pressedright(self):
+def on_key_pressed_right(self):
     self.x = self.x + 6
 
 @spieler.register
