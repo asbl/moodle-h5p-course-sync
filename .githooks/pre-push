@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT_DIR="$(git rev-parse --show-toplevel)"
+cd "$ROOT_DIR"
+
+if [[ -x ".venv/bin/python" ]]; then
+  PYTHON=".venv/bin/python"
+else
+  PYTHON="python"
+fi
+
+echo "pre-push: running unit tests"
+"$PYTHON" -m unittest discover -s tests -p 'test_*.py'

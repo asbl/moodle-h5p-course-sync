@@ -85,6 +85,20 @@ def test(ctx) -> None:
     _run_python(ctx, "-m", "unittest", "discover", "-s", "tests", "-p", "test_*.py")
 
 
+@task(name="pre-push-check")
+def pre_push_check(ctx) -> None:
+    """Run all checks that must pass before pushing."""
+    test(ctx)
+
+
+@task(name="install-git-hooks")
+def install_git_hooks(ctx) -> None:
+    """Configure Git to use the versioned hooks in .githooks/."""
+    del ctx
+    subprocess.run(["git", "config", "core.hooksPath", ".githooks"], check=True, cwd=ROOT_DIR)
+    print("Git hooks aktiviert: .githooks")
+
+
 @task(name="list-courses", optional=["verbose"])
 def list_courses(ctx, verbose: bool = False) -> None:
     """List local courses."""

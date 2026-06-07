@@ -10,6 +10,18 @@
 - H5P-Libraries werden nicht unter `courses/<kurs>/h5p/` gespeichert.
 - Zentrale Libraries liegen nur unter `libraries/`.
 
+# Push-Regel und Test-Workflow
+
+- Es darf niemals gepusht werden, solange Tests fehlschlagen oder bekannte Errors offen sind.
+- Vor jedem Push muss mindestens `inv pre-push-check` erfolgreich laufen. Dieser Task fuehrt die komplette Unit-Test-Suite aus.
+- Empfohlener Ablauf vor `git push`:
+  1. `inv pre-push-check`
+  2. offene Aenderungen committen
+  3. `git push origin <branch>`
+- Der versionierte Git-Hook unter `.githooks/pre-push` fuehrt dieselbe Pruefung automatisch vor einem Push aus.
+- Hook einmalig aktivieren mit: `inv install-git-hooks`
+- Wenn der Hook oder `inv pre-push-check` fehlschlaegt, wird **nicht** gepusht. Erst Ursache beheben, Tests erneut ausfuehren, dann pushen.
+
 # Refactoring-Konventionen fuer `scripts/main.py`
 
 ## Fassaden-Regel
