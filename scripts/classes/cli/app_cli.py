@@ -145,6 +145,11 @@ def build_arg_parser(default_port: int) -> argparse.ArgumentParser:
         default=30_000,
         help="Playwright-Timeout in Millisekunden. Standard: 30000.",
     )
+    upload_parser.add_argument(
+        "--verify-mbz-sync",
+        action="store_true",
+        help="Laedt vor und nach dem Upload ein .mbz-Kursbackup herunter und gibt eine detaillierte Diff-Analyse aus.",
+    )
 
     ping_parser = subparsers.add_parser(
         "moodle-ping", help="Prueft, ob die konfigurierte Moodle-Webservice-Verbindung funktioniert."

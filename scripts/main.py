@@ -57,6 +57,7 @@ from scripts.classes.h5p_runtime_manager import quote_path_segment as quote_path
 from scripts.classes.h5p_runtime_manager.runtime_manager import H5PRuntimeManager
 from scripts.classes.moodle_sync import MoodleSyncer
 from scripts.classes.moodle_sync import MoodleApiClient
+from scripts.classes.moodle_sync import MoodleBackupDiffAnalyzer
 from scripts.classes.moodle_sync import MoodleBackupExtractor
 from scripts.classes.moodle_sync import MoodleBackupImporter
 from scripts.classes.moodle_sync import MoodleClientResolver
@@ -113,6 +114,10 @@ def moodle_backup_extractor() -> MoodleBackupExtractor:
         download_file=download_file,
         ensure_directory=ensure_directory,
     )
+
+
+def moodle_backup_diff_analyzer() -> MoodleBackupDiffAnalyzer:
+    return MoodleBackupDiffAnalyzer()
 
 
 def normalize_whitespace(value: str) -> str:
@@ -811,6 +816,7 @@ def upload_moodle_chapter(
     headless: bool = False,
     timeout_ms: int = 30_000,
     target: str | None = None,
+    verify_mbz_sync: bool = False,
 ) -> list[MoodleH5PUploadResult]:
     moodle_client_resolver().load_dotenv_file()
     sync_course(course_dir)
@@ -851,12 +857,42 @@ def upload_moodle_chapter(
         headless=headless,
         timeout_ms=timeout_ms,
     )
+    before_backup = _download_course_backup_snapshot(course_dir, resolved_course_url, "before") if verify_mbz_sync else None
     results = uploader.upload_packages(packages)
+    if verify_mbz_sync and before_backup is not None:
+        after_backup = _download_course_backup_snapshot(course_dir, resolved_course_url, "after")
+        analysis = moodle_backup_diff_analyzer().analyze(before_backup, after_backup)
+        print(moodle_backup_diff_analyzer().format_report(analysis), flush=True)
     if not target and not course_url:
         _store_uploaded_activity_ids(course_dir, results)
     if target:
         _store_target_activity_ids(course_dir, target, results)
     return results
+
+
+def _download_course_backup_snapshot(course_dir: Path, course_url: str, label: str) -> Path:
+    parsed = urlparse(course_url)
+    course_id = int(parse_qs(parsed.query).get("id", ["0"])[0])
+    if course_id <= 0:
+        raise RuntimeError(f"Moodle-Kurs-ID fehlt in Kurs-URL: {course_url}")
+    base_url = f"{parsed.scheme}://{parsed.netloc}" if parsed.scheme and parsed.netloc else ""
+    if not base_url:
+        raise RuntimeError(f"Moodle-Basis-URL konnte nicht aus Kurs-URL gelesen werden: {course_url}")
+
+    backup_url = moodle_backup_extractor().discover_course_backup_url(base_url, course_id, course_url)
+    if not backup_url:
+        raise RuntimeError(
+            "Kein Moodle-.mbz-Backup-Link im Kurs gefunden. "
+            "Lege vor dem verifizierten Sync ein Kursbackup mit allen Aktivitaeten an oder fuehre ohne --verify-mbz-sync aus."
+        )
+
+    backups_dir = course_dir / "build" / "moodle-backups"
+    ensure_directory(backups_dir)
+    existing_count = len(list(backups_dir.glob(f"{label}-*.mbz")))
+    destination = backups_dir / f"{label}-{existing_count + 1:03d}.mbz"
+    print(f"Lade Moodle-MBZ-Snapshot ({label}): {backup_url}", flush=True)
+    download_file(backup_url, destination)
+    return destination
 
 
 def _load_existing_h5p_activity_ids_from_moodle(

@@ -154,7 +154,7 @@ def export_chapter(ctx, chapter: str, course: str = "python-2026", output: str =
     _run_python(ctx, *args)
 
 
-@task(optional=["course", "course_url", "target", "section", "username", "password", "storage_state", "headless", "timeout"])
+@task(optional=["course", "course_url", "target", "section", "username", "password", "storage_state", "headless", "timeout", "verify_mbz_sync"])
 def upload_chapter_moodle(
     ctx,
     chapter: str,
@@ -167,6 +167,7 @@ def upload_chapter_moodle(
     storage_state: str = "",
     headless: bool = False,
     timeout: int = 30000,
+    verify_mbz_sync: bool = False,
 ) -> None:
     """Upload or update one chapter's H5P packages in Moodle via Playwright."""
     args = [str(COURSE_SYNC), "upload-chapter-moodle", course, chapter]
@@ -186,12 +187,14 @@ def upload_chapter_moodle(
         args.append("--headless")
     if timeout != 30000:
         args.extend(["--timeout", str(timeout)])
+    if verify_mbz_sync:
+        args.append("--verify-mbz-sync")
     _run_python(ctx, *args, pty=not headless)
 
 
 @task(
     name="sync-h5p-demo-courses-moodle",
-    optional=["german_course", "english_course", "german_course_url", "english_course_url", "timeout"],
+    optional=["german_course", "english_course", "german_course_url", "english_course_url", "timeout", "verify_mbz_sync"],
 )
 def sync_h5p_demo_courses_moodle(
     ctx,
@@ -201,6 +204,7 @@ def sync_h5p_demo_courses_moodle(
     english_course_url: str = "",
     headless: bool = False,
     timeout: int = 30000,
+    verify_mbz_sync: bool = False,
 ) -> None:
     """Build and upload both H5P demo courses to their configured Moodle courses."""
     _ensure_course_sync_metadata(german_course, 2, "https://www.opencoding.de")
@@ -219,6 +223,8 @@ def sync_h5p_demo_courses_moodle(
                 args.append("--headless")
             if timeout != 30000:
                 args.extend(["--timeout", str(timeout)])
+            if verify_mbz_sync:
+                args.append("--verify-mbz-sync")
             _run_python(ctx, *args, pty=not headless)
 
 

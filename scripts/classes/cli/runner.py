@@ -175,7 +175,7 @@ def run_cli_command(
     print_course_status: Callable[[dict[str, object]], None],
     export_chapter: Callable[[Path, str, Path | None], list[Path]] | None = None,
     upload_moodle_chapter: Callable[
-        [Path, str, str | None, str | None, str | None, str | None, Path | None, bool, int, str | None],
+        [Path, str, str | None, str | None, str | None, str | None, Path | None, bool, int, str | None, bool],
         list[UploadResultLike],
     ]
     | None = None,
@@ -290,6 +290,7 @@ def run_cli_command(
                 args.headless,
                 args.timeout,
                 args.target,
+                getattr(args, "verify_mbz_sync", False),
             )
             for result in results:
                 print(f"{result.action}: {result.identifier} ({result.title})")
