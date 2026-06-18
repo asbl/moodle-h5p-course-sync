@@ -111,6 +111,18 @@ MOODLE_INFO_2026_SCHULE_PASSWORD=mein-passwort
 course-sync upload-chapter-moodle info-2026 001-einstieg --target=schule
 ```
 
+## Moodle-Upload: Zwei Nutzer erforderlich
+
+ Fuer Browser-Uploads (Playwright) und API-Zugriffe werden **zwei separate Moodle-Nutzer** bentigt:
+
+- **Playwright-Nutzer**: Muss als Trainer/in oder aehnlich im Kurs eingeschrieben sein
+  (Browser-Login fuer den Upload)
+- **Webservice-Nutzer** (Token): Muss ebenfalls im Kurs eingeschrieben sein
+  (API-Zugriffe fuer den Upload)
+
+Es reicht nicht, nur einen der beiden einzuschreiben — sonst scheitert der Upload
+mit einem Login-Fehler.
+
 ## Typische Probleme
 
 `course-sync: command not found`
