@@ -1,0 +1,139 @@
+## Grundlagen
+
+### Installation
+
+<PythonQuestion
+  identifier="installation"
+/>
+
+Du lernst, wie du miniworlds auf deinem Computer installierst.
+
+#### Installation mit pip
+
+```bash
+pip install miniworlds
+```
+
+#### Optional: Physics-Paket
+
+Für Physik-Unterstützung (Schwerkraft, Kollisionen):
+
+```bash
+pip install miniworlds miniworlds_physics
+```
+
+#### Entwicklungsumgebung
+
+Empfohlen für Anfänger: [Thonny](https://thonny.org/) – es kommt mit Python.
+
+### Die erste Welt
+
+<PythonQuestion
+  identifier="world-erstellen"
+/>
+
+Du erstellst deine erste miniworlds-Welt.
+
+#### Eine Welt erstellen
+
+```python
+from miniworlds import World
+
+# Welt mit 600x300 Pixeln
+world = World(600, 300)
+
+# Welt anzeigen
+world.run()
+```
+
+#### Hintergrund hinzufügen
+
+```python
+import miniworlds
+
+world = miniworlds.World(600, 300)
+world.add_background("images/grass.png")
+world.run()
+```
+
+:::{note}
+Die Bilder müssen in einem `images/`-Ordner liegen.
+:::
+
+### Actors
+
+<PythonQuestion
+  identifier="actor-erstellen"
+/>
+
+Du lernst, Actors in deine Welt zu setzen.
+
+#### Einen Actor erstellen
+
+```python
+import miniworlds
+
+world = miniworlds.World(600, 300)
+actor = miniworlds.Actor((100, 40))
+world.run()
+```
+
+#### Kostüme hinzufügen
+
+```python
+from miniworlds import World, Actor
+
+world = World(600, 300)
+actor = Actor((100, 40))
+actor.add_costume("images/player.png")
+world.run()
+```
+
+:::{note}
+Die Position (100, 40) bezieht sich auf den **Mittelpunkt** des Actors.
+:::
+
+### Bewegung
+
+<PythonQuestion
+  identifier="bewegung"
+/>
+
+Du lernst, wie du Actors bewegen kannst.
+
+#### move() – Geradeaus bewegen
+
+```python
+@player.register
+def act(self):
+    self.move()
+```
+
+#### Richtung ändern
+
+```python
+@player.register
+def act(self):
+    self.direction = "right"
+    self.move()
+```
+
+#### Drehen
+
+```python
+@player.register
+def on_key_down_a(self):
+    self.turn_left(30)
+
+@player.register
+def on_key_down_d(self):
+    self.turn_right(30)
+```
+
+#### move_in_direction()
+
+```python
+@player.register
+def act(self):
+    self.move_in_direction(45)  # Diagonal
+```

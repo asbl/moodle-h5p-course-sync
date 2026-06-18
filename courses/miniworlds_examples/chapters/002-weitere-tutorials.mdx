@@ -1,0 +1,147 @@
+## Weitere Tutorials
+
+### Kollisionen
+
+<PythonQuestion
+  identifier="rand-erkennen"
+/>
+
+<PythonQuestion
+  identifier="actors-zueinander"
+/>
+
+Du lernst, wie Actors mit ihrer Umgebung und anderen Actors kollidieren.
+
+#### Rand erkennen
+
+```python
+@ball.register
+def act(self):
+    self.move()
+    borders = self.detect_borders()
+    if borders:
+        self.bounce_from_border(borders)
+```
+
+#### Abstand messen
+
+```python
+abstand = spieler.get_distance_to(ziel)
+```
+
+#### Berührung erkennen
+
+```python
+@ball.register
+def act(self):
+    if self.detect_actors(ziel):
+        print("Berührung!")
+```
+
+### Events
+
+<PythonQuestion
+  identifier="tastatur-events"
+/>
+
+<PythonQuestion
+  identifier="maus-events"
+/>
+
+Du lernst, wie du auf Tastatur und Maus reagierst.
+
+#### Tastatur-Events
+
+```python
+@player.register
+def on_key_pressed_right(self):
+    self.x = self.x + 10
+
+@player.register
+def on_key_pressed_a(self):
+    self.turn_left(30)
+```
+
+#### Maus-Events
+
+```python
+@world.register
+def on_mouse_left(self):
+    self.add_actor(Circle(self.mouse_x, self.mouse_y, 20))
+```
+
+### Fortgeschrittene Themen
+
+<PythonQuestion
+  identifier="animationen"
+/>
+
+<PythonQuestion
+  identifier="timer"
+/>
+
+Du lernst Animationen und Timer.
+
+#### Animationen
+
+```python
+knight = miniworlds.Actor((100, 100))
+knight.add_costume("images/knight.png")
+knight.add_costume("images/knight2.png")
+knight.costume.animate()
+```
+
+#### Timer
+
+```python
+@world.register
+def on_setup(self):
+    self.set_timer("my_timer", 3)
+
+@world.register
+def on_timer_my_timer(self):
+    print("3 Sekunden vorbei!")
+```
+
+### Tiled Worlds
+
+<PythonQuestion
+  identifier="tiled-worlds"
+/>
+
+<PythonQuestion
+  identifier="kamera"
+/>
+
+<PythonQuestion
+  identifier="tiled-worlds-rpg"
+/>
+
+Du lernst, Worlds aus einer Liste zu erstellen.
+
+#### Level aus Liste erstellen
+
+```python
+level = [
+    "##########",
+    "#S.......#",
+    "#..###...#",
+    "#....#..Z#",
+    "##########",
+]
+
+world = miniworlds.TiledWorld(10, 6)
+
+for y, zeile in enumerate(level):
+    for x, zeichen in enumerate(zeile):
+        position = (x, y)
+        if zeichen == "#":
+            wand = miniworlds.Actor(position)
+            wand.is_blocking = True
+```
+
+#### Kamera folgen lassen
+
+```python
+world.camera.from_actor(spieler)
+```
