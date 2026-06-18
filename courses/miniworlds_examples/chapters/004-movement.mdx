@@ -1,0 +1,46 @@
+## Bewegung
+
+<PythonQuestion
+  identifier="bewegung"
+/>
+
+### Das Ziel
+
+Du lernst, wie du Actors bewegen kannst.
+
+### move() – Geradeaus bewegen
+
+```python
+@player.register
+def act(self):
+    self.move()
+```
+
+### Richtung ändern
+
+```python
+@player.register
+def act(self):
+    self.direction = "right"
+    self.move()
+```
+
+### Drehen
+
+```python
+@player.register
+def on_key_down_a(self):
+    self.turn_left(30)
+
+@player.register
+def on_key_down_d(self):
+    self.turn_right(30)
+```
+
+### move_in_direction()
+
+```python
+@player.register
+def act(self):
+    self.move_in_direction(45)  # Diagonal
+```

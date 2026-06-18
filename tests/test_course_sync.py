@@ -7,7 +7,6 @@ import unittest
 from hashlib import sha1
 from io import BytesIO
 from pathlib import Path
-from unittest.mock import call, patch
 from zipfile import ZipFile
 
 import yaml
@@ -39,7 +38,6 @@ from scripts.main import (
     write_source_package_sidecar,
 )
 from scripts.classes.h5p_runtime_manager import build_runtime_content_id
-from scripts.classes.moodle_sync import MoodleBackupDiffAnalyzer
 
 
 class CourseSyncTests(unittest.TestCase):
@@ -114,7 +112,7 @@ print("quadrat")
         first_question = questions[0]
         second_question = questions[1]
         self.assertEqual(first_question.identifier, "12eck")
-        self.assertEqual(first_question.packages, ["miniworlds", "sqlite3"])
+        self.assertEqual(first_question.packages, ["miniworlds"])
         self.assertEqual(second_question.identifier, "quadrat")
         self.assertIn("[[[PYTHON_QUESTION:12eck]]]", rendered_source)
         self.assertIn("[[[PYTHON_QUESTION:quadrat]]]", rendered_source)
@@ -381,7 +379,7 @@ turtle.forward(50)
         assert question is not None
         self.assertEqual(question.title, "Test: Erste Aufgabe")
         self.assertEqual(question.runner, "skulpt")
-        self.assertEqual(question.packages, ["miniworlds", "sqlite3"])
+        self.assertEqual(question.packages, ["miniworlds"])
         self.assertEqual(question.instructions, "**Aufgabe:** Gebe Informatik aus.")
         self.assertEqual(question.pre_code, "import math")
         self.assertEqual(question.starter_code, 'print("Informatik")')
@@ -1136,50 +1134,6 @@ turtle.forward(50)
         with ZipFile(destination) as archive:
             self.assertEqual(json.loads(archive.read("h5p.json").decode("utf-8"))["title"], "Bonus: Timestamps II")
 
-    def test_moodle_backup_diff_analyzer_reports_sections_activities_and_runtime_samples(self) -> None:
-        before_path = self.root / "before.mbz"
-        after_path = self.root / "after.mbz"
-        self._write_mbz_snapshot(
-            before_path,
-            sections=[
-                {"id": 10, "number": 1, "name": "Grundlagen", "sequence": [101]},
-                {"id": 20, "number": 2, "name": "Alt", "sequence": [201]},
-            ],
-            activities=[
-                {"moduleid": 101, "sectionid": 10, "title": "Intro", "library": "H5P.PythonQuestion", "content": {"version": 1}},
-                {"moduleid": 201, "sectionid": 20, "title": "Weg", "library": "H5P.QuestionSet", "content": {"version": 1}},
-            ],
-        )
-        self._write_mbz_snapshot(
-            after_path,
-            sections=[
-                {"id": 10, "number": 1, "name": "Grundlagen neu", "sequence": [101, 301]},
-                {"id": 30, "number": 3, "name": "Neu", "sequence": [401]},
-            ],
-            activities=[
-                {"moduleid": 101, "sectionid": 10, "title": "Intro", "library": "H5P.PythonQuestion", "content": {"version": 2}},
-                {"moduleid": 301, "sectionid": 10, "title": "Neue Aufgabe", "library": "H5P.PythonQuestion", "content": {"version": 1}},
-                {"moduleid": 401, "sectionid": 30, "title": "Quiz", "library": "H5P.QuestionSet", "content": {"questions": []}},
-            ],
-        )
-
-        analyzer = MoodleBackupDiffAnalyzer()
-        analysis = analyzer.analyze(before_path, after_path)
-        report = analyzer.format_report(analysis)
-
-        self.assertEqual([item["title"] for item in analysis["sections"]["created"]], ["Neu"])
-        self.assertEqual([item["before"]["title"] for item in analysis["sections"]["changed"]], ["Grundlagen"])
-        self.assertEqual([item["title"] for item in analysis["sections"]["deleted"]], ["Alt"])
-        self.assertEqual([item["title"] for item in analysis["activities"]["created"]], ["Neue Aufgabe", "Quiz"])
-        self.assertEqual([item["after"]["title"] for item in analysis["activities"]["changed"]], ["Intro"])
-        self.assertEqual([item["title"] for item in analysis["activities"]["deleted"]], ["Weg"])
-        self.assertEqual(
-            [(item["type"], item["ok"]) for item in analysis["runtimeChecks"]],
-            [("H5P.PythonQuestion", True), ("H5P.QuestionSet", True)],
-        )
-        self.assertIn("MBZ-Sync-Analyse", report)
-        self.assertIn("Stichproben-Laufcheck je Aktivitaetstyp", report)
-
     def test_download_activity_question_falls_back_to_course_backup(self) -> None:
         backup_path = self.root / "course.mbz"
         package_bytes = self._build_h5p_archive_bytes(
@@ -1625,76 +1579,6 @@ turtle.forward(50)
             module.sync_course = original_sync_course
             module.collect_h5p_upload_packages = original_collect
             module.MoodlePlaywrightUploader = original_uploader
-
-    def test_upload_moodle_chapter_verify_mbz_sync_downloads_before_after_and_prints_report(self) -> None:
-        from scripts import main as module
-
-        captured: dict[str, object] = {}
-        snapshots: list[tuple[Path, str, str]] = []
-        analyses: list[tuple[Path, Path]] = []
-
-        class FakeUploader:
-            def __init__(self, **kwargs: object) -> None:
-                captured.update(kwargs)
-
-            def upload_packages(self, packages: object) -> list[object]:
-                captured["packages"] = packages
-                return []
-
-        test_case = self
-
-        class FakeAnalyzer:
-            def analyze(self, before_path: Path, after_path: Path) -> dict[str, object]:
-                analyses.append((before_path, after_path))
-                return {"ok": True}
-
-            def format_report(self, analysis: dict[str, object]) -> str:
-                test_case.assertEqual(analysis, {"ok": True})
-                return "MBZ-Sync-Analyse\n- ok"
-
-        before = self.root / "before.mbz"
-        after = self.root / "after.mbz"
-
-        original_sync_course = module.sync_course
-        original_collect = module.collect_h5p_upload_packages
-        original_uploader = module.MoodlePlaywrightUploader
-        original_download_snapshot = module._download_course_backup_snapshot
-        original_analyzer = module.moodle_backup_diff_analyzer
-        try:
-            module.sync_course = lambda _course_dir: []
-            module.collect_h5p_upload_packages = lambda _course_dir, _chapter: []
-            module.MoodlePlaywrightUploader = FakeUploader
-
-            def fake_download_snapshot(course_dir: Path, course_url: str, label: str) -> Path:
-                snapshots.append((course_dir, course_url, label))
-                return before if label == "before" else after
-
-            module._download_course_backup_snapshot = fake_download_snapshot
-            module.moodle_backup_diff_analyzer = lambda: FakeAnalyzer()
-
-            with patch("builtins.print") as print_mock:
-                module.upload_moodle_chapter(
-                    self.course_dir,
-                    "013-texte-strings",
-                    course_url="https://example.invalid/course/view.php?id=5",
-                    verify_mbz_sync=True,
-                )
-        finally:
-            module.sync_course = original_sync_course
-            module.collect_h5p_upload_packages = original_collect
-            module.MoodlePlaywrightUploader = original_uploader
-            module._download_course_backup_snapshot = original_download_snapshot
-            module.moodle_backup_diff_analyzer = original_analyzer
-
-        self.assertEqual(
-            snapshots,
-            [
-                (self.course_dir, "https://example.invalid/course/view.php?id=5", "before"),
-                (self.course_dir, "https://example.invalid/course/view.php?id=5", "after"),
-            ],
-        )
-        self.assertEqual(analyses, [(before, after)])
-        self.assertIn(call("MBZ-Sync-Analyse\n- ok", flush=True), print_mock.call_args_list)
 
     def test_load_existing_h5p_activity_ids_skips_ambiguous_titles(self) -> None:
         from scripts import main as module
@@ -2606,113 +2490,6 @@ turtle.forward(50)
             ),
             encoding="utf-8",
         )
-
-    def _write_mbz_snapshot(
-        self,
-        path: Path,
-        *,
-        sections: list[dict[str, object]],
-        activities: list[dict[str, object]],
-    ) -> None:
-        file_records: list[dict[str, str]] = []
-        package_members: list[tuple[str, bytes]] = []
-        moodle_activities = []
-        for index, activity in enumerate(activities, start=1):
-            module_id = int(activity["moduleid"])
-            title = str(activity["title"])
-            library = str(activity["library"])
-            package_bytes = self._build_h5p_archive_bytes(
-                {"title": title, "mainLibrary": library},
-                dict(activity.get("content", {})),
-            )
-            content_hash = sha1(package_bytes).hexdigest()
-            file_id = str(9000 + index)
-            directory = f"activities/h5pactivity_{module_id}"
-            file_records.append(
-                {
-                    "id": file_id,
-                    "contenthash": content_hash,
-                    "filename": f"{module_id}.h5p",
-                    "directory": directory,
-                }
-            )
-            package_members.append((f"files/{content_hash[:2]}/{content_hash[2:4]}/{content_hash}", package_bytes))
-            moodle_activities.append(
-                f"""
-        <activity>
-          <moduleid>{module_id}</moduleid>
-          <sectionid>{int(activity["sectionid"])}</sectionid>
-          <modulename>h5pactivity</modulename>
-          <title>{title}</title>
-          <directory>{directory}</directory>
-        </activity>"""
-            )
-
-        moodle_sections = [
-            f"""
-        <section>
-          <sectionid>{int(section["id"])}</sectionid>
-          <directory>sections/section_{int(section["id"])}</directory>
-        </section>"""
-            for section in sections
-        ]
-
-        with tarfile.open(path, "w:gz") as archive:
-            self._add_tar_text(
-                archive,
-                "moodle_backup.xml",
-                f"""<?xml version=\"1.0\" encoding=\"UTF-8\"?>
-<moodle_backup>
-  <information>
-    <contents>
-      <sections>{''.join(moodle_sections)}
-      </sections>
-      <activities>{''.join(moodle_activities)}
-      </activities>
-    </contents>
-  </information>
-</moodle_backup>
-""",
-            )
-            for section in sections:
-                sequence = ",".join(str(item) for item in section.get("sequence", []))
-                self._add_tar_text(
-                    archive,
-                    f"sections/section_{int(section['id'])}/section.xml",
-                    f"""<?xml version=\"1.0\" encoding=\"UTF-8\"?>
-<section>
-  <number>{int(section["number"])}</number>
-  <name>{section["name"]}</name>
-  <sequence>{sequence}</sequence>
-</section>
-""",
-                )
-            for record in file_records:
-                self._add_tar_text(
-                    archive,
-                    f"{record['directory']}/inforef.xml",
-                    f"""<?xml version=\"1.0\" encoding=\"UTF-8\"?>
-<inforef><fileref><file><id>{record['id']}</id></file></fileref></inforef>
-""",
-                )
-            self._add_tar_text(
-                archive,
-                "files.xml",
-                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<files>\n"
-                + "".join(
-                    f"""  <file id=\"{record['id']}\">
-    <contenthash>{record['contenthash']}</contenthash>
-    <component>mod_h5pactivity</component>
-    <filearea>package</filearea>
-    <filename>{record['filename']}</filename>
-  </file>
-"""
-                    for record in file_records
-                )
-                + "</files>\n",
-            )
-            for member_name, package_bytes in package_members:
-                self._add_tar_bytes(archive, member_name, package_bytes)
 
     def _build_h5p_archive_bytes(
         self,

@@ -1,0 +1,34 @@
+## Actors
+
+<PythonQuestion
+  identifier="actor-erstellen"
+/>
+
+### Das Ziel
+
+Du lernst, Actors in deine Welt zu setzen.
+
+### Einen Actor erstellen
+
+```python
+import miniworlds
+
+world = miniworlds.World(600, 300)
+actor = miniworlds.Actor((100, 40))
+world.run()
+```
+
+### Kostüme hinzufügen
+
+```python
+from miniworlds import World, Actor
+
+world = World(600, 300)
+actor = Actor((100, 40))
+actor.add_costume("images/player.png")
+world.run()
+```
+
+:::{note}
+Die Position (100, 40) bezieht sich auf den **Mittelpunkt** des Actors.
+:::

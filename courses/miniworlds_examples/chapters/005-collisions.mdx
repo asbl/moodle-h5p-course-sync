@@ -1,0 +1,39 @@
+## Kollisionen
+
+<PythonQuestion
+  identifier="rand-erkennen"
+/>
+
+<PythonQuestion
+  identifier="actors-zueinander"
+/>
+
+### Das Ziel
+
+Du lernst, wie Actors mit ihrer Umgebung und anderen Actors kollidieren.
+
+### Rand erkennen
+
+```python
+@ball.register
+def act(self):
+    self.move()
+    borders = self.detect_borders()
+    if borders:
+        self.bounce_from_border(borders)
+```
+
+### Abstand messen
+
+```python
+abstand = spieler.get_distance_to(ziel)
+```
+
+### Berührung erkennen
+
+```python
+@ball.register
+def act(self):
+    if self.detect_actors(ziel):
+        print("Berührung!")
+```

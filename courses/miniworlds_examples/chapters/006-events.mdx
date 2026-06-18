@@ -1,0 +1,33 @@
+## Events
+
+<PythonQuestion
+  identifier="tastatur-events"
+/>
+
+<PythonQuestion
+  identifier="maus-events"
+/>
+
+### Das Ziel
+
+Du lernst, wie du auf Tastatur und Maus reagierst.
+
+### Tastatur-Events
+
+```python
+@player.register
+def on_key_pressed_right(self):
+    self.x = self.x + 10
+
+@player.register
+def on_key_pressed_a(self):
+    self.turn_left(30)
+```
+
+### Maus-Events
+
+```python
+@world.register
+def on_mouse_left(self):
+    self.add_actor(Circle(self.mouse_x, self.mouse_y, 20))
+```

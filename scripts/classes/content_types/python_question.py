@@ -14,6 +14,7 @@ from scripts.classes.python_runner_policy import (
     contains_miniworlds_import,
     contains_miniworlds_package,
     ensure_miniworlds_packages,
+    packages_for_h5p_content,
 )
 
 from ..models import SourceFile, TestCase
@@ -365,10 +366,11 @@ class PythonQuestion(H5PContentType):
         if self.test_cases and grading_method == "please_choose":
             grading_method = "ioTestCases"
         source = "\n".join([self.starter_code, self.solution_code, self.pre_code, self.post_code])
-        packages = ensure_miniworlds_packages(
+        raw_packages = ensure_miniworlds_packages(
             self.packages,
             source=source,
         )
+        packages = packages_for_h5p_content(raw_packages)
         uses_miniworlds = contains_miniworlds_package(packages) or contains_miniworlds_import(source)
         source_files = [
             {
@@ -488,7 +490,8 @@ class PythonQuestion(H5PContentType):
 
         defaults.setdefault("pyodideOptions", {})
         if isinstance(defaults["pyodideOptions"], dict):
-            defaults["pyodideOptions"]["packages"] = ensure_miniworlds_packages(self.packages)
+            raw_pkgs = ensure_miniworlds_packages(self.packages)
+            defaults["pyodideOptions"]["packages"] = packages_for_h5p_content(raw_pkgs)
 
         defaults.setdefault("editorSettings", {})
         if isinstance(defaults["editorSettings"], dict):

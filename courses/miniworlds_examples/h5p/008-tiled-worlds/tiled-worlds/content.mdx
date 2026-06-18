@@ -1,0 +1,133 @@
+# Tiled Worlds aus Listen erstellen
+
+Bei einem größeren Level möchtest du nicht jede Wand einzeln schreiben. Eine
+Liste kann den Grundriss der Welt speichern. Jedes Zeichen steht für ein Feld.
+
+```python
+level = [
+    "##########",
+    "#S.......#",
+    "#..###...#",
+    "#....#...#",
+    "#....#..Z#",
+    "##########",
+]
+```
+
+Die Zeichen bedeuten:
+
+* `#` ist eine Wand
+* `S` ist der Start des Spielers
+* `Z` ist das Ziel
+* `.` ist ein freies Feld
+
+### Aus der Liste eine TiledWorld bauen
+
+Mit zwei Schleifen gehst du durch alle Zeilen und Spalten. `y` ist die
+Zeilennummer, `x` ist die Spaltennummer.
+
+```python
+import miniworlds
+
+level = [
+    "##########",
+    "#S.......#",
+    "#..###...#",
+    "#....#...#",
+    "#....#..Z#",
+    "##########",
+]
+
+world = miniworlds.TiledWorld(10, 6)
+world.add_background((220, 235, 215))
+
+spieler = None
+ziel = None
+
+for y, zeile in enumerate(level):
+    for x, zeichen in enumerate(zeile):
+        position = (x, y)
+
+        if zeichen == "#":
+            wand = miniworlds.Actor(position)
+            wand.color = (80, 90, 95)
+            wand.is_blocking = True
+
+        if zeichen == "S":
+            spieler = miniworlds.Actor(position)
+            spieler.color = (60, 120, 220)
+            spieler.is_blockable = True
+
+        if zeichen == "Z":
+            ziel = miniworlds.Actor(position)
+            ziel.color = (240, 190, 70)
+
+world.run()
+```
+
+`enumerate(level)` liefert dir die Zeilennummer. `enumerate(zeile)` liefert dir
+die Spaltennummer und das Zeichen an dieser Stelle.
+
+### Steuerung ergänzen
+
+Jetzt bekommt der Spieler wieder die Tastensteuerung. Weil `spieler` erst in
+der Schleife erstellt wird, steht die Steuerung darunter.
+
+```python
+import miniworlds
+
+level = [
+    "##########",
+    "#S.......#",
+    "#..###...#",
+    "#....#...#",
+    "#....#..Z#",
+    "##########",
+]
+
+world = miniworlds.TiledWorld(10, 6)
+world.add_background((220, 235, 215))
+
+spieler = None
+ziel = None
+
+for y, zeile in enumerate(level):
+    for x, zeichen in enumerate(zeile):
+        position = (x, y)
+
+        if zeichen == "#":
+            wand = miniworlds.Actor(position)
+            wand.color = (80, 90, 95)
+            wand.is_blocking = True
+        elif zeichen == "S":
+            spieler = miniworlds.Actor(position)
+            spieler.color = (60, 120, 220)
+            spieler.is_blockable = True
+        elif zeichen == "Z":
+            ziel = miniworlds.Actor(position)
+            ziel.color = (240, 190, 70)
+
+@spieler.register
+def on_key_down_w(self):
+    self.y = self.y  + 1
+
+@spieler.register
+def on_key_down_s(self):
+    self.y = self.y - 1
+
+@spieler.register
+def on_key_down_a(self):
+    self.x = self.x - 1
+
+@spieler.register
+def on_key_down_d(self):
+    self.x = self.x + 1 
+
+world.run()
+```
+
+!!! note Leveldesign als Daten
+Der wichtigste Trick ist: Das Level steht nicht mehr als viele einzelne
+Anweisungen im Code. Es steht als Datenstruktur am Anfang. Dadurch kannst du
+Welten schnell umbauen, ohne die Spiellogik zu verändern.
+!!!

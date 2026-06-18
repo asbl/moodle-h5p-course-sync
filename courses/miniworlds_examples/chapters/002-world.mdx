@@ -1,0 +1,35 @@
+## Die erste Welt
+
+<PythonQuestion
+  identifier="world-erstellen"
+/>
+
+### Das Ziel
+
+Du erstellst deine erste miniworlds-Welt.
+
+### Eine Welt erstellen
+
+```python
+from miniworlds import World
+
+# Welt mit 600x300 Pixeln
+world = World(600, 300)
+
+# Welt anzeigen
+world.run()
+```
+
+### Hintergrund hinzufügen
+
+```python
+import miniworlds
+
+world = miniworlds.World(600, 300)
+world.add_background("images/grass.png")
+world.run()
+```
+
+:::{note}
+Die Bilder müssen in einem `images/`-Ordner liegen.
+:::

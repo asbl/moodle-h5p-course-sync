@@ -106,13 +106,16 @@ class TestBuildDefaultPythonQuestionContent(unittest.TestCase):
         content = syncer._build_default_python_question_content(q)
         self.assertEqual(content["pythonRunner"], "skulpt")
 
-    def test_packages_mapped_to_scalar_list(self) -> None:
+    def test_packages_mapped_to_h5p_object_format(self) -> None:
         syncer = _make_syncer()
         q = _make_question(packages=["miniworlds", "numpy"])
         content = syncer._build_default_python_question_content(q)
+        # miniworlds must be emitted as an H5P package object with remote:false
+        # so that the PythonRunner uses the locally-bundled version (not the CDN).
+        # sqlite3 is no longer auto-added.
         self.assertEqual(
             content["pyodideOptions"]["packages"],  # type: ignore[index]
-            ["miniworlds", "numpy", "sqlite3"],
+            [{"package": "miniworlds", "remote": False}, "numpy"],
         )
 
     def test_show_console_propagated(self) -> None:
