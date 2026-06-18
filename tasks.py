@@ -154,11 +154,54 @@ def export_chapter(ctx, chapter: str, course: str = "python-2026", output: str =
     _run_python(ctx, *args)
 
 
-@task(optional=["course", "course_url", "target", "section", "username", "password", "storage_state", "headless", "timeout", "verify_mbz_sync"])
+@task(
+    name="sync-miniworlds-examples-moodle",
+    optional=["course_url", "username", "password", "headless", "timeout", "verify_mbz_sync"],
+)
+def sync_miniworlds_examples_moodle(
+    ctx,
+    course_url: str = "",
+    username: str = "",
+    password: str = "",
+    headless: bool = False,
+    timeout: int = 30000,
+    verify_mbz_sync: bool = False,
+) -> None:
+    """Build and upload all miniworlds_examples chapters to Moodle.
+
+    Requires:
+    - Playwright-Nutzer: Moodle-Zugang mit Trainer-Rolle (oder hoeher) im Kurs
+    - Webservice-Nutzer: Eingeschrieben im Kurs (fuer API-Zugriffe)
+
+    Beide Nutzer muessen Zugriff auf den Kurs haben!
+    """
+    course = "miniworlds_examples"
+    _ensure_course_sync_metadata(course, 11, "https://www.opencoding.de")
+
+    _run_python(ctx, str(COURSE_SYNC), "build", course)
+
+    for chapter in _course_chapters(course):
+        args = [str(COURSE_SYNC), "upload-chapter-moodle", course, chapter]
+        if course_url:
+            args.extend(["--course-url", course_url])
+        if username:
+            args.extend(["--username", username])
+        if password:
+            args.extend(["--password", password])
+        if headless:
+            args.append("--headless")
+        if timeout != 30000:
+            args.extend(["--timeout", str(timeout)])
+        if verify_mbz_sync:
+            args.append("--verify-mbz-sync")
+        _run_python(ctx, *args, pty=not headless)
+
+
+@task(optional=["course_url", "target", "section", "username", "password", "storage_state", "headless", "timeout", "verify_mbz_sync"])
 def upload_chapter_moodle(
     ctx,
-    chapter: str,
     course: str = "python-2026",
+    chapter: str = "",
     course_url: str = "",
     target: str = "",
     section: str = "",
@@ -169,7 +212,17 @@ def upload_chapter_moodle(
     timeout: int = 30000,
     verify_mbz_sync: bool = False,
 ) -> None:
-    """Upload or update one chapter's H5P packages in Moodle via Playwright."""
+    """Upload or update one chapter's H5P packages in Moodle via Playwright.
+
+    Usage:
+        invoke upload-chapter-moodle COURSE CHAPTER [--course-url URL] [--username USER] [--password PASS] [--headless]
+
+    Requires:
+    - Playwright-Nutzer: Moodle-Zugang mit Trainer-Rolle (oder hoeher) im Kurs
+    - Webservice-Nutzer: Eingeschrieben im Kurs (fuer API-Zugriffe)
+    """
+    if not chapter:
+        raise ValueError("CHAPTER must be provided as second argument, e.g.: invoke upload-chapter-moodle python-2026 001-einstieg")
     args = [str(COURSE_SYNC), "upload-chapter-moodle", course, chapter]
     if course_url:
         args.extend(["--course-url", course_url])
