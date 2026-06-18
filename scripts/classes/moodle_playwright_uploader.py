@@ -587,7 +587,10 @@ class MoodlePlaywrightUploader:
 
         raise RuntimeError(
             "Konnte den Moodle-Bearbeitungsmodus nicht einschalten. "
-            f"Aktuelle URL: {current_url or 'unbekannt'}"
+            f"Aktuelle URL: {current_url or 'unbekannt'}\n"
+            "Hinweis: Stellen Sie sicher, dass der Playwright-Nutzer (fuer Browser-Uploads) "
+            "UND der Webservice-Nutzer (fuer API-Zugriffe) Zugriff auf den Kurs haben. "
+            "Es reicht nicht, nur einen der beiden einzuschreiben."
         )
 
     def _click_editing_switch(self, page: Any) -> bool:
