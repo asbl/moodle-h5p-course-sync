@@ -9,7 +9,7 @@ Diese Anleitung richtet sich an Personen, die `course-sync` noch nicht kennen.
 - Git
 - optional: Moodle-Zugang mit H5P-Rechten
 
-Fuer Moodle-Uploads nutzt `course-sync` Playwright. Beim ersten Upload kann Playwright
+Für Moodle-Uploads nutzt `course-sync` Playwright. Beim ersten Upload kann Playwright
 Browser-Dateien nachinstallieren.
 
 ## Einrichten
@@ -22,11 +22,11 @@ source prepare.sh
 
 `prepare.sh` erledigt:
 
-- virtuelle Umgebung `.venv` anlegen
+- Virtuelle Umgebung `.venv` anlegen
 - `course-sync` im Editable-Modus installieren
-- Python-Abhaengigkeiten installieren
+- Python-Abhängigkeiten installieren
 - H5P-Libraries nach `libraries/` laden, falls sie fehlen
-- `PYTHONPATH` fuer die aktuelle Shell setzen
+- `PYTHONPATH` für die aktuelle Shell setzen
 
 Nach dem Setup sollten diese Befehle funktionieren:
 
@@ -49,7 +49,7 @@ course-sync sync h5p-demo
 course-sync serve
 ```
 
-Oeffne anschliessend <http://127.0.0.1:8765/>.
+Öffne anschließend <http://127.0.0.1:8765/>.
 
 ## Eigenen Kurs anlegen
 
@@ -59,7 +59,7 @@ course-sync sync info-2026
 course-sync serve
 ```
 
-Der neue Kurs enthaelt ein Kapitel und eine lauffaehige PythonQuestion. Bearbeite danach:
+Der neue Kurs enthält ein Kapitel und eine lauffähige PythonQuestion. Bearbeite danach:
 
 - `courses/info-2026/index.mdx`
 - `courses/info-2026/chapters/001-einstieg.mdx`
@@ -82,12 +82,12 @@ Ohne `--output` landen die Dateien unter `courses/<kurs>/exports/<kapitel>/`.
 cp .env.example .env
 ```
 
-Trage mindestens die Werte ein, die du fuer deinen Weg brauchst:
+Trage mindestens die Werte ein, die du für deinen Weg brauchst:
 
-- `MOODLE_BASE_URL` und `MOODLE_TOKEN` fuer API-Import, Status und Ping
-- `MOODLE_USERNAME`, `MOODLE_PASSWORD` und `MOODLE_COURSE_URL` fuer Browser-Uploads
+- `MOODLE_BASE_URL` und `MOODLE_TOKEN` für API-Import, Status und Ping
+- `MOODLE_USERNAME`, `MOODLE_PASSWORD` und `MOODLE_COURSE_URL` für Browser-Uploads
 
-Verbindung pruefen:
+Verbindung prüfen:
 
 ```bash
 course-sync moodle-ping
@@ -99,7 +99,7 @@ Kapitel hochladen:
 course-sync upload-chapter-moodle info-2026 001-einstieg
 ```
 
-Mehrere Ziele fuer denselben Kurs werden ueber `--target` gewaehlt. Beispiel:
+Mehrere Ziele für denselben Kurs werden über `--target` gewählt. Beispiel:
 
 ```env
 MOODLE_INFO_2026_SCHULE_COURSE_URL=https://moodle.example.org/course/view.php?id=42
@@ -113,12 +113,12 @@ course-sync upload-chapter-moodle info-2026 001-einstieg --target=schule
 
 ## Moodle-Upload: Zwei Nutzer erforderlich
 
- Fuer Browser-Uploads (Playwright) und API-Zugriffe werden **zwei separate Moodle-Nutzer** bentigt:
+Für Browser-Uploads (Playwright) und API-Zugriffe werden **zwei separate Moodle-Nutzer** benötigt:
 
-- **Playwright-Nutzer**: Muss als Trainer/in oder aehnlich im Kurs eingeschrieben sein
-  (Browser-Login fuer den Upload)
+- **Playwright-Nutzer**: Muss als Trainer/in oder ähnlich im Kurs eingeschrieben sein
+  (Browser-Login für den Upload)
 - **Webservice-Nutzer** (Token): Muss ebenfalls im Kurs eingeschrieben sein
-  (API-Zugriffe fuer den Upload)
+  (API-Zugriffe für den Upload)
 
 Es reicht nicht, nur einen der beiden einzuschreiben — sonst scheitert der Upload
 mit einem Login-Fehler.
@@ -127,11 +127,11 @@ mit einem Login-Fehler.
 
 `course-sync: command not found`
 
-Fuehre `source prepare.sh` im Projektordner aus.
+Führe `source prepare.sh` im Projektordner aus.
 
 `Kurs '...' wurde nicht gefunden`
 
-Nutze `course-sync list-courses` und pruefe den Ordnernamen unter `courses/`.
+Nutze `course-sync list-courses` und prüfe den Ordnernamen unter `courses/`.
 
 Fehlende H5P-Libraries
 
