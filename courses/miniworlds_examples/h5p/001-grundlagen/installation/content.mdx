@@ -1,3 +1,40 @@
+<Instructions>
+Installiere miniworlds in deiner lokalen Python-Umgebung. Für den Einstieg eignet sich Thonny besonders gut, weil du dort Python-Code direkt ausführen und Fehlermeldungen gut lesen kannst.
+
+Öffne ein Terminal oder die Paketverwaltung deiner Entwicklungsumgebung und installiere miniworlds:
+
+```bash
+pip install miniworlds
+```
+
+Wenn du später Physikfunktionen wie Schwerkraft oder komplexere Kollisionen verwenden möchtest, installiere zusätzlich das Physik-Paket:
+
+```bash
+pip install miniworlds miniworlds_physics
+```
+
+Teste danach mit einem sehr kleinen Programm, ob miniworlds importiert werden kann.
+</Instructions>
+
+```python editor:startingCode
+import miniworlds
+
+world = miniworlds.World(400, 240)
+world.add_background((220, 235, 245))
+
+text = miniworlds.Text((40, 80), "miniworlds läuft!")
+text.font_size = 28
+text.color = (40, 50, 65)
+
+world.run()
+```
+
+```yaml editor
+options:
+  enableImageUploads: true
+  allowAddingFiles: true
+```
+
 ```yaml grading
 gradingMethod: please_choose
 dueDateGroup:

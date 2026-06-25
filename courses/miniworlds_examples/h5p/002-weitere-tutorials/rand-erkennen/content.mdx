@@ -1,3 +1,36 @@
+<Instructions>
+Mit `detect_borders()` erkennt ein Actor, ob er den Rand der Welt berührt. `bounce_from_border(...)` lässt ihn anschließend passend abprallen.
+
+Wichtig ist die Reihenfolge: erst bewegen, dann den Rand prüfen, dann abprallen.
+</Instructions>
+
+```python editor:startingCode
+import miniworlds
+
+world = miniworlds.World(460, 300)
+world.add_background((230, 238, 248))
+
+ball = miniworlds.Circle((100, 80), 20)
+ball.color = (60, 120, 220)
+ball.direction = 45
+ball.speed = 3
+
+@ball.register
+def act(self):
+    self.move()
+    borders = self.detect_borders()
+    if borders:
+        self.bounce_from_border(borders)
+
+world.run()
+```
+
+```yaml editor
+options:
+  enableImageUploads: true
+  allowAddingFiles: true
+```
+
 ```yaml grading
 gradingMethod: please_choose
 dueDateGroup:

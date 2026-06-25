@@ -1,3 +1,49 @@
+<Instructions>
+Die Kamera bestimmt, welcher Ausschnitt einer größeren Welt sichtbar ist. Mit `world.camera.world_size_x` kann die Spielwelt breiter als das Fenster sein.
+
+Im Beispiel folgt die Kamera automatisch dem Spieler.
+</Instructions>
+
+```python editor:startingCode
+import miniworlds
+
+world = miniworlds.World(500, 300)
+world.add_background((230, 238, 248))
+world.camera.world_size_x = 1200
+
+spieler = miniworlds.Actor((120, 150))
+spieler.size = (40, 40)
+spieler.color = (60, 120, 220)
+
+ziel = miniworlds.Circle((1000, 150), 25)
+ziel.color = (240, 190, 70)
+
+for x in range(250, 1000, 150):
+    marke = miniworlds.Actor((x, 250))
+    marke.size = (18, 50)
+    marke.color = (90, 150, 105)
+
+@spieler.register
+def act(self):
+    world.camera.from_actor(self)
+
+@spieler.register
+def on_key_down_right(self):
+    self.x = self.x + 20
+
+@spieler.register
+def on_key_down_left(self):
+    self.x = self.x - 20
+
+world.run()
+```
+
+```yaml editor
+options:
+  enableImageUploads: true
+  allowAddingFiles: true
+```
+
 ```yaml grading
 gradingMethod: please_choose
 dueDateGroup:

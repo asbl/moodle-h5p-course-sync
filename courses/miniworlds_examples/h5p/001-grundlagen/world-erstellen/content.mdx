@@ -1,3 +1,28 @@
+<Instructions>
+Eine miniworlds-Welt ist das Fenster, in dem dein Programm sichtbar wird. Du legst zuerst die Größe fest und startest die Welt anschließend mit `world.run()`.
+
+Der Hintergrund kann eine Farbe oder ein Bild sein. Bilder müssen im Projektordner liegen, zum Beispiel in einem Ordner `images`.
+</Instructions>
+
+```python editor:startingCode
+import miniworlds
+
+world = miniworlds.World(600, 300)
+world.add_background((130, 190, 120))
+
+hinweis = miniworlds.Text((30, 30), "Meine erste Welt")
+hinweis.font_size = 26
+hinweis.color = (30, 45, 35)
+
+world.run()
+```
+
+```yaml editor
+options:
+  enableImageUploads: true
+  allowAddingFiles: true
+```
+
 ```yaml grading
 gradingMethod: please_choose
 dueDateGroup:

@@ -1,3 +1,65 @@
+<Instructions>
+Eine Liste kann den Bauplan einer gekachelten Welt speichern. Jedes Zeichen steht für ein Feld: `#` ist eine Wand, `S` der Start und `Z` das Ziel.
+
+Mit zwei Schleifen gehst du Zeile für Zeile durch den Plan und erzeugst die passenden Actors.
+</Instructions>
+
+```python editor:startingCode
+import miniworlds
+
+level = [
+    "##########",
+    "#S.......#",
+    "#..###...#",
+    "#....#..Z#",
+    "##########",
+]
+
+world = miniworlds.TiledWorld(10, 5)
+world.add_background((220, 235, 215))
+
+spieler = None
+
+for y, zeile in enumerate(level):
+    for x, zeichen in enumerate(zeile):
+        position = (x, y)
+        if zeichen == "#":
+            wand = miniworlds.Actor(position)
+            wand.color = (80, 90, 95)
+            wand.is_blocking = True
+        elif zeichen == "S":
+            spieler = miniworlds.Actor(position)
+            spieler.color = (60, 120, 220)
+            spieler.is_blockable = True
+        elif zeichen == "Z":
+            ziel = miniworlds.Actor(position)
+            ziel.color = (240, 190, 70)
+
+@spieler.register
+def on_key_down_w(self):
+    self.y = self.y - 1
+
+@spieler.register
+def on_key_down_s(self):
+    self.y = self.y + 1
+
+@spieler.register
+def on_key_down_a(self):
+    self.x = self.x - 1
+
+@spieler.register
+def on_key_down_d(self):
+    self.x = self.x + 1
+
+world.run()
+```
+
+```yaml editor
+options:
+  enableImageUploads: true
+  allowAddingFiles: true
+```
+
 ```yaml grading
 gradingMethod: please_choose
 dueDateGroup:

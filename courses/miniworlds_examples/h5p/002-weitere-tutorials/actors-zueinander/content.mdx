@@ -1,3 +1,45 @@
+<Instructions>
+Actors können miteinander interagieren. Mit `get_distance_to(...)` misst du den Abstand zwischen zwei Figuren. Mit `detect(...)` prüfst du, ob sie sich berühren.
+
+Im Beispiel bewegt sich der blaue Ball auf das Ziel zu. Sobald beide Figuren kollidieren, färbt sich das Ziel rot.
+</Instructions>
+
+```python editor:startingCode
+import miniworlds
+
+world = miniworlds.World(460, 300)
+world.add_background((230, 238, 248))
+
+ball = miniworlds.Circle((80, 150), 20)
+ball.color = (60, 120, 220)
+ball.direction = 0
+ball.speed = 3
+
+ziel = miniworlds.Circle((360, 150), 25)
+ziel.color = (230, 170, 60)
+
+anzeige = miniworlds.Text((20, 20), "")
+anzeige.font_size = 20
+anzeige.color = (40, 45, 55)
+
+@ball.register
+def act(self):
+    self.move()
+    abstand = self.get_distance_to(ziel)
+    anzeige.text = f"Abstand: {abstand:.0f}"
+    if self.detect(ziel):
+        ziel.color = (220, 80, 80)
+        self.speed = 0
+
+world.run()
+```
+
+```yaml editor
+options:
+  enableImageUploads: true
+  allowAddingFiles: true
+```
+
 ```yaml grading
 gradingMethod: please_choose
 dueDateGroup:

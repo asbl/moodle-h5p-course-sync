@@ -1,3 +1,33 @@
+<Instructions>
+Mausereignisse werden an der Welt registriert. Mit `world.mouse_x` und `world.mouse_y` bekommst du die aktuelle Mausposition.
+
+Klicke in die Welt: An jeder Klickposition entsteht ein neuer Kreis.
+</Instructions>
+
+```python editor:startingCode
+import miniworlds
+
+world = miniworlds.World(600, 300)
+world.add_background((235, 238, 245))
+
+info = miniworlds.Text((20, 20), "Klicke in die Welt.")
+info.font_size = 22
+info.color = (40, 45, 55)
+
+@world.register
+def on_mouse_left(self):
+    kreis = miniworlds.Circle((self.mouse_x, self.mouse_y), 18)
+    kreis.color = (60, 120, 220)
+
+world.run()
+```
+
+```yaml editor
+options:
+  enableImageUploads: true
+  allowAddingFiles: true
+```
+
 ```yaml grading
 gradingMethod: please_choose
 dueDateGroup:

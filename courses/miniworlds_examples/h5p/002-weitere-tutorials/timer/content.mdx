@@ -1,3 +1,38 @@
+<Instructions>
+Timer lösen nach einer bestimmten Zeit ein Ereignis aus. Mit `set_timer("name", sekunden)` startest du einen Timer. Die passende Funktion heißt dann `on_timer_name`.
+
+Im Beispiel erscheint alle drei Sekunden ein neuer Kreis.
+</Instructions>
+
+```python editor:startingCode
+import miniworlds
+
+world = miniworlds.World(600, 300)
+world.add_background((230, 238, 248))
+world.zaehler = 0
+
+@world.register
+def on_setup(self):
+    self.set_timer("kreis", 3)
+
+@world.register
+def on_timer_kreis(self):
+    self.zaehler = self.zaehler + 1
+    x = 80 + (self.zaehler * 70) % 440
+    y = 80 + (self.zaehler * 45) % 160
+    kreis = miniworlds.Circle((x, y), 18)
+    kreis.color = (60, 120, 220)
+    self.set_timer("kreis", 3)
+
+world.run()
+```
+
+```yaml editor
+options:
+  enableImageUploads: true
+  allowAddingFiles: true
+```
+
 ```yaml grading
 gradingMethod: please_choose
 dueDateGroup:

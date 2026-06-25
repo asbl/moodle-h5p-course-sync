@@ -4,9 +4,10 @@
 
 <PythonQuestion
   identifier="installation"
+  title="miniworlds installieren"
 />
 
-Du lernst, wie du miniworlds auf deinem Computer installierst.
+Du lernst, wie du miniworlds auf deinem Computer installierst und eine passende Entwicklungsumgebung vorbereitest.
 
 #### Installation mit pip
 
@@ -14,9 +15,9 @@ Du lernst, wie du miniworlds auf deinem Computer installierst.
 pip install miniworlds
 ```
 
-#### Optional: Physics-Paket
+#### Optional: Physik-Paket
 
-Für Physik-Unterstützung (Schwerkraft, Kollisionen):
+Für Physikfunktionen wie Schwerkraft und Kollisionen kannst du zusätzlich das Physik-Paket installieren:
 
 ```bash
 pip install miniworlds miniworlds_physics
@@ -24,15 +25,16 @@ pip install miniworlds miniworlds_physics
 
 #### Entwicklungsumgebung
 
-Empfohlen für Anfänger: [Thonny](https://thonny.org/) – es kommt mit Python.
+Für den Einstieg eignet sich [Thonny](https://thonny.org/) besonders gut, weil Python dort bereits mitgebracht wird.
 
 ### Die erste Welt
 
 <PythonQuestion
   identifier="world-erstellen"
+  title="Die erste Welt erstellen"
 />
 
-Du erstellst deine erste miniworlds-Welt.
+Du erstellst deine erste miniworlds-Welt und startest sie im Ausgabefenster.
 
 #### Eine Welt erstellen
 
@@ -60,15 +62,16 @@ world.run()
 Die Bilder müssen in einem `images/`-Ordner liegen.
 :::
 
-### Actors
+### Figuren
 
 <PythonQuestion
   identifier="actor-erstellen"
+  title="Eine Figur erstellen"
 />
 
-Du lernst, Actors in deine Welt zu setzen.
+Du lernst, wie du Figuren, in miniworlds `Actor` genannt, in deine Welt setzt.
 
-#### Einen Actor erstellen
+#### Eine Figur erstellen
 
 ```python
 import miniworlds
@@ -90,16 +93,17 @@ world.run()
 ```
 
 :::{note}
-Die Position (100, 40) bezieht sich auf den **Mittelpunkt** des Actors.
+Die Position `(100, 40)` bezieht sich auf den **Mittelpunkt** der Figur.
 :::
 
 ### Bewegung
 
 <PythonQuestion
   identifier="bewegung"
+  title="Figuren bewegen"
 />
 
-Du lernst, wie du Actors bewegen kannst.
+Du lernst, wie du Figuren bewegst und ihre Richtung veränderst.
 
 #### move() – Geradeaus bewegen
 
@@ -114,7 +118,7 @@ def act(self):
 ```python
 @player.register
 def act(self):
-    self.direction = "right"
+    self.direction = 0
     self.move()
 ```
 

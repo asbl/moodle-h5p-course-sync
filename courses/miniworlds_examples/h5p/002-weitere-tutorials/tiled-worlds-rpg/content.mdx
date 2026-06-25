@@ -1,3 +1,59 @@
+<Instructions>
+Eine `TiledWorld` eignet sich gut für einfache RPGs, Labyrinthe und Brettspiel-Welten. Positionen wie `(1, 1)` meinen Felder, nicht Pixel.
+
+Der Spieler ist blockierbar, die Wände blockieren. Dadurch kann die Figur nicht durch Wände laufen.
+</Instructions>
+
+```python editor:startingCode
+import miniworlds
+
+world = miniworlds.TiledWorld(10, 7)
+world.add_background((220, 235, 215))
+
+spieler = miniworlds.Actor((1, 1))
+spieler.color = (60, 120, 220)
+spieler.is_blockable = True
+spieler.hat_gewonnen = False
+
+schatz = miniworlds.Actor((8, 5))
+schatz.color = (240, 190, 70)
+
+for position in [(3, 1), (3, 2), (3, 3), (5, 4), (6, 4), (7, 4)]:
+    wand = miniworlds.Actor(position)
+    wand.color = (80, 90, 95)
+    wand.is_blocking = True
+
+@spieler.register
+def act(self):
+    if self.detect(schatz) and not self.hat_gewonnen:
+        print("Geschafft! Du hast den Schatz gefunden.")
+        self.hat_gewonnen = True
+
+@spieler.register
+def on_key_down_w(self):
+    self.y = self.y - 1
+
+@spieler.register
+def on_key_down_s(self):
+    self.y = self.y + 1
+
+@spieler.register
+def on_key_down_a(self):
+    self.x = self.x - 1
+
+@spieler.register
+def on_key_down_d(self):
+    self.x = self.x + 1
+
+world.run()
+```
+
+```yaml editor
+options:
+  enableImageUploads: true
+  allowAddingFiles: true
+```
+
 ```yaml grading
 gradingMethod: please_choose
 dueDateGroup:

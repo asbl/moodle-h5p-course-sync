@@ -1,3 +1,44 @@
+<Instructions>
+Actors können sich automatisch bewegen. Mit `direction` legst du die Richtung fest, mit `speed` die Geschwindigkeit. In jedem Frame ruft miniworlds die Funktion `act` auf.
+
+Ändere die Richtung oder Geschwindigkeit und beobachte, wie sich die Figur verhält.
+</Instructions>
+
+```python editor:startingCode
+import miniworlds
+
+world = miniworlds.World(600, 300)
+world.add_background((230, 238, 248))
+
+spieler = miniworlds.Circle((100, 150), 20)
+spieler.color = (60, 120, 220)
+spieler.direction = 0
+spieler.speed = 3
+
+@spieler.register
+def act(self):
+    self.move()
+    borders = self.detect_borders()
+    if borders:
+        self.bounce_from_border(borders)
+
+@spieler.register
+def on_key_down_a(self):
+    self.turn_left(30)
+
+@spieler.register
+def on_key_down_d(self):
+    self.turn_right(30)
+
+world.run()
+```
+
+```yaml editor
+options:
+  enableImageUploads: true
+  allowAddingFiles: true
+```
+
 ```yaml grading
 gradingMethod: please_choose
 dueDateGroup:

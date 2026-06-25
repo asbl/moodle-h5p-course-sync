@@ -1,4 +1,6 @@
 contentType: ide_only
-pythonRunner: skulpt
+pythonRunner: pyodide
 pyodideOptions:
-  packages: []
+  packages:
+  - miniworlds
+  - sqlite3

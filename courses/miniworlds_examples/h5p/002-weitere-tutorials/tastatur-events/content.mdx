@@ -1,3 +1,52 @@
+<Instructions>
+Tastaturereignisse reagieren auf bestimmte Tasten. `on_key_down_right` wird zum Beispiel ausgelöst, wenn die rechte Pfeiltaste gedrückt wird.
+
+Bewege die Figur mit den Pfeiltasten. Mit `A` und `D` kannst du sie zusätzlich drehen.
+</Instructions>
+
+```python editor:startingCode
+import miniworlds
+
+world = miniworlds.World(600, 300)
+world.add_background((225, 235, 245))
+
+spieler = miniworlds.Actor((300, 150))
+spieler.size = (38, 38)
+spieler.color = (60, 120, 220)
+
+@spieler.register
+def on_key_down_right(self):
+    self.x = self.x + 10
+
+@spieler.register
+def on_key_down_left(self):
+    self.x = self.x - 10
+
+@spieler.register
+def on_key_down_up(self):
+    self.y = self.y - 10
+
+@spieler.register
+def on_key_down_down(self):
+    self.y = self.y + 10
+
+@spieler.register
+def on_key_down_a(self):
+    self.turn_left(30)
+
+@spieler.register
+def on_key_down_d(self):
+    self.turn_right(30)
+
+world.run()
+```
+
+```yaml editor
+options:
+  enableImageUploads: true
+  allowAddingFiles: true
+```
+
 ```yaml grading
 gradingMethod: please_choose
 dueDateGroup:

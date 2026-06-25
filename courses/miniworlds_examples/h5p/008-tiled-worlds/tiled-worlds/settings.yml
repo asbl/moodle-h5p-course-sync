@@ -1,8 +1,0 @@
-contentType: text_only
-pythonRunner: pyodide
-pyodideOptions:
-  packages:
-  - miniworlds
-  - sqlite3
-advancedOptions:
-  disableOutputPopups: true

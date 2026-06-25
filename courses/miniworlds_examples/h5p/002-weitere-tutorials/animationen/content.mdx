@@ -1,3 +1,40 @@
+<Instructions>
+Animationen entstehen, wenn eine Figur mehrere Kostüme besitzt und zwischen ihnen wechselt. Für eigene Spiele kannst du Bilddateien mit `add_costume(...)` hinzufügen.
+
+Das Beispiel verwendet einfache Farbwechsel, damit es ohne zusätzliche Dateien direkt läuft.
+</Instructions>
+
+```python editor:startingCode
+import miniworlds
+
+world = miniworlds.World(500, 300)
+world.add_background((230, 238, 248))
+
+figur = miniworlds.Circle((250, 150), 28)
+farben = [
+    (60, 120, 220),
+    (90, 170, 110),
+    (240, 190, 70),
+]
+figur.schritt = 0
+
+@figur.register
+def act(self):
+    self.schritt = self.schritt + 1
+    if self.schritt % 20 == 0:
+        index = (self.schritt // 20) % len(farben)
+        self.color = farben[index]
+    self.turn_right(2)
+
+world.run()
+```
+
+```yaml editor
+options:
+  enableImageUploads: true
+  allowAddingFiles: true
+```
+
 ```yaml grading
 gradingMethod: please_choose
 dueDateGroup:

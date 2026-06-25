@@ -1,3 +1,31 @@
+<Instructions>
+Figuren heißen in miniworlds `Actor`. Ein Actor hat eine Position, eine Größe und kann eine Farbe oder ein Kostüm bekommen.
+
+Die Position `(100, 80)` beschreibt den Mittelpunkt der Figur. Wenn du ein Bild verwenden möchtest, lege es im Projekt ab und füge es mit `add_costume(...)` hinzu.
+</Instructions>
+
+```python editor:startingCode
+import miniworlds
+
+world = miniworlds.World(600, 300)
+world.add_background((225, 235, 245))
+
+spieler = miniworlds.Actor((120, 150))
+spieler.size = (40, 40)
+spieler.color = (60, 120, 220)
+
+ziel = miniworlds.Circle((430, 150), 24)
+ziel.color = (240, 190, 70)
+
+world.run()
+```
+
+```yaml editor
+options:
+  enableImageUploads: true
+  allowAddingFiles: true
+```
+
 ```yaml grading
 gradingMethod: please_choose
 dueDateGroup:

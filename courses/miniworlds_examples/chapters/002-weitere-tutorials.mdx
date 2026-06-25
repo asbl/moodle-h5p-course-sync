@@ -4,13 +4,15 @@
 
 <PythonQuestion
   identifier="rand-erkennen"
+  title="Rand erkennen und abprallen"
 />
 
 <PythonQuestion
   identifier="actors-zueinander"
+  title="Kollisionen zwischen Figuren"
 />
 
-Du lernst, wie Actors mit ihrer Umgebung und anderen Actors kollidieren.
+Du lernst, wie Figuren mit dem Rand der Welt und mit anderen Figuren kollidieren.
 
 #### Rand erkennen
 
@@ -34,23 +36,25 @@ abstand = spieler.get_distance_to(ziel)
 ```python
 @ball.register
 def act(self):
-    if self.detect_actors(ziel):
+    if self.detect(ziel):
         print("Berührung!")
 ```
 
-### Events
+### Ereignisse
 
 <PythonQuestion
   identifier="tastatur-events"
+  title="Tastaturereignisse verwenden"
 />
 
 <PythonQuestion
   identifier="maus-events"
+  title="Mausereignisse verwenden"
 />
 
-Du lernst, wie du auf Tastatur und Maus reagierst.
+Du lernst, wie dein Programm auf Tastatur- und Mausereignisse reagiert.
 
-#### Tastatur-Events
+#### Tastaturereignisse
 
 ```python
 @player.register
@@ -62,25 +66,28 @@ def on_key_pressed_a(self):
     self.turn_left(30)
 ```
 
-#### Maus-Events
+#### Mausereignisse
 
 ```python
 @world.register
 def on_mouse_left(self):
-    self.add_actor(Circle(self.mouse_x, self.mouse_y, 20))
+    kreis = miniworlds.Circle((self.mouse_x, self.mouse_y), 20)
+    kreis.color = (60, 120, 220)
 ```
 
-### Fortgeschrittene Themen
+### Animationen und Timer
 
 <PythonQuestion
   identifier="animationen"
+  title="Animationen verwenden"
 />
 
 <PythonQuestion
   identifier="timer"
+  title="Timer verwenden"
 />
 
-Du lernst Animationen und Timer.
+Du lernst, wie du einfache Animationen und zeitgesteuerte Abläufe einsetzt.
 
 #### Animationen
 
@@ -103,23 +110,26 @@ def on_timer_my_timer(self):
     print("3 Sekunden vorbei!")
 ```
 
-### Tiled Worlds
+### Gekachelte Welten
 
 <PythonQuestion
   identifier="tiled-worlds"
+  title="Gekachelte Welten aus Listen erstellen"
 />
 
 <PythonQuestion
   identifier="kamera"
+  title="Die Kamera verwenden"
 />
 
 <PythonQuestion
   identifier="tiled-worlds-rpg"
+  title="Einfache RPG-Welten erstellen"
 />
 
-Du lernst, Worlds aus einer Liste zu erstellen.
+Du lernst, wie du gekachelte Welten aus Listen aufbaust und eine Kamera verwendest.
 
-#### Level aus Liste erstellen
+#### Level aus einer Liste erstellen
 
 ```python
 level = [
@@ -140,7 +150,7 @@ for y, zeile in enumerate(level):
             wand.is_blocking = True
 ```
 
-#### Kamera folgen lassen
+#### Kamera einer Figur folgen lassen
 
 ```python
 world.camera.from_actor(spieler)
