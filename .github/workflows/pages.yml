@@ -36,6 +36,9 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -e .
 
+      - name: Install H5P CLI
+        run: npm install --global ./h5p-cli-1.1.5.tgz
+
       - name: Download H5P libraries
         run: course-sync update-h5p-libraries
 
