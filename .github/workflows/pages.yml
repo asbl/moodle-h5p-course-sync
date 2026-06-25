@@ -42,6 +42,52 @@ jobs:
       - name: Download H5P libraries
         run: course-sync update-h5p-libraries
 
+      - name: Seed standard H5P dependencies
+        run: |
+          python - <<'PY'
+          import shutil
+          import subprocess
+          import tempfile
+          from pathlib import Path
+
+          root = Path.cwd()
+          target_root = root / ".h5p-runtime" / "libraries"
+          target_root.mkdir(parents=True, exist_ok=True)
+
+          libraries = [
+              ("h5p", "h5p-question", "1.5.47", "H5P.Question-1.5"),
+              ("h5p", "h5p-joubel-ui", "1.3.32", "H5P.JoubelUI-1.3"),
+              ("h5p", "h5p-transition", "1.0.4", "H5P.Transition-1.0"),
+              ("h5p", "h5p-font-icons", "1.0.6", "H5P.FontIcons-1.0"),
+              ("h5p", "font-awesome", "4.5.6", "FontAwesome-4.5"),
+              ("h5p", "jquery-ui", "1.10.22", "jQuery.ui-1.10"),
+              ("h5p", "h5p-components", "1.0.89", "H5P.Components-1.0"),
+          ]
+
+          with tempfile.TemporaryDirectory() as tmp:
+              tmp_path = Path(tmp)
+              for org, repo, tag, destination in libraries:
+                  clone_path = tmp_path / repo
+                  subprocess.run(
+                      [
+                          "git",
+                          "clone",
+                          "--depth",
+                          "1",
+                          "--branch",
+                          tag,
+                          f"https://github.com/{org}/{repo}.git",
+                          str(clone_path),
+                      ],
+                      check=True,
+                  )
+                  target_path = target_root / destination
+                  if target_path.exists():
+                      shutil.rmtree(target_path)
+                  ignore = shutil.ignore_patterns(".git", "node_modules")
+                  shutil.copytree(clone_path, target_path, ignore=ignore)
+          PY
+
       - name: Build static site
         run: course-sync export-site --output public
 
