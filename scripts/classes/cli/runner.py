@@ -181,6 +181,7 @@ def run_cli_command(
     | None = None,
     update_h5p_libraries_from_github: Callable[[str | None], list[dict[str, str]]] | None = None,
     import_moodle_from_mbz: Callable[[str, Path, int, str], Path] | None = None,
+    export_static_site: Callable[[Path, Path | None], list[Path]] | None = None,
 ) -> None:
     try:
         if args.command == "list-courses":
@@ -219,6 +220,16 @@ def run_cli_command(
             questions = build_preview_runtime(course_dir)
             for question in questions:
                 print(question.package_path.relative_to(root_dir))
+            return
+
+        if args.command == "export-site":
+            if export_static_site is None:
+                raise RuntimeError("Static-Site-Export ist nicht konfiguriert.")
+            course_dir = resolve_course_dir(args.course, courses_dir) if args.course else None
+            output_dir = Path(args.output).expanduser()
+            exported_paths = export_static_site(output_dir, course_dir)
+            for path in exported_paths:
+                print(path.relative_to(root_dir) if path.is_relative_to(root_dir) else path)
             return
 
         if args.command == "update-h5p-libraries":

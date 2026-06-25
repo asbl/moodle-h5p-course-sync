@@ -136,6 +136,17 @@ def build(ctx, course: str = "") -> None:
     _run_python(ctx, *args)
 
 
+@task(name="export-site", optional=["course", "output"])
+def export_site(ctx, course: str = "", output: str = "public") -> None:
+    """Generate a static course website for local use or GitHub Pages."""
+    args = [str(COURSE_SYNC), "export-site"]
+    if course:
+        args.append(course)
+    if output != "public":
+        args.extend(["--output", output])
+    _run_python(ctx, *args)
+
+
 @task(name="update-h5p-libraries", optional=["tag"])
 def update_h5p_libraries(ctx, tag: str = "") -> None:
     """Download the latest custom H5P libraries from GitHub into libraries/."""

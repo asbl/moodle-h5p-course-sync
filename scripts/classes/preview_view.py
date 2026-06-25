@@ -15,6 +15,8 @@ class QuestionLike(Protocol):
     title: str
     course_slug: str
     runtime_content_id: str
+    h5p_subdir: str
+    package_path: Path
 
 
 class PreviewViewBuilder:
@@ -44,23 +46,19 @@ class PreviewViewBuilder:
         return f"{path}?{urlencode(query)}"
 
     def build_question_component(self, question: QuestionLike) -> str:
-        frame_src = self.build_local_preview_path_with_options(question, mode="view", simple=True)
-        status_src = (
-            f"/preview-status/{self.quote_path_segment(question.course_slug)}/"
-            f"{self.quote_path_segment(question.identifier)}"
-        )
-        rebuild_src = (
-            f"/preview-rebuild/{self.quote_path_segment(question.course_slug)}/"
-            f"{self.quote_path_segment(question.identifier)}"
-        )
-        template = (_TEMPLATES_DIR / "question_card.html").read_text("utf-8")
+        package_name = self.quote_path_segment(question.package_path.name)
+        package_src = f"build/h5p/{package_name}"
+        if question.h5p_subdir:
+            package_src = f"build/h5p/{self.quote_path_segment(question.h5p_subdir)}/{package_name}"
+        return self.build_static_question_component(question, package_src=package_src)
+
+    def build_static_question_component(self, question: QuestionLike, *, package_src: str) -> str:
+        template = (_TEMPLATES_DIR / "static_question_card.html").read_text("utf-8")
         return _fill(
             template,
             identifier=self.escape_inline(question.identifier),
             title=self.escape_inline(question.title),
-            frame_src=self.escape_inline(frame_src),
-            status_src=self.escape_inline(status_src),
-            rebuild_src=self.escape_inline(rebuild_src),
+            package_src=self.escape_inline(package_src),
         ).strip()
 
     def render_preview_waiting_page(self, question: QuestionLike, *, mode: str = "view", simple: bool = False) -> str:

@@ -18,16 +18,23 @@ source prepare.sh
 course-sync list-courses
 course-sync new-course mein-kurs --title "Mein Kurs"
 course-sync sync mein-kurs
-course-sync serve
+course-sync export-site mein-kurs
 ```
 
-Danach ist die Vorschau unter <http://127.0.0.1:8765/> erreichbar.
+Danach liegt die statische Kursseite unter `public/index.html`. Sie kann direkt im
+Browser geoeffnet oder mit einem einfachen lokalen Webserver ausgeliefert werden:
+
+```bash
+python -m http.server 8000 --directory public
+```
+
+Dann ist die statische Ansicht unter <http://127.0.0.1:8000/> erreichbar.
 
 Wenn du lieber `invoke` nutzt, funktionieren die bestehenden Kurzbefehle weiterhin:
 
 ```bash
 inv sync --course=mein-kurs
-inv serve
+inv export-site --course=mein-kurs
 ```
 
 ## Was wird unterstuetzt?
@@ -50,6 +57,7 @@ course-sync list-courses --verbose
 course-sync new-course info-2026 --title "Informatik 2026"
 course-sync sync info-2026
 course-sync build info-2026
+course-sync export-site info-2026 --output public
 course-sync export-chapter info-2026 001-einstieg
 course-sync serve --port 8765
 course-sync import-mbz imported-course backup.mbz
@@ -62,7 +70,19 @@ Die alten Task-Namen bleiben als Komfortschicht verfuegbar:
 ```bash
 inv -l
 inv smoke --course=info-2026
+inv export-site --course=info-2026
 ```
+
+## Statische Website und GitHub Pages
+
+`course-sync export-site` erzeugt eine rein statische Website. Kursseiten werden als HTML
+geschrieben, H5P-Aufgaben werden als `.h5p`-Downloads verlinkt. Die Bearbeitung passiert
+weiterhin in den Kursdateien unter `courses/`.
+
+Der Standard-Output ist `public/`. Das Repository enthaelt einen GitHub-Actions-Workflow
+unter `.github/workflows/pages.yml`, der bei jedem Push auf `main` die H5P-Libraries
+laedt, `course-sync export-site --output public` ausfuehrt und `public/` nach GitHub
+Pages deployt.
 
 ## Dokumentation
 

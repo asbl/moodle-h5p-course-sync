@@ -52,6 +52,21 @@ def build_arg_parser(default_port: int) -> argparse.ArgumentParser:
         help="Optionaler Kursordner unter courses/. Ohne Angabe werden alle Kurse vorbereitet.",
     )
 
+    export_site_parser = subparsers.add_parser(
+        "export-site",
+        help="Erzeugt eine statische Kurs-Webseite mit H5P-Downloads.",
+    )
+    export_site_parser.add_argument(
+        "course",
+        nargs="?",
+        help="Optionaler Kursordner unter courses/. Ohne Angabe werden alle Kurse exportiert.",
+    )
+    export_site_parser.add_argument(
+        "--output",
+        default="public",
+        help="Zielordner fuer die statische Webseite. Standard: public/",
+    )
+
     update_libraries_parser = subparsers.add_parser(
         "update-h5p-libraries",
         help="Laedt die neuesten H5P-Libraries aus dem GitHub-Release und aktualisiert libraries/.",

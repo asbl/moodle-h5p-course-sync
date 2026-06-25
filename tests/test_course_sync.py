@@ -21,6 +21,7 @@ from scripts.main import (
     build_course_status,
     build_imported_question_from_h5p_package,
     compute_question_hash,
+    export_static_site,
     extract_h5p_package_url_from_activity_html,
     import_moodle_course,
     load_course_preview_state,
@@ -232,23 +233,55 @@ turtle.forward(50)
 
     def test_render_course_page_embeds_preview_link(self) -> None:
         html = render_course_page(self.course_dir)
-        self.assertEqual(html.count("<iframe"), 1)
-        self.assertIn('/preview/python-2026/12eck?mode=view&amp;simple=1', html)
-        self.assertIn('/preview/python-2026/quadrat?mode=view&amp;simple=1', html)
+        self.assertEqual(html.count("<iframe"), 0)
+        self.assertIn('href="build/h5p/12eck.h5p"', html)
+        self.assertIn('href="build/h5p/quadrat.h5p"', html)
         self.assertIn('class="course-section course-section-h1"', html)
         self.assertIn('class="course-section-body"', html)
         self.assertNotIn('PythonQuestion', html)
         self.assertNotIn('Vorschau und Bearbeitung nur auf Klick', html)
-        self.assertIn('data-open-modal="true"', html)
-        self.assertIn('class="question-toolbar question-row-button"', html)
-        self.assertIn('/preview-status/python-2026/12eck', html)
-        self.assertIn('id="preview-modal"', html)
+        self.assertNotIn('data-open-modal="true"', html)
+        self.assertIn('class="question-toolbar"', html)
+        self.assertNotIn('/preview-status/python-2026/12eck', html)
+        self.assertNotIn('id="preview-modal"', html)
+        self.assertIn('>H5P herunterladen<', html)
         self.assertNotIn('>Öffnen<', html)
         self.assertNotIn('>Edit<', html)
         self.assertNotIn('>Split View<', html)
         self.assertNotIn('>Löschen<', html)
         self.assertNotIn('delete-runtime', html)
         self.assertNotIn('<details', html)
+
+    def test_export_static_site_writes_index_and_h5p_packages(self) -> None:
+        output_dir = self.root / "public"
+
+        written_paths = export_static_site(output_dir, self.course_dir)
+
+        self.assertIn(output_dir / ".nojekyll", written_paths)
+        self.assertTrue((output_dir / "index.html").is_file())
+        course_index = output_dir / "courses" / "python-2026" / "index.html"
+        self.assertTrue(course_index.is_file())
+        self.assertTrue((output_dir / "h5p" / "python-2026" / "12eck.h5p").is_file())
+        self.assertTrue((output_dir / "h5p" / "python-2026" / "quadrat.h5p").is_file())
+        course_html = course_index.read_text(encoding="utf-8")
+        self.assertIn('href="../../h5p/python-2026/12eck.h5p"', course_html)
+        self.assertNotIn("/preview/", course_html)
+
+    def test_export_static_site_rejects_project_root_as_output(self) -> None:
+        from scripts import main as module
+
+        original_root_dir = module.ROOT_DIR
+        original_courses_dir = module.COURSES_DIR
+        try:
+            module.ROOT_DIR = self.root
+            module.COURSES_DIR = self.root / "courses"
+            with self.assertRaisesRegex(ValueError, "Export-Zielordner"):
+                export_static_site(self.root, self.course_dir)
+            with self.assertRaisesRegex(ValueError, "Export-Zielordner"):
+                export_static_site(self.root / "courses", self.course_dir)
+        finally:
+            module.ROOT_DIR = original_root_dir
+            module.COURSES_DIR = original_courses_dir
 
     def test_rewrite_runtime_html_rewrites_paths_and_hides_view_chrome(self) -> None:
         source = (

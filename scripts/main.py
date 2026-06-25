@@ -669,12 +669,22 @@ def render_course_page(
     *,
     questions: list[PythonQuestionBlock] | None = None,
     rendered_source: str | None = None,
+    package_href_builder: Any | None = None,
 ) -> str:
     if questions is None or rendered_source is None:
         _, questions, rendered_source = parse_course(course_dir)
 
     view_builder = preview_view_builder()
-    question_html = {question.identifier: view_builder.build_question_component(question) for question in questions}
+    question_html = {}
+    for question in questions:
+        if package_href_builder is not None:
+            package_src = str(package_href_builder(question))
+        else:
+            try:
+                package_src = question.package_path.relative_to(course_dir).as_posix()
+            except ValueError:
+                package_src = question.package_path.as_posix()
+        question_html[question.identifier] = view_builder.build_static_question_component(question, package_src=package_src)
     content_html = markdown_renderer().render(rendered_source, question_html)
 
     return template_renderer().render_course_page(title=course_dir.name, content_html=content_html)
@@ -717,6 +727,64 @@ def export_chapter(course_dir: Path, chapter: str, output_dir: Path | None = Non
         shutil.copy2(package_path, target_path)
         exported_paths.append(target_path)
     return exported_paths
+
+
+def export_static_site(output_dir: Path, course_dir: Path | None = None) -> list[Path]:
+    target_course_dirs = [course_dir] if course_dir is not None else [item for item in list_course_dirs() if (item / "index.mdx").exists()]
+    if not target_course_dirs:
+        raise FileNotFoundError("Keine Kurse fuer den statischen Export gefunden.")
+
+    resolved_output_dir = output_dir.resolve()
+    protected_dirs = {ROOT_DIR.resolve(), COURSES_DIR.resolve()}
+    if resolved_output_dir in protected_dirs:
+        raise ValueError(f"Export-Zielordner darf kein Projekt- oder Kurs-Quellordner sein: {output_dir}")
+
+    if output_dir.exists():
+        shutil.rmtree(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    (output_dir / ".nojekyll").write_text("", encoding="utf-8")
+
+    written_paths: list[Path] = [output_dir / ".nojekyll"]
+    for target_course_dir in target_course_dirs:
+        questions = sync_course(target_course_dir)
+        _, parsed_questions, rendered_source = parse_course(target_course_dir)
+        questions_by_identifier = {question.identifier: question for question in questions}
+        ordered_questions = [questions_by_identifier.get(question.identifier, question) for question in parsed_questions]
+
+        course_site_dir = output_dir / "courses" / target_course_dir.name
+        h5p_site_dir = output_dir / "h5p" / target_course_dir.name
+        course_site_dir.mkdir(parents=True, exist_ok=True)
+        h5p_site_dir.mkdir(parents=True, exist_ok=True)
+
+        copied_packages: dict[str, str] = {}
+        for question in ordered_questions:
+            if not question.package_path.is_file():
+                raise FileNotFoundError(f"H5P-Paket fuer '{question.identifier}' wurde nicht gebaut: {question.package_path}")
+            relative_package_path = (
+                Path(question.h5p_subdir) / question.package_path.name
+                if question.h5p_subdir
+                else Path(question.package_path.name)
+            )
+            target_package_path = h5p_site_dir / relative_package_path
+            target_package_path.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(question.package_path, target_package_path)
+            copied_packages[question.identifier] = f"../../h5p/{target_course_dir.name}/{relative_package_path.as_posix()}"
+            written_paths.append(target_package_path)
+
+        html_content = render_course_page(
+            target_course_dir,
+            questions=ordered_questions,
+            rendered_source=rendered_source,
+            package_href_builder=lambda question: copied_packages.get(question.identifier, ""),
+        )
+        course_index_path = course_site_dir / "index.html"
+        course_index_path.write_text(html_content + "\n", encoding="utf-8")
+        written_paths.append(course_index_path)
+
+    index_path = output_dir / "index.html"
+    index_path.write_text(template_renderer().render_index(target_course_dirs, static=True) + "\n", encoding="utf-8")
+    written_paths.append(index_path)
+    return written_paths
 
 
 def _chapter_title_from_index(course_dir: Path, chapter: str) -> str:
@@ -1036,6 +1104,7 @@ def main() -> None:
         upload_moodle_chapter=upload_moodle_chapter,
         update_h5p_libraries_from_github=update_h5p_libraries_from_github,
         import_moodle_from_mbz=import_moodle_from_mbz,
+        export_static_site=export_static_site,
     )
 
 

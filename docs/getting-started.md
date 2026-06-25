@@ -45,18 +45,23 @@ source prepare.sh
 
 ```bash
 course-sync list-courses --verbose
-course-sync sync h5p-demo
-course-sync serve
+course-sync export-site h5p-demo
 ```
 
-Öffne anschließend <http://127.0.0.1:8765/>.
+Öffne anschließend `public/index.html` im Browser oder starte einen einfachen lokalen
+Webserver:
+
+```bash
+python -m http.server 8000 --directory public
+```
+
+Die statische Ansicht ist dann unter <http://127.0.0.1:8000/> erreichbar.
 
 ## Eigenen Kurs anlegen
 
 ```bash
 course-sync new-course info-2026 --title "Informatik 2026"
-course-sync sync info-2026
-course-sync serve
+course-sync export-site info-2026
 ```
 
 Der neue Kurs enthält ein Kapitel und eine lauffähige PythonQuestion. Bearbeite danach:
@@ -75,6 +80,18 @@ course-sync export-chapter info-2026 001-einstieg
 ```
 
 Ohne `--output` landen die Dateien unter `courses/<kurs>/exports/<kapitel>/`.
+
+## Statische Website exportieren
+
+```bash
+course-sync export-site info-2026 --output public
+inv export-site --course=info-2026
+```
+
+Der Export schreibt HTML-Seiten und kopiert die gebauten `.h5p`-Pakete nach `public/`.
+Die Seite ist rein statisch und funktioniert lokal genauso wie auf GitHub Pages. Im
+Repository liegt ein Workflow unter `.github/workflows/pages.yml`, der bei Push auf
+`main` automatisch `public/` baut und nach GitHub Pages deployed.
 
 ## Moodle konfigurieren
 
@@ -139,7 +156,7 @@ Fehlende H5P-Libraries
 course-sync update-h5p-libraries
 ```
 
-Preview-Port belegt
+Preview-Port belegt, falls du die alte dynamische Preview nutzt
 
 ```bash
 course-sync serve --port 8770

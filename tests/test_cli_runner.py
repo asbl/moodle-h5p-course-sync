@@ -136,6 +136,35 @@ class CliRunnerTests(unittest.TestCase):
 
         self.assertEqual(captured, [None])
 
+    def test_run_cli_command_export_site_prints_exported_paths(self) -> None:
+        args = SimpleNamespace(command="export-site", course="python-2026", output=str(self.root_dir / "public"))
+        parser = DummyParser()
+        exported_path = self.root_dir / "public" / "index.html"
+        captured: list[tuple[Path, Path | None]] = []
+
+        with patch("builtins.print") as print_mock:
+            run_cli_command(
+                args,
+                parser=parser,
+                root_dir=self.root_dir,
+                courses_dir=self.courses_dir,
+                sync_course=lambda _course_dir: [],
+                build_preview_runtime=lambda _course_dir: [],
+                serve_preview=lambda _port: None,
+                resolve_moodle_client=lambda _base_url, _token: object(),
+                import_moodle_course=lambda _course, _remote_id, _client: self.course_dir,
+                push_moodle_course=lambda _course_dir, _remote_id, _client: None,
+                sync_metadata_path=lambda _course_dir: self.course_dir / "sync-metadata.json",
+                build_moodle_ping_report=lambda _client: {},
+                print_moodle_ping_report=lambda _report: None,
+                build_course_status=lambda _course_dir: {},
+                print_course_status=lambda _status: None,
+                export_static_site=lambda output_dir, course_dir: captured.append((output_dir, course_dir)) or [exported_path],
+            )
+
+        self.assertEqual(captured, [(self.root_dir / "public", self.course_dir)])
+        print_mock.assert_called_once_with(Path("public/index.html"))
+
     def test_run_cli_command_export_chapter_prints_exported_package_paths(self) -> None:
         args = SimpleNamespace(command="export-chapter", course="python-2026", chapter="012-miniworlds", output=None)
         parser = DummyParser()

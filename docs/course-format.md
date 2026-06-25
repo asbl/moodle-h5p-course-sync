@@ -129,6 +129,7 @@ Diese Ordner sind lokal oder generiert und sollten nicht als Kursquelle bearbeit
 
 - `courses/<kurs>/build/`
 - `courses/<kurs>/exports/`
+- `public/`
 - `.h5p-runtime/`
 - `temp/`
 - `uploads/`
@@ -143,7 +144,7 @@ Empfohlener Ablauf:
 git pull
 git checkout -b feature/neue-aufgabe
 course-sync sync info-2026
-course-sync serve
+course-sync export-site info-2026
 git add courses/info-2026
 git commit -m "Add variables exercise"
 ```

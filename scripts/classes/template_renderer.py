@@ -26,9 +26,13 @@ class TemplateRenderer:
             content_html=content_html,
         ).strip()
 
-    def render_index(self, course_dirs: Iterable[Path]) -> str:
+    def render_index(self, course_dirs: Iterable[Path], *, static: bool = False) -> str:
         links = "".join(
-            f'<li><a href="/courses/{self._escape_inline(d.name)}">{self._escape_inline(d.name)}</a></li>'
+            (
+                f'<li><a href="courses/{self._escape_inline(d.name)}/index.html">{self._escape_inline(d.name)}</a></li>'
+                if static
+                else f'<li><a href="/courses/{self._escape_inline(d.name)}">{self._escape_inline(d.name)}</a></li>'
+            )
             for d in course_dirs
         )
         return _fill(self._index_tpl, links=links).strip()
