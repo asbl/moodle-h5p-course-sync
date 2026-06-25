@@ -2265,6 +2265,46 @@ turtle.forward(50)
             status["items"],
         )
 
+    def test_store_uploaded_activity_ids_refreshes_metadata_hash_and_title(self) -> None:
+        from scripts import main as module
+        from scripts.classes.moodle_playwright_uploader import MoodleH5PUploadResult
+
+        metadata = SyncMetadata(
+            course_slug="python-2026",
+            remote_course_id=5,
+            moodle_base_url="https://example.invalid",
+        )
+        metadata.entries["12eck"] = SyncMetadataEntry(
+            identifier="12eck",
+            remote_activity_id=134,
+            remote_instance_id=77,
+            remote_title="Alter Titel",
+            remote_url="",
+            remote_visible=False,
+            local_hash="stale",
+            remote_hash="stale",
+            status="modified-local",
+        )
+        save_sync_metadata(self.course_dir, metadata)
+
+        module._store_uploaded_activity_ids(
+            self.course_dir,
+            [MoodleH5PUploadResult("12eck", "Zwölfeck zeichnen", "updated", 134)],
+        )
+
+        reloaded = load_sync_metadata(self.course_dir)
+        assert reloaded is not None
+        entry = reloaded.entries["12eck"]
+        _, questions, _ = parse_course(self.course_dir)
+        question = next(question for question in questions if question.identifier == "12eck")
+        expected_hash = compute_question_hash(question)
+        self.assertEqual(entry.remote_title, "Zwölfeck zeichnen")
+        self.assertEqual(entry.remote_url, "https://example.invalid/mod/h5pactivity/view.php?id=134")
+        self.assertEqual(entry.local_hash, expected_hash)
+        self.assertEqual(entry.remote_hash, expected_hash)
+        self.assertEqual(entry.status, "tracked")
+        self.assertTrue(entry.remote_visible)
+
     def test_sync_course_writes_h5p_files(self) -> None:
         from scripts import main as module
 
@@ -2297,6 +2337,9 @@ turtle.forward(50)
                 73,
                 [("H5P.CodeQuestion", 6, 73), ("H5P.LibCodeTools", 6, 73)],
             )
+            stale_hash = self.course_dir / "build" / "hashes" / "old-section" / "old-question.build-hash"
+            stale_hash.parent.mkdir(parents=True)
+            stale_hash.write_text("stale", encoding="utf-8")
             questions = sync_course(self.course_dir)
         finally:
             module.COURSES_DIR = original_courses_dir
@@ -2312,6 +2355,7 @@ turtle.forward(50)
         self.assertTrue(archive.exists())
         self.assertTrue(content_mdx.exists())
         self.assertTrue(build_hash.exists())
+        self.assertFalse(stale_hash.exists())
         self.assertFalse((self.course_dir / "h5p" / "12eck.h5p").exists())
         self.assertFalse((self.course_dir / "h5p" / ".12eck.build-hash").exists())
         self.assertFalse((self.course_dir / "h5p" / "orphaned-old-package.h5p").exists())

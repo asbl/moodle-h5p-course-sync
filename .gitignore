@@ -2,6 +2,7 @@
 .env
 .h5p-runtime/
 .vscode/
+.claude/
 .codex
 __pycache__/
 *.py[cod]

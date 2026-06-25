@@ -17,6 +17,12 @@ class UploadResultLike(Protocol):
     action: str
 
 
+class CleanupResultLike(Protocol):
+    title: str
+    section_number: int
+    action: str
+
+
 def resolve_course_dir(course: str, courses_dir: Path) -> Path:
     course_dir = courses_dir / course
     if not course_dir.exists():
@@ -175,8 +181,19 @@ def run_cli_command(
     print_course_status: Callable[[dict[str, object]], None],
     export_chapter: Callable[[Path, str, Path | None], list[Path]] | None = None,
     upload_moodle_chapter: Callable[
-        [Path, str, str | None, str | None, str | None, str | None, Path | None, bool, int, str | None, bool],
+        [Path, str, str | None, str | None, str | None, str | None, Path | None, bool, int, str | None, bool, bool],
         list[UploadResultLike],
+    ]
+    | None = None,
+    upload_moodle_course: Callable[
+        [Path, str | None, str | None, str | None, Path | None, bool, int, str | None, bool, bool, bool],
+        list[UploadResultLike | CleanupResultLike],
+    ]
+    | None = None,
+    audit_course: Callable[[Path], dict[str, object]] | None = None,
+    verify_moodle_course: Callable[
+        [Path, str | None, str | None, str | None, Path | None, bool, int, str | None],
+        list[dict[str, object]],
     ]
     | None = None,
     update_h5p_libraries_from_github: Callable[[str | None], list[dict[str, str]]] | None = None,
@@ -213,6 +230,16 @@ def run_cli_command(
             questions = sync_course(course_dir)
             for question in questions:
                 print(question.package_path.relative_to(root_dir))
+            return
+
+        if args.command == "audit":
+            if audit_course is None:
+                raise RuntimeError("Kurs-Audit ist nicht konfiguriert.")
+            course_dir = resolve_course_dir(args.course, courses_dir)
+            report = audit_course(course_dir)
+            _print_audit_report(report)
+            if int(report.get("errors", 0)) > 0:
+                raise RuntimeError(f"Audit fehlgeschlagen: {report['errors']} Fehler.")
             return
 
         if args.command == "build":
@@ -302,9 +329,102 @@ def run_cli_command(
                 args.timeout,
                 args.target,
                 getattr(args, "verify_mbz_sync", False),
+                getattr(args, "verify_remote", False),
             )
             for result in results:
                 print(f"{result.action}: {result.identifier} ({result.title})")
+            return
+
+        if args.command == "upload-course-moodle":
+            if upload_moodle_course is None:
+                raise RuntimeError("Moodle-Playwright-Kursupload ist nicht konfiguriert.")
+            course_dir = resolve_course_dir(args.course, courses_dir)
+            storage_state = Path(args.storage_state).expanduser() if args.storage_state else None
+            results = upload_moodle_course(
+                course_dir,
+                args.course_url,
+                args.username,
+                args.password,
+                storage_state,
+                args.headless,
+                args.timeout,
+                args.target,
+                getattr(args, "verify_mbz_sync", False),
+                not getattr(args, "keep_extra_sections", False),
+                getattr(args, "verify_remote", False),
+            )
+            for result in results:
+                if hasattr(result, "identifier"):
+                    print(f"{result.action}: {result.identifier} ({result.title})")
+                else:
+                    print(f"{result.action}: section {result.section_number} ({result.title})")
+            return
+
+        if args.command == "verify-moodle":
+            if verify_moodle_course is None:
+                raise RuntimeError("Moodle-Remote-Verifikation ist nicht konfiguriert.")
+            course_dir = resolve_course_dir(args.course, courses_dir)
+            storage_state = Path(args.storage_state).expanduser() if args.storage_state else None
+            results = verify_moodle_course(
+                course_dir,
+                args.course_url,
+                args.username,
+                args.password,
+                storage_state,
+                args.headless,
+                args.timeout,
+                args.target,
+            )
+            _print_verify_results(results)
+            if any(not bool(item.get("ok")) for item in results):
+                raise RuntimeError("Remote-Verifikation fehlgeschlagen.")
+            return
+
+        if args.command == "publish":
+            if audit_course is None or upload_moodle_course is None or verify_moodle_course is None:
+                raise RuntimeError("Publish ist nicht vollstaendig konfiguriert.")
+            course_dir = resolve_course_dir(args.course, courses_dir)
+            storage_state = Path(args.storage_state).expanduser() if args.storage_state else None
+            print("== Audit ==")
+            audit_report = audit_course(course_dir)
+            _print_audit_report(audit_report)
+            if int(audit_report.get("errors", 0)) > 0:
+                raise RuntimeError(f"Audit fehlgeschlagen: {audit_report['errors']} Fehler.")
+            print("== Upload ==")
+            upload_results = upload_moodle_course(
+                course_dir,
+                args.course_url,
+                args.username,
+                args.password,
+                storage_state,
+                args.headless,
+                args.timeout,
+                args.target,
+                False,
+                not getattr(args, "keep_extra_sections", False),
+                False,
+            )
+            for result in upload_results:
+                if hasattr(result, "identifier"):
+                    print(f"{result.action}: {result.identifier} ({result.title})")
+                else:
+                    print(f"{result.action}: section {result.section_number} ({result.title})")
+            print("== Remote Verify ==")
+            verify_results = verify_moodle_course(
+                course_dir,
+                args.course_url,
+                args.username,
+                args.password,
+                storage_state,
+                args.headless,
+                args.timeout,
+                args.target,
+            )
+            _print_verify_results(verify_results)
+            if any(not bool(item.get("ok")) for item in verify_results):
+                raise RuntimeError("Remote-Verifikation fehlgeschlagen.")
+            print("== Status ==")
+            print_course_status(build_course_status(course_dir))
             return
 
         if args.command == "moodle-ping":
@@ -320,3 +440,24 @@ def run_cli_command(
         parser.exit(1, f"Fehler: {error}\n")
 
     parser.error("Unbekanntes Kommando.")
+
+
+def _print_audit_report(report: dict[str, object]) -> None:
+    print(
+        f"Audit: errors={report.get('errors', 0)}, "
+        f"warnings={report.get('warnings', 0)}, checks={report.get('checks', 0)}"
+    )
+    for issue in report.get("issues", []):
+        if not isinstance(issue, dict):
+            continue
+        location = str(issue.get("path") or issue.get("identifier") or "")
+        prefix = f"{issue.get('severity', 'warning')}:"
+        print(f"- {prefix} {location}: {issue.get('message', '')}")
+
+
+def _print_verify_results(results: list[dict[str, object]]) -> None:
+    ok_count = sum(1 for item in results if bool(item.get("ok")))
+    print(f"Remote-Verifikation: ok={ok_count}, failed={len(results) - ok_count}")
+    for item in results:
+        status = "ok" if item.get("ok") else "failed"
+        print(f"- {status}: {item.get('identifier')} (id={item.get('activityId')}) {item.get('message', '')}")

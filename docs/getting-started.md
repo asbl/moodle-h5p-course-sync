@@ -76,6 +76,7 @@ Der neue Kurs enthält ein Kapitel und eine lauffähige PythonQuestion. Bearbeit
 
 ```bash
 course-sync sync info-2026
+course-sync audit info-2026
 course-sync export-chapter info-2026 001-einstieg
 ```
 
@@ -110,10 +111,31 @@ Verbindung prüfen:
 course-sync moodle-ping
 ```
 
-Kapitel hochladen:
+Ganzen Kurs hochladen und Moodle-Abschnitte mit `index.mdx` abgleichen:
+
+```bash
+course-sync upload-course-moodle info-2026 --verify-remote
+```
+
+Ein einzelnes Kapitel gezielt hochladen:
 
 ```bash
 course-sync upload-chapter-moodle info-2026 001-einstieg
+```
+
+Headless-Uploads brauchen entweder einen gültigen Storage-State oder Moodle-Zugangsdaten. Für einen Kurs `info-2026`
+werden zuerst die kursbezogenen Variablen gelesen:
+
+```env
+MOODLE_INFO_2026_COURSE_URL=https://moodle.example.org/course/view.php?id=42
+MOODLE_INFO_2026_USERNAME=mein-login
+MOODLE_INFO_2026_PASSWORD=mein-passwort
+```
+
+Danach funktioniert der Upload ohne sichtbaren Browser:
+
+```bash
+course-sync upload-course-moodle info-2026 --headless --verify-remote
 ```
 
 Mehrere Ziele für denselben Kurs werden über `--target` gewählt. Beispiel:
@@ -125,7 +147,27 @@ MOODLE_INFO_2026_SCHULE_PASSWORD=mein-passwort
 ```
 
 ```bash
-course-sync upload-chapter-moodle info-2026 001-einstieg --target=schule
+course-sync upload-course-moodle info-2026 --target=schule
+```
+
+## Qualitaet pruefen und veroeffentlichen
+
+Der lokale Audit baut den Kurs und prueft typische Probleme in Quellen und H5P-Paketen:
+
+```bash
+course-sync audit info-2026
+```
+
+Nach einem Upload kann `verify-moodle` die eingebetteten H5P-Frames im Remote-Kurs pruefen. Dabei zaehlt nicht nur der Moodle-Titel, sondern sichtbarer Inhalt im H5P-Frame.
+
+```bash
+course-sync verify-moodle info-2026 --headless
+```
+
+Der Komfortbefehl `publish` fuehrt Audit, Upload, Remote-Verifikation und Statusausgabe in einem Lauf aus:
+
+```bash
+course-sync publish info-2026 --headless
 ```
 
 ## Moodle-Upload: Zwei Nutzer erforderlich

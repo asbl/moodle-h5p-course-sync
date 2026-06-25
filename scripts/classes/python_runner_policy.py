@@ -6,9 +6,19 @@ import re
 DEFAULT_PYTHON_RUNNER = "skulpt"
 MINIWORLDS_PYTHON_RUNNER = "pyodide"
 MINIWORLDS_PACKAGE = "miniworlds"
+MINIWORLDS_ROBOT_PACKAGE = "miniworlds-robot"
+MINIWORLDS_TURTLE_PACKAGE = "miniworlds-turtle"
 MINIWORLDS_EXTRA_PACKAGES: tuple[str, ...] = ()
 GRAPHICS_IMPORT_RE = re.compile(r"^\s*(?:import|from)\s+(?:p5|turtle)\b", re.MULTILINE)
-MINIWORLDS_IMPORT_RE = re.compile(r"^\s*(?:import|from)\s+miniworlds\b", re.MULTILINE)
+MINIWORLDS_IMPORT_RE = re.compile(
+    r"^\s*(?:import|from)\s+(miniworlds(?:_robot|_turtle)?)\b", re.MULTILINE
+)
+MINIWORLDS_IMPORT_PACKAGES = {
+    "miniworlds": MINIWORLDS_PACKAGE,
+    "miniworlds_robot": MINIWORLDS_ROBOT_PACKAGE,
+    "miniworlds_turtle": MINIWORLDS_TURTLE_PACKAGE,
+}
+MINIWORLDS_PACKAGES = frozenset(MINIWORLDS_IMPORT_PACKAGES.values())
 
 
 def _package_name(pkg: str | dict[str, object]) -> str:
@@ -27,7 +37,18 @@ def contains_miniworlds_import(source: str) -> bool:
 
 
 def contains_miniworlds_package(packages: list[str | dict[str, object]] | tuple[str | dict[str, object], ...]) -> bool:
-    return any(_package_name(p) == MINIWORLDS_PACKAGE for p in packages)
+    return any(_canonical_package_name(_package_name(p)) in MINIWORLDS_PACKAGES for p in packages)
+
+
+def _canonical_package_name(name: str) -> str:
+    return MINIWORLDS_IMPORT_PACKAGES.get(name.lower(), name)
+
+
+def _packages_imported_by_source(source: str) -> set[str]:
+    return {
+        MINIWORLDS_IMPORT_PACKAGES[match.group(1)]
+        for match in MINIWORLDS_IMPORT_RE.finditer(source)
+    }
 
 
 def ensure_miniworlds_packages(
@@ -44,7 +65,7 @@ def ensure_miniworlds_packages(
     normalized: list[str] = []
     seen: set[str] = set()
     for package in packages:
-        name = str(package).strip()
+        name = _canonical_package_name(str(package).strip())
         if not name:
             continue
         key = name.lower()
@@ -53,12 +74,20 @@ def ensure_miniworlds_packages(
         normalized.append(name)
         seen.add(key)
 
-    if not (contains_miniworlds_package(normalized) or contains_miniworlds_import(source)):
+    imported_packages = _packages_imported_by_source(source)
+    required_packages = {
+        _canonical_package_name(package) for package in normalized
+    } | imported_packages
+    if not required_packages.intersection(MINIWORLDS_PACKAGES):
         return normalized
 
     if MINIWORLDS_PACKAGE not in seen:
         normalized.append({"package": MINIWORLDS_PACKAGE, "remote": False})
         seen.add(MINIWORLDS_PACKAGE)
+    for package in (MINIWORLDS_ROBOT_PACKAGE, MINIWORLDS_TURTLE_PACKAGE):
+        if package in required_packages and package not in seen:
+            normalized.append(package)
+            seen.add(package)
     for package in MINIWORLDS_EXTRA_PACKAGES:
         if package not in seen:
             normalized.append(package)
@@ -80,6 +109,7 @@ def packages_for_h5p_content(
     seen: set[str] = set()
     for pkg in packages:
         name = _package_name(pkg)
+        name = _canonical_package_name(name)
         if name == MINIWORLDS_PACKAGE:
             if MINIWORLDS_PACKAGE not in seen:
                 result.append({"package": MINIWORLDS_PACKAGE, "remote": False})

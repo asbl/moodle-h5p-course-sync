@@ -118,6 +118,21 @@ class TestBuildDefaultPythonQuestionContent(unittest.TestCase):
             [{"package": "miniworlds", "remote": False}, "numpy"],
         )
 
+    def test_miniworlds_extensions_include_core_and_use_distribution_names(self) -> None:
+        syncer = _make_syncer()
+        q = _make_question(packages=["miniworlds_robot", "miniworlds_turtle"])
+
+        content = syncer._build_default_python_question_content(q)
+
+        self.assertEqual(
+            content["pyodideOptions"]["packages"],  # type: ignore[index]
+            [
+                "miniworlds-robot",
+                "miniworlds-turtle",
+                {"package": "miniworlds", "remote": False},
+            ],
+        )
+
     def test_show_console_propagated(self) -> None:
         syncer = _make_syncer()
         q = _make_question(show_console=False)

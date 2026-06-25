@@ -8,6 +8,7 @@ from pathlib import Path
 
 from scripts.classes.moodle_playwright_uploader import (
     MoodleH5PUploadPackage,
+    MoodleH5PUploadResult,
     MoodlePlaywrightUploader,
     collect_h5p_upload_packages,
     infer_h5p_package_points,
@@ -485,6 +486,15 @@ class MoodlePlaywrightUploaderTests(unittest.TestCase):
             def count(self) -> int:
                 return 1 if self.present else 0
 
+            def nth(self, index: int):  # type: ignore[no-untyped-def]
+                return self
+
+            def is_visible(self) -> bool:
+                return self.present
+
+            def is_enabled(self) -> bool:
+                return self.present
+
             def fill(self, value: str) -> None:
                 self.page.filled[self.name] = value
 
@@ -512,6 +522,8 @@ class MoodlePlaywrightUploaderTests(unittest.TestCase):
                     return FakeLocator(self, "username", not self.logged_in)
                 if selector == 'input[name="password"]':
                     return FakeLocator(self, "password", not self.logged_in)
+                if selector == "#loginbtn":
+                    return FakeLocator(self, "login-button", not self.logged_in)
                 if selector == ".logininfo a[href*='login/index.php'], a[href*='login/index.php']":
                     return EmptyLocator()
                 if selector == (
@@ -550,6 +562,97 @@ class MoodlePlaywrightUploaderTests(unittest.TestCase):
         self.assertEqual(page.filled, {"username": "alice", "password": "secret"})
         self.assertEqual(page.clicks, ["login-button"])
         self.assertEqual(page.gotos, [page.course_url])
+
+    def test_login_with_credentials_uses_visible_fields_and_login_button(self) -> None:
+        class Candidate:
+            def __init__(self, page, name: str, visible: bool = True) -> None:  # type: ignore[no-untyped-def]
+                self.page = page
+                self.name = name
+                self.visible = visible
+
+            def is_visible(self) -> bool:
+                return self.visible
+
+            def is_enabled(self) -> bool:
+                return True
+
+            def fill(self, value: str) -> None:
+                if not self.visible:
+                    raise AssertionError("hidden field must not be filled")
+                self.page.filled[self.name] = value
+
+            def click(self) -> None:
+                self.page.clicks.append(self.name)
+                self.page.logged_in = True
+
+        class FakeLocator:
+            def __init__(self, candidates: list[Candidate]) -> None:
+                self.candidates = candidates
+                self.first = candidates[0] if candidates else None
+
+            def count(self) -> int:
+                return len(self.candidates)
+
+            def nth(self, index: int) -> Candidate:
+                return self.candidates[index]
+
+        class EmptyLocator:
+            first = None
+
+            def count(self) -> int:
+                return 0
+
+        class FakePage:
+            def __init__(self) -> None:
+                self.course_url = "https://www.opencoding.de/course/view.php?id=11"
+                self.url = "https://www.opencoding.de/enrol/index.php?id=11"
+                self.logged_in = False
+                self.filled: dict[str, str] = {}
+                self.clicks: list[str] = []
+                self.gotos: list[str] = []
+
+            def locator(self, selector: str):  # type: ignore[no-untyped-def]
+                if selector == 'input[name="username"]':
+                    if self.logged_in:
+                        return EmptyLocator()
+                    return FakeLocator([Candidate(self, "hidden-user", visible=False), Candidate(self, "visible-user")])
+                if selector == 'input[name="password"]':
+                    if self.logged_in:
+                        return EmptyLocator()
+                    return FakeLocator([Candidate(self, "hidden-password", visible=False), Candidate(self, "visible-password")])
+                if selector == "#loginbtn":
+                    return FakeLocator([Candidate(self, "login-button")])
+                if selector == ".logininfo, .usermenu, [data-region='usermenu']":
+                    return EmptyLocator()
+                if selector == ".logininfo a[href*='login/index.php'], a[href*='login/index.php']":
+                    return EmptyLocator()
+                if selector == (
+                    ".usermenu, [data-region='usermenu'], a[href*='login/logout.php'], "
+                    ".logininfo a[href*='login/logout.php']"
+                ):
+                    return FakeLocator([Candidate(self, "logout")]) if self.logged_in else EmptyLocator()
+                return EmptyLocator()
+
+            def goto(self, url: str, **kwargs: object) -> None:
+                self.gotos.append(url)
+                self.url = url
+
+            def wait_for_load_state(self, state: str) -> None:
+                return None
+
+        page = FakePage()
+        uploader = MoodlePlaywrightUploader(
+            course_url=page.course_url,
+            section_title="Grundlagen",
+            username="playwright",
+            password="secret",
+            headless=True,
+        )
+
+        uploader._login_with_credentials_if_needed(page)
+
+        self.assertEqual(page.filled, {"visible-user": "playwright", "visible-password": "secret"})
+        self.assertEqual(page.clicks, ["login-button"])
 
     def test_turn_editing_on_reports_external_sso_redirect_as_login(self) -> None:
         class EmptyLocator:
@@ -599,6 +702,38 @@ class MoodlePlaywrightUploaderTests(unittest.TestCase):
         )
 
         self.assertFalse(uploader._login_is_required(FakePage()))
+
+    def test_headless_login_if_needed_treats_guest_enrol_page_as_stale_storage(self) -> None:
+        class EmptyLocator:
+            def count(self) -> int:
+                return 0
+
+        class TextLocator:
+            def count(self) -> int:
+                return 1
+
+            def nth(self, index: int):  # type: ignore[no-untyped-def]
+                return self
+
+            def inner_text(self, timeout: int = 0) -> str:
+                return "Sie sind als Gast angemeldet Anmelden"
+
+        class FakePage:
+            url = "https://www.opencoding.de/enrol/index.php?id=11"
+
+            def locator(self, selector: str):  # type: ignore[no-untyped-def]
+                if selector in {".logininfo, .usermenu, [data-region='usermenu']"}:
+                    return TextLocator()
+                return EmptyLocator()
+
+        uploader = MoodlePlaywrightUploader(
+            course_url="https://www.opencoding.de/course/view.php?id=11",
+            section_title="Grundlagen",
+            headless=True,
+        )
+
+        with self.assertRaisesRegex(RuntimeError, "nur als Gast angemeldet.*Storage-State"):
+            uploader._login_if_needed(FakePage())
 
     def test_find_or_create_section_aborts_when_rename_form_is_missing(self) -> None:
         class UploaderWithMissingRenameForm(MoodlePlaywrightUploader):
@@ -823,6 +958,241 @@ class MoodlePlaywrightUploaderTests(unittest.TestCase):
         uploader._sort_section_h5p_activities(object(), 19, packages)
 
         self.assertEqual(uploader.moves, [])
+
+    def test_resolve_existing_activity_id_can_reuse_coursewide_id_outside_target_section(self) -> None:
+        uploader = MoodlePlaywrightUploader(
+            course_url="https://example.invalid/course/view.php?id=5",
+            section_title="Grundlagen",
+            existing_activity_ids={"bewegung": 44},
+        )
+
+        activity_id = uploader._resolve_existing_activity_id(
+            MoodleH5PUploadPackage("bewegung", "Bewegung", Path("bewegung.h5p")),
+            {"installation": 11},
+            require_section_match=True,
+        )
+
+        self.assertIsNone(activity_id)
+
+        activity_id = uploader._resolve_existing_activity_id(
+            MoodleH5PUploadPackage("bewegung", "Bewegung", Path("bewegung.h5p")),
+            {"installation": 11},
+            require_section_match=False,
+        )
+
+        self.assertEqual(activity_id, 44)
+
+    def test_resolve_existing_activity_id_keeps_coursewide_id_inside_target_section(self) -> None:
+        uploader = MoodlePlaywrightUploader(
+            course_url="https://example.invalid/course/view.php?id=5",
+            section_title="Grundlagen",
+            existing_activity_ids={"bewegung": 44},
+        )
+
+        activity_id = uploader._resolve_existing_activity_id(
+            MoodleH5PUploadPackage("bewegung", "Bewegung", Path("bewegung.h5p")),
+            {"alter-titel": 44},
+            require_section_match=True,
+        )
+
+        self.assertEqual(activity_id, 44)
+
+    def test_set_activity_section_updates_hidden_section_field(self) -> None:
+        class FakeLocator:
+            def __init__(self, present: bool) -> None:
+                self.present = present
+                self.first = self
+                self.evaluated_values: list[str | None] = []
+
+            def count(self) -> int:
+                return 1 if self.present else 0
+
+            def select_option(self, *, value: str) -> None:
+                raise AssertionError("hidden input must be used in this test")
+
+            def evaluate(self, script: str, value: str | None = None) -> None:
+                self.evaluated_values.append(value)
+
+        class FakePage:
+            def __init__(self) -> None:
+                self.section_input = FakeLocator(True)
+
+            def locator(self, selector: str):  # type: ignore[no-untyped-def]
+                if selector.startswith("select"):
+                    return FakeLocator(False)
+                if selector.startswith("input"):
+                    return self.section_input
+                return FakeLocator(False)
+
+        page = FakePage()
+        uploader = MoodlePlaywrightUploader(course_url="https://example.invalid/course/view.php?id=5")
+
+        uploader._set_activity_section(page, 2)
+
+        self.assertEqual(page.section_input.evaluated_values, ["2"])
+
+    def test_move_activity_to_section_number_uses_moodle_movetosection(self) -> None:
+        class MoveUploader(MoodlePlaywrightUploader):
+            def __init__(self) -> None:
+                super().__init__(course_url="https://example.invalid/course/view.php?id=5")
+
+            def _turn_editing_on(self, page):  # type: ignore[no-untyped-def]
+                return None
+
+            def _section_by_number(self, page, section_number: int):  # type: ignore[no-untyped-def]
+                return {"selector": "[data-section='1']", "number": section_number, "title": "Grundlagen", "sectionDbId": "143"}
+
+            def _moodle_sesskey(self, page):  # type: ignore[no-untyped-def]
+                return "abc123"
+
+        class FakePage:
+            def __init__(self) -> None:
+                self.urls: list[str] = []
+
+            def goto(self, url: str, **kwargs: object) -> None:
+                self.urls.append(url)
+
+        page = FakePage()
+        uploader = MoveUploader()
+
+        uploader._move_activity_to_section_number(page, 412, 1)
+
+        self.assertEqual(
+            page.urls,
+            [
+                "https://example.invalid/course/view.php?id=5",
+                "https://example.invalid/course/mod.php?sesskey=abc123&copy=412",
+                "https://example.invalid/course/mod.php?movetosection=143&sesskey=abc123",
+                "https://example.invalid/course/view.php?id=5",
+            ],
+        )
+
+    def test_upload_packages_reloads_section_after_invalid_existing_activity_id(self) -> None:
+        class UploadUploader(MoodlePlaywrightUploader):
+            def __init__(self) -> None:
+                super().__init__(
+                    course_url="https://example.invalid/course/view.php?id=5",
+                    section_title="Weitere Tutorials",
+                    existing_activity_ids={"animationen": 419},
+                )
+                self.section_calls = 0
+                self.created = False
+
+            def _find_or_create_section(self, page, packages):  # type: ignore[no-untyped-def]
+                self.section_calls += 1
+                return {"selector": f"[data-section='{self.section_calls}']", "number": 5, "title": "Weitere Tutorials", "sectionDbId": "148"}
+
+            def _collect_section_h5p_activities(self, page, section_selector: str):  # type: ignore[no-untyped-def]
+                return {}
+
+            def _update_h5p_activity(self, page, activity_id: int, package, *, section_number=None):  # type: ignore[no-untyped-def]
+                return None
+
+            def _create_h5p_activity(self, page, section_number: int, package):  # type: ignore[no-untyped-def]
+                self.created = True
+                return MoodleH5PUploadResult(package.identifier, package.title, "created", 777)
+
+            def _sort_section_h5p_activities(self, page, section_number: int, packages):  # type: ignore[no-untyped-def]
+                return None
+
+            def _turn_editing_on(self, page):  # type: ignore[no-untyped-def]
+                return None
+
+        class FakePage:
+            def __init__(self) -> None:
+                self.gotos: list[str] = []
+
+            def goto(self, url: str, **kwargs: object) -> None:
+                self.gotos.append(url)
+
+        uploader = UploadUploader()
+        page = FakePage()
+
+        # Exercise the inner package loop without launching Playwright.
+        section = None
+        known_activities: dict[str, int] = {}
+        packages = [MoodleH5PUploadPackage("animationen", "animationen", Path("animationen.h5p"))]
+
+        def ensure_section():  # type: ignore[no-untyped-def]
+            nonlocal section, known_activities
+            if section is not None:
+                return section
+            section = uploader._find_or_create_section(page, packages)
+            known_activities = uploader._collect_section_h5p_activities(page, section["selector"])
+            return section
+
+        package = packages[0]
+        target_section = ensure_section()
+        activity_id = uploader._resolve_existing_activity_id(package, known_activities, require_section_match=False)
+        result = uploader._update_h5p_activity(page, activity_id, package, section_number=int(target_section["number"]))
+        self.assertIsNone(result)
+        section = None
+        known_activities = {}
+        uploader.existing_activity_ids.pop(package.identifier, None)
+        page.goto(uploader.course_url, wait_until="domcontentloaded")
+        uploader._turn_editing_on(page)
+        target_section = ensure_section()
+        created = uploader._create_h5p_activity(page, int(target_section["number"]), package)
+
+        self.assertEqual(uploader.section_calls, 2)
+        self.assertTrue(uploader.created)
+        self.assertEqual(created.activity_id, 777)
+
+    def test_prune_extra_course_sections_deletes_only_non_desired_h5p_sections(self) -> None:
+        class CleanupUploader(MoodlePlaywrightUploader):
+            def __init__(self) -> None:
+                super().__init__(course_url="https://example.invalid/course/view.php?id=5")
+                self.sections = [
+                    {"number": 0, "title": "Allgemeines", "modules": [{"modname": "forum", "name": "Ankündigungen"}]},
+                    {"number": 1, "title": "Grundlagen", "modules": [{"modname": "h5pactivity", "name": "intro"}]},
+                    {"number": 2, "title": "Alt", "modules": [{"modname": "h5pactivity", "name": "old"}]},
+                ]
+                self.deleted: list[int] = []
+
+            def _course_sections_snapshot(self, page):  # type: ignore[no-untyped-def]
+                return list(self.sections)
+
+            def _delete_section(self, page, section):  # type: ignore[no-untyped-def]
+                self.deleted.append(int(section["number"]))
+                self.sections = [item for item in self.sections if item["number"] != section["number"]]
+                return True
+
+            def _turn_editing_on(self, page):  # type: ignore[no-untyped-def]
+                return None
+
+        class FakePage:
+            def goto(self, url: str, **kwargs: object) -> None:
+                return None
+
+        uploader = CleanupUploader()
+
+        results = uploader._prune_extra_course_sections(FakePage(), ["Grundlagen"])
+
+        self.assertEqual(uploader.deleted, [2])
+        self.assertEqual([(result.section_number, result.title, result.action) for result in results], [(2, "Alt", "deleted")])
+
+    def test_prune_extra_course_sections_aborts_for_non_h5p_modules(self) -> None:
+        class CleanupUploader(MoodlePlaywrightUploader):
+            def __init__(self) -> None:
+                super().__init__(course_url="https://example.invalid/course/view.php?id=5")
+
+            def _course_sections_snapshot(self, page):  # type: ignore[no-untyped-def]
+                return [
+                    {"number": 1, "title": "Grundlagen", "modules": []},
+                    {"number": 2, "title": "Alt", "modules": [{"modname": "page", "name": "Nicht loeschen"}]},
+                ]
+
+            def _turn_editing_on(self, page):  # type: ignore[no-untyped-def]
+                return None
+
+        class FakePage:
+            def goto(self, url: str, **kwargs: object) -> None:
+                return None
+
+        uploader = CleanupUploader()
+
+        with self.assertRaisesRegex(RuntimeError, "Nicht-H5P-Inhalte: Nicht loeschen"):
+            uploader._prune_extra_course_sections(FakePage(), ["Grundlagen"])
 
     def test_create_section_at_end_raises_when_no_new_section_was_created(self) -> None:
         class UploaderWithoutCreation(MoodlePlaywrightUploader):

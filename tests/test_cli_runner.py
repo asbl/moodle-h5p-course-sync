@@ -232,6 +232,165 @@ class CliRunnerTests(unittest.TestCase):
 
         print_mock.assert_called_once_with("updated: miniworlds-tutorial (miniworlds-tutorial)")
 
+    def test_run_cli_command_upload_course_moodle_prints_upload_and_cleanup_results(self) -> None:
+        @dataclass(slots=True)
+        class DummyCleanupResult:
+            title: str
+            section_number: int
+            action: str
+
+        args = SimpleNamespace(
+            command="upload-course-moodle",
+            course="python-2026",
+            course_url=None,
+            username=None,
+            password=None,
+            storage_state=None,
+            headless=False,
+            timeout=30000,
+            target=None,
+            verify_mbz_sync=False,
+            keep_extra_sections=False,
+        )
+        parser = DummyParser()
+
+        with patch("builtins.print") as print_mock:
+            run_cli_command(
+                args,
+                parser=parser,
+                root_dir=self.root_dir,
+                courses_dir=self.courses_dir,
+                sync_course=lambda _course_dir: [],
+                build_preview_runtime=lambda _course_dir: [],
+                serve_preview=lambda _port: None,
+                resolve_moodle_client=lambda _base_url, _token: object(),
+                import_moodle_course=lambda _course, _remote_id, _client: self.course_dir,
+                push_moodle_course=lambda _course_dir, _remote_id, _client: None,
+                sync_metadata_path=lambda _course_dir: self.course_dir / "sync-metadata.json",
+                build_moodle_ping_report=lambda _client: {},
+                print_moodle_ping_report=lambda _report: None,
+                build_course_status=lambda _course_dir: {},
+                print_course_status=lambda _status: None,
+                upload_moodle_course=lambda *args: [
+                    DummyUploadResult("intro", "Intro", "updated"),
+                    DummyCleanupResult("Alt", 4, "deleted"),
+                ],
+            )
+
+        self.assertEqual(
+            [call.args[0] for call in print_mock.call_args_list],
+            ["updated: intro (Intro)", "deleted: section 4 (Alt)"],
+        )
+
+    def test_run_cli_command_audit_prints_report(self) -> None:
+        args = SimpleNamespace(command="audit", course="python-2026")
+        parser = DummyParser()
+
+        with patch("builtins.print") as print_mock:
+            run_cli_command(
+                args,
+                parser=parser,
+                root_dir=self.root_dir,
+                courses_dir=self.courses_dir,
+                sync_course=lambda _course_dir: [],
+                build_preview_runtime=lambda _course_dir: [],
+                serve_preview=lambda _port: None,
+                resolve_moodle_client=lambda _base_url, _token: object(),
+                import_moodle_course=lambda _course, _remote_id, _client: self.course_dir,
+                push_moodle_course=lambda _course_dir, _remote_id, _client: None,
+                sync_metadata_path=lambda _course_dir: self.course_dir / "sync-metadata.json",
+                build_moodle_ping_report=lambda _client: {},
+                print_moodle_ping_report=lambda _report: None,
+                build_course_status=lambda _course_dir: {},
+                print_course_status=lambda _status: None,
+                audit_course=lambda _course_dir: {"errors": 0, "warnings": 0, "checks": 3, "issues": []},
+            )
+
+        print_mock.assert_called_once_with("Audit: errors=0, warnings=0, checks=3")
+
+    def test_run_cli_command_verify_moodle_prints_results(self) -> None:
+        args = SimpleNamespace(
+            command="verify-moodle",
+            course="python-2026",
+            course_url=None,
+            username=None,
+            password=None,
+            storage_state=None,
+            headless=True,
+            timeout=30000,
+            target=None,
+        )
+        parser = DummyParser()
+
+        with patch("builtins.print") as print_mock:
+            run_cli_command(
+                args,
+                parser=parser,
+                root_dir=self.root_dir,
+                courses_dir=self.courses_dir,
+                sync_course=lambda _course_dir: [],
+                build_preview_runtime=lambda _course_dir: [],
+                serve_preview=lambda _port: None,
+                resolve_moodle_client=lambda _base_url, _token: object(),
+                import_moodle_course=lambda _course, _remote_id, _client: self.course_dir,
+                push_moodle_course=lambda _course_dir, _remote_id, _client: None,
+                sync_metadata_path=lambda _course_dir: self.course_dir / "sync-metadata.json",
+                build_moodle_ping_report=lambda _client: {},
+                print_moodle_ping_report=lambda _report: None,
+                build_course_status=lambda _course_dir: {},
+                print_course_status=lambda _status: None,
+                verify_moodle_course=lambda *args: [
+                    {"identifier": "intro", "activityId": 123, "ok": True, "message": "matched=Intro"}
+                ],
+            )
+
+        self.assertEqual(print_mock.call_args_list[0].args[0], "Remote-Verifikation: ok=1, failed=0")
+        self.assertIn("ok: intro", print_mock.call_args_list[1].args[0])
+
+    def test_run_cli_command_publish_runs_audit_upload_verify_and_status(self) -> None:
+        args = SimpleNamespace(
+            command="publish",
+            course="python-2026",
+            course_url=None,
+            username=None,
+            password=None,
+            storage_state=None,
+            headless=True,
+            timeout=30000,
+            target=None,
+            keep_extra_sections=False,
+        )
+        parser = DummyParser()
+        calls: list[str] = []
+
+        with patch("builtins.print"):
+            run_cli_command(
+                args,
+                parser=parser,
+                root_dir=self.root_dir,
+                courses_dir=self.courses_dir,
+                sync_course=lambda _course_dir: [],
+                build_preview_runtime=lambda _course_dir: [],
+                serve_preview=lambda _port: None,
+                resolve_moodle_client=lambda _base_url, _token: object(),
+                import_moodle_course=lambda _course, _remote_id, _client: self.course_dir,
+                push_moodle_course=lambda _course_dir, _remote_id, _client: None,
+                sync_metadata_path=lambda _course_dir: self.course_dir / "sync-metadata.json",
+                build_moodle_ping_report=lambda _client: {},
+                print_moodle_ping_report=lambda _report: None,
+                build_course_status=lambda _course_dir: {"course": "python-2026"},
+                print_course_status=lambda _status: calls.append("status"),
+                audit_course=lambda _course_dir: calls.append("audit") or {"errors": 0, "warnings": 0, "checks": 1, "issues": []},
+                upload_moodle_course=lambda *args: calls.append("upload") or [
+                    DummyUploadResult("intro", "Intro", "updated")
+                ],
+                verify_moodle_course=lambda *args: calls.append("verify") or [
+                    {"identifier": "intro", "activityId": 123, "ok": True, "message": ""}
+                ],
+            )
+
+        self.assertEqual(calls, ["audit", "upload", "verify", "status"])
+
     def test_run_cli_command_serve_calls_serve_preview_with_port(self) -> None:
         args = SimpleNamespace(command="serve", port=8810)
         parser = DummyParser()

@@ -27,6 +27,14 @@ class MoodleH5PUploadResult:
     activity_id: int | None = None
 
 
+@dataclass(slots=True)
+class MoodleSectionCleanupResult:
+    title: str
+    section_number: int
+    action: str
+    modules: list[str]
+
+
 def normalize_moodle_identifier(value: str) -> str:
     normalized = value.strip().lower()
     for source, target in {
@@ -171,6 +179,53 @@ class MoodlePlaywrightUploader:
         self.headless = headless
         self.timeout_ms = timeout_ms
 
+    def reconcile_course_sections(
+        self,
+        *,
+        desired_section_titles: list[str],
+        prune_extra_sections: bool = True,
+    ) -> list[MoodleSectionCleanupResult]:
+        if not prune_extra_sections:
+            return []
+        try:
+            from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
+            from playwright.sync_api import sync_playwright
+        except ModuleNotFoundError as error:
+            raise RuntimeError(
+                "Playwright ist nicht installiert. Installiere zuerst: "
+                "python -m pip install -r requirements.txt && python -m playwright install chromium"
+            ) from error
+
+        with sync_playwright() as playwright:
+            browser = playwright.chromium.launch(headless=self.headless)
+            context_kwargs: dict[str, Any] = {}
+            if self.storage_state and self.storage_state.exists():
+                context_kwargs["storage_state"] = str(self.storage_state)
+            context = browser.new_context(**context_kwargs)
+            page = context.new_page()
+            page.set_default_timeout(self.timeout_ms)
+            try:
+                print(f"Oeffne Moodle-Kurs: {self.course_url}", flush=True)
+                page.goto(self.course_url, wait_until="domcontentloaded")
+                self._login_if_needed(page)
+                self._wait_for_manual_login_confirmation(page)
+                self._return_to_course_after_login(page)
+                self._wait_for_editing_controls_after_manual_login(page)
+                print("Schalte Moodle-Bearbeitungsmodus ein.", flush=True)
+                self._turn_editing_on(page)
+                return self._prune_extra_course_sections(page, desired_section_titles)
+            except PlaywrightTimeoutError as error:
+                self._write_debug_artifacts(page, "timeout-course-section-cleanup")
+                raise RuntimeError(
+                    self._format_timeout_error(error, current_step="Moodle-Sections bereinigen", package=None)
+                ) from error
+            finally:
+                if self.storage_state:
+                    self.storage_state.parent.mkdir(parents=True, exist_ok=True)
+                    context.storage_state(path=str(self.storage_state))
+                context.close()
+                browser.close()
+
     def upload_packages(self, packages: list[MoodleH5PUploadPackage]) -> list[MoodleH5PUploadResult]:
         try:
             from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
@@ -223,18 +278,32 @@ class MoodlePlaywrightUploader:
                     current_package = package
                     current_step = f"H5P-Paket verarbeiten: {package.identifier}"
                     print(f"Verarbeite H5P-Paket: {package.identifier} ({package.title})", flush=True)
-                    activity_id = self.existing_activity_ids.get(package.identifier)
-                    if activity_id is None:
-                        ensure_section()
-                        activity_id = known_activities.get(package.identifier)
-                    if activity_id is None:
-                        ensure_section()
-                        activity_id = known_activities.get(normalize_moodle_identifier(package.title))
+                    activity_id: int | None = None
+                    target_section_number: int | None = None
+                    if self.section_title:
+                        target_section = ensure_section()
+                        target_section_number = int(target_section["number"])
+                        activity_id = self._resolve_existing_activity_id(
+                            package,
+                            known_activities,
+                            require_section_match=False,
+                        )
+                    else:
+                        activity_id = self._resolve_existing_activity_id(
+                            package,
+                            known_activities,
+                            require_section_match=False,
+                        )
 
                     if activity_id is not None:
                         current_step = f"H5P-Aktivitaet aktualisieren: {package.identifier}"
                         print(f"Aktualisiere H5P-Aktivitaet {activity_id}: {package.title}", flush=True)
-                        result = self._update_h5p_activity(page, activity_id, package)
+                        result = self._update_h5p_activity(
+                            page,
+                            activity_id,
+                            package,
+                            section_number=target_section_number,
+                        )
                         if result is not None:
                             results.append(result)
                             continue
@@ -243,23 +312,52 @@ class MoodlePlaywrightUploader:
                             "Lege sie neu an.",
                             flush=True,
                         )
+                        section = None
+                        known_activities = {}
+                        self.existing_activity_ids.pop(package.identifier, None)
+                        self.existing_activity_ids.pop(normalize_moodle_identifier(package.identifier), None)
+                        self.existing_activity_ids.pop(normalize_moodle_identifier(package.title), None)
+                        page.goto(self.course_url, wait_until="domcontentloaded")
+                        self._turn_editing_on(page)
 
                     target_section = ensure_section()
                     section_number = int(target_section["number"])
-                    refreshed_activity_id = known_activities.get(package.identifier) or known_activities.get(
-                        normalize_moodle_identifier(package.title)
+                    known_activities = self._collect_section_h5p_activities(page, target_section["selector"])
+                    refreshed_activity_id = self._resolve_existing_activity_id(
+                        package,
+                        known_activities,
+                        require_section_match=True,
                     )
                     if refreshed_activity_id is not None:
                         current_step = f"H5P-Aktivitaet aktualisieren: {package.identifier}"
                         print(f"Aktualisiere H5P-Aktivitaet {refreshed_activity_id}: {package.title}", flush=True)
-                        result = self._update_h5p_activity(page, refreshed_activity_id, package)
+                        result = self._update_h5p_activity(
+                            page,
+                            refreshed_activity_id,
+                            package,
+                            section_number=section_number,
+                        )
                         if result is not None:
                             results.append(result)
                             continue
+                        print(
+                            f"Warnung: H5P-Aktivitaet {refreshed_activity_id} konnte nicht geoeffnet werden. "
+                            "Lege sie neu an.",
+                            flush=True,
+                        )
+                        section = None
+                        known_activities = {}
+                        page.goto(self.course_url, wait_until="domcontentloaded")
+                        self._turn_editing_on(page)
+                        target_section = ensure_section()
+                        section_number = int(target_section["number"])
 
                     print(f"Lege neue H5P-Aktivitaet an: {package.title}", flush=True)
                     current_step = f"H5P-Aktivitaet anlegen: {package.identifier}"
                     result = self._create_h5p_activity(page, section_number, package)
+                    if result.activity_id:
+                        known_activities[normalize_moodle_identifier(package.identifier)] = result.activity_id
+                        known_activities[normalize_moodle_identifier(package.title)] = result.activity_id
                     results.append(result)
 
                 if packages:
@@ -285,6 +383,236 @@ class MoodlePlaywrightUploader:
 
         return results
 
+    def _prune_extra_course_sections(
+        self,
+        page: Any,
+        desired_section_titles: list[str],
+    ) -> list[MoodleSectionCleanupResult]:
+        desired_titles = {
+            normalize_moodle_section_title(title)
+            for title in desired_section_titles
+            if normalize_moodle_section_title(title)
+        }
+        if not desired_titles:
+            return []
+
+        results: list[MoodleSectionCleanupResult] = []
+        for _ in range(20):
+            page.goto(self.course_url, wait_until="domcontentloaded")
+            self._turn_editing_on(page)
+            sections = self._course_sections_snapshot(page)
+            extra_sections = [
+                section
+                for section in sections
+                if int(section["number"]) > 0
+                and normalize_moodle_section_title(str(section.get("title") or "")) not in desired_titles
+            ]
+            if not extra_sections:
+                return results
+
+            section = extra_sections[-1]
+            modules = [str(module.get("name") or module.get("modname") or "") for module in section.get("modules", [])]
+            unsafe_modules = [
+                module
+                for module in section.get("modules", [])
+                if str(module.get("modname") or "") not in {"", "h5pactivity"}
+            ]
+            if unsafe_modules:
+                unsafe_labels = ", ".join(str(module.get("name") or module.get("modname") or "") for module in unsafe_modules)
+                raise RuntimeError(
+                    f"Ueberzaehlige Moodle-Section '{section.get('title')}' "
+                    f"(Section {section.get('number')}) enthaelt Nicht-H5P-Inhalte: {unsafe_labels}. "
+                    "Automatisches Loeschen wurde abgebrochen."
+                )
+
+            print(
+                f"Loesche ueberzaehlige Moodle-Section {section['number']}: {section.get('title') or '(ohne Titel)'}",
+                flush=True,
+            )
+            if not self._delete_section(page, section):
+                raise RuntimeError(
+                    f"Ueberzaehlige Moodle-Section '{section.get('title')}' "
+                    f"(Section {section.get('number')}) konnte nicht geloescht werden."
+                )
+            results.append(
+                MoodleSectionCleanupResult(
+                    title=str(section.get("title") or ""),
+                    section_number=int(section["number"]),
+                    action="deleted",
+                    modules=modules,
+                )
+            )
+        raise RuntimeError("Moodle-Section-Bereinigung wurde nach zu vielen Loeschversuchen abgebrochen.")
+
+    def _course_sections_snapshot(self, page: Any) -> list[dict[str, Any]]:
+        payload = page.evaluate(
+            """
+            () => {
+              const sectionSelector = 'li.section, li.course-section, section.course-section';
+              const sections = [...document.querySelectorAll(sectionSelector)].filter((section) =>
+                !section.parentElement?.closest(sectionSelector)
+              );
+              return sections
+                .filter((section) => !section.classList.contains('delegated-section') && !section.classList.contains('subsection'))
+                .map((section) => {
+                  const numberValue = section.getAttribute('data-number')
+                    || section.getAttribute('data-section')
+                    || (section.id.match(/section-(\\d+)/) || [])[1]
+                    || section.querySelector('[data-sectionnum]')?.getAttribute('data-sectionnum');
+                  const number = Number.parseInt(numberValue || '', 10);
+                  const marker = `course-sync-section-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+                  section.setAttribute('data-course-sync-section', marker);
+                  const modules = [...section.querySelectorAll('li.activity, [data-activityname]')]
+                    .filter((activity, index, all) => all.findIndex((item) => item === activity || item.contains(activity)) === index)
+                    .map((activity) => {
+                      const link = activity.querySelector('a[href*="/mod/"]');
+                      const href = link?.href || '';
+                      const modMatch = href.match(/\\/mod\\/([^/]+)\\//);
+                      const name = activity.getAttribute('data-activityname')
+                        || activity.querySelector('[data-value]')?.getAttribute('data-value')
+                        || link?.textContent
+                        || activity.textContent
+                        || '';
+                      return {
+                        id: Number.parseInt(new URL(href || window.location.href).searchParams.get('id') || '', 10) || 0,
+                        modname: modMatch ? modMatch[1] : '',
+                        name: name.trim(),
+                      };
+                    });
+                  return {
+                    selector: `[data-course-sync-section="${marker}"]`,
+                    number,
+                    title: (section.getAttribute('data-sectionname') || section.querySelector('.sectionname, .section-title, h3, h4')?.textContent || '').trim(),
+                    sectionDbId: section.getAttribute('data-id') || '',
+                    modules,
+                  };
+                })
+                .filter((section) => !Number.isNaN(section.number));
+            }
+            """
+        )
+        return [dict(section) for section in payload if isinstance(section, dict)]
+
+    def _delete_section(self, page: Any, section: dict[str, Any]) -> bool:
+        if self._delete_section_by_link(page, section):
+            return True
+        return self._delete_section_by_url(page, section)
+
+    def _delete_section_by_link(self, page: Any, section: dict[str, Any]) -> bool:
+        delete_href = page.locator(str(section["selector"])).evaluate(
+            """
+            (section) => {
+              const links = [...section.querySelectorAll('a[href]')];
+              const byHref = links.find((link) => /deletesection|delete(section)?=1|sectiondelete/i.test(link.href || ''));
+              if (byHref) return byHref.href;
+              const byLabel = links.find((link) =>
+                /Abschnitt löschen|Abschnitt loeschen|Delete section|Delete topic/i.test(
+                  link.textContent || link.getAttribute('aria-label') || link.getAttribute('title') || ''
+                )
+              );
+              return byLabel ? byLabel.href : '';
+            }
+            """
+        )
+        if not delete_href:
+            return False
+        page.goto(str(delete_href), wait_until="domcontentloaded")
+        self._confirm_section_delete_if_needed(page)
+        page.goto(self.course_url, wait_until="domcontentloaded")
+        return not self._section_still_exists(page, section)
+
+    def _delete_section_by_url(self, page: Any, section: dict[str, Any]) -> bool:
+        section_number = int(section["number"])
+        sesskey = self._moodle_sesskey(page)
+        if not sesskey:
+            return False
+        urls = [
+            urljoin(self.course_url, "/course/format/topics/deletesection.php")
+            + "?"
+            + urlencode({"courseid": str(self._course_id()), "section": str(section_number), "confirm": "1", "sesskey": sesskey}),
+            urljoin(self.course_url, "/course/changenumsections.php")
+            + "?"
+            + urlencode({"courseid": str(self._course_id()), "deletesection": str(section_number), "sesskey": sesskey}),
+        ]
+        for target_url in urls:
+            try:
+                page.goto(target_url, wait_until="domcontentloaded")
+                self._confirm_section_delete_if_needed(page)
+                page.goto(self.course_url, wait_until="domcontentloaded")
+            except Exception:
+                continue
+            if not self._section_still_exists(page, section):
+                return True
+        return False
+
+    def _section_still_exists(self, page: Any, deleted_section: dict[str, Any]) -> bool:
+        deleted_title = normalize_moodle_section_title(str(deleted_section.get("title") or ""))
+        deleted_db_id = str(deleted_section.get("sectionDbId") or "").strip()
+        for section in self._course_sections_snapshot(page):
+            if deleted_db_id and str(section.get("sectionDbId") or "").strip() == deleted_db_id:
+                return True
+            if deleted_title and normalize_moodle_section_title(str(section.get("title") or "")) == deleted_title:
+                return True
+        return False
+
+    def _confirm_section_delete_if_needed(self, page: Any) -> None:
+        selectors = [
+            ".modal-dialog button:has-text('Löschen')",
+            ".modal-dialog button:has-text('Loeschen')",
+            ".modal-dialog button:has-text('Delete')",
+            ".modal-dialog button:has-text('Fortfahren')",
+            ".modal-dialog button:has-text('Continue')",
+            "[role='dialog'] button:has-text('Löschen')",
+            "[role='dialog'] button:has-text('Loeschen')",
+            "[role='dialog'] button:has-text('Delete')",
+            "[role='dialog'] button:has-text('Fortfahren')",
+            "[role='dialog'] button:has-text('Continue')",
+            "form[action*='deletesection'] button[type='submit']",
+            "form[action*='deletesection'] input[type='submit']",
+            "form button[type='submit']:has-text('Löschen')",
+            "form button[type='submit']:has-text('Delete')",
+        ]
+        for selector in selectors:
+            locator = page.locator(selector)
+            button = self._first_clickable(locator)
+            if button is not None:
+                button.click()
+                page.wait_for_load_state("domcontentloaded")
+                return
+        for label in ["Delete", "Löschen", "Loeschen", "Fortfahren", "Continue", "Ja", "Yes"]:
+            locator = page.get_by_role("link", name=re.compile(label, re.IGNORECASE))
+            link = self._first_clickable(locator)
+            if link is not None:
+                link.click()
+                page.wait_for_load_state("domcontentloaded")
+                return
+
+    def _resolve_existing_activity_id(
+        self,
+        package: MoodleH5PUploadPackage,
+        section_activities: dict[str, int],
+        *,
+        require_section_match: bool,
+    ) -> int | None:
+        keys = [
+            package.identifier,
+            normalize_moodle_identifier(package.identifier),
+            normalize_moodle_identifier(package.title),
+        ]
+        for key in keys:
+            activity_id = section_activities.get(key)
+            if activity_id is not None:
+                return activity_id
+
+        for key in keys:
+            activity_id = self.existing_activity_ids.get(key)
+            if activity_id is None:
+                continue
+            if require_section_match and activity_id not in set(section_activities.values()):
+                continue
+            return activity_id
+        return None
+
     def _login_if_needed(self, page: Any) -> None:
         if self.username and self.password:
             self._login_with_credentials_if_needed(page)
@@ -295,8 +623,11 @@ class MoodlePlaywrightUploader:
 
         if self.headless:
             raise RuntimeError(
-                "Moodle verlangt Login (wahrscheinlich abgelaufener SSO-Storage-State). "
-                "Bitte den Storage-State im headed Browser neu erzeugen und den Upload erneut starten. "
+                "Moodle verlangt Login oder die gespeicherte Session ist nur als Gast angemeldet "
+                "(wahrscheinlich abgelaufener SSO-Storage-State oder falscher Storage-State). "
+                "Fuehre den Upload einmal ohne --headless aus oder setze Moodle-Zugangsdaten "
+                "(MOODLE_USERNAME/MOODLE_PASSWORD, kursbezogene MOODLE_<KURS>_USERNAME/MOODLE_<KURS>_PASSWORD "
+                "oder --username/--password), damit Headless automatisch neu einloggen kann. "
                 f"Aktuelle URL: {self._current_page_url(page) or 'unbekannt'}"
             )
 
@@ -327,9 +658,19 @@ class MoodlePlaywrightUploader:
             self._finish_credential_login(page)
             return
 
-        username_input = page.locator('input[name="username"]')
-        password_input = page.locator('input[name="password"]')
-        if username_input.count() == 0 or password_input.count() == 0:
+        username_input = self._first_visible_enabled_locator(
+            page,
+            [
+                'input[name="username"]',
+                'input[name="user"]',
+                'input[name="login"]',
+                'input[name="email"]',
+                'input[type="email"]',
+                'input[type="text"]',
+            ],
+        )
+        password_input = self._first_visible_enabled_locator(page, ['input[name="password"]', 'input[type="password"]'])
+        if username_input is None or password_input is None:
             if self._external_login_page_is_open(page):
                 raise RuntimeError(
                     "Moodle hat auf einen externen SSO-Login umgeleitet. "
@@ -339,9 +680,21 @@ class MoodlePlaywrightUploader:
                 )
             raise RuntimeError("Moodle-Loginformular wurde nicht gefunden, obwohl Zugangsdaten gesetzt sind.")
 
-        username_input.first.fill(self.username or "")
-        password_input.first.fill(self.password or "")
-        self._click_first_by_text(page, ["Log in", "Login", "Einloggen", "Anmelden"])
+        username_input.fill(self.username or "")
+        password_input.fill(self.password or "")
+        submit = self._first_visible_enabled_locator(
+            page,
+            [
+                "#loginbtn",
+                'button[type="submit"]',
+                'input[type="submit"]',
+                'button[name="submit"]',
+            ],
+        )
+        if submit is not None:
+            submit.click()
+        else:
+            self._click_first_by_text(page, ["Log in", "Login", "Einloggen", "Anmelden"])
         page.wait_for_load_state("domcontentloaded")
 
         if page.locator('input[name="username"]').count() > 0:
@@ -462,6 +815,8 @@ class MoodlePlaywrightUploader:
             )
 
     def _looks_logged_in(self, page: Any) -> bool:
+        if self._guest_or_enrol_page_is_open(page):
+            return False
         if page.locator('input[name="username"]').count() > 0:
             return False
         if page.locator(".logininfo a[href*='login/index.php'], a[href*='login/index.php']").count() > 0:
@@ -472,7 +827,25 @@ class MoodlePlaywrightUploader:
         ).count() > 0
 
     def _login_is_required(self, page: Any) -> bool:
-        return page.locator('input[name="username"]').count() > 0 or self._external_login_page_is_open(page)
+        return (
+            page.locator('input[name="username"]').count() > 0
+            or self._external_login_page_is_open(page)
+            or self._guest_or_enrol_page_is_open(page)
+        )
+
+    def _guest_or_enrol_page_is_open(self, page: Any) -> bool:
+        current_url = self._current_page_url(page)
+        if "/enrol/index.php" in current_url:
+            return True
+        login_info = page.locator(".logininfo, .usermenu, [data-region='usermenu']")
+        for index in range(login_info.count()):
+            try:
+                text = login_info.nth(index).inner_text(timeout=500).lower()
+            except Exception:
+                continue
+            if "gast" in text or "guest" in text:
+                return True
+        return False
 
     def _external_login_page_is_open(self, page: Any) -> bool:
         current_url = self._current_page_url(page)
@@ -923,7 +1296,8 @@ class MoodlePlaywrightUploader:
                 if (!Number.isNaN(number)) {
                   const marker = `course-sync-section-${Date.now()}-${Math.random().toString(16).slice(2)}`;
                   section.setAttribute('data-course-sync-section', marker);
-                  return { selector: `[data-course-sync-section="${marker}"]`, number, title };
+                  const sectionDbId = section.getAttribute('data-id') || '';
+                  return { selector: `[data-course-sync-section="${marker}"]`, number, title, sectionDbId };
                 }
               }
               return null;
@@ -1475,13 +1849,22 @@ class MoodlePlaywrightUploader:
         activity_id = self._activity_id_from_current_page(page)
         return MoodleH5PUploadResult(package.identifier, package.title, "created", activity_id)
 
-    def _update_h5p_activity(self, page: Any, activity_id: int, package: MoodleH5PUploadPackage) -> MoodleH5PUploadResult | None:
+    def _update_h5p_activity(
+        self,
+        page: Any,
+        activity_id: int,
+        package: MoodleH5PUploadPackage,
+        *,
+        section_number: int | None = None,
+    ) -> MoodleH5PUploadResult | None:
         params = {"update": str(activity_id), "return": "0"}
         page.goto(urljoin(self.course_url, "/course/modedit.php") + "?" + urlencode(params), wait_until="domcontentloaded")
         if not self._h5p_form_is_available(page):
             self._write_debug_artifacts(page, f"invalid-update-{activity_id}")
             return None
-        self._fill_h5p_form(page, package)
+        self._fill_h5p_form(page, package, section_number=section_number)
+        if section_number is not None:
+            self._move_activity_to_section_number(page, activity_id, section_number)
         return MoodleH5PUploadResult(package.identifier, package.title, "updated", activity_id)
 
     def _h5p_form_is_available(self, page: Any) -> bool:
@@ -1491,12 +1874,22 @@ class MoodlePlaywrightUploader:
             return True
         return False
 
-    def _fill_h5p_form(self, page: Any, package: MoodleH5PUploadPackage) -> None:
+    def _fill_h5p_form(
+        self,
+        page: Any,
+        package: MoodleH5PUploadPackage,
+        *,
+        section_number: int | None = None,
+    ) -> None:
         if not self._upload_h5p_package_file(page, package):
             self._write_debug_artifacts(page, "missing-file-input")
-            raise RuntimeError("Kein Datei-Uploadfeld im H5P-Formular gefunden.")
-        self._confirm_file_overwrite_if_needed(page)
-        self._close_open_moodle_dialogues(page)
+            raise RuntimeError(
+                f"Kein Datei-Uploadfeld im H5P-Formular fuer {package.identifier} gefunden. "
+                "Der Upload wurde abgebrochen, damit kein altes H5P-Paket als erfolgreich synchronisiert gilt."
+            )
+        else:
+            self._confirm_file_overwrite_if_needed(page)
+            self._close_open_moodle_dialogues(page)
 
         # Set the activity title after package upload because Moodle may prefill
         # the title from package metadata during upload processing.
@@ -1504,6 +1897,8 @@ class MoodlePlaywrightUploader:
         if name_input.count() > 0:
             name_input.first.fill(package.title)
 
+        if section_number is not None:
+            self._set_activity_section(page, section_number)
         self._set_activity_points(page, package.points)
         self._set_completion_tracking(page, gradepass=1)
 
@@ -1518,6 +1913,49 @@ class MoodlePlaywrightUploader:
             ],
         )
         page.wait_for_load_state("domcontentloaded")
+
+    def _h5p_package_filemanager_has_file(self, page: Any) -> bool:
+        files = page.locator("#fitem_id_packagefile .fp-file, #fitem_id_packagefile .fp-filename")
+        return files.count() > 0
+
+    def _set_activity_section(self, page: Any, section_number: int) -> None:
+        value = str(section_number)
+        section_select = page.locator('select[name="section"], #id_section')
+        if section_select.count() > 0:
+            try:
+                section_select.first.select_option(value=value)
+                return
+            except Exception:
+                pass
+
+        section_input = page.locator('input[name="section"], input#id_section')
+        if section_input.count() > 0:
+            self._set_form_control_value(section_input.first, value)
+
+    def _move_activity_to_section_number(self, page: Any, activity_id: int, section_number: int) -> None:
+        page.goto(self.course_url, wait_until="domcontentloaded")
+        self._turn_editing_on(page)
+        section = self._section_by_number(page, section_number)
+        if section is None:
+            raise RuntimeError(f"Ziel-Section {section_number} wurde nach dem Speichern nicht gefunden.")
+        section_db_id = str(section.get("sectionDbId") or "").strip()
+        if not section_db_id:
+            raise RuntimeError(f"Ziel-Section {section_number} hat keine Moodle-Section-ID; Aktivitaet kann nicht verschoben werden.")
+        self._move_activity_to_section_db_id(page, activity_id, section_db_id)
+
+    def _move_activity_to_section_db_id(self, page: Any, activity_id: int, section_db_id: str) -> None:
+        sesskey = self._moodle_sesskey(page)
+        if not sesskey:
+            raise RuntimeError("Moodle-Sesskey fehlt; Aktivitaet kann nicht in die Ziel-Section verschoben werden.")
+        page.goto(
+            urljoin(self.course_url, "/course/mod.php") + "?" + urlencode({"sesskey": sesskey, "copy": str(activity_id)}),
+            wait_until="domcontentloaded",
+        )
+        page.goto(
+            urljoin(self.course_url, "/course/mod.php") + "?" + urlencode({"movetosection": section_db_id, "sesskey": sesskey}),
+            wait_until="domcontentloaded",
+        )
+        page.goto(self.course_url, wait_until="domcontentloaded")
 
     def _set_activity_points(self, page: Any, points: int) -> None:
         value = str(max(0, int(points)))

@@ -38,6 +38,7 @@ class CourseOrchestrator:
                 self._write_h5p_package(question)
             self._remove_legacy_h5p_root_outputs(course_dir)
             self._remove_legacy_h5p_source_build_outputs(course_dir)
+            self._remove_stale_build_hashes(course_dir, questions)
             return questions
 
     def _remove_legacy_h5p_root_outputs(self, course_dir: Path) -> None:
@@ -59,6 +60,28 @@ class CourseOrchestrator:
             for path in h5p_dir.glob(pattern):
                 if path.is_file():
                     path.unlink()
+
+    def _remove_stale_build_hashes(self, course_dir: Path, questions: list[PythonQuestionBlock]) -> None:
+        hash_dir = course_dir / "build" / "hashes"
+        if not hash_dir.exists():
+            return
+
+        expected_paths: set[Path] = set()
+        for question in questions:
+            if question.h5p_subdir:
+                expected_paths.add(hash_dir / question.h5p_subdir / f"{question.identifier}.build-hash")
+            else:
+                expected_paths.add(hash_dir / f"{question.identifier}.build-hash")
+
+        for path in hash_dir.glob("**/*.build-hash"):
+            if path.is_file() and path not in expected_paths:
+                path.unlink()
+
+        for directory in sorted((path for path in hash_dir.glob("**/*") if path.is_dir()), reverse=True):
+            try:
+                directory.rmdir()
+            except OSError:
+                pass
 
     def _course_preview_mtime_ns(self, course_dir: Path) -> int:
         paths = [

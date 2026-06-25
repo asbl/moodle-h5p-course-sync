@@ -58,11 +58,15 @@ course-sync new-course info-2026 --title "Informatik 2026"
 course-sync sync info-2026
 course-sync build info-2026
 course-sync export-site info-2026 --output public
+course-sync audit info-2026
 course-sync export-chapter info-2026 001-einstieg
 course-sync serve --port 8765
 course-sync import-mbz imported-course backup.mbz
 course-sync moodle-ping
+course-sync upload-course-moodle info-2026 --target=schule --verify-remote
 course-sync upload-chapter-moodle info-2026 001-einstieg --target=schule
+course-sync verify-moodle info-2026 --target=schule --headless
+course-sync publish info-2026 --target=schule --headless
 ```
 
 Die alten Task-Namen bleiben als Komfortschicht verfuegbar:

@@ -42,6 +42,12 @@ def build_arg_parser(default_port: int) -> argparse.ArgumentParser:
     sync_parser = subparsers.add_parser("sync", help="Erzeugt H5P-Dateien aus einer Kurs-MDX.")
     sync_parser.add_argument("course", help="Kursordner unter courses/, zum Beispiel python-2026")
 
+    audit_parser = subparsers.add_parser(
+        "audit",
+        help="Prueft lokale Kursquellen und gebaute H5P-Pakete auf typische Sync- und Inhaltsprobleme.",
+    )
+    audit_parser.add_argument("course", help="Kursordner unter courses/, zum Beispiel python-2026")
+
     build_parser = subparsers.add_parser(
         "build",
         help="Bereitet H5P-Dateien und Preview-Runtime im Batch vor.",
@@ -164,6 +170,87 @@ def build_arg_parser(default_port: int) -> argparse.ArgumentParser:
         "--verify-mbz-sync",
         action="store_true",
         help="Laedt vor und nach dem Upload ein .mbz-Kursbackup herunter und gibt eine detaillierte Diff-Analyse aus.",
+    )
+    upload_parser.add_argument(
+        "--verify-remote",
+        action="store_true",
+        help="Prueft nach dem Upload die eingebetteten H5P-Frames im Remote-Kurs.",
+    )
+
+    upload_course_parser = subparsers.add_parser(
+        "upload-course-moodle",
+        help="Laedt alle Kapitel eines Kurses nach Moodle hoch und gleicht die Moodle-Sections mit index.mdx ab.",
+    )
+    upload_course_parser.add_argument("course", help="Lokaler Kursordner unter courses/, zum Beispiel python-2026")
+    upload_course_parser.add_argument(
+        "--course-url",
+        help="Moodle-Kurs-URL. Standard: moodleBaseUrl + remoteCourseId aus .course-sync.json.",
+    )
+    upload_course_parser.add_argument(
+        "--target",
+        help="Benanntes Moodle-Ziel aus .env, z.B. staging oder schule2.",
+    )
+    upload_course_parser.add_argument("--username", help="Moodle-Login. Faellt sonst auf MOODLE_USERNAME zurueck.")
+    upload_course_parser.add_argument("--password", help="Moodle-Passwort. Faellt sonst auf MOODLE_PASSWORD zurueck.")
+    upload_course_parser.add_argument(
+        "--storage-state",
+        help="Playwright-Login-Statusdatei. Standard: courses/<kurs>/.moodle-storage-state.json.",
+    )
+    upload_course_parser.add_argument("--headless", action="store_true", help="Browser ohne sichtbares Fenster starten.")
+    upload_course_parser.add_argument(
+        "--timeout",
+        type=int,
+        default=30_000,
+        help="Playwright-Timeout in Millisekunden. Standard: 30000.",
+    )
+    upload_course_parser.add_argument(
+        "--verify-mbz-sync",
+        action="store_true",
+        help="Laedt vor und nach jedem Kapitel-Upload ein .mbz-Kursbackup herunter und gibt eine Diff-Analyse aus.",
+    )
+    upload_course_parser.add_argument(
+        "--verify-remote",
+        action="store_true",
+        help="Prueft nach dem Upload die eingebetteten H5P-Frames im Remote-Kurs.",
+    )
+    upload_course_parser.add_argument(
+        "--keep-extra-sections",
+        action="store_true",
+        help="Laesst Moodle-Sections stehen, die nicht im lokalen index.mdx vorkommen.",
+    )
+
+    verify_parser = subparsers.add_parser(
+        "verify-moodle",
+        help="Prueft Remote-H5P-Aktivitaeten eines Kurses gegen lokale Erwartungen.",
+    )
+    verify_parser.add_argument("course", help="Kursordner unter courses/, zum Beispiel python-2026")
+    verify_parser.add_argument("--course-url", help="Moodle-Kurs-URL. Standard: .course-sync.json.")
+    verify_parser.add_argument("--target", help="Benanntes Moodle-Ziel aus .env, z.B. staging oder schule2.")
+    verify_parser.add_argument("--username", help="Moodle-Login. Faellt sonst auf MOODLE_USERNAME zurueck.")
+    verify_parser.add_argument("--password", help="Moodle-Passwort. Faellt sonst auf MOODLE_PASSWORD zurueck.")
+    verify_parser.add_argument(
+        "--storage-state",
+        help="Playwright-Login-Statusdatei. Standard: courses/<kurs>/.moodle-storage-state.json.",
+    )
+    verify_parser.add_argument("--headless", action="store_true", help="Browser ohne sichtbares Fenster starten.")
+    verify_parser.add_argument("--timeout", type=int, default=30_000, help="Playwright-Timeout in Millisekunden.")
+
+    publish_parser = subparsers.add_parser(
+        "publish",
+        help="Fuehrt Audit, Kursupload, Remote-Verifikation und Statusausgabe in einem Schritt aus.",
+    )
+    publish_parser.add_argument("course", help="Kursordner unter courses/, zum Beispiel python-2026")
+    publish_parser.add_argument("--course-url", help="Moodle-Kurs-URL. Standard: .course-sync.json.")
+    publish_parser.add_argument("--target", help="Benanntes Moodle-Ziel aus .env, z.B. staging oder schule2.")
+    publish_parser.add_argument("--username", help="Moodle-Login. Faellt sonst auf MOODLE_USERNAME zurueck.")
+    publish_parser.add_argument("--password", help="Moodle-Passwort. Faellt sonst auf MOODLE_PASSWORD zurueck.")
+    publish_parser.add_argument("--storage-state", help="Playwright-Login-Statusdatei.")
+    publish_parser.add_argument("--headless", action="store_true", help="Browser ohne sichtbares Fenster starten.")
+    publish_parser.add_argument("--timeout", type=int, default=30_000, help="Playwright-Timeout in Millisekunden.")
+    publish_parser.add_argument(
+        "--keep-extra-sections",
+        action="store_true",
+        help="Laesst Moodle-Sections stehen, die nicht im lokalen index.mdx vorkommen.",
     )
 
     ping_parser = subparsers.add_parser(

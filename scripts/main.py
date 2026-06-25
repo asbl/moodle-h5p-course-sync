@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import html
+import json
 import os
 import re
 import shutil
@@ -64,6 +65,7 @@ from scripts.classes.moodle_sync import MoodleClientResolver
 from scripts.classes.moodle_playwright_uploader import (
     MoodleH5PUploadResult,
     MoodlePlaywrightUploader,
+    MoodleSectionCleanupResult,
     collect_h5p_upload_packages,
     normalize_moodle_identifier,
 )
@@ -814,6 +816,32 @@ def _chapter_title_from_index(course_dir: Path, chapter: str) -> str:
     return chapter
 
 
+def _course_chapter_plan(course_dir: Path) -> list[tuple[str, str]]:
+    index_path = course_dir / "index.mdx"
+    if not index_path.exists():
+        raise FileNotFoundError(f"Kursindex wurde nicht gefunden: {index_path}")
+
+    source = index_path.read_text(encoding="utf-8")
+    chapters: list[tuple[str, str]] = []
+    pattern = re.compile(
+        r"<Chapter\b(?P<attrs>.*?)/?>",
+        re.IGNORECASE | re.DOTALL,
+    )
+    attr_pattern = re.compile(r"\b(?P<key>src|title)=['\"](?P<value>[^'\"]+)['\"]", re.IGNORECASE)
+    for match in pattern.finditer(source):
+        attrs = {item.group("key").lower(): html.unescape(item.group("value")).strip() for item in attr_pattern.finditer(match.group("attrs"))}
+        src = attrs.get("src", "")
+        title = attrs.get("title", "")
+        if not src:
+            continue
+        slug = Path(src).with_suffix("").name
+        if slug:
+            chapters.append((slug, title or slug))
+    if not chapters:
+        raise ValueError(f"Kurs '{course_dir.name}' enthaelt keine Chapter-Eintraege in index.mdx.")
+    return chapters
+
+
 def _course_env_key(course_dir: Path, suffix: str) -> str:
     normalized = re.sub(r"[^A-Za-z0-9]+", "_", course_dir.name).strip("_").upper()
     return f"MOODLE_{normalized}_{suffix}"
@@ -873,6 +901,65 @@ def _resolve_moodle_course_url(course_dir: Path, course_url: str | None, target:
     return f"{metadata.moodle_base_url.rstrip('/')}/course/view.php?id={metadata.remote_course_id}"
 
 
+def _resolve_moodle_storage_state(course_dir: Path, storage_state: Path | None, target: str | None = None) -> Path:
+    target_storage_state = (
+        Path(_target_env_value(course_dir, target, "STORAGE_STATE", "MOODLE_STORAGE_STATE")).expanduser()
+        if _target_env_value(course_dir, target, "STORAGE_STATE", "MOODLE_STORAGE_STATE")
+        else None
+    )
+    return storage_state or target_storage_state or (
+        course_dir / (f".moodle-storage-state-{target}.json" if target else ".moodle-storage-state.json")
+    )
+
+
+def _moodle_base_url(course_url: str) -> str:
+    parsed = urlparse(course_url)
+    return f"{parsed.scheme}://{parsed.netloc}" if parsed.scheme and parsed.netloc else course_url.rstrip("/")
+
+
+def _remote_verification_expectations(course_dir: Path, target: str | None = None) -> list[dict[str, object]]:
+    metadata = _SYNC_METADATA_STORE.load(course_dir)
+    target_ids = _load_target_activity_ids(course_dir, target) if target else {}
+    expectations: list[dict[str, object]] = []
+    for chapter, _section_title in _course_chapter_plan(course_dir):
+        for package in collect_h5p_upload_packages(course_dir, chapter):
+            activity_id = target_ids.get(package.identifier)
+            if activity_id is None and metadata is not None and package.identifier in metadata.entries:
+                activity_id = metadata.entries[package.identifier].remote_activity_id
+            expectations.append(
+                {
+                    "identifier": package.identifier,
+                    "activityId": activity_id or 0,
+                    "signals": _h5p_package_text_signals(package.path),
+                }
+            )
+    return expectations
+
+
+def _h5p_package_text_signals(package_path: Path) -> list[str]:
+    try:
+        with ZipFile(package_path) as archive:
+            metadata = json.loads(archive.read("h5p.json").decode("utf-8"))
+            content = json.loads(archive.read("content/content.json").decode("utf-8"))
+    except Exception:
+        return [package_path.stem]
+
+    signals: list[str] = []
+    editor = content.get("editorSettings") if isinstance(content, dict) else {}
+    editor = editor if isinstance(editor, dict) else {}
+    for value in [editor.get("instructions"), editor.get("startingCode")]:
+        text = str(value or "")
+        for line in text.splitlines():
+            cleaned = re.sub(r"[`*_#>\-]+", " ", line).strip()
+            if len(cleaned) >= 18:
+                signals.append(cleaned[:80])
+                break
+    title = str(metadata.get("title") or "").strip()
+    if title:
+        signals.append(title)
+    return signals or [package_path.stem]
+
+
 def upload_moodle_chapter(
     course_dir: Path,
     chapter: str,
@@ -885,13 +972,16 @@ def upload_moodle_chapter(
     timeout_ms: int = 30_000,
     target: str | None = None,
     verify_mbz_sync: bool = False,
+    skip_sync: bool = False,
+    verify_remote: bool = False,
 ) -> list[MoodleH5PUploadResult]:
     moodle_client_resolver().load_dotenv_file()
-    sync_course(course_dir)
+    if not skip_sync:
+        sync_course(course_dir)
     packages = collect_h5p_upload_packages(course_dir, chapter)
     metadata = _SYNC_METADATA_STORE.load(course_dir)
     existing_activity_ids: dict[str, int] = {}
-    if not target and not course_url:
+    if not target:
         existing_activity_ids.update(
             {
                 identifier: entry.remote_activity_id
@@ -931,10 +1021,246 @@ def upload_moodle_chapter(
         after_backup = _download_course_backup_snapshot(course_dir, resolved_course_url, "after")
         analysis = moodle_backup_diff_analyzer().analyze(before_backup, after_backup)
         print(moodle_backup_diff_analyzer().format_report(analysis), flush=True)
-    if not target and not course_url:
+    if not target:
         _store_uploaded_activity_ids(course_dir, results)
     if target:
         _store_target_activity_ids(course_dir, target, results)
+    if verify_remote:
+        verification = verify_moodle_course(
+            course_dir,
+            course_url=resolved_course_url,
+            username=username,
+            password=password,
+            storage_state=resolved_storage_state,
+            headless=headless,
+            timeout_ms=timeout_ms,
+            target=target,
+        )
+        failed = [item for item in verification if not bool(item.get("ok"))]
+        if failed:
+            raise RuntimeError(f"Remote-Verifikation fehlgeschlagen: {len(failed)} Aktivitaeten.")
+    return results
+
+
+def upload_moodle_course(
+    course_dir: Path,
+    course_url: str | None = None,
+    username: str | None = None,
+    password: str | None = None,
+    storage_state: Path | None = None,
+    headless: bool = False,
+    timeout_ms: int = 30_000,
+    target: str | None = None,
+    verify_mbz_sync: bool = False,
+    prune_extra_sections: bool = True,
+    verify_remote: bool = False,
+) -> list[MoodleH5PUploadResult | MoodleSectionCleanupResult]:
+    sync_course(course_dir)
+    chapter_plan = _course_chapter_plan(course_dir)
+    results: list[MoodleH5PUploadResult | MoodleSectionCleanupResult] = []
+    for chapter, section_title in chapter_plan:
+        results.extend(
+            upload_moodle_chapter(
+                course_dir=course_dir,
+                chapter=chapter,
+                course_url=course_url,
+                section=section_title,
+                username=username,
+                password=password,
+                storage_state=storage_state,
+                headless=headless,
+                timeout_ms=timeout_ms,
+                target=target,
+                verify_mbz_sync=verify_mbz_sync,
+                skip_sync=True,
+                verify_remote=False,
+            )
+        )
+
+    moodle_client_resolver().load_dotenv_file()
+    target_config = _load_target_config(course_dir, target) if target else {}
+    use_credentials = _target_auth_uses_credentials(target_config)
+    resolved_course_url = _resolve_moodle_course_url(course_dir, course_url, target)
+    target_storage_state = (
+        Path(_target_env_value(course_dir, target, "STORAGE_STATE", "MOODLE_STORAGE_STATE")).expanduser()
+        if _target_env_value(course_dir, target, "STORAGE_STATE", "MOODLE_STORAGE_STATE")
+        else None
+    )
+    resolved_storage_state = storage_state or target_storage_state or (
+        course_dir / (f".moodle-storage-state-{target}.json" if target else ".moodle-storage-state.json")
+    )
+    cleanup_results = MoodlePlaywrightUploader(
+        course_url=resolved_course_url,
+        section_title="",
+        username=username or (_target_env_value(course_dir, target, "USERNAME", "MOODLE_USERNAME") if use_credentials else None),
+        password=password or (_target_env_value(course_dir, target, "PASSWORD", "MOODLE_PASSWORD") if use_credentials else None),
+        storage_state=resolved_storage_state,
+        headless=headless,
+        timeout_ms=timeout_ms,
+    ).reconcile_course_sections(
+        desired_section_titles=[title for _, title in chapter_plan],
+        prune_extra_sections=prune_extra_sections,
+    )
+    results.extend(cleanup_results)
+    if verify_remote:
+        verification = verify_moodle_course(
+            course_dir,
+            course_url=resolved_course_url,
+            username=username,
+            password=password,
+            storage_state=resolved_storage_state,
+            headless=headless,
+            timeout_ms=timeout_ms,
+            target=target,
+        )
+        failed = [item for item in verification if not bool(item.get("ok"))]
+        if failed:
+            raise RuntimeError(f"Remote-Verifikation fehlgeschlagen: {len(failed)} Aktivitaeten.")
+    return results
+
+
+def audit_course(course_dir: Path) -> dict[str, object]:
+    questions = sync_course(course_dir)
+    question_ids = {question.identifier for question in questions}
+    issues: list[dict[str, object]] = []
+    checks = 0
+
+    for chapter, _section_title in _course_chapter_plan(course_dir):
+        chapter_path = course_dir / "chapters" / f"{chapter}.mdx"
+        if chapter_path.exists():
+            source = chapter_path.read_text(encoding="utf-8")
+            for pattern, message in [
+                (r"\bdetect_actors\s*\(", "Moeglicherweise falsche miniworlds-API: nutze detect(...) fuer einzelne Actors."),
+                (r"\bCircle\s*\(\s*self\.mouse_x\s*,", "Circle-Aufruf braucht eine Positions-Tupel-Form: miniworlds.Circle((x, y), r)."),
+                (r"direction\s*=\s*['\"](?:right|left|up|down)['\"]", "Richtungen sollten in den Beispielen numerisch oder erklaert verwendet werden."),
+            ]:
+                checks += 1
+                if re.search(pattern, source):
+                    issues.append({"severity": "warning", "path": str(chapter_path), "message": message})
+
+    for package_path in sorted((course_dir / "build" / "h5p").glob("*/*.h5p")):
+        checks += 1
+        try:
+            with ZipFile(package_path) as archive:
+                metadata = json.loads(archive.read("h5p.json").decode("utf-8"))
+                content = json.loads(archive.read("content/content.json").decode("utf-8"))
+        except Exception as error:
+            issues.append({"severity": "error", "path": str(package_path), "message": f"H5P-Paket ist nicht lesbar: {error}"})
+            continue
+
+        identifier = package_path.stem
+        if identifier not in question_ids:
+            issues.append({"severity": "warning", "path": str(package_path), "message": "Paket ist gebaut, aber nicht im Kurs referenziert."})
+
+        if str(metadata.get("mainLibrary") or "") == "H5P.PythonQuestion":
+            editor = content.get("editorSettings") if isinstance(content, dict) else {}
+            editor = editor if isinstance(editor, dict) else {}
+            instructions = str(editor.get("instructions") or "").strip()
+            starting_code = str(editor.get("startingCode") or "").strip()
+            content_type = str(content.get("contentType") or "")
+            if content_type in {"ide_only", "text_and_ide", "text_only"} and not instructions:
+                issues.append({"severity": "error", "path": str(package_path), "message": "PythonQuestion enthaelt keine sichtbaren Instructions."})
+            if content_type in {"ide_only", "text_and_ide"} and not starting_code:
+                issues.append({"severity": "warning", "path": str(package_path), "message": "IDE-Aktivitaet enthaelt keinen Startcode."})
+            runner = str(content.get("pythonRunner") or "")
+            packages = content.get("pyodideOptions", {}).get("packages", []) if isinstance(content.get("pyodideOptions"), dict) else []
+            content_blob = json.dumps(content, ensure_ascii=False)
+            if "miniworlds" in content_blob and runner != "pyodide":
+                issues.append({"severity": "error", "path": str(package_path), "message": "miniworlds-Aktivitaet sollte pythonRunner=pyodide nutzen."})
+            if "import miniworlds" in content_blob and "miniworlds" not in packages:
+                issues.append({"severity": "error", "path": str(package_path), "message": "miniworlds wird importiert, fehlt aber in pyodideOptions.packages."})
+
+    hash_files = {path.relative_to(course_dir / "build" / "hashes") for path in (course_dir / "build" / "hashes").glob("**/*.build-hash")}
+    expected_hashes = {
+        (Path(question.h5p_subdir) / f"{question.identifier}.build-hash") if question.h5p_subdir else Path(f"{question.identifier}.build-hash")
+        for question in questions
+    }
+    stale_hashes = hash_files - expected_hashes
+    checks += len(hash_files)
+    for stale in sorted(stale_hashes):
+        issues.append({"severity": "warning", "path": str(course_dir / "build" / "hashes" / stale), "message": "Veraltete Build-Hash-Datei."})
+
+    errors = sum(1 for issue in issues if issue.get("severity") == "error")
+    warnings = sum(1 for issue in issues if issue.get("severity") != "error")
+    return {"course": course_dir.name, "checks": checks, "errors": errors, "warnings": warnings, "issues": issues}
+
+
+def verify_moodle_course(
+    course_dir: Path,
+    course_url: str | None = None,
+    username: str | None = None,
+    password: str | None = None,
+    storage_state: Path | None = None,
+    headless: bool = False,
+    timeout_ms: int = 30_000,
+    target: str | None = None,
+) -> list[dict[str, object]]:
+    moodle_client_resolver().load_dotenv_file()
+    sync_course(course_dir)
+    resolved_course_url = _resolve_moodle_course_url(course_dir, course_url, target)
+    resolved_storage_state = _resolve_moodle_storage_state(course_dir, storage_state, target)
+    target_config = _load_target_config(course_dir, target) if target else {}
+    use_credentials = _target_auth_uses_credentials(target_config)
+    resolved_username = username or (_target_env_value(course_dir, target, "USERNAME", "MOODLE_USERNAME") if use_credentials else None)
+    resolved_password = password or (_target_env_value(course_dir, target, "PASSWORD", "MOODLE_PASSWORD") if use_credentials else None)
+    expected = _remote_verification_expectations(course_dir, target)
+
+    try:
+        from playwright.sync_api import sync_playwright
+    except ModuleNotFoundError as error:
+        raise RuntimeError(
+            "Playwright ist nicht installiert. Installiere zuerst: "
+            "python -m pip install -r requirements.txt && python -m playwright install chromium"
+        ) from error
+
+    uploader = MoodlePlaywrightUploader(
+        course_url=resolved_course_url,
+        username=resolved_username,
+        password=resolved_password,
+        storage_state=resolved_storage_state,
+        headless=headless,
+        timeout_ms=timeout_ms,
+    )
+    results: list[dict[str, object]] = []
+    with sync_playwright() as playwright:
+        browser = playwright.chromium.launch(headless=headless)
+        context_kwargs: dict[str, Any] = {}
+        if resolved_storage_state and resolved_storage_state.exists():
+            context_kwargs["storage_state"] = str(resolved_storage_state)
+        context = browser.new_context(**context_kwargs)
+        page = context.new_page()
+        page.set_default_timeout(timeout_ms)
+        page.goto(resolved_course_url, wait_until="domcontentloaded")
+        uploader._login_if_needed(page)
+        uploader._wait_for_manual_login_confirmation(page)
+        uploader._return_to_course_after_login(page)
+        for item in expected:
+            identifier = str(item["identifier"])
+            activity_id = int(item.get("activityId") or 0)
+            signals = [str(signal) for signal in item.get("signals", []) if str(signal).strip()]
+            if activity_id <= 0:
+                results.append({"identifier": identifier, "activityId": activity_id, "ok": False, "message": "Keine Remote-Activity-ID bekannt."})
+                continue
+            page.goto(f"{_moodle_base_url(resolved_course_url)}/mod/h5pactivity/view.php?id={activity_id}", wait_until="domcontentloaded")
+            page.wait_for_timeout(4_000)
+            frame_texts: list[str] = []
+            for frame in page.frames:
+                if frame == page.main_frame:
+                    continue
+                try:
+                    frame_texts.append(frame.locator("body").inner_text(timeout=1_500))
+                except Exception:
+                    pass
+            combined = "\n".join(frame_texts)
+            matched = [signal for signal in signals if signal in combined]
+            ok = len(combined.strip()) > 500 and bool(matched)
+            message = f"matched={matched[0]}" if matched else "Kein erwartetes Textsignal im H5P-Frame gefunden."
+            results.append({"identifier": identifier, "activityId": activity_id, "ok": ok, "message": message, "chars": len(combined)})
+        if resolved_storage_state:
+            resolved_storage_state.parent.mkdir(parents=True, exist_ok=True)
+            context.storage_state(path=str(resolved_storage_state))
+        context.close()
+        browser.close()
     return results
 
 
@@ -1040,10 +1366,16 @@ def _store_uploaded_activity_ids(course_dir: Path, results: list[MoodleH5PUpload
     metadata = _SYNC_METADATA_STORE.load(course_dir)
     if metadata is None:
         return
+    _, questions, _ = parse_course(course_dir)
+    questions_by_identifier = {question.identifier: question for question in questions}
+    base_url = metadata.moodle_base_url.rstrip("/")
     changed = False
     for result in results:
         if not result.activity_id:
             continue
+        question = questions_by_identifier.get(result.identifier)
+        local_hash = compute_question_hash(question) if question is not None else ""
+        remote_url = f"{base_url}/mod/h5pactivity/view.php?id={result.activity_id}" if base_url else ""
         entry = metadata.entries.get(result.identifier)
         if entry is None:
             entry = SyncMetadataEntry(
@@ -1051,8 +1383,10 @@ def _store_uploaded_activity_ids(course_dir: Path, results: list[MoodleH5PUpload
                 remote_activity_id=result.activity_id,
                 remote_instance_id=None,
                 remote_title=result.title,
-                remote_url="",
+                remote_url=remote_url,
                 remote_visible=True,
+                local_hash=local_hash,
+                remote_hash=local_hash,
                 status="tracked",
             )
             metadata.entries[result.identifier] = entry
@@ -1060,6 +1394,24 @@ def _store_uploaded_activity_ids(course_dir: Path, results: list[MoodleH5PUpload
             continue
         if entry.remote_activity_id != result.activity_id:
             entry.remote_activity_id = result.activity_id
+            changed = True
+        if entry.remote_title != result.title:
+            entry.remote_title = result.title
+            changed = True
+        if remote_url and entry.remote_url != remote_url:
+            entry.remote_url = remote_url
+            changed = True
+        if local_hash and entry.local_hash != local_hash:
+            entry.local_hash = local_hash
+            changed = True
+        if local_hash and entry.remote_hash != local_hash:
+            entry.remote_hash = local_hash
+            changed = True
+        if entry.status != "tracked":
+            entry.status = "tracked"
+            changed = True
+        if not entry.remote_visible:
+            entry.remote_visible = True
             changed = True
     if changed:
         _SYNC_METADATA_STORE.save(course_dir, metadata)
@@ -1102,6 +1454,9 @@ def main() -> None:
         print_course_status=print_cli_course_status,
         export_chapter=export_chapter,
         upload_moodle_chapter=upload_moodle_chapter,
+        upload_moodle_course=upload_moodle_course,
+        audit_course=audit_course,
+        verify_moodle_course=verify_moodle_course,
         update_h5p_libraries_from_github=update_h5p_libraries_from_github,
         import_moodle_from_mbz=import_moodle_from_mbz,
         export_static_site=export_static_site,
